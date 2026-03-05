@@ -111,8 +111,110 @@ model OrgMember {
   linkedMember OrgMember?   @relation("MemberLink", fields: [linkedMemberId], references: [id])
   linkedBy     OrgMember[]  @relation("MemberLink")
 
+  profile        MemberProfile?
+  branchHistory  MemberBranchHistory[]
+
   @@unique([orgId, userId])
   @@map("org_members")
+}
+
+// ============================================================
+// MODULE 10: Audit Log
+// ============================================================
+
+model AuditLog {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId      String   @map("org_id") @db.Uuid
+  userId     String?  @map("user_id") @db.Uuid
+  action     String   @db.VarChar(100)
+  resource   String   @db.VarChar(100)
+  resourceId String?  @map("resource_id") @db.Uuid
+  oldValue   Json?    @map("old_value")
+  newValue   Json?    @map("new_value")
+  ipAddress  String?  @map("ip_address") @db.VarChar(50)
+  userAgent  String?  @map("user_agent")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  @@index([orgId, action])
+  @@index([orgId, resource, resourceId])
+  @@index([orgId, createdAt])
+  @@map("audit_logs")
+}
+
+// ============================================================
+// MODULE 1: HRM (Human Resource Management)
+// ============================================================
+
+model MemberProfile {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId           String    @map("org_id") @db.Uuid
+  orgMemberId     String    @unique @map("org_member_id") @db.Uuid
+  fullName        String    @map("full_name") @db.VarChar(255)
+  birthDate       DateTime? @map("birth_date") @db.Date
+  gender          String?   @db.VarChar(20)
+  idCard          String?   @map("id_card") @db.VarChar(50)
+  address         String?
+  photoUrl        String?   @map("photo_url")
+  personalPhone   String?   @map("personal_phone") @db.VarChar(20)
+  personalEmail   String?   @map("personal_email") @db.VarChar(255)
+  zaloId          String?   @map("zalo_id") @db.VarChar(100)
+  guardianName    String?   @map("guardian_name") @db.VarChar(255)
+  guardianPhone   String?   @map("guardian_phone") @db.VarChar(20)
+  guardianRelation String?  @map("guardian_relation") @db.VarChar(50)
+  guardianZalo    String?   @map("guardian_zalo") @db.VarChar(100)
+  promiseDate     DateTime? @map("promise_date") @db.Date
+  uniformSize     String?   @map("uniform_size") @db.VarChar(20)
+  healthNotes     String?   @map("health_notes")
+  emergencyContact String?  @map("emergency_contact")
+  woodBadgeLevel  String?   @map("wood_badge_level") @db.VarChar(50)
+  specializations String[]  @default([])
+  joinReason      String?   @map("join_reason")
+  createdBy       String?   @map("created_by") @db.Uuid
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  orgMember OrgMember @relation(fields: [orgMemberId], references: [id], onDelete: Cascade)
+
+  @@index([orgId])
+  @@map("member_profiles")
+}
+
+model MemberBranchHistory {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId          String   @map("org_id") @db.Uuid
+  orgMemberId    String   @map("org_member_id") @db.Uuid
+  fromBranchId   String?  @map("from_branch_id") @db.Uuid
+  toBranchId     String?  @map("to_branch_id") @db.Uuid
+  fromUnitId     String?  @map("from_unit_id") @db.Uuid
+  toUnitId       String?  @map("to_unit_id") @db.Uuid
+  transitionDate DateTime @map("transition_date") @db.Date
+  reason         String?
+  approvedBy     String?  @map("approved_by") @db.Uuid
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  orgMember OrgMember @relation(fields: [orgMemberId], references: [id])
+
+  @@index([orgId, orgMemberId])
+  @@map("member_branch_history")
+}
+
+model OrgChartNode {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId        String   @map("org_id") @db.Uuid
+  nodeType     String   @map("node_type") @db.VarChar(50)
+  name         String   @db.VarChar(255)
+  parentNodeId String?  @map("parent_node_id") @db.Uuid
+  orgMemberId  String?  @map("org_member_id") @db.Uuid
+  positionTitle String? @map("position_title") @db.VarChar(100)
+  displayOrder Int      @default(0) @map("display_order")
+  metadata     Json     @default("{}")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  parentNode  OrgChartNode?  @relation("OrgChartHierarchy", fields: [parentNodeId], references: [id])
+  childNodes  OrgChartNode[] @relation("OrgChartHierarchy")
+
+  @@index([orgId])
+  @@map("org_chart_nodes")
 }
 
 // ============================================================

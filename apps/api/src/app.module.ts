@@ -7,9 +7,11 @@ import { DatabaseModule } from './core/database';
 import { AuthModule, AuthGuard, RolesGuard } from './core/auth';
 import { EventsModule } from './core/events';
 import { CacheModule } from './core/cache';
+import { AuditModule } from './core/audit';
 import { AllExceptionsFilter } from './common/filters';
 import { LoggingInterceptor, TransformInterceptor } from './common/interceptors';
 import { OrgConfigModule } from './modules/org-config';
+import { HrmModule } from './modules/hrm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -25,7 +27,9 @@ import { AppService } from './app.service';
     AuthModule,
     EventsModule,
     CacheModule,
+    AuditModule,
     OrgConfigModule,
+    HrmModule,
   ],
   controllers: [AppController],
   providers: [
