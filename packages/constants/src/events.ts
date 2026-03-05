@@ -111,4 +111,11 @@ export const DOMAIN_EVENTS = {
     STEP_COMPLETED: 'process.step_completed',
     WORKFLOW_COMPLETED: 'process.workflow_completed',
   },
+
+  // Notifications
+  NOTIFICATION: {
+    SENT: 'notification.notification_sent',
+    READ: 'notification.notification_read',
+    BULK_SENT: 'notification.bulk_sent',
+  },
 } as const;

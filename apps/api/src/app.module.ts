@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { APP_GUARD, APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
@@ -10,6 +10,7 @@ import { CacheModule } from './core/cache';
 import { AuditModule } from './core/audit';
 import { AllExceptionsFilter } from './common/filters';
 import { LoggingInterceptor, TransformInterceptor } from './common/interceptors';
+import { SecurityHeadersMiddleware, RateLimiterMiddleware } from './common/middleware';
 import { OrgConfigModule } from './modules/org-config';
 import { HrmModule } from './modules/hrm';
 import { RewardsModule } from './modules/rewards';
@@ -24,6 +25,8 @@ import { FinanceModule } from './modules/finance';
 import { AssetsModule } from './modules/assets';
 import { ProcessModule } from './modules/process';
 import { ChildSafetyModule } from './modules/child-safety';
+import { NotificationsModule } from './modules/notifications';
+import { DashboardsModule } from './modules/dashboards';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -54,6 +57,8 @@ import { AppService } from './app.service';
     AssetsModule,
     ProcessModule,
     ChildSafetyModule,
+    NotificationsModule,
+    DashboardsModule,
   ],
   controllers: [AppController],
   providers: [
@@ -65,4 +70,8 @@ import { AppService } from './app.service';
     { provide: APP_INTERCEPTOR, useClass: TransformInterceptor },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(SecurityHeadersMiddleware, RateLimiterMiddleware).forRoutes('*');
+  }
+}

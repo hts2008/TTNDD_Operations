@@ -1,0 +1,36 @@
+name: Deploy to Cloud Run
+on:
+  push:
+    branches: [main]
+    paths: ['apps/api/**', 'packages/**']
+
+jobs:
+  deploy-api:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_SA_EMAIL }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - run: |
+          gcloud builds submit \
+            --tag gcr.io/${{ secrets.GCP_PROJECT_ID }}/ttndd-api:${{ github.sha }} \
+            --project ${{ secrets.GCP_PROJECT_ID }} \
+            apps/api
+      - run: |
+          gcloud run deploy ttndd-api \
+            --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/ttndd-api:${{ github.sha }} \
+            --region asia-southeast1 \
+            --platform managed \
+            --allow-unauthenticated \
+            --set-env-vars "NODE_ENV=production" \
+            --max-instances 2 \
+            --memory 512Mi \
+            --project ${{ secrets.GCP_PROJECT_ID }}

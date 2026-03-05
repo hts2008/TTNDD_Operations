@@ -1163,6 +1163,68 @@ model WorkflowRun {
 }
 
 // ============================================================
+// MODULE: Notifications
+// ============================================================
+
+model Notification {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId       String    @map("org_id") @db.Uuid
+  recipientId String    @map("recipient_id") @db.Uuid
+  title       String    @db.VarChar(255)
+  body        String
+  type        String    @db.VarChar(50)
+  channel     String    @default("in_app") @db.VarChar(20)
+  isRead      Boolean   @default(false) @map("is_read")
+  readAt      DateTime? @map("read_at") @db.Timestamptz()
+  actionUrl   String?   @map("action_url")
+  metadata    Json      @default("{}")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+
+  @@index([orgId, recipientId, isRead])
+  @@index([orgId, createdAt])
+  @@map("notifications")
+}
+
+model NotificationPreference {
+  id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId     String  @map("org_id") @db.Uuid
+  userId    String  @map("user_id") @db.Uuid
+  channel   String  @db.VarChar(20)
+  eventType String  @map("event_type") @db.VarChar(100)
+  enabled   Boolean @default(true)
+
+  @@unique([userId, channel, eventType])
+  @@map("notification_preferences")
+}
+
+model NotificationTemplate {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId     String   @map("org_id") @db.Uuid
+  eventType String   @map("event_type") @db.VarChar(100)
+  channel   String   @db.VarChar(20)
+  title     String   @db.VarChar(255)
+  body      String
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  @@unique([orgId, eventType, channel])
+  @@map("notification_templates")
+}
+
+model NotificationDeliveryLog {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  notificationId String    @map("notification_id") @db.Uuid
+  channel        String    @db.VarChar(20)
+  status         String    @default("pending") @db.VarChar(20)
+  attempts       Int       @default(0)
+  lastError      String?   @map("last_error")
+  sentAt         DateTime? @map("sent_at") @db.Timestamptz()
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+
+  @@map("notification_delivery_logs")
+}
+
+// ============================================================
 // DOMAIN EVENTS (Event Sourcing / Outbox)
 // ============================================================
 
