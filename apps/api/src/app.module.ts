@@ -12,6 +12,7 @@ import { AllExceptionsFilter } from './common/filters';
 import { LoggingInterceptor, TransformInterceptor } from './common/interceptors';
 import { OrgConfigModule } from './modules/org-config';
 import { HrmModule } from './modules/hrm';
+import { RewardsModule } from './modules/rewards';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -30,6 +31,7 @@ import { AppService } from './app.service';
     AuditModule,
     OrgConfigModule,
     HrmModule,
+    RewardsModule,
   ],
   controllers: [AppController],
   providers: [

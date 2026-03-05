@@ -6,6 +6,7 @@ export interface CurrentUserPayload {
   role: string;
   email?: string;
   firebaseUid: string;
+  memberId?: string;
 }
 
 export const CurrentUser = createParamDecorator(

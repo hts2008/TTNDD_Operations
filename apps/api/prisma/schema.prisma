@@ -111,8 +111,12 @@ model OrgMember {
   linkedMember OrgMember?   @relation("MemberLink", fields: [linkedMemberId], references: [id])
   linkedBy     OrgMember[]  @relation("MemberLink")
 
-  profile        MemberProfile?
-  branchHistory  MemberBranchHistory[]
+  profile          MemberProfile?
+  branchHistory    MemberBranchHistory[]
+  expTransactions  ExpTransaction[]
+  expSummary       MemberExpSummary?
+  badges           MemberBadge[]
+  redemptions      RewardRedemption[]
 
   @@unique([orgId, userId])
   @@map("org_members")
@@ -215,6 +219,155 @@ model OrgChartNode {
 
   @@index([orgId])
   @@map("org_chart_nodes")
+}
+
+// ============================================================
+// MODULE 9: Reward Engine (EXP, Badges, Leaderboard)
+// ============================================================
+
+model ExpConfig {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId        String   @map("org_id") @db.Uuid
+  eventType    String   @map("event_type") @db.VarChar(200)
+  sourceModule String   @map("source_module") @db.VarChar(100)
+  actionName   String   @map("action_name") @db.VarChar(255)
+  expAmount    Int      @map("exp_amount")
+  maxPerDay    Int      @default(-1) @map("max_per_day")
+  maxPerWeek   Int      @default(-1) @map("max_per_week")
+  isActive     Boolean  @default(true) @map("is_active")
+  description  String?
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  @@unique([orgId, eventType])
+  @@map("exp_configs")
+}
+
+model ExpTransaction {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId           String    @map("org_id") @db.Uuid
+  orgMemberId     String    @map("org_member_id") @db.Uuid
+  transactionType String    @map("transaction_type") @db.VarChar(20)
+  expAmount       Int       @map("exp_amount")
+  eventType       String?   @map("event_type") @db.VarChar(200)
+  sourceModule    String?   @map("source_module") @db.VarChar(100)
+  sourceEntityId  String?   @map("source_entity_id") @db.Uuid
+  deductionReason String?   @map("deduction_reason")
+  balanceAfter    Int?      @map("balance_after")
+  recordedBy      String?   @map("recorded_by") @db.Uuid
+  notes           String?
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+
+  orgMember OrgMember @relation(fields: [orgMemberId], references: [id])
+
+  @@index([orgId, orgMemberId])
+  @@index([orgId, createdAt])
+  @@map("exp_transactions")
+}
+
+model MemberExpSummary {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId        String   @map("org_id") @db.Uuid
+  orgMemberId  String   @unique @map("org_member_id") @db.Uuid
+  totalExp     Int      @default(0) @map("total_exp")
+  availableExp Int      @default(0) @map("available_exp")
+  tier1Count   Int      @default(0) @map("tier_1_count")
+  tier2Count   Int      @default(0) @map("tier_2_count")
+  tier3Count   Int      @default(0) @map("tier_3_count")
+  tier4Count   Int      @default(0) @map("tier_4_count")
+  penaltyCount Int      @default(0) @map("penalty_count")
+  lastUpdated  DateTime @default(now()) @updatedAt @map("last_updated") @db.Timestamptz()
+
+  orgMember OrgMember @relation(fields: [orgMemberId], references: [id])
+
+  @@index([orgId])
+  @@map("member_exp_summary")
+}
+
+model BadgeDefinition {
+  id           String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId        String  @map("org_id") @db.Uuid
+  badgeCode    String  @map("badge_code") @db.VarChar(100)
+  name         String  @db.VarChar(255)
+  description  String?
+  badgeType    String? @map("badge_type") @db.VarChar(50)
+  imageUrl     String  @map("image_url")
+  rarity       String  @default("common") @db.VarChar(20)
+  triggerEvent String? @map("trigger_event") @db.VarChar(200)
+  triggerConfig Json   @default("{}") @map("trigger_config")
+  expReward    Int     @default(0) @map("exp_reward")
+  isAutoAward  Boolean @default(true) @map("is_auto_award")
+
+  memberBadges MemberBadge[]
+
+  @@unique([orgId, badgeCode])
+  @@map("badge_definitions")
+}
+
+model MemberBadge {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId         String   @map("org_id") @db.Uuid
+  orgMemberId   String   @map("org_member_id") @db.Uuid
+  badgeId       String   @map("badge_id") @db.Uuid
+  earnedAt      DateTime @default(now()) @map("earned_at") @db.Timestamptz()
+  sourceEventId String?  @map("source_event_id") @db.Uuid
+  notes         String?
+
+  orgMember OrgMember       @relation(fields: [orgMemberId], references: [id])
+  badge     BadgeDefinition @relation(fields: [badgeId], references: [id])
+
+  @@unique([orgMemberId, badgeId])
+  @@index([orgId])
+  @@map("member_badges")
+}
+
+model RewardItem {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId             String    @map("org_id") @db.Uuid
+  name              String    @db.VarChar(255)
+  description       String?
+  costExp           Int       @map("cost_exp")
+  category          String?   @db.VarChar(100)
+  imageUrl          String?   @map("image_url")
+  quantityAvailable Int       @default(-1) @map("quantity_available")
+  isActive          Boolean   @default(true) @map("is_active")
+  validUntil        DateTime? @map("valid_until") @db.Date
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+
+  redemptions RewardRedemption[]
+
+  @@index([orgId])
+  @@map("reward_items")
+}
+
+model RewardRedemption {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId       String   @map("org_id") @db.Uuid
+  orgMemberId String   @map("org_member_id") @db.Uuid
+  rewardId    String   @map("reward_id") @db.Uuid
+  expSpent    Int      @map("exp_spent")
+  status      String   @default("pending") @db.VarChar(50)
+  approvedBy  String?  @map("approved_by") @db.Uuid
+  redeemedAt  DateTime @default(now()) @map("redeemed_at") @db.Timestamptz()
+
+  orgMember OrgMember  @relation(fields: [orgMemberId], references: [id])
+  reward    RewardItem @relation(fields: [rewardId], references: [id])
+
+  @@index([orgId])
+  @@map("reward_redemptions")
+}
+
+model LeaderboardSnapshot {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId        String   @map("org_id") @db.Uuid
+  scope        String   @db.VarChar(50)
+  scopeId      String?  @map("scope_id") @db.Uuid
+  period       String?  @db.VarChar(50)
+  snapshotDate DateTime @map("snapshot_date") @db.Date
+  rankings     Json
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  @@index([orgId, scope, snapshotDate])
+  @@map("leaderboard_snapshots")
 }
 
 // ============================================================
