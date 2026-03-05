@@ -1,10 +1,10 @@
-# 🏯 TTNDD_OPS — MASTER SPEC (PRODUCT-FIRST, RESEARCH-AUGMENTED, ALL-IN-ONE + CONTRACT PACK) v12.0 UI MMORPG SCREEN MAP + DESIGN TOKENS (DTCG) RELEASE
+# 🏯 TTNDD_OPS — MASTER SPEC (PRODUCT-FIRST, RESEARCH-AUGMENTED, ALL-IN-ONE + CONTRACT PACK) v13.0 TECH STACK + AI-DRIVEN DELIVERY MODEL RELEASE
 
 > **Nền tảng**: Thanh Thiếu Niên Đại Đạo — Hệ thống Quản lý & Vận hành (Power Platform ERP)  
 > **Triết lý**: *Business first → System design → Technical contract*  
 > **Kiến trúc mục tiêu**: Modular Monolith · Multi-Tenant · Event-Driven · Google Cloud Native  
 > **Ngân sách GCP (Hard cap)**: **≤ 800.000 VND/tháng** (thiết lập guardrails + auto actions)  
-> **Phiên bản**: **12.0** — Ngày: **06/03/2026** (Asia/Ho_Chi_Minh) (Asia/Ho_Chi_Minh)
+> **Phiên bản**: **13.0** — Ngày: **06/03/2026** (Asia/Ho_Chi_Minh) (Asia/Ho_Chi_Minh)
 
 ---
 
@@ -25,6 +25,11 @@
 
 ## CHANGE LOG
 
+- **v13.0 (06/03/2026): Technical Stack (Full‑stack AI) + AI‑Driven Delivery Operating Model**  
+  - Bổ sung **PHẦN II.1 — Technical Stack (GCP‑native, budget‑aware)**: monorepo, FE/BE, DB, event bus, CI/CD, security, testing.  
+  - Bổ sung **PHẦN II.2 — AI‑Driven Delivery Operating Model**: luân phiên vai trò theo team Product chuẩn; SSOT + Sync Gate + CR bám chặt.  
+  - Nâng SSOT từ **7 → 8 artifacts**: thêm **ADR/Tech Stack Decisions** để chặn lệch pha công nghệ.  
+
 - **v12.0 (06/03/2026): UI MMORPG “thật sự” — Screen Map theo module + Design Tokens JSON (DTCG) + Sync update**  
   - Bổ sung **UI Screen Map chi tiết theo từng module**: route map + wireframe text + component mapping (HUD/Quest/Inventory/Skill Tree/Boards…).  
   - Thêm **Design Tokens JSON** theo chuẩn **Design Tokens Community Group (DTCG)** để FE import thẳng, và hướng dẫn build ra CSS variables/Tailwind bằng Style Dictionary.  
@@ -37,7 +42,7 @@
 
 
 - **v10.0 (05/03/2026): BIG SYNC RELEASE (Consistency-first)**  
-  - Thêm **Spec Sync System** (SSOT 7 artifacts + CI Sync Gate + CR template) để loại bỏ “lệch pha” giữa PRD ↔ contract ↔ schema ↔ tests ↔ roadmap.  
+  - Thêm **Spec Sync System** (SSOT 8 artifacts + CI Sync Gate + CR template) để loại bỏ “lệch pha” giữa PRD ↔ contract ↔ schema ↔ tests ↔ roadmap.  
   - Nâng cấp **PHẦN VIII Roadmap**: thêm cột **Dev Notes (Implementation)** cho từng Work Package để AI Agent/Dev bám vào mà code.  
   - Chuẩn hoá cách ghi ngân sách: **≤ 800.000 VND/tháng** và runbook Budget Guardrails (50/80/100/120).  
   - Chuẩn hoá thuật ngữ & liên kết chéo (Module 8 hợp nhất Sessions/Events/Spiritual; Safe-from-Harm; contract-first gate).  
@@ -2119,6 +2124,8 @@ Module 9: +EXP + Badge → Notification → Lễ Thăng Đẳng
 
 ## PHẦN II — THIẾT KẾ HỆ THỐNG & CÔNG NGHỆ
 
+## PHẦN II-A — TECHNICAL STACK & AI‑DRIVEN DELIVERY MODEL (Full‑stack AI)
+
 ### 2.1 Sơ đồ Kiến trúc Tổng thể
 
 ### 2.1 Sơ đồ Kiến trúc Tổng thể
@@ -2210,6 +2217,156 @@ Mọi thay đổi trạng thái trong hệ thống → phát Domain Event → c�
 ---
 
 ---
+
+
+
+### 2.1 Technical Stack (Full‑stack AI, GCP‑native, budget‑aware)
+
+> **Mục tiêu**: Vì platform “AI‑Driven Code” → cần 1 tech stack **rõ ràng, chốt chuẩn**, để AI Agents/Dev không lệch pha.  
+> **Nguyên tắc**: (1) GCP‑native, (2) Low‑ops, (3) Contract‑first (OpenAPI), (4) Multi‑tenant + RLS, (5) Budget guardrails ≤ 800k.
+
+#### 2.1.1 Monorepo & Package Management
+- **Monorepo**: Turborepo (task graph + caching, CI không chạy lại việc cũ).  
+- **Package manager**: pnpm workspaces (`pnpm-workspace.yaml`, `workspace:` protocol).  
+- **Code quality**: ESLint + Prettier + Husky pre-commit + commitlint (conventional commits).
+
+Repo layout (chuẩn):
+```
+/apps
+  /web        # Next.js (App Router) - MMORPG UI
+  /api        # NestJS (REST + domain events + RLS context)
+  /worker     # Cloud Run Jobs/Consumers (Pub/Sub, outbox)
+  /gateway    # OpenAPI specs for API Gateway
+/packages
+  /shared     # types, DTOs, validators, utils
+  /tokens     # Design Tokens (DTCG JSON) + build output
+  /ui         # shared UI components (HUD, SkillTree, QuestChain)
+ /contracts
+  /openapi    # SSOT: API surface
+  /events     # SSOT: event catalog
+  /db         # migrations (SQL) + seed
+  /tests      # contract tests, pact (optional)
+```
+
+#### 2.1.2 Frontend (MMORPG UI)
+- **Framework**: Next.js (App Router) — layouts/pages/route handlers.
+- **UI**: React + TailwindCSS + shadcn/ui (UI primitives) + Framer Motion (motion, but obey reduced‑motion).
+- **State**: TanStack Query (server state), Zustand (client UI state).
+- **Form validation**: Zod (shared schemas FE/BE).
+- **Design tokens**: DTCG JSON → build CSS variables/Tailwind mapping (Style Dictionary).
+
+#### 2.1.3 Backend (Core App Engine)
+- **Framework**: NestJS (modular monolith) — controllers/providers/modules + DI.
+- **API style**: REST (OpenAPI SSOT) + API Gateway front door.
+- **DB access**: Prisma ORM + Prisma Migrate (migrations) + raw SQL ONLY when needed for RLS/policies.
+- **Validation**:
+  - DTO validation: Nest ValidationPipe + class-validator (DTOs).  
+  - Config validation: Zod (flags/config JSON).
+- **Authorization**: RBAC + ABAC (scope) + resource checks:
+  - RBAC/ABAC rules: CASL Ability (role+resource attributes).
+  - Tenant isolation: PostgreSQL RLS (CREATE POLICY).
+
+#### 2.1.4 Identity & Access (Multi‑tenant)
+- **Identity**: Google Cloud Identity Platform multi‑tenancy (tenant silos users/config).  
+- **Auth flow** (web):
+  - Client obtains ID token (Firebase/Auth compatible SDK).
+  - Backend verifies ID token, maps to org_id + roles/scopes, issues **short-lived access token** + refresh cookie (HttpOnly).
+  - DB layer sets `SET LOCAL app.org_id` per request for RLS enforcement.
+
+#### 2.1.5 Event Bus & Async
+- **Internal**: NestJS EventEmitter (in-process) for local domain events (dev speed).
+- **Outbox**: `core.domain_events` table; publisher reads outbox and publishes once.
+- **External**: Cloud Pub/Sub for async fan-out (notifications, rewards, warehouse sync).
+
+#### 2.1.6 Storage & Files
+- **Binary**: Cloud Storage (private by default).
+- **Upload**: signed URLs (short TTL); store file refs in `file.object_ref`.
+- **Scanning/limits**: MIME sniff (magic bytes) + max size (default 50MB) + moderation hooks.
+
+#### 2.1.7 Observability & Security (Budget-aware)
+- **Logs**: Cloud Logging with exclusions (reduce spend).
+- **Metrics**: Cloud Monitoring; budget dashboards.
+- **Security headers**: Helmet (CSP/HSTS/etc).
+- **Rate limiting**: Cloud Armor rate limiting for API edge.
+- **Secrets**: Secret Manager for API keys/secrets.
+- **Artifacts**: Artifact Registry for container images & packages.
+- **CI/CD**: Cloud Build → Artifact Registry → Cloud Run deploy.
+
+#### 2.1.8 Runtime Targets (GCP)
+- **Compute**: Cloud Run services (api/web/worker) + Cloud Run Jobs.
+- **DB**: Cloud SQL for PostgreSQL.
+- **Gateway**: API Gateway (OpenAPI + extensions).
+- **Budget guardrails**:
+  - Cloud Run: set **max instances** as cost-safety limit; tune concurrency.
+  - Billing Budgets: 50/80/100/120 alerts + Pub/Sub notifications + auto actions.
+
+---
+
+### 2.2 AI‑Driven Delivery Operating Model (Luân phiên vai trò team Product chuẩn)
+
+> **Mục tiêu**: AI Agents/Dev làm việc như “một team product tiêu chuẩn” nhưng chạy theo **contract‑first** và **SSOT** để không lệch pha.
+
+#### 2.2.1 Team roles (rotation)
+- **Role A — Product Manager (PM/BA)**: PRD, user stories, acceptance criteria, scope P0/P1.
+- **Role B — UX/UI Game Designer**: screen map, wireframe text, component mapping, tokens usage.
+- **Role C — System Architect**: bounded context, event catalog, ADR decisions, budget/safety invariants.
+- **Role D — Backend Engineer**: OpenAPI, controllers/services, Prisma schema/migrations, RLS, outbox, tests.
+- **Role E — Frontend Engineer**: route implementation, HUD components, data fetching, forms, a11y.
+- **Role F — QA/Release Engineer**: test plan (unit/integration/contract/e2e), regression, release notes.
+- **Role G — SRE/Security**: Cloud Run configs, budgets, log exclusions, secrets, rate limiting, runbooks.
+
+> **Luân phiên**: mỗi Work Package phải “đi qua” A→G (nhanh hay chậm tuỳ P0/P1), nhưng không được bỏ qua “contract gates”.
+
+#### 2.2.2 SSOT artifacts (8) — “đụng đâu update đó”
+1) PRD/Workflow (Product View)  
+2) UI Contract (Screen Map + Component mapping + Tokens)  
+3) OpenAPI Contract (`/contracts/openapi/*.yaml`)  
+4) Event Catalog (`/contracts/events/catalog.json`)  
+5) DB Schema/Migrations (`/contracts/db/migrations/*`)  
+6) Tests (unit/integration/contract/e2e)  
+7) Roadmap row IDs (Work Package table)  
+8) **ADR/Tech Stack Decisions** (version pinning + rationale)
+
+#### 2.2.3 Work Package execution recipe (AI‑friendly)
+**Input**: WP scope + constraints (budget 800k + child safety P0 + SPICES).  
+**Output**: mergeable PR with SSOT updates + passing gates.
+
+Step-by-step:
+1) **PM/BA**: cập nhật PRD (what/why), define ACs + non-goals.
+2) **UX**: cập nhật screen map + component mapping + cost impact tags.
+3) **Architect**: cập nhật ADR (tech choice), event catalog, data boundaries.
+4) **BE**: update OpenAPI → generate stubs → implement handlers → migrations + RLS.
+5) **FE**: implement routes/components; connect API; add a11y + reduced motion.
+6) **QA**: add tests; run e2e smoke; ensure no table/token drift.
+7) **SRE/Sec**: update IaC/runbook; budget thresholds; log exclusions; Cloud Armor rules.
+
+#### 2.2.4 CI Sync Gates (không pass → không merge)
+- OpenAPI validate + diff check (breaking changes blocked).
+- Event schema compatibility check.
+- Migration smoke test against local Postgres (RLS on).
+- Contract tests (optional Pact).
+- E2E smoke (Playwright): login → open world map → complete 1 action.
+
+#### 2.2.5 “Prompt pack” cho AI Agents (gợi ý)
+- **PM prompt**: “từ PRD hiện có, viết user stories + ACs cho WP‑x, đảm bảo safety P0 + SPICES tags”.  
+- **UX prompt**: “vẽ wireframe text + component mapping + routes; xác định cost impact tags”.  
+- **BE prompt**: “tạo/đổi OpenAPI, update event catalog, migrations + RLS + tests”.  
+- **FE prompt**: “implement screen theo tokens; obey reduced-motion; integrate API; add empty/loading/error states”.  
+
+---
+
+### 2.3 ADR/Tech Stack Decisions Registry (SSOT)
+- `ADR-TS-01`: Monorepo (Turborepo + pnpm)  
+- `ADR-TS-02`: FE Next.js App Router + Tailwind + Tokens  
+- `ADR-TS-03`: BE NestJS + Prisma + PostgreSQL RLS  
+- `ADR-TS-04`: Identity Platform multi‑tenancy + custom session tokens  
+- `ADR-TS-05`: API Gateway OpenAPI as SSOT  
+- `ADR-TS-06`: Outbox + Pub/Sub for async  
+- `ADR-TS-07`: Cloud Build + Artifact Registry + Cloud Run CI/CD  
+- `ADR-TS-08`: Budget guardrails & low-cost mode (max instances, log exclusions)
+
+> Mỗi ADR có: Context → Decision → Alternatives → Consequences → Rollout plan.
+
 
 ## PHẦN II-B — KIẾN TRÚC KỸ THUẬT CHI TIẾT (Developer & Product Team Reference)
 
@@ -4264,7 +4421,7 @@ Tham khảo chính thức: https://docs.cloud.google.com/billing/docs/how-to/dis
 >
 > **Giải pháp v10:** áp dụng **Spec Sync System** với 3 tầng: **(A) Single Source of Truth (SSOT)**, **(B) Sync Gates trong CI**, **(C) Change Request (CR) bắt buộc**.
 
-#### 8.0.1 SSOT (Single Source of Truth) — 7 artifacts phải luôn đồng bộ
+#### 8.0.1 SSOT (Single Source of Truth) — 8 artifacts phải luôn đồng bộ
 Mỗi thay đổi sản phẩm/kỹ thuật **BẮT BUỘC** cập nhật đủ 6 artifacts sau (thiếu 1 = coi như chưa hoàn thành):
 1) **PRD/Workflow** (luồng nghiệp vụ + acceptance criteria)  
 2) **Service list** (controllers/services/handlers/jobs)  
