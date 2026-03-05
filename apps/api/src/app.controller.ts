@@ -8,7 +8,7 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get('health')
-  @ApiOperation({ summary: 'Health check' })
+  @ApiOperation({ summary: 'Health check including database connectivity' })
   getHealth() {
     return this.appService.getHealth();
   }

@@ -1,0 +1,140 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// CORE: Multi-Tenant Foundation (Module 10)
+// ============================================================
+
+model Organization {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug             String   @unique @db.VarChar(100)
+  name             String   @db.VarChar(255)
+  fullName         String?  @map("full_name")
+  logoUrl          String?  @map("logo_url")
+  settings         Json     @default("{}")
+  subscriptionPlan String   @default("basic") @map("subscription_plan") @db.VarChar(50)
+  isActive         Boolean  @default(true) @map("is_active")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt        DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  branches     Branch[]
+  units        Unit[]
+  orgMembers   OrgMember[]
+  domainEvents DomainEvent[]
+
+  @@map("organizations")
+}
+
+model Branch {
+  id            String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId         String  @map("org_id") @db.Uuid
+  code          String  @db.VarChar(50)
+  name          String  @db.VarChar(100)
+  minAge        Int?    @map("min_age")
+  maxAge        Int?    @map("max_age")
+  colorTheme    String? @map("color_theme") @db.VarChar(50)
+  narrativeName String? @map("narrative_name") @db.VarChar(100)
+  settings      Json    @default("{}")
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  units        Unit[]
+  orgMembers   OrgMember[]
+
+  @@unique([orgId, code])
+  @@map("branches")
+}
+
+model Unit {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId        String   @map("org_id") @db.Uuid
+  branchId     String   @map("branch_id") @db.Uuid
+  name         String   @db.VarChar(100)
+  totemName    String?  @map("totem_name") @db.VarChar(100)
+  unitType     String?  @map("unit_type") @db.VarChar(50)
+  parentUnitId String?  @map("parent_unit_id") @db.Uuid
+  leaderUserId String?  @map("leader_user_id") @db.Uuid
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  organization Organization @relation(fields: [orgId], references: [id])
+  branch       Branch       @relation(fields: [branchId], references: [id])
+  parentUnit   Unit?        @relation("UnitHierarchy", fields: [parentUnitId], references: [id])
+  childUnits   Unit[]       @relation("UnitHierarchy")
+  orgMembers   OrgMember[]
+
+  @@map("units")
+}
+
+model User {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  firebaseUid String   @unique @map("firebase_uid") @db.VarChar(128)
+  email       String?  @unique @db.VarChar(255)
+  phone       String?  @db.VarChar(20)
+  displayName String?  @map("display_name") @db.VarChar(255)
+  avatarUrl   String?  @map("avatar_url")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  orgMembers   OrgMember[]
+  domainEvents DomainEvent[] @relation("EventActor")
+
+  @@map("users")
+}
+
+model OrgMember {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId          String   @map("org_id") @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  role           String   @db.VarChar(50)
+  truongLevel    String?  @map("truong_level") @db.VarChar(50)
+  branchId       String?  @map("branch_id") @db.Uuid
+  unitId         String?  @map("unit_id") @db.Uuid
+  memberCode     String?  @map("member_code") @db.VarChar(50)
+  joinedDate     DateTime? @map("joined_date") @db.Date
+  status         String   @default("active") @db.VarChar(50)
+  linkedMemberId String?  @map("linked_member_id") @db.Uuid
+  scoutName      String?  @map("scout_name") @db.VarChar(100)
+  heroName       String?  @map("hero_name") @db.VarChar(100)
+  meta           Json     @default("{}")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  branch       Branch?      @relation(fields: [branchId], references: [id])
+  unit         Unit?        @relation(fields: [unitId], references: [id])
+  linkedMember OrgMember?   @relation("MemberLink", fields: [linkedMemberId], references: [id])
+  linkedBy     OrgMember[]  @relation("MemberLink")
+
+  @@unique([orgId, userId])
+  @@map("org_members")
+}
+
+// ============================================================
+// DOMAIN EVENTS (Event Sourcing / Outbox)
+// ============================================================
+
+model DomainEvent {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId         String    @map("org_id") @db.Uuid
+  eventType     String    @map("event_type") @db.VarChar(200)
+  aggregateId   String    @map("aggregate_id") @db.Uuid
+  aggregateType String    @map("aggregate_type") @db.VarChar(100)
+  payload       Json
+  actorUserId   String?   @map("actor_user_id") @db.Uuid
+  processed     Boolean   @default(false)
+  processedAt   DateTime? @map("processed_at") @db.Timestamptz()
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+
+  organization Organization @relation(fields: [orgId], references: [id])
+  actorUser    User?        @relation("EventActor", fields: [actorUserId], references: [id])
+
+  @@index([orgId, eventType])
+  @@index([processed, createdAt])
+  @@map("domain_events")
+}
