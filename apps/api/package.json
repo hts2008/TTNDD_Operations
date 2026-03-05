@@ -58,6 +58,24 @@
     "ts-jest": "^29.0.0",
     "ts-node": "^10.0.0",
     "prisma": "^5.0.0",
-    "typescript": "^5.5.0"
+    "typescript": "^5.5.0",
+    "@types/supertest": "^6.0.0"
+  },
+  "jest": {
+    "moduleFileExtensions": ["js", "json", "ts"],
+    "rootDir": "src",
+    "testRegex": ".*\\.spec\\.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "collectCoverageFrom": ["**/*.(t|j)s", "!**/index.ts", "!main.ts"],
+    "coverageDirectory": "../coverage",
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/$1",
+      "^@modules/(.*)$": "<rootDir>/modules/$1",
+      "^@core/(.*)$": "<rootDir>/core/$1",
+      "^@common/(.*)$": "<rootDir>/common/$1"
+    }
   }
 }
