@@ -1,0 +1,157 @@
+# TTNDD_OPS Module Readiness Manifest (V2 §8.7.2)
+# CI validates this before every release
+# spec_version must match platform/TTNDD_OPS_V2.md header
+release_profile: PROFILE_OPS
+spec_version: "17.0"
+last_updated: "2026-03-06"
+
+modules:
+  HRM:
+    active: true
+    required_routes:
+      - /members
+      - /members/:id
+    required_openapi_tags: [HRM, Org]
+    required_seed:
+      - org_demo_structure
+      - members_minimal
+    required_e2e:
+      - tests/e2e/hrm/onboard-member.spec.ts
+
+  SCOUT:
+    active: true
+    required_routes:
+      - /skills
+      - /skills/:skillId
+    required_openapi_tags: [Scout]
+    required_seed:
+      - scout_program_minimal
+      - skills_minimal
+    required_e2e:
+      - tests/e2e/scout/skill-progress.spec.ts
+
+  SESSIONS:
+    active: true
+    required_routes:
+      - /sessions
+    required_openapi_tags: [Sessions]
+    required_seed:
+      - sessions_sample
+    required_e2e:
+      - tests/e2e/sessions/create-attend.spec.ts
+
+  EVENTS:
+    active: true
+    required_routes:
+      - /events
+    required_openapi_tags: [Events]
+    required_seed:
+      - events_sample
+    required_e2e:
+      - tests/e2e/events/register-event.spec.ts
+
+  REWARDS:
+    active: true
+    required_routes:
+      - /rewards
+    required_openapi_tags: [Rewards]
+    required_seed:
+      - rewards_config_minimal
+    required_e2e:
+      - tests/e2e/rewards/earn-badge.spec.ts
+
+  LMS:
+    active: true
+    required_routes:
+      - /lms
+      - /lms/:courseId
+    required_openapi_tags: [LMS]
+    required_seed:
+      - course_demo
+    required_e2e:
+      - tests/e2e/lms/enroll-complete.spec.ts
+
+  PROJECTS:
+    active: true
+    required_routes:
+      - /projects
+    required_openapi_tags: [Projects]
+    required_seed:
+      - plan_template_demo
+    required_e2e:
+      - tests/e2e/projects/plan-to-project.spec.ts
+
+  TICKETS:
+    active: true
+    required_routes:
+      - /tickets
+    required_openapi_tags: [Tickets]
+    required_seed: []
+    required_e2e:
+      - tests/e2e/tickets/create-close.spec.ts
+
+  FINANCE:
+    active: true
+    required_routes:
+      - /finance
+    required_openapi_tags: [Finance]
+    required_seed:
+      - finance_accounts_demo
+    required_e2e:
+      - tests/e2e/finance/fee-payment.spec.ts
+
+  ASSETS:
+    active: true
+    required_routes:
+      - /assets
+    required_openapi_tags: [Assets]
+    required_seed:
+      - assets_demo
+    required_e2e:
+      - tests/e2e/assets/loan-return.spec.ts
+
+  PROCESS:
+    active: true
+    required_routes:
+      - /process
+    required_openapi_tags: [Process]
+    required_seed: []
+    required_e2e:
+      - tests/e2e/process/workflow-run.spec.ts
+
+  NOTIFICATIONS:
+    active: true
+    required_routes:
+      - /notifications
+    required_openapi_tags: [Notifications]
+    required_seed:
+      - notification_templates
+    required_e2e:
+      - tests/e2e/notifications/receive-notif.spec.ts
+
+  CHILD_SAFETY:
+    active: true
+    required_routes:
+      - /child-safety
+    required_openapi_tags: [ChildSafety]
+    required_seed: []
+    required_e2e:
+      - tests/e2e/child-safety/report-incident.spec.ts
+
+  FILE_STORAGE:
+    active: true
+    required_routes:
+      - /file-storage
+    required_openapi_tags: [FileStorage]
+    required_seed: []
+    required_e2e:
+      - tests/e2e/file-storage/upload-download.spec.ts
+
+  DATA_IMPORT:
+    active: true
+    required_routes:
+      - /data-import
+    required_openapi_tags: [DataImport]
+    required_seed: []
+    required_e2e:
+      - tests/e2e/data-import/csv-import.spec.ts

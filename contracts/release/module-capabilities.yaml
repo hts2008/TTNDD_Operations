@@ -1,0 +1,164 @@
+# TTNDD_OPS Module Capabilities Map (V2 §8.11)
+# Each epic = 1 capability = workflow + screens + APIs + DB + events + tests
+spec_version: "17.0"
+last_updated: "2026-03-06"
+
+modules:
+  HRM:
+    epics:
+      - id: HRM-E1
+        name: Member Lifecycle
+        workflow: create member -> assign branch/unit -> view profile -> manage status
+        screens: [/members, /members/:id]
+        openapi_tags: [HRM]
+        tables: [users, org_members, member_profiles]
+        events_out: [hrm.member_joined, hrm.member_status_changed]
+        spices_impact: [CHARACTER, SOCIAL]
+        tests:
+          unit: [HrmService]
+          e2e: [tests/e2e/hrm/onboard-member.spec.ts]
+      - id: HRM-E2
+        name: Guardian Link
+        workflow: link guardian -> parent views child progress
+        screens: [/members/:id]
+        tables: [org_members]
+        tests:
+          e2e: [tests/e2e/hrm/parent-view.spec.ts]
+      - id: HRM-E3
+        name: CSV Import
+        workflow: upload CSV -> dry-run validate -> execute import -> audit log
+        screens: [/settings/import]
+        openapi_tags: [DataImport]
+        tables: [import_batches]
+        tests:
+          unit: [DataImportService]
+          e2e: [tests/e2e/hrm/csv-import.spec.ts]
+
+  SCOUT:
+    epics:
+      - id: SCOUT-E1
+        name: Skill Tree
+        workflow: view skill tree -> locked/unlocked/in-progress by spicesTags
+        screens: [/skills]
+        openapi_tags: [Scout]
+        tables: [skills, skill_groups, member_skill_progress]
+        spices_impact: [INTELLECTUAL, CHARACTER, PHYSICAL, SOCIAL, EMOTIONAL, SPIRITUAL]
+        tests:
+          e2e: [tests/e2e/scout/skill-progress.spec.ts]
+      - id: SCOUT-E2
+        name: Evidence Submit
+        workflow: upload evidence (FileStorage) -> submit -> leader verify -> award EXP+badge
+        screens: [/skills/:skillId]
+        openapi_tags: [Scout, FileStorage]
+        tables: [member_skill_progress, file_object_refs]
+        events_out: [scout.skill_verified, reward.exp_earned]
+        tests:
+          e2e: [tests/e2e/scout/evidence-submit.spec.ts]
+      - id: SCOUT-E3
+        name: Rank Progression
+        workflow: eligible -> propose -> approve -> ceremony -> badge
+        screens: [/skills]
+        openapi_tags: [Scout]
+        tables: [member_ranks, rank_definitions]
+        events_out: [scout.rank_achieved]
+        tests:
+          e2e: [tests/e2e/scout/rank-progress.spec.ts]
+
+  REWARDS:
+    epics:
+      - id: REWARDS-E1
+        name: EXP Engine
+        workflow: domain event consumed -> exp ledger updated -> summary refreshed
+        screens: [/rewards]
+        openapi_tags: [Rewards]
+        tables: [exp_transactions, member_exp_summaries, exp_configs]
+        events_in: [scout.skill_verified, session.attendance_marked, hrm.member_joined]
+        tests:
+          e2e: [tests/e2e/rewards/earn-badge.spec.ts]
+      - id: REWARDS-E2
+        name: Badge Awards + Leaderboard
+        workflow: condition met -> badge awarded -> leaderboard snapshot -> notify
+        screens: [/rewards, /rewards/badges]
+        tables: [badge_definitions, member_badges, leaderboard_snapshots]
+        events_out: [reward.badge_awarded]
+        tests:
+          e2e: [tests/e2e/rewards/earn-badge.spec.ts]
+
+  SESSIONS:
+    epics:
+      - id: SESS-E1
+        name: Session Lifecycle
+        workflow: create (planned) -> publish -> run attendance -> complete -> award EXP
+        screens: [/sessions]
+        tables: [sessions, session_attendance, annual_programs]
+        spices_impact: [PHYSICAL, INTELLECTUAL, SOCIAL, SPIRITUAL, CHARACTER, EMOTIONAL]
+        events_out: [session.attendance_marked, session.completed]
+        tests:
+          e2e: [tests/e2e/sessions/create-attend.spec.ts]
+
+  EVENTS:
+    epics:
+      - id: EVT-E1
+        name: Event Registration
+        workflow: create event -> open registration -> member registers -> check-in -> post-event
+        screens: [/events]
+        tables: [events, event_registrations]
+        spices_impact: [PHYSICAL, SOCIAL, SPIRITUAL, CHARACTER]
+        events_out: [event.registered, event.completed]
+        tests:
+          e2e: [tests/e2e/events/register-event.spec.ts]
+
+  LMS:
+    epics:
+      - id: LMS-E1
+        name: Course Enroll + Complete
+        workflow: browse -> enroll -> complete lessons -> pass quiz -> award EXP
+        screens: [/lms, /lms/:courseId]
+        tables: [courses, lessons, quizzes, member_course_progress]
+        spices_impact: [INTELLECTUAL, SPIRITUAL, CHARACTER]
+        events_out: [lms.course_completed, lms.lesson_completed]
+        tests:
+          e2e: [tests/e2e/lms/enroll-complete.spec.ts]
+
+  FINANCE:
+    epics:
+      - id: FIN-E1
+        name: Fee Collection
+        workflow: create fee -> member pays partial/full -> ledger updated -> receipt
+        screens: [/finance]
+        tables: [financial_accounts, financial_transactions, member_fees]
+        events_out: [finance.fee_paid, finance.transaction_completed]
+        tests:
+          e2e: [tests/e2e/finance/fee-payment.spec.ts]
+
+  ASSETS:
+    epics:
+      - id: ASSET-E1
+        name: Loan Workflow
+        workflow: request loan -> approve -> checkout -> return -> condition check
+        screens: [/assets]
+        tables: [assets, asset_loans, asset_categories]
+        events_out: [asset.checked_out, asset.returned]
+        tests:
+          e2e: [tests/e2e/assets/loan-return.spec.ts]
+
+  FILE_STORAGE:
+    epics:
+      - id: FS-E1
+        name: Signed URL Upload/Download
+        workflow: request upload URL -> upload to GCS -> get download URL -> serve
+        screens: [embedded in other modules]
+        tables: [file_object_refs]
+        tests:
+          e2e: [tests/e2e/file-storage/upload-download.spec.ts]
+
+  DATA_IMPORT:
+    epics:
+      - id: IMPORT-E1
+        name: CSV Member Import
+        workflow: download template -> fill -> dry-run validate -> confirm -> import -> audit
+        screens: [/settings/import]
+        tables: [import_batches, users, org_members]
+        tests:
+          unit: [DataImportService]
+          e2e: [tests/e2e/data-import/csv-import.spec.ts]

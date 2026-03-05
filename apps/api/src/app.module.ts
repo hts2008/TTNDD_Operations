@@ -27,6 +27,9 @@ import { ProcessModule } from './modules/process';
 import { ChildSafetyModule } from './modules/child-safety';
 import { NotificationsModule } from './modules/notifications';
 import { DashboardsModule } from './modules/dashboards';
+import { FileStorageModule } from './modules/file-storage';
+import { SystemModule } from './modules/system';
+import { DataImportModule } from './modules/data-import';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -59,6 +62,9 @@ import { AppService } from './app.service';
     ChildSafetyModule,
     NotificationsModule,
     DashboardsModule,
+    FileStorageModule,
+    SystemModule,
+    DataImportModule,
   ],
   controllers: [AppController],
   providers: [

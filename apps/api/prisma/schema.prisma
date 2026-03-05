@@ -437,6 +437,7 @@ model Skill {
   isRequired      Boolean  @default(false) @map("is_required")
   requiredForRankId String? @map("required_for_rank_id") @db.Uuid
   expPerLevel     Int      @default(10) @map("exp_per_level")
+  spicesTags      String[] @map("spices_tags") @db.VarChar(20)
   createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz()
 
   skillGroup      SkillGroup          @relation(fields: [skillGroupId], references: [id])
@@ -506,6 +507,7 @@ model Session {
   energyRating      Int?      @map("energy_rating")
   engagementRating  Int?      @map("engagement_rating")
   status            String    @default("planned") @db.VarChar(50)
+  spicesTags        String[]  @map("spices_tags") @db.VarChar(20)
   createdBy         String?   @map("created_by") @db.Uuid
   expReward         Int       @default(5) @map("exp_reward")
   createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz()
@@ -580,6 +582,7 @@ model Event {
   createdBy           String?   @map("created_by") @db.Uuid
   safetyChecklist     Json?     @map("safety_checklist")
   postEventReport     Json?     @map("post_event_report")
+  spicesTags          String[]  @map("spices_tags") @db.VarChar(20)
   createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   updatedAt           DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
 
@@ -628,6 +631,7 @@ model Course {
   createdBy      String?  @map("created_by") @db.Uuid
   status         String   @default("draft") @db.VarChar(50)
   totalDuration  Int?     @map("total_duration")
+  spicesTags     String[] @map("spices_tags") @db.VarChar(20)
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz()
 
   lessons  Lesson[]
@@ -650,6 +654,7 @@ model Lesson {
   duration    Int?
   expReward   Int      @default(0) @map("exp_reward")
   isRequired  Boolean  @default(true) @map("is_required")
+  spicesTags  String[] @map("spices_tags") @db.VarChar(20)
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
 
   course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
@@ -1246,4 +1251,69 @@ model DomainEvent {
   @@index([orgId, eventType])
   @@index([processed, createdAt])
   @@map("domain_events")
+}
+
+// ============================================================
+// FILE STORAGE (WP-0.6) — GCS Signed URL
+// ============================================================
+
+model FileObjectRef {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId         String    @map("org_id") @db.Uuid
+  uploaderUserId String?  @map("uploader_user_id") @db.Uuid
+  bucketName    String    @map("bucket_name") @db.VarChar(200)
+  objectKey     String    @map("object_key") @db.VarChar(1000)
+  originalName  String    @map("original_name") @db.VarChar(500)
+  mimeType      String    @map("mime_type") @db.VarChar(100)
+  sizeBytes     BigInt    @map("size_bytes")
+  entityType    String?   @map("entity_type") @db.VarChar(100)
+  entityId      String?   @map("entity_id") @db.Uuid
+  isPublic      Boolean   @default(false) @map("is_public")
+  uploadedAt    DateTime  @default(now()) @map("uploaded_at") @db.Timestamptz()
+  deletedAt     DateTime? @map("deleted_at") @db.Timestamptz()
+
+  @@index([orgId, entityType, entityId])
+  @@index([orgId, uploadedAt])
+  @@map("file_object_refs")
+}
+
+// ============================================================
+// SYSTEM / OPS (WP-0.11, WP-6.6) — Module Readiness
+// ============================================================
+
+model ReleaseGateReport {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  environment String   @db.VarChar(50)
+  buildId     String?  @map("build_id") @db.VarChar(200)
+  commitSha   String?  @map("commit_sha") @db.VarChar(100)
+  profile     String   @default("PROFILE_CORE") @db.VarChar(100)
+  status      String   @default("pending") @db.VarChar(50)
+  reportJson  Json     @default("{}") @map("report_json")
+  linksJson   Json     @default("{}") @map("links_json")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  @@index([environment, createdAt])
+  @@map("release_gate_reports")
+}
+
+// ============================================================
+// DATA IMPORT (WP-1.4) — CSV Import Tracking
+// ============================================================
+
+model ImportBatch {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId         String    @map("org_id") @db.Uuid
+  importType    String    @map("import_type") @db.VarChar(50)
+  status        String    @default("pending") @db.VarChar(50)
+  totalRows     Int       @default(0) @map("total_rows")
+  successRows   Int       @default(0) @map("success_rows")
+  errorRows     Int       @default(0) @map("error_rows")
+  errorDetails  Json      @default("[]") @map("error_details")
+  importedBy    String?   @map("imported_by") @db.Uuid
+  isDryRun      Boolean   @default(false) @map("is_dry_run")
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  completedAt   DateTime? @map("completed_at") @db.Timestamptz()
+
+  @@index([orgId, importType])
+  @@map("import_batches")
 }
