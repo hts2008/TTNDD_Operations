@@ -13,6 +13,9 @@ import { LoggingInterceptor, TransformInterceptor } from './common/interceptors'
 import { OrgConfigModule } from './modules/org-config';
 import { HrmModule } from './modules/hrm';
 import { RewardsModule } from './modules/rewards';
+import { ScoutModule } from './modules/scout';
+import { SessionsModule } from './modules/sessions';
+import { EventsCampModule } from './modules/events';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -32,6 +35,9 @@ import { AppService } from './app.service';
     OrgConfigModule,
     HrmModule,
     RewardsModule,
+    ScoutModule,
+    SessionsModule,
+    EventsCampModule,
   ],
   controllers: [AppController],
   providers: [
