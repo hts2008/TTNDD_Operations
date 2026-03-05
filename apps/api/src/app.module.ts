@@ -16,6 +16,14 @@ import { RewardsModule } from './modules/rewards';
 import { ScoutModule } from './modules/scout';
 import { SessionsModule } from './modules/sessions';
 import { EventsCampModule } from './modules/events';
+import { LmsModule } from './modules/lms';
+import { EnrichmentModule } from './modules/enrichment';
+import { ProjectsModule } from './modules/projects';
+import { TicketsModule } from './modules/tickets';
+import { FinanceModule } from './modules/finance';
+import { AssetsModule } from './modules/assets';
+import { ProcessModule } from './modules/process';
+import { ChildSafetyModule } from './modules/child-safety';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -38,6 +46,14 @@ import { AppService } from './app.service';
     ScoutModule,
     SessionsModule,
     EventsCampModule,
+    LmsModule,
+    EnrichmentModule,
+    ProjectsModule,
+    TicketsModule,
+    FinanceModule,
+    AssetsModule,
+    ProcessModule,
+    ChildSafetyModule,
   ],
   controllers: [AppController],
   providers: [

@@ -66,6 +66,14 @@ export const DOMAIN_EVENTS = {
     QUIZ_FAILED: 'lms.quiz_failed',
   },
 
+  // Module 8D: Enrichment
+  ENRICHMENT: {
+    SPIRITUAL_LOG_CREATED: 'enrichment.spiritual_log_created',
+    NGU_GIOI_ASSESSED: 'enrichment.ngu_gioi_assessed',
+    EVALUATION_CREATED: 'enrichment.evaluation_created',
+    MENTORING_STARTED: 'enrichment.mentoring_started',
+  },
+
   // Module 2: Projects
   PROJECT: {
     PLAN_SUBMITTED: 'project.plan_submitted',
@@ -95,5 +103,12 @@ export const DOMAIN_EVENTS = {
     CHECKED_OUT: 'asset.asset_checked_out',
     RETURNED: 'asset.asset_returned',
     REPORTED_LOST: 'asset.asset_reported_lost',
+  },
+
+  // Module 6: Process
+  PROCESS: {
+    WORKFLOW_STARTED: 'process.workflow_started',
+    STEP_COMPLETED: 'process.step_completed',
+    WORKFLOW_COMPLETED: 'process.workflow_completed',
   },
 } as const;
