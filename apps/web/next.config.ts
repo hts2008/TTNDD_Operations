@@ -1,10 +1,8 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  transpilePackages: ['@ttndd/shared', '@ttndd/constants', '@ttndd/ui', '@ttndd/tokens'],
-  experimental: {
-    optimizePackageImports: ['lucide-react', 'framer-motion'],
-  },
+  reactStrictMode: true,
+  eslint: { ignoreDuringBuilds: true },
 };
 
 export default nextConfig;

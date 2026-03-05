@@ -2,20 +2,14 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'TTNDD_OPS — Thanh Thiếu Niên Đại Đạo',
-  description: 'Hệ thống Quản lý & Vận hành Đoàn Thiếu Nhi Đạo Đức',
+  title: 'TTNDD Operations',
+  description: 'Hệ thống quản lý Đoàn Thiếu Nhi Đạo Đức',
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="vi">
-      <body className="min-h-screen bg-background antialiased">
-        {children}
-      </body>
+      <body className="min-h-screen antialiased">{children}</body>
     </html>
   );
 }
