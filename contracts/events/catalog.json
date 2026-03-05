@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TTNDD_OPS Event Catalog",
+  "version": "0.1.0",
+  "events": {}
+}
