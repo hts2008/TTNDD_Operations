@@ -83,3 +83,59 @@ jobs:
       - run: cd apps/api && npx prisma migrate deploy
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/ttndd_migrate_test
+
+  contract-lint:
+    name: Contract Lint & Drift Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with: { version: '${{ env.PNPM_VERSION }}' }
+      - uses: actions/setup-node@v4
+        with: { node-version: '${{ env.NODE_VERSION }}', cache: 'pnpm' }
+      - run: pnpm install --frozen-lockfile
+
+      # Validate OpenAPI spec exists and is valid JSON
+      - name: Validate OpenAPI spec
+        run: |
+          if [ ! -f contracts/openapi/ttndd-ops-api.json ]; then
+            echo "❌ OpenAPI spec missing! Run: pnpm --filter api generate:openapi"
+            exit 1
+          fi
+          node -e "JSON.parse(require('fs').readFileSync('contracts/openapi/ttndd-ops-api.json','utf8')); console.log('✅ OpenAPI JSON valid')"
+
+      # Validate event catalog exists and has events
+      - name: Validate event catalog
+        run: |
+          if [ ! -f contracts/events/catalog.json ]; then
+            echo "❌ Event catalog missing!"
+            exit 1
+          fi
+          node -e "
+            const cat = JSON.parse(require('fs').readFileSync('contracts/events/catalog.json','utf8'));
+            const modules = Object.keys(cat.events || {});
+            if (modules.length === 0) { console.error('❌ Event catalog is empty'); process.exit(1); }
+            console.log('✅ Event catalog valid:', modules.length, 'modules');
+          "
+
+      # Validate TypeScript types are in sync
+      - name: Validate api-types.d.ts exists
+        run: |
+          if [ ! -f contracts/openapi/api-types.d.ts ]; then
+            echo "⚠️  api-types.d.ts missing. Run: node contracts/openapi/codegen.js"
+            exit 1
+          fi
+          echo "✅ TypeScript types present"
+
+      # Check contract drift (regenerate and diff)
+      - name: Check OpenAPI drift
+        run: |
+          cp contracts/openapi/ttndd-ops-api.json /tmp/openapi-before.json
+          pnpm --filter api build
+          node apps/api/scripts/generate-openapi.js
+          if ! diff -q contracts/openapi/ttndd-ops-api.json /tmp/openapi-before.json > /dev/null 2>&1; then
+            echo "⚠️  OpenAPI spec has drifted from code. Please regenerate and commit."
+            diff contracts/openapi/ttndd-ops-api.json /tmp/openapi-before.json | head -50
+            exit 1
+          fi
+          echo "✅ OpenAPI spec is in sync with code"

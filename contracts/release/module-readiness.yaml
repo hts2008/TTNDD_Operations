@@ -1,9 +1,11 @@
-# TTNDD_OPS Module Readiness Manifest (V2 §8.7.2)
-# CI validates this before every release
-# spec_version must match platform/TTNDD_OPS_V2.md header
+# TTNDD_OPS Module Readiness Manifest (V3 release baseline)
+# CI validates this before every release.
+# spec_version must match the active baseline in platform/TTNDD_OPS_V3.md.
+# This manifest defines required readiness expectations.
+# Actual implementation truth is audited in PROJECT_CONTEXT.md and KANBAN.md.
 release_profile: PROFILE_OPS
-spec_version: "17.0"
-last_updated: "2026-03-06"
+spec_version: "V10 FINAL"
+last_updated: "2026-03-07"
 
 modules:
   HRM:
