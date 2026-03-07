@@ -1,7 +1,7 @@
 # 🏯 TTNDD_OPS — MASTER SPEC V10 CANONICAL (PRODUCT-FIRST, IMPLEMENTATION-COMPLETE, MODULE-STORY-COVERED, ROADMAP-SYNCED, GO-LIVE-READY, ALL-IN-ONE + CONTRACT PACK)
 
 > **Nền tảng**: Thanh Thiếu Niên Đại Đạo — Hệ thống Quản lý & Vận hành (Power Platform ERP)  
-> **Triết lý**: *Business first → System design → Technical contract*  
+> **Triết lý**: _Business first → System design → Technical contract_  
 > **Kiến trúc mục tiêu**: Modular Monolith · Multi-Tenant · Event-Driven · Google Cloud Native  
 > **Ngân sách GCP (Hard cap)**: **≤ 800.000 VND/tháng** (thiết lập guardrails + auto actions)  
 > **Phiên bản**: **V10 FINAL** — Ngày: **07/03/2026** (Asia/Ho_Chi_Minh)  
@@ -12,11 +12,13 @@
 ## CÁCH DÙNG TÀI LIỆU (2 “VIEW” RÕ RÀNG)
 
 ### ✅ PRODUCT VIEW (dành cho LĐT + Product Team)
+
 - Bức tranh tổng thể platform (giống ERP game/MMORPG)
 - Module map, user journeys, page map, workflow, business rules, user stories, acceptance criteria
 - Không sa vào tech stack / code chi tiết
 
 ### ✅ ENGINEERING VIEW (dành cho Dev/AI-Agent/Tech Lead)
+
 - Architecture chuẩn hoá + bounded context + data contract
 - Database schema, RLS policies, event catalog, integration, API, LLD
 - GCP deploy + budget guardrails + observability
@@ -44,10 +46,10 @@
   - Viết lại **PHẦN VIII — Lộ trình triển khai** theo logic coverage mới: **Foundation + Module-owned + Engineering tracks**, đồng bộ với sub-pages, services, workflows, state machines, OpenAPI, DB/RLS, tests, imports, release evidence và go-live gates.
   - Nâng **8.4 Coverage Matrix** để mỗi module phải đi qua cả lớp module story lẫn lớp engineering story trước khi được ACTIVE/GA.
 
-- **v7.0 (06/03/2026): Implementation Completion + Roadmap/Contract Sync Release**  
-  - Sửa lại **PHẦN VIII** để bao phủ đủ **PHẦN IX, PHỤ LỤC A, PHỤ LỤC B, PHỤ LỤC C, PHẦN X** bằng một **parallel documentation-to-code story** có phase, work package, milestone và task chi tiết.  
-  - Hoàn thiện **PHỤ LỤC B — Module 8 backlog** từ 1 story rút gọn thành nhiều story bám sát Skillbook, Sessions, Events, Spiritual, Mentoring, Read Models.  
-  - Hoàn thiện **PHỤ LỤC C**: điền đầy đủ **13.5 DoD toàn platform**, thêm **13.6 Release Evidence Pack**, **13.7 Traceability Matrix**, **13.8 Module Readiness Manifest**, **13.9 CTO handoff checklist**, **13.10 Cutover & hypercare notes**.  
+- **v7.0 (06/03/2026): Implementation Completion + Roadmap/Contract Sync Release**
+  - Sửa lại **PHẦN VIII** để bao phủ đủ **PHẦN IX, PHỤ LỤC A, PHỤ LỤC B, PHỤ LỤC C, PHẦN X** bằng một **parallel documentation-to-code story** có phase, work package, milestone và task chi tiết.
+  - Hoàn thiện **PHỤ LỤC B — Module 8 backlog** từ 1 story rút gọn thành nhiều story bám sát Skillbook, Sessions, Events, Spiritual, Mentoring, Read Models.
+  - Hoàn thiện **PHỤ LỤC C**: điền đầy đủ **13.5 DoD toàn platform**, thêm **13.6 Release Evidence Pack**, **13.7 Traceability Matrix**, **13.8 Module Readiness Manifest**, **13.9 CTO handoff checklist**, **13.10 Cutover & hypercare notes**.
   - Bổ sung **10.6/10.7** để checklist sync trực tiếp với roadmap, module contracts, release gates và owner thực thi.
 
 - **v6.1 (06/03/2026): Roadmap Rebuild — multi-story, implementation-complete**
@@ -55,66 +57,66 @@
   - Bổ sung **Task Description & Developer Detail** ở cấp Work Package, mô tả rõ service, API, schema, event, UI state, test, migration, feature flags và logic xử lý.
   - Sửa lỗi format/heading khiến **PHẦN VIII** bị “lọt” vào mục 7.3.6; chuẩn hoá lại heading để roadmap là một phần high-level độc lập.
   - Thêm **Technical Stack Summary Table** để team Product, CTO và AI Agent cùng nhìn thấy baseline full-stack ngay ở PHẦN II-A.
-  - Rà lại roadmap theo benchmark chính thống và nguồn mở: **OpenProject/Plane** (work packages, cycles, docs/wiki, Gantt), **Moodle** (offline, competencies), **Zammad** (triggers/core workflows), **ERPNext** (cost center/budget), **Snipe-IT** (checkin/checkout/custom fields/user acceptance), **React Flow** (workflow builder).  
+  - Rà lại roadmap theo benchmark chính thống và nguồn mở: **OpenProject/Plane** (work packages, cycles, docs/wiki, Gantt), **Moodle** (offline, competencies), **Zammad** (triggers/core workflows), **ERPNext** (cost center/budget), **Snipe-IT** (checkin/checkout/custom fields/user acceptance), **React Flow** (workflow builder).
 
-- **v6.0 (06/03/2026): Roadmap V6 — Multi-Story Production Delivery Rewrite**  
-  - Viết lại **PHẦN VIII — Lộ trình triển khai** từ mô hình “1 story bao trùm” sang **nhiều story theo capability**, để roadmap phản ánh đúng khối lượng build thực tế và đường go-live production.  
-  - Chuẩn hoá **8.6 Roadmap chỉnh để build đúng thứ mô tả** theo đúng cấu trúc **Story → Phase → Work Package → Milestone → Task** và bảng cột: **Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation)**.  
-  - Bổ sung **Story Map**, **Module Coverage Matrix**, **Benchmark Delta Audit**, **Exit Criteria**, **Go-Live Hard Gates**, **E2E Gate Pack**, và **Module Not Empty Guarantee** để roadmap map thẳng sang module, state machine, contract, schema, tests, release dashboard.  
-  - Siết logic “đã mô tả gì thì roadmap phải build cái đó”: mỗi WP phải có UI + API + DB + Event + QA + Ops deliverables, không chấp nhận skeleton-only.  
+- **v6.0 (06/03/2026): Roadmap V6 — Multi-Story Production Delivery Rewrite**
+  - Viết lại **PHẦN VIII — Lộ trình triển khai** từ mô hình “1 story bao trùm” sang **nhiều story theo capability**, để roadmap phản ánh đúng khối lượng build thực tế và đường go-live production.
+  - Chuẩn hoá **8.6 Roadmap chỉnh để build đúng thứ mô tả** theo đúng cấu trúc **Story → Phase → Work Package → Milestone → Task** và bảng cột: **Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation)**.
+  - Bổ sung **Story Map**, **Module Coverage Matrix**, **Benchmark Delta Audit**, **Exit Criteria**, **Go-Live Hard Gates**, **E2E Gate Pack**, và **Module Not Empty Guarantee** để roadmap map thẳng sang module, state machine, contract, schema, tests, release dashboard.
+  - Siết logic “đã mô tả gì thì roadmap phải build cái đó”: mỗi WP phải có UI + API + DB + Event + QA + Ops deliverables, không chấp nhận skeleton-only.
 
-- **v5.1 (06/03/2026): Canonical Consistency Audit + Structural Normalization**  
-  - Chuẩn hoá lại thứ tự phần/mục để Product View → Technical Stack → PRD → Security/UI → Engineering → Budget → Roadmap → State Machines → Schemas → Contracts đi đúng luồng triển khai.  
-  - Đồng bộ lại các phần bị lệch: **PHẦN VIII — Lộ trình**, **PHẦN IX — State Machines**, **PHỤ LỤC A — Database Schemas**, **Appendix Module 8 Contract**, **OpenAPI Scout Core**, **RLS/Implementation Playbook**.  
-  - Bổ sung **Canonical State & Contract Registry**, **Schema Coverage Map**, **Roadmap-to-Contract Traceability** và chèn lại **Module 6 — Process schema** để loại bỏ tình trạng “có màn hình nhưng chưa build được lõi”.  
+- **v5.1 (06/03/2026): Canonical Consistency Audit + Structural Normalization**
+  - Chuẩn hoá lại thứ tự phần/mục để Product View → Technical Stack → PRD → Security/UI → Engineering → Budget → Roadmap → State Machines → Schemas → Contracts đi đúng luồng triển khai.
+  - Đồng bộ lại các phần bị lệch: **PHẦN VIII — Lộ trình**, **PHẦN IX — State Machines**, **PHỤ LỤC A — Database Schemas**, **Appendix Module 8 Contract**, **OpenAPI Scout Core**, **RLS/Implementation Playbook**.
+  - Bổ sung **Canonical State & Contract Registry**, **Schema Coverage Map**, **Roadmap-to-Contract Traceability** và chèn lại **Module 6 — Process schema** để loại bỏ tình trạng “có màn hình nhưng chưa build được lõi”.
 
-- **V5 FINAL (06/03/2026): Big Sync Final Release — Product/Module First + Full Consistency Closure**  
-  - Rà soát lại toàn bộ MasterSpec theo hướng **product trước, module trước, technical contract sau**, đảm bảo mỗi module đều có mô tả mục đích → feature/function → workflow → UI → data/API/event/security → roadmap build tương ứng.  
-  - Hấp thụ các điểm mạnh của bản tham chiếu cạnh tranh: **release/dashboard hard gates, coverage automation, capability map, module development track, sync system**, nhưng giữ lõi DTNDD/TTNDD từ bản nghiên cứu nội bộ để không biến spec thành ERP generic.  
-  - **PHẦN VIII** được tái đồng bộ: roadmap chính + roadmap module đều có thêm cột **Task Description & Developer Detail** để team dev/AI Agent hiểu task làm gì, chạm đến code/hàm/logic/cấu trúc nào.  
-  - **PHẦN V UI/UX** được nâng lên cấp “game design bible” với scene grammar, asset pipeline, motion budget, performance budget, mobile/camp mode, accessibility, và quy tắc art direction *Tu tiên × Hướng đạo × Cao Đài × Việt Nam*.  
-  - Bổ sung **Cross-System Consistency Matrix** để khóa tính đồng bộ giữa Product View ↔ Screen Map ↔ API ↔ DB ↔ Events ↔ Security ↔ DWH ↔ Roadmap ↔ Release Gates.  
-  - Chuẩn hoá lại **Technical Stack** theo hướng full-stack AI-native: Next.js App Router, NestJS modular monolith, Prisma + PostgreSQL RLS, API Gateway/OpenAPI SSOT, Identity Platform multi-tenancy, Cloud Run/Pub/Sub/BigQuery/GCS, cùng guardrails chi phí ≤ 800.000 VND/tháng.  
+- **V5 FINAL (06/03/2026): Big Sync Final Release — Product/Module First + Full Consistency Closure**
+  - Rà soát lại toàn bộ MasterSpec theo hướng **product trước, module trước, technical contract sau**, đảm bảo mỗi module đều có mô tả mục đích → feature/function → workflow → UI → data/API/event/security → roadmap build tương ứng.
+  - Hấp thụ các điểm mạnh của bản tham chiếu cạnh tranh: **release/dashboard hard gates, coverage automation, capability map, module development track, sync system**, nhưng giữ lõi DTNDD/TTNDD từ bản nghiên cứu nội bộ để không biến spec thành ERP generic.
+  - **PHẦN VIII** được tái đồng bộ: roadmap chính + roadmap module đều có thêm cột **Task Description & Developer Detail** để team dev/AI Agent hiểu task làm gì, chạm đến code/hàm/logic/cấu trúc nào.
+  - **PHẦN V UI/UX** được nâng lên cấp “game design bible” với scene grammar, asset pipeline, motion budget, performance budget, mobile/camp mode, accessibility, và quy tắc art direction _Tu tiên × Hướng đạo × Cao Đài × Việt Nam_.
+  - Bổ sung **Cross-System Consistency Matrix** để khóa tính đồng bộ giữa Product View ↔ Screen Map ↔ API ↔ DB ↔ Events ↔ Security ↔ DWH ↔ Roadmap ↔ Release Gates.
+  - Chuẩn hoá lại **Technical Stack** theo hướng full-stack AI-native: Next.js App Router, NestJS modular monolith, Prisma + PostgreSQL RLS, API Gateway/OpenAPI SSOT, Identity Platform multi-tenancy, Cloud Run/Pub/Sub/BigQuery/GCS, cùng guardrails chi phí ≤ 800.000 VND/tháng.
 
-- **v17.0 (06/03/2026): Coverage Report Automation + Go‑Live Dashboard (Hard Gates)**  
-  - Thêm **Coverage Report Generator** (CI tự tạo báo cáo coverage theo module/capability + publish artifacts) và **hard gate**: fail coverage → block release.  
-  - Thêm **Release Gate Dashboard** trong Admin Settings: xem trạng thái pass/fail theo module, links tới missing items + E2E report.  
-  - Chuẩn hoá **/contracts/release/**: readiness manifest + capability manifest + coverage outputs (JSON/MD) để traceability.  
+- **v17.0 (06/03/2026): Coverage Report Automation + Go‑Live Dashboard (Hard Gates)**
+  - Thêm **Coverage Report Generator** (CI tự tạo báo cáo coverage theo module/capability + publish artifacts) và **hard gate**: fail coverage → block release.
+  - Thêm **Release Gate Dashboard** trong Admin Settings: xem trạng thái pass/fail theo module, links tới missing items + E2E report.
+  - Chuẩn hoá **/contracts/release/**: readiness manifest + capability manifest + coverage outputs (JSON/MD) để traceability.
 
-- **v16.0 (06/03/2026): Module Capability‑Mapped Roadmap — “build đúng tính năng/mô tả”**  
-  - Thêm **Module Capability Map** (Feature/Workflow → Screens → APIs → DB → Events → Tests) và roadmap riêng **Module Development Track**.  
-  - Thêm **Technical Reference Index** (anchors) để cột **Dev Notes (Implementation)** link thẳng đến phần kỹ thuật (API/DB/Event/UI/SEC/DWH…).  
-  - Nâng hard gates: module ACTIVE bắt buộc pass **capability manifest** (không chỉ readiness manifest).  
+- **v16.0 (06/03/2026): Module Capability‑Mapped Roadmap — “build đúng tính năng/mô tả”**
+  - Thêm **Module Capability Map** (Feature/Workflow → Screens → APIs → DB → Events → Tests) và roadmap riêng **Module Development Track**.
+  - Thêm **Technical Reference Index** (anchors) để cột **Dev Notes (Implementation)** link thẳng đến phần kỹ thuật (API/DB/Event/UI/SEC/DWH…).
+  - Nâng hard gates: module ACTIVE bắt buộc pass **capability manifest** (không chỉ readiness manifest).
 
-- **v15.0 (06/03/2026): Go‑live Hard Gates — KHÔNG cho phép module “trống”**  
-  - Bổ sung **Go‑Live Gate Manifest** (release profile → module readiness → required E2E) và **CI/CD hard checks**: nếu module đang **ACTIVE** mà chưa đạt “Playable MVP” thì **chặn release**.  
-  - Bổ sung **E2E Playwright Gate Pack** theo module (tag-based) + post-deploy canary checks.  
-  - Cập nhật PHẦN VIII: thêm WP cho Module Registry/Readiness + Go‑live gates (Cloud Deploy approval optional).  
+- **v15.0 (06/03/2026): Go‑live Hard Gates — KHÔNG cho phép module “trống”**
+  - Bổ sung **Go‑Live Gate Manifest** (release profile → module readiness → required E2E) và **CI/CD hard checks**: nếu module đang **ACTIVE** mà chưa đạt “Playable MVP” thì **chặn release**.
+  - Bổ sung **E2E Playwright Gate Pack** theo module (tag-based) + post-deploy canary checks.
+  - Cập nhật PHẦN VIII: thêm WP cho Module Registry/Readiness + Go‑live gates (Cloud Deploy approval optional).
 
-- **v14.0 (06/03/2026): Mainline Roadmap “Module Playable MVP”**  
-  - Nâng cấp PHẦN VIII: chuyển từ “có module” sang **Module Not Empty Guarantee** (Playable MVP) + seed data pack + demo scenarios + deliverables per WP.  
-  - Bổ sung **Module Readiness Matrix** để đối chiếu chéo module ↔ screens ↔ APIs ↔ schema ↔ WP.  
+- **v14.0 (06/03/2026): Mainline Roadmap “Module Playable MVP”**
+  - Nâng cấp PHẦN VIII: chuyển từ “có module” sang **Module Not Empty Guarantee** (Playable MVP) + seed data pack + demo scenarios + deliverables per WP.
+  - Bổ sung **Module Readiness Matrix** để đối chiếu chéo module ↔ screens ↔ APIs ↔ schema ↔ WP.
 
-- **v13.0 (06/03/2026): Technical Stack (Full‑stack AI) + AI‑Driven Delivery Operating Model**  
-  - Bổ sung **PHẦN II.1 — Technical Stack (GCP‑native, budget‑aware)**: monorepo, FE/BE, DB, event bus, CI/CD, security, testing.  
-  - Bổ sung **PHẦN II.2 — AI‑Driven Delivery Operating Model**: luân phiên vai trò theo team Product chuẩn; SSOT + Sync Gate + CR bám chặt.  
-  - Nâng SSOT từ **7 → 8 artifacts**: thêm **ADR/Tech Stack Decisions** để chặn lệch pha công nghệ.  
+- **v13.0 (06/03/2026): Technical Stack (Full‑stack AI) + AI‑Driven Delivery Operating Model**
+  - Bổ sung **PHẦN II.1 — Technical Stack (GCP‑native, budget‑aware)**: monorepo, FE/BE, DB, event bus, CI/CD, security, testing.
+  - Bổ sung **PHẦN II.2 — AI‑Driven Delivery Operating Model**: luân phiên vai trò theo team Product chuẩn; SSOT + Sync Gate + CR bám chặt.
+  - Nâng SSOT từ **7 → 8 artifacts**: thêm **ADR/Tech Stack Decisions** để chặn lệch pha công nghệ.
 
-- **v12.0 (06/03/2026): UI MMORPG “thật sự” — Screen Map theo module + Design Tokens JSON (DTCG) + Sync update**  
-  - Bổ sung **UI Screen Map chi tiết theo từng module**: route map + wireframe text + component mapping (HUD/Quest/Inventory/Skill Tree/Boards…).  
-  - Thêm **Design Tokens JSON** theo chuẩn **Design Tokens Community Group (DTCG)** để FE import thẳng, và hướng dẫn build ra CSS variables/Tailwind bằng Style Dictionary.  
-  - Cập nhật **Spec Sync System**: SSOT tăng từ **6 → 7 artifacts**, thêm **UI Contract (Screen Map + Tokens)** để chặn lệch pha.  
+- **v12.0 (06/03/2026): UI MMORPG “thật sự” — Screen Map theo module + Design Tokens JSON (DTCG) + Sync update**
+  - Bổ sung **UI Screen Map chi tiết theo từng module**: route map + wireframe text + component mapping (HUD/Quest/Inventory/Skill Tree/Boards…).
+  - Thêm **Design Tokens JSON** theo chuẩn **Design Tokens Community Group (DTCG)** để FE import thẳng, và hướng dẫn build ra CSS variables/Tailwind bằng Style Dictionary.
+  - Cập nhật **Spec Sync System**: SSOT tăng từ **6 → 7 artifacts**, thêm **UI Contract (Screen Map + Tokens)** để chặn lệch pha.
 
-- **v11.0 (06/03/2026): UI/UX MMORPG + Fix Markdown Tables**  
-  - Sửa toàn bộ **bảng (tables) bị vỡ format**: chuyển các “inline table 1 dòng” thành markdown table đúng chuẩn.  
-  - Nâng cấp lớn **PHẦN V — UI/UX**: đặc tả như game MMORPG (*Tu tiên × Hướng đạo × Cao Đài × Việt Nam*), thêm HUD layout, design tokens, component kit, camp/offline mode, accessibility.  
-  - Chuẩn hoá thêm các liên kết tiêu chuẩn (WCAG 2.2, prefers-reduced-motion, PWA caching).  
+- **v11.0 (06/03/2026): UI/UX MMORPG + Fix Markdown Tables**
+  - Sửa toàn bộ **bảng (tables) bị vỡ format**: chuyển các “inline table 1 dòng” thành markdown table đúng chuẩn.
+  - Nâng cấp lớn **PHẦN V — UI/UX**: đặc tả như game MMORPG (_Tu tiên × Hướng đạo × Cao Đài × Việt Nam_), thêm HUD layout, design tokens, component kit, camp/offline mode, accessibility.
+  - Chuẩn hoá thêm các liên kết tiêu chuẩn (WCAG 2.2, prefers-reduced-motion, PWA caching).
 
-- **v10.0 (05/03/2026): BIG SYNC RELEASE (Consistency-first)**  
-  - Thêm **Spec Sync System** (SSOT 8 artifacts + CI Sync Gate + CR template) để loại bỏ “lệch pha” giữa PRD ↔ contract ↔ schema ↔ tests ↔ roadmap.  
-  - Nâng cấp **PHẦN VIII Roadmap**: thêm cột **Dev Notes (Implementation)** cho từng Work Package để AI Agent/Dev bám vào mà code.  
-  - Chuẩn hoá cách ghi ngân sách: **≤ 800.000 VND/tháng** và runbook Budget Guardrails (50/80/100/120).  
-  - Chuẩn hoá thuật ngữ & liên kết chéo (Module 8 hợp nhất Sessions/Events/Spiritual; Safe-from-Harm; contract-first gate).  
+- **v10.0 (05/03/2026): BIG SYNC RELEASE (Consistency-first)**
+  - Thêm **Spec Sync System** (SSOT 8 artifacts + CI Sync Gate + CR template) để loại bỏ “lệch pha” giữa PRD ↔ contract ↔ schema ↔ tests ↔ roadmap.
+  - Nâng cấp **PHẦN VIII Roadmap**: thêm cột **Dev Notes (Implementation)** cho từng Work Package để AI Agent/Dev bám vào mà code.
+  - Chuẩn hoá cách ghi ngân sách: **≤ 800.000 VND/tháng** và runbook Budget Guardrails (50/80/100/120).
+  - Chuẩn hoá thuật ngữ & liên kết chéo (Module 8 hợp nhất Sessions/Events/Spiritual; Safe-from-Harm; contract-first gate).
 
 - **v9.0-baseline (05/03/2026): FINAL RELEASE**
   - Hợp nhất “điểm mạnh đối thủ” (bản TTNDD_OPS_v8) vào bản chuẩn: thêm **Success Metrics + Non‑Goals** rõ ràng, chuẩn hoá cách trình bày & liên kết phần Product↔Engineering.
@@ -137,48 +139,54 @@
 
 ---
 
-
 ## PHẦN 0 — ĐỐI CHIẾU CẠNH TRANH, HẤP THỤ Ý TƯỞNG & NGUYÊN TẮC NÂNG CẤP V5
 
 ### A0.1 Kết luận đối chiếu
+
 Bản tham chiếu cạnh tranh mạnh hơn V4.1 ở 5 lớp sau:
-1. **Cơ chế ép đồng bộ** giữa PRD, contracts, schema, tests, release gates.  
-2. **Roadmap có khả năng kiểm soát chất lượng go-live** chứ không chỉ liệt kê phase.  
-3. **Capability map & readiness manifest** giúp chứng minh module “có mô tả thì phải có màn hình, API, DB, event, test tương ứng”.  
-4. **Release dashboard / coverage report automation** giúp nhìn trạng thái release theo module thay vì đọc tài liệu thủ công.  
+
+1. **Cơ chế ép đồng bộ** giữa PRD, contracts, schema, tests, release gates.
+2. **Roadmap có khả năng kiểm soát chất lượng go-live** chứ không chỉ liệt kê phase.
+3. **Capability map & readiness manifest** giúp chứng minh module “có mô tả thì phải có màn hình, API, DB, event, test tương ứng”.
+4. **Release dashboard / coverage report automation** giúp nhìn trạng thái release theo module thay vì đọc tài liệu thủ công.
 5. **Engineering contract pack** chi tiết hơn cho AI Agent / Dev bám vào.
 
 ### A0.2 Điều chúng ta giữ lại làm lợi thế riêng
+
 TTNDD_OPS vẫn vượt trội ở những phần đối thủ thường làm hời hợt:
+
 - Mô tả **nghiệp vụ đặc thù DTNDD/Cao Đài/Hướng đạo** sâu hơn ERP thông thường.
 - Hệ **Scout Core + Reward Engine** gắn với đẳng thứ, chuyên hiệu, SPICES, tự rèn luyện, mentoring, chuyển ngành.
 - **Gamification có đạo đức** dựa trên SDT + Flow + anti-abuse + child safety.
 - **Ngân sách Google Cloud ≤ 800.000 VND/tháng** được coi là constraint kiến trúc thật, không phải chú thích phụ.
 
 ### A0.3 Nguyên tắc hấp thụ ở V5
-- Không sao chép nguyên xi đối thủ.  
-- Chỉ hấp thụ những thứ làm tăng: **tính rõ ràng**, **tính buildable**, **tính kiểm soát release**, **tính nhất quán xuyên tài liệu**.  
-- Mọi enhancement phải trả lời được 3 câu hỏi:  
-  1) Product team có hiểu sản phẩm rõ hơn không?  
-  2) Dev/AI Agent có build đúng hơn không?  
-  3) Release/go-live có được kiểm soát chặt hơn không?
+
+- Không sao chép nguyên xi đối thủ.
+- Chỉ hấp thụ những thứ làm tăng: **tính rõ ràng**, **tính buildable**, **tính kiểm soát release**, **tính nhất quán xuyên tài liệu**.
+- Mọi enhancement phải trả lời được 3 câu hỏi:
+  1. Product team có hiểu sản phẩm rõ hơn không?
+  2. Dev/AI Agent có build đúng hơn không?
+  3. Release/go-live có được kiểm soát chặt hơn không?
 
 ### A0.4 Các nâng cấp bắt buộc đã khóa trong V5
-| Chủ đề | V4.1 còn yếu | V5 xử lý như thế nào |
-|---|---|---|
-| Product-first consistency | Product view tốt nhưng roadmap/contract chưa bám hết | Thêm Cross-System Consistency Matrix + capability closure |
-| Roadmap | Chưa phản ánh hết module/function mới cập nhật | Rà lại PHẦN VIII, thêm Task Description & Developer Detail + deliverables + contract refs |
-| UI/UX MMORPG | Đã có định hướng nhưng chưa thành design bible đủ build | Nâng thành scene grammar + art direction + performance budget + asset pipeline + interaction law |
-| Technical Stack | Có nhưng chưa đủ “pin” cho AI-driven code | Thêm pinned baseline, package policy, module boundary rules, test/runtime policy |
-| Release Control | Chưa đủ hard-gate theo capability coverage | Giữ coverage automation + release dashboard + readiness/capability manifests |
+
+| Chủ đề                    | V4.1 còn yếu                                            | V5 xử lý như thế nào                                                                             |
+| ------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Product-first consistency | Product view tốt nhưng roadmap/contract chưa bám hết    | Thêm Cross-System Consistency Matrix + capability closure                                        |
+| Roadmap                   | Chưa phản ánh hết module/function mới cập nhật          | Rà lại PHẦN VIII, thêm Task Description & Developer Detail + deliverables + contract refs        |
+| UI/UX MMORPG              | Đã có định hướng nhưng chưa thành design bible đủ build | Nâng thành scene grammar + art direction + performance budget + asset pipeline + interaction law |
+| Technical Stack           | Có nhưng chưa đủ “pin” cho AI-driven code               | Thêm pinned baseline, package policy, module boundary rules, test/runtime policy                 |
+| Release Control           | Chưa đủ hard-gate theo capability coverage              | Giữ coverage automation + release dashboard + readiness/capability manifests                     |
 
 ---
-
 
 ## PHẦN I — PLATFORM PRODUCT BLUEPRINT & BỐI CẢNH CHIẾN LƯỢC
 
 ### A.1 North Star (mục tiêu sản phẩm)
+
 TTNDD_OPS là “**bộ não vận hành + tấm gương tiến bộ**” của ĐTNĐĐ:
+
 - **Giảm hành chính** để Trưởng tập trung giáo dục và an toàn
 - **Giữ tính kế thừa dữ liệu** khi thay đổi Trưởng/đổi nhiệm kỳ
 - **Ghi nhận tiến bộ công bằng** qua đẳng thứ – chuyên hiệu – khen thưởng
@@ -186,15 +194,18 @@ TTNDD_OPS là “**bộ não vận hành + tấm gương tiến bộ**” của 
 - **Minh bạch** với phụ huynh và Ban Cai Quản
 
 ### A.2 4 loại tài khoản (multi-tenant)
+
 - `super_admin`: Liên Đoàn Trưởng / Liên Đoàn Phó — cấu hình Org + phê duyệt + toàn quyền theo chính sách
 - `admin`: Trưởng Ngành / Trưởng Ban chuyên môn — vận hành module theo phạm vi
 - `user`: Đoàn sinh — học tập, rèn luyện, nộp minh chứng, xem tiến bộ
 - `guest`: Phụ huynh — xem tiến bộ, ký consent, nhận thông báo
 
 ### A.3 Global Navigation (một “Game Hub” cho toàn bộ ERP)
+
 **Core layout**: Sidebar “Guild Menu” + Topbar + Breadcrumb + Quick Actions
 
 **Trang Global (bắt buộc có)**
+
 1. **Home Dashboard (Org)** — tóm tắt 10 module, alerts, upcoming events
 2. **My Dashboard (Personal)** — nhiệm vụ, học tập, kỹ năng, streak, thông báo
 3. **Global Search** — tìm người/kỹ năng/task/ticket/tài sản/bài học
@@ -204,25 +215,33 @@ TTNDD_OPS là “**bộ não vận hành + tấm gương tiến bộ**” của 
 7. **Reports Center** — PDF/Excel exports theo role
 
 ### A.4 Core User Journeys (đường đi “đúng” để product/dev cùng hiểu)
+
 **J1 — Onboard 1 Org mới (Super Admin)**
+
 - Tạo Org → cấu hình Ngành & độ tuổi → tạo user admin → bật/tắt module → set theme → set Zalo OA → go-live
 
 **J2 — Onboard 1 Đoàn sinh (Admin)**
+
 - Tạo hồ sơ (kèm phụ huynh nếu <18) → phân Đơn vị (Hàng/Đội/Nhóm) → mở Skill Tree → cấp “nhân vật” → bắt đầu LMS/Scout
 
 **J3 — Sinh hoạt tuần (Scout)**
+
 - Tạo Session + Lesson Plan → điểm danh → ghi nhận kỹ năng rèn → publish events → Reward tính EXP/Badge → Parent nhận tóm tắt
 
 **J4 — Sự kiện/Trại (Scout)**
+
 - Tạo Event → (nếu qua đêm) HIRARC + kế hoạch an toàn → mở đăng ký → gửi consent phụ huynh → check-in/out → event completed → báo cáo
 
 **J5 — Kế hoạch → Dự án (PM)**
+
 - Soạn kế hoạch 9 phần → submit → LĐT duyệt → auto-generate dự án (OKR → tasks) → nhắc việc → hoàn thành → nhận thưởng
 
 **J6 — Tiến bộ & Thăng đẳng (Scout)**
+
 - Đoàn sinh nộp minh chứng → Trưởng verify tiêu chí → hoàn tất kỹ năng/đẳng thứ → đề xuất → phê duyệt → thông báo + nghi thức
 
 ### A.5 Cross-cutting Product Requirements (yêu cầu xuyên module)
+
 - **P0 Child Safety**: consent, 2-adult rule, privacy-by-default, no 1:1 private chat
 - **Data Consistency**: một “Person/Member” canonical, timeline event store, RLS
 - **Offline-friendly** (PWA): cache read-only pages, upload queue (optional)
@@ -231,7 +250,9 @@ TTNDD_OPS là “**bộ não vận hành + tấm gương tiến bộ**” của 
 - **Budget-first**: mọi feature tốn tiền phải có “kill switch” (khi chạm 100% budget)
 
 ### A.6 (Platform) Success Metrics (KPI đo lường thành công)
+
 **Org-level (hàng tuần/tháng)**
+
 - % Trưởng active hằng tuần (WAU) / tổng Trưởng
 - % kế hoạch được duyệt đúng hạn; % task hoàn thành đúng hạn
 - Attendance rate trung bình theo Ngành; số buổi sinh hoạt được ghi nhận đầy đủ
@@ -239,17 +260,20 @@ TTNDD_OPS là “**bộ não vận hành + tấm gương tiến bộ**” của 
 - Số sự cố an toàn được báo cáo & xử lý theo SLA (P0)
 
 **Member-level (học tập & phát triển)**
+
 - % kỹ năng/đẳng thứ hoàn tất theo quý; thời gian trung bình để hoàn tất 1 bậc
 - XP earned (có cap), badge earned, streak habits (không khuyến khích nghiện)
 - SPICES balance score: phân bổ hoạt động trên 6 chiều (không lệch 1 chiều)
 
 ### A.7 (Platform) Non-Goals v1 (Không làm trong Phase 1)
+
 - Không xây **mạng xã hội công khai** (newsfeed public), không DM 1‑1 Trưởng↔Đoàn sinh.
 - Không làm **payroll/phúc lợi phức tạp** như doanh nghiệp (Finance chỉ ở mức Đoàn).
 - Không làm **real-time location tracking** của trẻ em.
 - Không tối ưu cho >10.000 concurrent users (phase 1 target: vài trăm concurrent).
 
 ### A.8 (Platform) SPICES Coverage Enforcement (bắt buộc)
+
 - Mọi **Activity / Session / Event / Lesson / Skill / Badge** phải gắn **SPICES tags**: `SOCIAL, PHYSICAL, INTELLECTUAL, CHARACTER, EMOTIONAL, SPIRITUAL`.
 - Dashboard Org phải có **SPICES coverage widget**: % hoạt động theo 6 chiều, cảnh báo lệch.
 - Data model: trường `spices_tags text[]` (PostgreSQL) hoặc join table `entity_spices(entity_type, entity_id, spices)`.
@@ -269,37 +293,40 @@ TTNDD_OPS là “**bộ não vận hành + tấm gương tiến bộ**” của 
 
 **Giải pháp**: TTNDD_OPS — một nền tảng Power Platform dạng ERP, tích hợp ba trụ cột: Giáo lý Cao Đài + Phương pháp Hướng Đạo WOSM + Gamification MMORPG (Thiện Tâm Kỳ Truyện), triển khai 100% trên Google Cloud trong ngân sách 800.000 VND/tháng.
 
-**Tầm nhìn**: *"Mỗi Đoàn sinh là một nhân vật trong hành trình tu luyện — Thiện Tâm Kỳ Truyện. Mỗi kỹ năng học được là một bước tiến trên Cây Kỹ năng. Mỗi bậc Đẳng thứ đạt được là một cấp độ mới trong cuộc phiêu lưu. Hệ thống ghi nhận, khích lệ và tôn vinh hành trình đó — không phải thay thế, mà là tấm gương kỹ thuật số phản chiếu triết lý giáo dục Hướng Đạo."*
+**Tầm nhìn**: _"Mỗi Đoàn sinh là một nhân vật trong hành trình tu luyện — Thiện Tâm Kỳ Truyện. Mỗi kỹ năng học được là một bước tiến trên Cây Kỹ năng. Mỗi bậc Đẳng thứ đạt được là một cấp độ mới trong cuộc phiêu lưu. Hệ thống ghi nhận, khích lệ và tôn vinh hành trình đó — không phải thay thế, mà là tấm gương kỹ thuật số phản chiếu triết lý giáo dục Hướng Đạo."_
 
 ### 1.2 Phân tích Các bên Liên quan (Stakeholders)
 
-| Vai trò | Người dùng | Nhu cầu chính | Quyền trong hệ thống |
-| ---------|-----------|--------------|--------------------- |
-| **Ban Cai Quản Thánh Thất** | Chức sắc Cao Đài | Giám sát tổng quan, đảm bảo phù hợp Giáo lý | Xem báo cáo tổng hợp |
-| **Liên Đoàn Trưởng (LĐT)** | 1 người/Liên Đoàn | Quản trị toàn bộ, lập chiến lược, phê duyệt | `super_admin` |
-| **Liên Đoàn Phó** | 1-2 người/LĐ | Hỗ trợ LĐT, thay mặt khi vắng | `super_admin` (giới hạn) |
-| **Trưởng Ngành** | 1 người/Ngành | Quản lý đoàn sinh ngành, lập kế hoạch, giáo án | `admin` |
-| **Phó Ngành + Trưởng phụ tá** | 2-4 người/Ngành | Hỗ trợ Trưởng Ngành, điểm danh, hướng dẫn | `admin` (giới hạn theo ngành) |
-| **Trưởng Ban Chuyên Môn** | Theo nhu cầu | Quản lý lĩnh vực chuyên môn (huấn luyện, truyền thông, quản cụ...) | `admin` (theo chức năng) |
-| **Đoàn sinh** | 20-100+ em/LĐ | Xem tiến trình, học bài, nhận EXP, tham gia đấu trường | `user` |
-| **Phụ huynh** | 1-2 người/em | Xem tiến bộ con em, nhận thông báo, đồng ý sự kiện | `guest` |
-| **Ban Cố Vấn** | Cựu Trưởng | Tư vấn, hỗ trợ khi được mời | Xem báo cáo |
+| Vai trò                       | Người dùng        | Nhu cầu chính                                                      | Quyền trong hệ thống          |
+| ----------------------------- | ----------------- | ------------------------------------------------------------------ | ----------------------------- |
+| **Ban Cai Quản Thánh Thất**   | Chức sắc Cao Đài  | Giám sát tổng quan, đảm bảo phù hợp Giáo lý                        | Xem báo cáo tổng hợp          |
+| **Liên Đoàn Trưởng (LĐT)**    | 1 người/Liên Đoàn | Quản trị toàn bộ, lập chiến lược, phê duyệt                        | `super_admin`                 |
+| **Liên Đoàn Phó**             | 1-2 người/LĐ      | Hỗ trợ LĐT, thay mặt khi vắng                                      | `super_admin` (giới hạn)      |
+| **Trưởng Ngành**              | 1 người/Ngành     | Quản lý đoàn sinh ngành, lập kế hoạch, giáo án                     | `admin`                       |
+| **Phó Ngành + Trưởng phụ tá** | 2-4 người/Ngành   | Hỗ trợ Trưởng Ngành, điểm danh, hướng dẫn                          | `admin` (giới hạn theo ngành) |
+| **Trưởng Ban Chuyên Môn**     | Theo nhu cầu      | Quản lý lĩnh vực chuyên môn (huấn luyện, truyền thông, quản cụ...) | `admin` (theo chức năng)      |
+| **Đoàn sinh**                 | 20-100+ em/LĐ     | Xem tiến trình, học bài, nhận EXP, tham gia đấu trường             | `user`                        |
+| **Phụ huynh**                 | 1-2 người/em      | Xem tiến bộ con em, nhận thông báo, đồng ý sự kiện                 | `guest`                       |
+| **Ban Cố Vấn**                | Cựu Trưởng        | Tư vấn, hỗ trợ khi được mời                                        | Xem báo cáo                   |
 
 ### 1.3 Ba Trụ cột Giáo dục
 
 DTNDD xây dựng chương trình giáo dục dựa trên ba trụ cột đồng bộ hóa:
 
 **Trụ cột 1 — Đạo Đức Cao Đài (Tam Giáo Quy Nguyên)**
+
 - Ngũ Giới Cấm: Bất sát sinh, Bất du đạo, Bất tà dâm, Bất vọng ngữ, Bất ẩm tửu
 - Ngũ Thường: Nhân, Nghĩa, Lễ, Trí, Tín
 - Tứ Đại Điều Quy: Vâng lời, Khiêm tốn, Trung thực, Nhất quán
 - Tam Lập: Lập Đức, Lập Công, Lập Ngôn
 
 **Trụ cột 2 — Phương pháp Hướng Đạo (WOSM Scout Method)**
+
 - 8 yếu tố: Lời Hứa & Luật, Học qua Hành động, Hệ thống Nhóm nhỏ (Hàng đội), Khung Biểu tượng, Thiên nhiên, Tiến bộ Cá nhân, Hỗ trợ từ Trưởng, Phụng sự Cộng đồng
 - SPICES: Social (Xã hội), Physical (Thể chất), Intellectual (Trí tuệ), Character (Nhân cách), Emotional (Cảm xúc), Spiritual (Tâm linh)
 
 **Trụ cột 3 — Giáo dục Hiện đại + Gamification MMORPG**
+
 - Thiện Tâm Kỳ Truyện: Khung tường thuật (narrative framework) chuyển đổi sinh hoạt hướng đạo thành hành trình RPG
 - Lý thuyết Tự Quyết (Self-Determination Theory): Tự chủ (Autonomy), Năng lực (Competence), Gắn kết (Relatedness)
 - Microlearning, spaced repetition, dopamine loops có kiểm soát (không gây nghiện)
@@ -308,18 +335,18 @@ DTNDD xây dựng chương trình giáo dục dựa trên ba trụ cột đồng
 
 **Không có nền tảng nào trên thế giới kết hợp cả ba yếu tố này.** Các nền tảng hiện có (Scoutbook, OSM, TroopTrack, Scouts Terrain) chỉ giải quyết quản lý hành chính. TTNDD_OPS tạo bước nhảy bằng cách:
 
-| SPICES | Giáo lý Cao Đài | Gamification MMORPG | Tính năng Hệ thống |
-| --------|----------------|--------------------|-------------------- |
-| **Social** | Tứ Đại Điều Quy, Tứ Hải Giai Huynh Đệ | Guild/Party system (Hàng/Đội/Nhóm) | Cộng đồng, thi đấu đội, bảng xếp hạng đội |
-| **Physical** | Ngũ Giới (giữ gìn thân thể) | Chỉ số Thể Lực trong Character Sheet | Theo dõi hoạt động ngoài trời, trại, thể dục |
-| **Intellectual** | Trí (Ngũ Thường) | Skill Tree, Quiz Battle Arena | LMS, bài kiểm tra, kho tri thức |
-| **Character** | Ngũ Thường (Nhân, Nghĩa, Lễ, Tín) | Achievement System, Badge Gallery | Đẳng thứ, chuyên hiệu, đánh giá 5 chiều |
-| **Emotional** | Thiền định, Tĩnh tâm | EXP từ nhật ký tâm linh | Nhật ký cảm xúc, self-assessment |
-| **Spiritual** | Thiên Nhãn, Ngũ Chi, Thánh Ngôn | Spiritual Quest Line | Nhật ký tâm linh, Ngũ Giới tracking |
+| SPICES           | Giáo lý Cao Đài                       | Gamification MMORPG                  | Tính năng Hệ thống                           |
+| ---------------- | ------------------------------------- | ------------------------------------ | -------------------------------------------- |
+| **Social**       | Tứ Đại Điều Quy, Tứ Hải Giai Huynh Đệ | Guild/Party system (Hàng/Đội/Nhóm)   | Cộng đồng, thi đấu đội, bảng xếp hạng đội    |
+| **Physical**     | Ngũ Giới (giữ gìn thân thể)           | Chỉ số Thể Lực trong Character Sheet | Theo dõi hoạt động ngoài trời, trại, thể dục |
+| **Intellectual** | Trí (Ngũ Thường)                      | Skill Tree, Quiz Battle Arena        | LMS, bài kiểm tra, kho tri thức              |
+| **Character**    | Ngũ Thường (Nhân, Nghĩa, Lễ, Tín)     | Achievement System, Badge Gallery    | Đẳng thứ, chuyên hiệu, đánh giá 5 chiều      |
+| **Emotional**    | Thiền định, Tĩnh tâm                  | EXP từ nhật ký tâm linh              | Nhật ký cảm xúc, self-assessment             |
+| **Spiritual**    | Thiên Nhãn, Ngũ Chi, Thánh Ngôn       | Spiritual Quest Line                 | Nhật ký tâm linh, Ngũ Giới tracking          |
 
 ### 1.5 Cấu trúc 10 Module & Phụ thuộc Liên Module
 
-```
+````
 ```mermaid
 graph TB
     subgraph "TTNDD_OPS — 10 MODULE"
@@ -347,7 +374,7 @@ graph TB
     style M9 fill:#9C27B0,color:#fff,stroke-width:3px
     style M10 fill:#607D8B,color:#fff
     style EB fill:#FF9800,color:#fff
-```
+````
 
 **Chuỗi phụ thuộc**: Module 10 → Module 1 → Module 9 → Module 8 → Module 7 → Module 2 → [3,4,5,6]
 
@@ -355,20 +382,19 @@ graph TB
 
 ### 1.6 Quyết định Kiến trúc (ADR)
 
-| # | Quyết định | Lý do | Hệ quả |
-| ---|-----------|-------|-------- |
-| ADR-01 | **Modular Monolith** thay vì Microservices | Team nhỏ, AI Agent code, tránh network overhead | Deploy 1 container, chia module rõ ràng |
-| ADR-02 | **Row-Level Multi-Tenancy** (`org_id`) | Đơn giản, hiệu quả cho ~100 orgs, overhead 2-5% | Mọi bảng đều có `org_id`, PostgreSQL RLS |
-| ADR-03 | **Event-Driven Inter-Module** | Nhất quán dữ liệu, loose coupling | Module A publish event → Module B subscribe |
-| ADR-04 | **PostgreSQL 16** làm Primary DB | ACID, JSONB, RLS, GCP Cloud SQL | Cloud SQL db-f1-micro |
-| ADR-05 | **In-Process Cache** thay Memorystore Redis | Tiết kiệm ~$30/tháng cho ngân sách 800.000 VND/tháng VND | NestJS CacheManager + node-cache + Redis Cloud Free 30MB |
-| ADR-06 | **NestJS + Next.js 15** fullstack | TypeScript end-to-end, AI Agent friendly | Monorepo Turborepo |
-| ADR-07 | **100% Google Cloud — Budget-Optimized** | Tương thích GCP, tận dụng free tier | Cloud Run min=0, Cloud SQL micro |
-| ADR-08 | **Module 11+12 sáp nhập vào Module 8** | Sessions/Events là hoạt động cốt lõi Hướng Đạo, không tách rời Scout Management | Module 8 trở thành mega-module |
-| ADR-09 | **PRD-first, Code-second** | Team product cần hiểu "xây cái gì" trước "xây bằng gì" | Mỗi module có PRD ~10+ trang trước khi viết code |
+| #      | Quyết định                                  | Lý do                                                                           | Hệ quả                                                   |
+| ------ | ------------------------------------------- | ------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| ADR-01 | **Modular Monolith** thay vì Microservices  | Team nhỏ, AI Agent code, tránh network overhead                                 | Deploy 1 container, chia module rõ ràng                  |
+| ADR-02 | **Row-Level Multi-Tenancy** (`org_id`)      | Đơn giản, hiệu quả cho ~100 orgs, overhead 2-5%                                 | Mọi bảng đều có `org_id`, PostgreSQL RLS                 |
+| ADR-03 | **Event-Driven Inter-Module**               | Nhất quán dữ liệu, loose coupling                                               | Module A publish event → Module B subscribe              |
+| ADR-04 | **PostgreSQL 16** làm Primary DB            | ACID, JSONB, RLS, GCP Cloud SQL                                                 | Cloud SQL db-f1-micro                                    |
+| ADR-05 | **In-Process Cache** thay Memorystore Redis | Tiết kiệm ~$30/tháng cho ngân sách 800.000 VND/tháng VND                        | NestJS CacheManager + node-cache + Redis Cloud Free 30MB |
+| ADR-06 | **NestJS + Next.js 15** fullstack           | TypeScript end-to-end, AI Agent friendly                                        | Monorepo Turborepo                                       |
+| ADR-07 | **100% Google Cloud — Budget-Optimized**    | Tương thích GCP, tận dụng free tier                                             | Cloud Run min=0, Cloud SQL micro                         |
+| ADR-08 | **Module 11+12 sáp nhập vào Module 8**      | Sessions/Events là hoạt động cốt lõi Hướng Đạo, không tách rời Scout Management | Module 8 trở thành mega-module                           |
+| ADR-09 | **PRD-first, Code-second**                  | Team product cần hiểu "xây cái gì" trước "xây bằng gì"                          | Mỗi module có PRD ~10+ trang trước khi viết code         |
 
 ---
-
 
 ## PHẦN II — TECHNICAL STACK, CORE APP ENGINE & AI-DRIVEN DELIVERY MODEL
 
@@ -425,27 +451,29 @@ graph TB
 
 #### 2.2.0 Technical Stack Summary Table
 
-| Layer | Baseline chuẩn | Vì sao chốt chuẩn này | Guardrails / Notes |
-|---|---|---|---|
-| Monorepo | **Turborepo + pnpm workspaces** | Dễ chia package, cache CI tốt, AI Agent đọc repo rõ | Không trộn npm/yarn; package shared phải version theo workspace |
-| Frontend | **Next.js App Router + React + Tailwind + shadcn/ui + TanStack Query + Zustand** | Full-stack TS, route/layout rõ, UI game hoá tốt, state tách biệt | Mọi screen phải có `loading/empty/error`; reduced-motion bắt buộc |
-| Backend | **NestJS modular monolith** | Module boundary rõ, DI mạnh, hợp đồng API/event dễ kiểm soát | Không gọi chéo DB giữa modules; chỉ giao tiếp qua service boundary + events |
-| API Contract | **OpenAPI 3.x làm SSOT** | Map thẳng vào API Gateway, codegen client/server dễ | Mọi endpoint state-changing phải có request/response schema + auth scope |
-| Database | **PostgreSQL 16 + Prisma + raw SQL cho RLS/policies** | ACID, JSONB, RLS tốt cho multi-tenant | Mọi bảng business có `org_id`; migration phải có rollback note |
-| Auth/IAM | **Identity Platform/Firebase-compatible SDK + JWT session nội bộ + CASL** | Login nhanh, multi-tenant rõ, FE/BE dễ tích hợp | Không trust claims phía client; BE luôn verify token và resolve scope |
-| Eventing | **Outbox table + Nest EventEmitter + Pub/Sub** | Dev nhanh trong monolith nhưng vẫn có async fan-out | Event name canonical, idempotent consumer, dead-letter cho job lỗi |
-| Files | **Cloud Storage signed URLs** | Private-by-default, phù hợp evidence/avatar/export | Scan MIME, TTL theo loại file, policy riêng cho file trẻ em |
-| Realtime | **Socket.IO** | Đủ cho quiz arena / notifications / presence | Room size và frequency bị budget-gate; degrade về polling khi cần |
-| Reporting | **OLTP read models + BigQuery optional sync** | V1 vẫn chạy được trong budget; phase sau có warehouse | BigQuery mặc định OFF ở org nhỏ; chỉ bật khi readiness pass |
-| Testing | **Vitest/Jest + Supertest + Playwright + contract checks** | Bao đủ unit/integration/e2e/contract | Module ACTIVE bắt buộc có Playwright gate pack |
-| CI/CD | **Cloud Build + Artifact Registry + Cloud Run** | GCP-native, ít vận hành | Release block nếu readiness/coverage/canary fail |
+| Layer        | Baseline chuẩn                                                                   | Vì sao chốt chuẩn này                                            | Guardrails / Notes                                                          |
+| ------------ | -------------------------------------------------------------------------------- | ---------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Monorepo     | **Turborepo + pnpm workspaces**                                                  | Dễ chia package, cache CI tốt, AI Agent đọc repo rõ              | Không trộn npm/yarn; package shared phải version theo workspace             |
+| Frontend     | **Next.js App Router + React + Tailwind + shadcn/ui + TanStack Query + Zustand** | Full-stack TS, route/layout rõ, UI game hoá tốt, state tách biệt | Mọi screen phải có `loading/empty/error`; reduced-motion bắt buộc           |
+| Backend      | **NestJS modular monolith**                                                      | Module boundary rõ, DI mạnh, hợp đồng API/event dễ kiểm soát     | Không gọi chéo DB giữa modules; chỉ giao tiếp qua service boundary + events |
+| API Contract | **OpenAPI 3.x làm SSOT**                                                         | Map thẳng vào API Gateway, codegen client/server dễ              | Mọi endpoint state-changing phải có request/response schema + auth scope    |
+| Database     | **PostgreSQL 16 + Prisma + raw SQL cho RLS/policies**                            | ACID, JSONB, RLS tốt cho multi-tenant                            | Mọi bảng business có `org_id`; migration phải có rollback note              |
+| Auth/IAM     | **Identity Platform/Firebase-compatible SDK + JWT session nội bộ + CASL**        | Login nhanh, multi-tenant rõ, FE/BE dễ tích hợp                  | Không trust claims phía client; BE luôn verify token và resolve scope       |
+| Eventing     | **Outbox table + Nest EventEmitter + Pub/Sub**                                   | Dev nhanh trong monolith nhưng vẫn có async fan-out              | Event name canonical, idempotent consumer, dead-letter cho job lỗi          |
+| Files        | **Cloud Storage signed URLs**                                                    | Private-by-default, phù hợp evidence/avatar/export               | Scan MIME, TTL theo loại file, policy riêng cho file trẻ em                 |
+| Realtime     | **Socket.IO**                                                                    | Đủ cho quiz arena / notifications / presence                     | Room size và frequency bị budget-gate; degrade về polling khi cần           |
+| Reporting    | **OLTP read models + BigQuery optional sync**                                    | V1 vẫn chạy được trong budget; phase sau có warehouse            | BigQuery mặc định OFF ở org nhỏ; chỉ bật khi readiness pass                 |
+| Testing      | **Vitest/Jest + Supertest + Playwright + contract checks**                       | Bao đủ unit/integration/e2e/contract                             | Module ACTIVE bắt buộc có Playwright gate pack                              |
+| CI/CD        | **Cloud Build + Artifact Registry + Cloud Run**                                  | GCP-native, ít vận hành                                          | Release block nếu readiness/coverage/canary fail                            |
 
 #### 2.2.1 Monorepo & Package Management
-- **Monorepo**: Turborepo (task graph + caching, CI không chạy lại việc cũ).  
-- **Package manager**: pnpm workspaces (`pnpm-workspace.yaml`, `workspace:` protocol).  
+
+- **Monorepo**: Turborepo (task graph + caching, CI không chạy lại việc cũ).
+- **Package manager**: pnpm workspaces (`pnpm-workspace.yaml`, `workspace:` protocol).
 - **Code quality**: ESLint + Prettier + Husky pre-commit + commitlint (conventional commits).
 
 Repo layout (chuẩn):
+
 ```
 /apps
   /web        # Next.js (App Router) - MMORPG UI
@@ -464,6 +492,7 @@ Repo layout (chuẩn):
 ```
 
 #### 2.2.2 Frontend (MMORPG UI + 3D Scene Layer)
+
 - **Framework**: Next.js (App Router) — layouts/pages/route handlers.
 - **UI nghiệp vụ 2D**: React + TailwindCSS + shadcn/ui (UI primitives) + Motion for React (motion, obey reduced‑motion).
 - **3D/Animation layer**: `three` + `@react-three/fiber` + `@react-three/drei` + Motion for React Three Fiber, chỉ dùng cho **scene header, celebration screen, hero module surfaces, character pedestal, reward forge, world map transitions**.
@@ -473,34 +502,39 @@ Repo layout (chuẩn):
 - **Runtime policy**: 3D scene phải **lazy-load theo route**, có **static poster fallback**, respect `prefers-reduced-motion`, và tự tắt ở **low-cost / low-end device mode**.
 
 #### 2.2.3 Backend (Core App Engine)
+
 - **Framework**: NestJS (modular monolith) — controllers/providers/modules + DI.
 - **API style**: REST (OpenAPI SSOT) + API Gateway front door.
 - **DB access**: Prisma ORM + Prisma Migrate (migrations) + raw SQL ONLY when needed for RLS/policies.
 - **Validation**:
-  - DTO validation: Nest ValidationPipe + class-validator (DTOs).  
+  - DTO validation: Nest ValidationPipe + class-validator (DTOs).
   - Config validation: Zod (flags/config JSON).
 - **Authorization**: RBAC + ABAC (scope) + resource checks:
   - RBAC/ABAC rules: CASL Ability (role+resource attributes).
   - Tenant isolation: PostgreSQL RLS (CREATE POLICY).
 
 #### 2.2.4 Identity & Access (Multi‑tenant)
-- **Identity**: Google Cloud Identity Platform multi‑tenancy (tenant silos users/config).  
+
+- **Identity**: Google Cloud Identity Platform multi‑tenancy (tenant silos users/config).
 - **Auth flow** (web):
   - Client obtains ID token (Firebase/Auth compatible SDK).
   - Backend verifies ID token, maps to org_id + roles/scopes, issues **short-lived access token** + refresh cookie (HttpOnly).
   - DB layer sets `SET LOCAL app.org_id` per request for RLS enforcement.
 
 #### 2.2.5 Event Bus & Async
+
 - **Internal**: NestJS EventEmitter (in-process) for local domain events (dev speed).
 - **Outbox**: `core.domain_events` table; publisher reads outbox and publishes once.
 - **External**: Cloud Pub/Sub for async fan-out (notifications, rewards, warehouse sync).
 
 #### 2.2.6 Storage & Files
+
 - **Binary**: Cloud Storage (private by default).
 - **Upload**: signed URLs (short TTL); store file refs in `file.object_ref`.
 - **Scanning/limits**: MIME sniff (magic bytes) + max size (default 50MB) + moderation hooks.
 
 #### 2.2.7 Observability & Security (Budget-aware)
+
 - **Logs**: Cloud Logging with exclusions (reduce spend).
 - **Metrics**: Cloud Monitoring; budget dashboards.
 - **Security headers**: Helmet (CSP/HSTS/etc).
@@ -510,6 +544,7 @@ Repo layout (chuẩn):
 - **CI/CD**: Cloud Build → Artifact Registry → Cloud Run deploy.
 
 #### 2.2.8 Runtime Targets (GCP)
+
 - **Compute**: Cloud Run services (api/web/worker) + Cloud Run Jobs.
 - **DB**: Cloud SQL for PostgreSQL.
 - **Gateway**: API Gateway (OpenAPI + extensions).
@@ -520,40 +555,45 @@ Repo layout (chuẩn):
 ---
 
 #### 2.2.9 Pinned Baseline (để AI Agent/Dev không lệch stack)
-- **Runtime**: Node.js LTS hiện hành cho Cloud Run; package manager chuẩn **pnpm**; monorepo **Turborepo**.  
-- **Frontend**: **Next.js App Router** + React + Tailwind CSS + shadcn/ui + TanStack Query + Zustand + Framer Motion (obey reduced-motion).  
-- **Backend**: **NestJS** modular monolith (controllers/providers/modules) + Prisma ORM + PostgreSQL 16 + Zod/class-validator + Socket.IO cho realtime tối thiểu.  
-- **Security & IAM**: Google Cloud Identity Platform multi-tenancy + JWT session nội bộ + CASL + PostgreSQL RLS.  
-- **Infra**: Cloud Run (web/api/worker), API Gateway (OpenAPI SSOT), Cloud SQL PostgreSQL, Pub/Sub, Cloud Storage, BigQuery, Cloud Logging/Monitoring, Secret Manager, Artifact Registry.  
+
+- **Runtime**: Node.js LTS hiện hành cho Cloud Run; package manager chuẩn **pnpm**; monorepo **Turborepo**.
+- **Frontend**: **Next.js App Router** + React + Tailwind CSS + shadcn/ui + TanStack Query + Zustand + Framer Motion (obey reduced-motion).
+- **Backend**: **NestJS** modular monolith (controllers/providers/modules) + Prisma ORM + PostgreSQL 16 + Zod/class-validator + Socket.IO cho realtime tối thiểu.
+- **Security & IAM**: Google Cloud Identity Platform multi-tenancy + JWT session nội bộ + CASL + PostgreSQL RLS.
+- **Infra**: Cloud Run (web/api/worker), API Gateway (OpenAPI SSOT), Cloud SQL PostgreSQL, Pub/Sub, Cloud Storage, BigQuery, Cloud Logging/Monitoring, Secret Manager, Artifact Registry.
 - **Testing**: Vitest/Jest cho unit, Supertest cho integration API, Playwright cho E2E/P0 gates, schema contract validation cho OpenAPI & event catalog.
 
 #### 2.2.10 Software Mindset & Coding Law (áp dụng cho toàn team)
-1. **Contract-first, code-second**: viết hoặc cập nhật OpenAPI/Event/Schema trước khi code handler/service.  
-2. **One module owns write**: module khác chỉ đọc qua API/read model/event, không viết chéo bảng.  
-3. **Transaction + event**: mọi state change quan trọng phải đi theo mẫu `BEGIN → write → outbox event → commit`.  
-4. **No smart UI without source of truth**: FE không tự “tính đại” progress/rank/ledger; mọi chỉ số phải có server contract hoặc read model.  
-5. **RLS before features**: dữ liệu multi-tenant phải an toàn trước khi làm UI đẹp.  
-6. **Feature flags for cost**: tính năng tốn CPU/bandwidth/logging phải có low-cost flag hoặc kill-switch.  
+
+1. **Contract-first, code-second**: viết hoặc cập nhật OpenAPI/Event/Schema trước khi code handler/service.
+2. **One module owns write**: module khác chỉ đọc qua API/read model/event, không viết chéo bảng.
+3. **Transaction + event**: mọi state change quan trọng phải đi theo mẫu `BEGIN → write → outbox event → commit`.
+4. **No smart UI without source of truth**: FE không tự “tính đại” progress/rank/ledger; mọi chỉ số phải có server contract hoặc read model.
+5. **RLS before features**: dữ liệu multi-tenant phải an toàn trước khi làm UI đẹp.
+6. **Feature flags for cost**: tính năng tốn CPU/bandwidth/logging phải có low-cost flag hoặc kill-switch.
 7. **Child safety wins**: khi feature growth xung đột an toàn trẻ em, ưu tiên an toàn.
 
 #### 2.2.11 Technical Stack Decision Criteria (để chọn lib/framework đúng)
-- Chỉ chọn thư viện khi thỏa 5 tiêu chí: **official docs tốt**, **TypeScript tốt**, **community đủ lớn**, **AI Agent đọc/áp dụng dễ**, **không phá ngân sách GCP**.  
-- Ưu tiên các thư viện “boring but reliable”: routing rõ, testable, typed, ít magic.  
+
+- Chỉ chọn thư viện khi thỏa 5 tiêu chí: **official docs tốt**, **TypeScript tốt**, **community đủ lớn**, **AI Agent đọc/áp dụng dễ**, **không phá ngân sách GCP**.
+- Ưu tiên các thư viện “boring but reliable”: routing rõ, testable, typed, ít magic.
 - Hạn chế thêm dependency mới nếu chỉ để giải quyết vấn đề nhỏ có thể tự build trong bounded context.
 
 #### 2.2.12 Technical Reference Pack (official-first)
-- Next.js App Router & nested layouts/server components.  
-- NestJS modules/controllers/providers/authentication.  
-- Prisma client extensions & RLS isolation patterns.  
-- Tailwind responsive utilities.  
+
+- Next.js App Router & nested layouts/server components.
+- NestJS modules/controllers/providers/authentication.
+- Prisma client extensions & RLS isolation patterns.
+- Tailwind responsive utilities.
 - Google Cloud API Gateway (OpenAPI-based), Cloud Run max instances/concurrency, Billing budgets + Pub/Sub notifications, Identity Platform multi-tenancy.
 
 #### 2.2.13 Official Docs Backbone (để tra cứu khi implement)
-- Google Cloud API Gateway dùng OpenAPI làm mô tả API; API Gateway nhận các phiên bản OpenAPI được hỗ trợ.  
-- Cloud Billing budgets hỗ trợ email alerts và **Pub/Sub programmatic notifications**, từ đó mới tự động hóa phản ứng chi phí.  
-- Cloud Run cho phép đặt **maximum instances** và **maximum concurrent requests per instance**, phù hợp với chiến lược cost guardrails.  
-- Identity Platform hỗ trợ **multi-tenancy** bằng tenant silos trong một project.  
-- Next.js App Router hỗ trợ layouts, nested routing, loading/error states; NestJS tổ chức ứng dụng bằng modules/controllers/providers; Prisma có pattern client extensions cho RLS isolation; Tailwind hỗ trợ responsive utility classes.  
+
+- Google Cloud API Gateway dùng OpenAPI làm mô tả API; API Gateway nhận các phiên bản OpenAPI được hỗ trợ.
+- Cloud Billing budgets hỗ trợ email alerts và **Pub/Sub programmatic notifications**, từ đó mới tự động hóa phản ứng chi phí.
+- Cloud Run cho phép đặt **maximum instances** và **maximum concurrent requests per instance**, phù hợp với chiến lược cost guardrails.
+- Identity Platform hỗ trợ **multi-tenancy** bằng tenant silos trong một project.
+- Next.js App Router hỗ trợ layouts, nested routing, loading/error states; NestJS tổ chức ứng dụng bằng modules/controllers/providers; Prisma có pattern client extensions cho RLS isolation; Tailwind hỗ trợ responsive utility classes.
 - Design Tokens Community Group (DTCG) và WCAG 2.2 là xương sống để giữ UI kit đồng nhất và accessible.
 
 <a id="REF-AIDELIVERY"></a>
@@ -586,7 +626,7 @@ ttndd-ops/
 
 ### 2.4 Kiến trúc Dữ liệu Lõi
 
-*(Chi tiết SQL schema được đặt trong phần E — Đặc tả Kỹ thuật của từng Module PRD)*
+_(Chi tiết SQL schema được đặt trong phần E — Đặc tả Kỹ thuật của từng Module PRD)_
 
 **Bảng lõi chung** (tất cả module phụ thuộc): `organizations`, `branches`, `units`, `users`, `org_members`, `domain_events`
 
@@ -613,46 +653,49 @@ Mọi thay đổi trạng thái trong hệ thống → phát Domain Event → c�
 > Mục tiêu: **chốt** bản đồ module để đội AI Agent có “source of truth” khi code, đảm bảo dữ liệu **nhất quán – liên kết – đồng bộ** giữa các module.
 
 ### 2.6.1 Nguyên tắc DDD / Bounded Context
+
 - Mỗi module là **1 bounded context** (BC), sở hữu dữ liệu của mình (write ownership).
 - Module khác chỉ **đọc** qua API hoặc **subscribe domain events**, không viết chéo DB.
 - Monolith nhưng **module boundary** phải “hard” (package boundaries + ACL).
 
 ### 2.6.2 Schema naming (PostgreSQL)
-- `core.*` (tenant/org/users/events)  
-- `iam.*` (roles/permissions/scopes)  
-- `org.*` (org chart, branches, units)  
-- `hrm.*`  
-- `pm.*`  
-- `ticket.*`  
-- `fin.*`  
-- `asset.*`  
-- `proc.*`  
-- `lms.*`  
-- `scout.*`  (**Module 8**)  
-- `reward.*` (**Module 9**)  
-- `cfg.*`  
-- `msg.*`  
-- `file.*`  
+
+- `core.*` (tenant/org/users/events)
+- `iam.*` (roles/permissions/scopes)
+- `org.*` (org chart, branches, units)
+- `hrm.*`
+- `pm.*`
+- `ticket.*`
+- `fin.*`
+- `asset.*`
+- `proc.*`
+- `lms.*`
+- `scout.*` (**Module 8**)
+- `reward.*` (**Module 9**)
+- `cfg.*`
+- `msg.*`
+- `file.*`
 - `audit.*`
 
 > **Multi-tenant**: mọi bảng **bắt buộc** có `org_id` + PostgreSQL **Row Level Security (RLS)**; app layer phải `SET LOCAL app.org_id` cho mỗi transaction (chi tiết ở Appendix).
 
 ### 2.6.3 Module Map (chốt)
 
-| BC | Module | Schema | Write-Owner | Key entities (chính) | Emits events (chính) | Consumes (chính) |
-| ---|---|---|---|---|---|--- |
-| BC-00 | Org Config (M10) | `core, cfg, iam` | Settings/roles/modules | organizations, branches, units, users, org_members, settings, role_scope | `cfg.updated`, `iam.role.granted` | — |
-| BC-01 | HRM (M1) | `hrm, org` | Con người & membership | person_profile, guardian_link, membership, transfer_case, org_chart | `hrm.member_joined`, `hrm.member_transferred`, `hrm.member_left` | `scout.*`, `reward.*`, `fin.*`, `lms.*`, `pm.*` (read) |
-| BC-02 | Project (M2) | `pm` | Plans/Projects/Tasks | plans, projects, phases, sprints, work_packages, tasks | `pm.task_completed`, `pm.project_completed`, `pm.plan_approved` | `hrm.*` (assignees), `reward.*` |
-| BC-03 | Ticket (M3) | `ticket` | Requests/Approvals | ticket, comment, status_history | `ticket.approved` (optional), `ticket.closed` | `msg.*`, `hrm.*` |
-| BC-04 | Finance (M4) | `fin` | Ledger/Fees | accounts, transactions, member_fees, sponsors, in_kind | `fin.fee_paid`, `fin.fee_overdue` | `msg.*`, `hrm.*` |
-| BC-05 | Assets (M5) | `asset` | Inventory/Loans | assets, categories, loans, maintenance | `asset.loan.checked_out`, `asset.loan.returned` | `msg.*`, `hrm.*` |
-| BC-06 | Process (M6) | `proc` | Workflow/SOP | workflow_def, workflow_run, sop_doc, sop_version | `proc.workflow.executed` | mọi events |
-| BC-07 | LMS (M7) | `lms` | Courses/Quizzes | courses, lessons, quizzes, attempts, battles, progress | `lms.lesson_completed`, `lms.quiz_passed`, `lms.battle_won` | `reward.*`, `scout.*` |
-| **BC-08** | **Scout Core (M8)** | **`scout`** | **Skillbook/Progress/Sessions/Events/Spiritual/Mentoring** | program_version, rank, domain, skill, criteria, progress, evidence, session, attendance, event, consent, evaluation, habit | **`scout.*` + `session.*` + `event.*`** | `hrm.*`, `reward.*`, `lms.*`, `pm.*`, `fin.*`, `asset.*` |
-| **BC-09** | **Reward Engine (M9)** | **`reward`** | EXP/Badges/Shop/Leaderboard | exp_config, exp_txn, badge_def, badge_award, leaderboard | `reward.exp_earned`, `reward.badge_awarded` | **all events** |
+| BC        | Module                 | Schema           | Write-Owner                                                | Key entities (chính)                                                                                                       | Emits events (chính)                                             | Consumes (chính)                                         |
+| --------- | ---------------------- | ---------------- | ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | -------------------------------------------------------- |
+| BC-00     | Org Config (M10)       | `core, cfg, iam` | Settings/roles/modules                                     | organizations, branches, units, users, org_members, settings, role_scope                                                   | `cfg.updated`, `iam.role.granted`                                | —                                                        |
+| BC-01     | HRM (M1)               | `hrm, org`       | Con người & membership                                     | person_profile, guardian_link, membership, transfer_case, org_chart                                                        | `hrm.member_joined`, `hrm.member_transferred`, `hrm.member_left` | `scout.*`, `reward.*`, `fin.*`, `lms.*`, `pm.*` (read)   |
+| BC-02     | Project (M2)           | `pm`             | Plans/Projects/Tasks                                       | plans, projects, phases, sprints, work_packages, tasks                                                                     | `pm.task_completed`, `pm.project_completed`, `pm.plan_approved`  | `hrm.*` (assignees), `reward.*`                          |
+| BC-03     | Ticket (M3)            | `ticket`         | Requests/Approvals                                         | ticket, comment, status_history                                                                                            | `ticket.approved` (optional), `ticket.closed`                    | `msg.*`, `hrm.*`                                         |
+| BC-04     | Finance (M4)           | `fin`            | Ledger/Fees                                                | accounts, transactions, member_fees, sponsors, in_kind                                                                     | `fin.fee_paid`, `fin.fee_overdue`                                | `msg.*`, `hrm.*`                                         |
+| BC-05     | Assets (M5)            | `asset`          | Inventory/Loans                                            | assets, categories, loans, maintenance                                                                                     | `asset.loan.checked_out`, `asset.loan.returned`                  | `msg.*`, `hrm.*`                                         |
+| BC-06     | Process (M6)           | `proc`           | Workflow/SOP                                               | workflow_def, workflow_run, sop_doc, sop_version                                                                           | `proc.workflow.executed`                                         | mọi events                                               |
+| BC-07     | LMS (M7)               | `lms`            | Courses/Quizzes                                            | courses, lessons, quizzes, attempts, battles, progress                                                                     | `lms.lesson_completed`, `lms.quiz_passed`, `lms.battle_won`      | `reward.*`, `scout.*`                                    |
+| **BC-08** | **Scout Core (M8)**    | **`scout`**      | **Skillbook/Progress/Sessions/Events/Spiritual/Mentoring** | program_version, rank, domain, skill, criteria, progress, evidence, session, attendance, event, consent, evaluation, habit | **`scout.*` + `session.*` + `event.*`**                          | `hrm.*`, `reward.*`, `lms.*`, `pm.*`, `fin.*`, `asset.*` |
+| **BC-09** | **Reward Engine (M9)** | **`reward`**     | EXP/Badges/Shop/Leaderboard                                | exp_config, exp_txn, badge_def, badge_award, leaderboard                                                                   | `reward.exp_earned`, `reward.badge_awarded`                      | **all events**                                           |
 
 ### 2.6.4 Canonical IDs (data consistency)
+
 - **Person ID (HRM)** là canonical cho “con người” (đoàn sinh/trưởng).
 - **Event Store** (`core.domain_events`) lưu tất cả domain events (để audit + rebuild dashboard).
 - Mọi module cần “cross module dashboard” **đọc** từ: (1) view/materialized view trong OLTP, hoặc (2) event store.
@@ -662,6 +705,7 @@ Mọi thay đổi trạng thái trong hệ thống → phát Domain Event → c�
 > **Mục tiêu**: AI Agents/Dev làm việc như “một team product tiêu chuẩn” nhưng chạy theo **contract‑first** và **SSOT** để không lệch pha.
 
 #### 2.7.1 Team roles (rotation)
+
 - **Role A — Product Manager (PM/BA)**: PRD, user stories, acceptance criteria, scope P0/P1.
 - **Role B — UX/UI Game Designer**: screen map, wireframe text, component mapping, tokens usage.
 - **Role C — System Architect**: bounded context, event catalog, ADR decisions, budget/safety invariants.
@@ -673,29 +717,33 @@ Mọi thay đổi trạng thái trong hệ thống → phát Domain Event → c�
 > **Luân phiên**: mỗi Work Package phải “đi qua” A→G (nhanh hay chậm tuỳ P0/P1), nhưng không được bỏ qua “contract gates”.
 
 #### 2.7.2 SSOT artifacts (8) — “đụng đâu update đó”
-1) PRD/Workflow (Product View)  
-2) UI Contract (Screen Map + Component mapping + Tokens)  
-3) OpenAPI Contract (`/contracts/openapi/*.yaml`)  
-4) Event Catalog (`/contracts/events/catalog.json`)  
-5) DB Schema/Migrations (`/contracts/db/migrations/*`)  
-6) Tests (unit/integration/contract/e2e)  
-7) Roadmap row IDs (Work Package table)  
-8) **ADR/Tech Stack Decisions** (version pinning + rationale)
+
+1. PRD/Workflow (Product View)
+2. UI Contract (Screen Map + Component mapping + Tokens)
+3. OpenAPI Contract (`/contracts/openapi/*.yaml`)
+4. Event Catalog (`/contracts/events/catalog.json`)
+5. DB Schema/Migrations (`/contracts/db/migrations/*`)
+6. Tests (unit/integration/contract/e2e)
+7. Roadmap row IDs (Work Package table)
+8. **ADR/Tech Stack Decisions** (version pinning + rationale)
 
 #### 2.7.3 Work Package execution recipe (AI‑friendly)
+
 **Input**: WP scope + constraints (budget 800k + child safety P0 + SPICES).  
 **Output**: mergeable PR with SSOT updates + passing gates.
 
 Step-by-step:
-1) **PM/BA**: cập nhật PRD (what/why), define ACs + non-goals.
-2) **UX**: cập nhật screen map + component mapping + cost impact tags.
-3) **Architect**: cập nhật ADR (tech choice), event catalog, data boundaries.
-4) **BE**: update OpenAPI → generate stubs → implement handlers → migrations + RLS.
-5) **FE**: implement routes/components; connect API; add a11y + reduced motion.
-6) **QA**: add tests; run e2e smoke; ensure no table/token drift.
-7) **SRE/Sec**: update IaC/runbook; budget thresholds; log exclusions; Cloud Armor rules.
+
+1. **PM/BA**: cập nhật PRD (what/why), define ACs + non-goals.
+2. **UX**: cập nhật screen map + component mapping + cost impact tags.
+3. **Architect**: cập nhật ADR (tech choice), event catalog, data boundaries.
+4. **BE**: update OpenAPI → generate stubs → implement handlers → migrations + RLS.
+5. **FE**: implement routes/components; connect API; add a11y + reduced motion.
+6. **QA**: add tests; run e2e smoke; ensure no table/token drift.
+7. **SRE/Sec**: update IaC/runbook; budget thresholds; log exclusions; Cloud Armor rules.
 
 #### 2.7.4 CI Sync Gates (không pass → không merge)
+
 - OpenAPI validate + diff check (breaking changes blocked).
 - Event schema compatibility check.
 - Migration smoke test against local Postgres (RLS on).
@@ -703,19 +751,21 @@ Step-by-step:
 - E2E smoke (Playwright): login → open world map → complete 1 action.
 
 #### 2.7.5 “Prompt pack” cho AI Agents (gợi ý)
-- **PM prompt**: “từ PRD hiện có, viết user stories + ACs cho WP‑x, đảm bảo safety P0 + SPICES tags”.  
-- **UX prompt**: “vẽ wireframe text + component mapping + routes; xác định cost impact tags”.  
-- **BE prompt**: “tạo/đổi OpenAPI, update event catalog, migrations + RLS + tests”.  
+
+- **PM prompt**: “từ PRD hiện có, viết user stories + ACs cho WP‑x, đảm bảo safety P0 + SPICES tags”.
+- **UX prompt**: “vẽ wireframe text + component mapping + routes; xác định cost impact tags”.
+- **BE prompt**: “tạo/đổi OpenAPI, update event catalog, migrations + RLS + tests”.
 - **FE prompt**: “implement screen theo tokens; obey reduced-motion; integrate API; add empty/loading/error states”.
 
 ### 2.8 ADR/Tech Stack Decisions Registry (SSOT)
-- `ADR-TS-01`: Monorepo (Turborepo + pnpm)  
-- `ADR-TS-02`: FE Next.js App Router + Tailwind + Tokens  
-- `ADR-TS-03`: BE NestJS + Prisma + PostgreSQL RLS  
-- `ADR-TS-04`: Identity Platform multi‑tenancy + custom session tokens  
-- `ADR-TS-05`: API Gateway OpenAPI as SSOT  
-- `ADR-TS-06`: Outbox + Pub/Sub for async  
-- `ADR-TS-07`: Cloud Build + Artifact Registry + Cloud Run CI/CD  
+
+- `ADR-TS-01`: Monorepo (Turborepo + pnpm)
+- `ADR-TS-02`: FE Next.js App Router + Tailwind + Tokens
+- `ADR-TS-03`: BE NestJS + Prisma + PostgreSQL RLS
+- `ADR-TS-04`: Identity Platform multi‑tenancy + custom session tokens
+- `ADR-TS-05`: API Gateway OpenAPI as SSOT
+- `ADR-TS-06`: Outbox + Pub/Sub for async
+- `ADR-TS-07`: Cloud Build + Artifact Registry + Cloud Run CI/CD
 - `ADR-TS-08`: Budget guardrails & low-cost mode (max instances, log exclusions)
 
 > Mỗi ADR có: Context → Decision → Alternatives → Consequences → Rollout plan.
@@ -1204,7 +1254,6 @@ BACKUP STRATEGY:
   - Point-in-time recovery enabled
 ```
 
-
 ## PHẦN III — PRD CÁC MODULE
 
 ### MODULE 1 — QUẢN LÝ NHÂN SỰ (HRM)
@@ -1214,6 +1263,7 @@ BACKUP STRATEGY:
 **Mục đích**: Module HRM là **trung tâm dữ liệu Con Người** của toàn bộ hệ thống. Mọi module khác (Scout, LMS, Finance, Reward...) đều tham chiếu đến dữ liệu thành viên từ HRM. Module quản lý toàn bộ vòng đời (lifecycle) của thành viên: từ khi gia nhập Đoàn, phát triển qua các Ngành, cho đến khi rời Đoàn hoặc trở thành Trưởng.
 
 **Phạm vi**:
+
 - Quản lý hồ sơ cá nhân Đoàn sinh, Trưởng, Phụ huynh
 - Cơ cấu tổ chức: Liên Đoàn → Ngành → Đơn vị (Hàng/Đội/Nhóm)
 - Chuyển ngành khi đủ tuổi (data migration)
@@ -1222,6 +1272,7 @@ BACKUP STRATEGY:
 - Cựu thành viên & theo dõi alumni
 
 **Đối tượng sử dụng**:
+
 - `super_admin` (LĐT): Quản lý toàn bộ nhân sự, phê duyệt chuyển ngành
 - `admin` (Trưởng Ngành): Quản lý đoàn sinh trong ngành phụ trách
 - `user` (Đoàn sinh): Xem và cập nhật hồ sơ cá nhân
@@ -1236,35 +1287,39 @@ BACKUP STRATEGY:
 > Mục tiêu: HRM của TTNDD_OPS **không chỉ “lưu hồ sơ”**, mà là **hệ sinh thái quản trị con người** tương đương một HR platform hiện đại (OrangeHRM/BambooHR), được “điều chỉnh” cho đặc thù thanh thiếu niên – tình nguyện viên – phụ huynh.
 
 **B.0.1 14 phân hệ phụ cần có (định hướng roadmap)**
-1) **Quản lý Thông tin Nhân sự (Core HR)**: hồ sơ, custom fields, sơ đồ tổ chức, tài liệu/giấy tờ.  
-2) **Nghỉ phép/PTO** (cho Trưởng/tình nguyện viên).  
-3) **Chấm công & Điểm danh**: clock-in/out web; timesheet; lịch ca (đặc thù: lịch sinh hoạt/đi công tác).  
-4) **Tuyển dụng/ATS** (tuyển Trưởng/tình nguyện viên).  
-5) **Onboarding/Offboarding**: nhập môn Trưởng mới; bàn giao nhiệm kỳ; thôi sinh hoạt.  
-6) **Quản lý Hiệu suất**: OKR, đánh giá 360, 1:1 check-ins (dành cho Trưởng).  
-7) **Kế hoạch Kế nhiệm & Phát triển**: 9-box, IDP, lộ trình năng lực.  
-8) **Đào tạo/Học tập**: liên kết LMS (bắt buộc các khoá an toàn trẻ em).  
-9) **Đi lại & Chi phí**: hoàn ứng, chi phí sự kiện.  
-10) **Tiền lương & Phúc lợi** (tuỳ Org; có thể tắt): phụ cấp/công tác phí.  
-11) **Cổng Tự phục vụ**: cập nhật hồ sơ, xin nghỉ, đăng ký lịch.  
-12) **Helpdesk Nhân sự**: ticket nội bộ HR (liên kết Module 3).  
-13) **Báo cáo & Phân tích**: headcount, retention, compliance training.  
-14) **Kỷ luật**: log vi phạm, quy trình xử lý, mức độ (liên kết Reward/EXP trừ điểm).
+
+1. **Quản lý Thông tin Nhân sự (Core HR)**: hồ sơ, custom fields, sơ đồ tổ chức, tài liệu/giấy tờ.
+2. **Nghỉ phép/PTO** (cho Trưởng/tình nguyện viên).
+3. **Chấm công & Điểm danh**: clock-in/out web; timesheet; lịch ca (đặc thù: lịch sinh hoạt/đi công tác).
+4. **Tuyển dụng/ATS** (tuyển Trưởng/tình nguyện viên).
+5. **Onboarding/Offboarding**: nhập môn Trưởng mới; bàn giao nhiệm kỳ; thôi sinh hoạt.
+6. **Quản lý Hiệu suất**: OKR, đánh giá 360, 1:1 check-ins (dành cho Trưởng).
+7. **Kế hoạch Kế nhiệm & Phát triển**: 9-box, IDP, lộ trình năng lực.
+8. **Đào tạo/Học tập**: liên kết LMS (bắt buộc các khoá an toàn trẻ em).
+9. **Đi lại & Chi phí**: hoàn ứng, chi phí sự kiện.
+10. **Tiền lương & Phúc lợi** (tuỳ Org; có thể tắt): phụ cấp/công tác phí.
+11. **Cổng Tự phục vụ**: cập nhật hồ sơ, xin nghỉ, đăng ký lịch.
+12. **Helpdesk Nhân sự**: ticket nội bộ HR (liên kết Module 3).
+13. **Báo cáo & Phân tích**: headcount, retention, compliance training.
+14. **Kỷ luật**: log vi phạm, quy trình xử lý, mức độ (liên kết Reward/EXP trừ điểm).
 
 **B.0.2 Thích ứng riêng cho DTNDD/Hướng đạo (P0)**
-- **Quản lý tình nguyện viên**: theo dõi **lịch rảnh** + lịch trực sinh hoạt + phân công theo thời hạn (from/to).  
-- **Theo dõi trình độ/chuyên hiệu của Trưởng**: “năng lực hướng dẫn” liên kết Scout Core (Module 8) & LMS (Module 7).  
-- **Kiểm tra lý lịch & nhắc gia hạn**: background check (nếu Org áp dụng) + expiry alerts.  
-- **Tuân thủ đào tạo “bảo vệ thanh thiếu niên”**: bắt buộc hoàn thành khoá trước khi được cấp quyền quản lý.  
-- **Hồ sơ y tế & liên hệ khẩn cấp**: field riêng + quyền truy cập hạn chế (trưởng y tế, trưởng trại).  
+
+- **Quản lý tình nguyện viên**: theo dõi **lịch rảnh** + lịch trực sinh hoạt + phân công theo thời hạn (from/to).
+- **Theo dõi trình độ/chuyên hiệu của Trưởng**: “năng lực hướng dẫn” liên kết Scout Core (Module 8) & LMS (Module 7).
+- **Kiểm tra lý lịch & nhắc gia hạn**: background check (nếu Org áp dụng) + expiry alerts.
+- **Tuân thủ đào tạo “bảo vệ thanh thiếu niên”**: bắt buộc hoàn thành khoá trước khi được cấp quyền quản lý.
+- **Hồ sơ y tế & liên hệ khẩn cấp**: field riêng + quyền truy cập hạn chế (trưởng y tế, trưởng trại).
 - **Guardian/Parent link**: phụ huynh xem tiến bộ; phê duyệt consent cho sự kiện/ảnh.
 
 **B.0.3 Feature parity (nguồn tham chiếu)**
-- OrangeHRM mô tả các mảng: employee management, recruitment, onboarding, performance, leave/time & attendance (tương đương các nhóm tính năng trên).  
+
+- OrangeHRM mô tả các mảng: employee management, recruitment, onboarding, performance, leave/time & attendance (tương đương các nhóm tính năng trên).
 - BambooHR mô tả platform gồm payroll/time/benefits, time-off tracking, performance management, onboarding.
 
 **Tài liệu tham chiếu**
-- OrangeHRM (overview): https://www.orangehrm.com/  
+
+- OrangeHRM (overview): https://www.orangehrm.com/
 - BambooHR (platform/time-off/performance/onboarding): https://www.bamboohr.com/
 
 **B.1 Quản lý Hồ sơ Thành viên**
@@ -1359,27 +1414,31 @@ BACKUP STRATEGY:
 
 **C.2 Quy tắc nghiệp vụ (Business Rules)**
 
-| # | Quy tắc | Mô tả |
-| ---|---------|------- |
-| BR-HRM-01 | Ngành tự động theo tuổi | Đồng: 5-10, Thiếu: 11-15, Thanh: 16-25 |
-| BR-HRM-02 | Phụ huynh bắt buộc < 18 tuổi | Không tạo được hồ sơ đoàn sinh < 18 mà không có phụ huynh |
-| BR-HRM-03 | Chuyển ngành bắt buộc | Hệ thống cảnh báo khi đoàn sinh đạt giới hạn tuổi, chuyển trong 3 tháng |
-| BR-HRM-04 | Soft delete 90 ngày | Dữ liệu giữ 90 ngày sau khi rời, sau đó xóa cứng (tuân thủ PDPD) |
-| BR-HRM-05 | 1 profile active/thời điểm | Unique constraint `(user_id, status='active')` |
-| BR-HRM-06 | Audit mọi thay đổi | Mọi chỉnh sửa hồ sơ đều ghi `actor_id`, `before`, `after`, `timestamp` |
+| #         | Quy tắc                      | Mô tả                                                                   |
+| --------- | ---------------------------- | ----------------------------------------------------------------------- |
+| BR-HRM-01 | Ngành tự động theo tuổi      | Đồng: 5-10, Thiếu: 11-15, Thanh: 16-25                                  |
+| BR-HRM-02 | Phụ huynh bắt buộc < 18 tuổi | Không tạo được hồ sơ đoàn sinh < 18 mà không có phụ huynh               |
+| BR-HRM-03 | Chuyển ngành bắt buộc        | Hệ thống cảnh báo khi đoàn sinh đạt giới hạn tuổi, chuyển trong 3 tháng |
+| BR-HRM-04 | Soft delete 90 ngày          | Dữ liệu giữ 90 ngày sau khi rời, sau đó xóa cứng (tuân thủ PDPD)        |
+| BR-HRM-05 | 1 profile active/thời điểm   | Unique constraint `(user_id, status='active')`                          |
+| BR-HRM-06 | Audit mọi thay đổi           | Mọi chỉnh sửa hồ sơ đều ghi `actor_id`, `before`, `after`, `timestamp`  |
 
 #### D. USER STORIES & TIÊU CHÍ CHẤP NHẬN
 
-**US-HRM-01**: *Là Trưởng Ngành, tôi muốn thêm đoàn sinh mới vào hệ thống, để quản lý hồ sơ tập trung.*
+**US-HRM-01**: _Là Trưởng Ngành, tôi muốn thêm đoàn sinh mới vào hệ thống, để quản lý hồ sơ tập trung._
+
 - AC: Given thông tin đoàn sinh hợp lệ + phụ huynh (nếu < 18), When Trưởng submit form, Then hồ sơ được tạo với status `pending`, Trưởng cấp trên nhận thông báo.
 
-**US-HRM-02**: *Là Phụ huynh, tôi muốn xem tiến bộ tổng hợp của con tôi, để theo dõi sự phát triển.*
+**US-HRM-02**: _Là Phụ huynh, tôi muốn xem tiến bộ tổng hợp của con tôi, để theo dõi sự phát triển._
+
 - AC: Given phụ huynh đã đăng nhập + đã liên kết đoàn sinh, When vào Dashboard, Then thấy tổng hợp: chuyên cần, EXP, đẳng thứ, badge, phí.
 
-**US-HRM-03**: *Là LĐT, tôi muốn xem sơ đồ tổ chức tổng quan, để nắm bắt nhân sự toàn Liên Đoàn.*
+**US-HRM-03**: _Là LĐT, tôi muốn xem sơ đồ tổ chức tổng quan, để nắm bắt nhân sự toàn Liên Đoàn._
+
 - AC: Given LĐT đăng nhập, When vào Org Chart, Then hiển thị cây tổ chức đầy đủ, click node → xem chi tiết.
 
-**US-HRM-04**: *Là hệ thống, khi đoàn sinh đạt 11 tuổi ở Ngành Đồng, tôi cần thông báo chuyển ngành.*
+**US-HRM-04**: _Là hệ thống, khi đoàn sinh đạt 11 tuổi ở Ngành Đồng, tôi cần thông báo chuyển ngành._
+
 - AC: Given đoàn sinh ngành Đồng, birth_date cho thấy đã 11 tuổi, When chạy cron hàng ngày, Then gửi thông báo cho Trưởng Đồng + Trưởng Thiếu + phụ huynh.
 
 ### MODULE 2 — QUẢN LÝ DỰ ÁN & KẾ HOẠCH (Project Management)
@@ -1389,6 +1448,7 @@ BACKUP STRATEGY:
 **Mục đích**: Module Project Management là **trung tâm lập kế hoạch và theo dõi thực thi** của toàn Liên Đoàn. Mọi hoạt động của DTNDD — từ chương trình năm, kế hoạch ngành, đến từng sự kiện cụ thể — đều cần được lập kế hoạch có hệ thống, phê duyệt, triển khai và đánh giá. Module này số hóa toàn bộ quy trình đó.
 
 **Phạm vi**:
+
 - Soạn Kế hoạch theo chuẩn 9 phần của DTNDD (Mô tả → Mục tiêu → Kết quả → Hoạt động → Nhân sự → Nội dung → Tiến độ → Đề xuất → Kinh phí)
 - Phê duyệt kế hoạch theo quy trình phân cấp
 - Tự động tạo Dự án từ kế hoạch được duyệt (Plan → Project Auto-Generation)
@@ -1397,6 +1457,7 @@ BACKUP STRATEGY:
 - Nhiều góc nhìn: Kanban Board, Gantt Chart, Backlog Table, Calendar
 
 **Đối tượng sử dụng**:
+
 - `super_admin`: Phê duyệt kế hoạch, giám sát tổng quan dự án, báo cáo
 - `admin`: Lập kế hoạch, quản lý dự án, phân công task
 - `user`: Nhận task, cập nhật tiến độ, báo cáo hoàn thành
@@ -1409,30 +1470,34 @@ BACKUP STRATEGY:
 > Mục tiêu: Module 2 phải “đủ lực” như một PM tool hiện đại: nhiều view, nhiều cấp phân rã công việc, có wiki/tài liệu, có cycle/sprint, có template, có time tracking — nhưng được “dịch” sang **kế hoạch hoạt động Đoàn**.
 
 **B.0.1 Phân cấp tham chiếu (định hướng thiết kế)**
-- **Workspace → Portfolio → Project → Epics → Work items → Sub-items**  
-- Tổ chức song song theo **Cycles/Sprints** (timebox) và **Modules** (nhóm theo chủ đề).  
+
+- **Workspace → Portfolio → Project → Epics → Work items → Sub-items**
+- Tổ chức song song theo **Cycles/Sprints** (timebox) và **Modules** (nhóm theo chủ đề).
 
 **B.0.2 Tính năng thiết yếu (baseline)**
-- **Portfolio management**: nhìn toàn cảnh nhiều dự án (năm/quý/tháng/sự kiện).  
-- **Nhiều góc nhìn**: List/Table · Kanban/Board · Gantt · Calendar · Timeline.  
-- **Wiki/Tài liệu**: gắn trực tiếp với dự án/work items; embed bảng công việc/Gantt.  
-- **Cộng tác**: activity stream, comments, @mentions, updates.  
-- **Methodologies**: Scrum, Kanban, Waterfall, Hybrid (tuỳ Org).  
-- **Integrations**: file storage, API, (phase sau) Git/ChatOps.  
+
+- **Portfolio management**: nhìn toàn cảnh nhiều dự án (năm/quý/tháng/sự kiện).
+- **Nhiều góc nhìn**: List/Table · Kanban/Board · Gantt · Calendar · Timeline.
+- **Wiki/Tài liệu**: gắn trực tiếp với dự án/work items; embed bảng công việc/Gantt.
+- **Cộng tác**: activity stream, comments, @mentions, updates.
+- **Methodologies**: Scrum, Kanban, Waterfall, Hybrid (tuỳ Org).
+- **Integrations**: file storage, API, (phase sau) Git/ChatOps.
 - **Time tracking & cost** (đặc biệt cho sự kiện/trại): giờ công, chi phí dự kiến, chi phí thực tế.
 
 **B.0.3 Thích ứng riêng cho DTNDD/Hướng đạo (P0)**
-- **Plan templates chuẩn** cho: cắm trại, lễ hội, công tác xã hội, khóa tu/giáo lý.  
-  - Mỗi template có checklist: di chuyển, ăn uống, thiết bị, giấy phép, y tế, bảo hiểm, danh sách người tham gia, consent phụ huynh.  
-- **Risk register** cho hoạt động ngoài trời: rủi ro thời tiết, an toàn nước, cháy nổ, y tế, hành trình.  
-- **Chu kỳ chương trình**: theo dõi chu kỳ rèn luyện/thăng tiến (gắn Module 8).  
+
+- **Plan templates chuẩn** cho: cắm trại, lễ hội, công tác xã hội, khóa tu/giáo lý.
+  - Mỗi template có checklist: di chuyển, ăn uống, thiết bị, giấy phép, y tế, bảo hiểm, danh sách người tham gia, consent phụ huynh.
+- **Risk register** cho hoạt động ngoài trời: rủi ro thời tiết, an toàn nước, cháy nổ, y tế, hành trình.
+- **Chu kỳ chương trình**: theo dõi chu kỳ rèn luyện/thăng tiến (gắn Module 8).
 
 **Tài liệu tham chiếu**
-- Plane docs: Epics & Cycles: https://docs.plane.so/ (ví dụ: https://docs.plane.so/core-concepts/issues/epics ; https://plane.so/cycles)  
-- OpenProject: work packages, views, Gantt, Wiki:  
-  - https://www.openproject.org/docs/getting-started/work-packages-introduction/  
-  - https://www.openproject.org/docs/user-guide/work-packages/work-package-views/  
-  - https://www.openproject.org/docs/user-guide/gantt-chart/  
+
+- Plane docs: Epics & Cycles: https://docs.plane.so/ (ví dụ: https://docs.plane.so/core-concepts/issues/epics ; https://plane.so/cycles)
+- OpenProject: work packages, views, Gantt, Wiki:
+  - https://www.openproject.org/docs/getting-started/work-packages-introduction/
+  - https://www.openproject.org/docs/user-guide/work-packages/work-package-views/
+  - https://www.openproject.org/docs/user-guide/gantt-chart/
   - https://www.openproject.org/docs/user-guide/wiki/
 
 **B.1 Soạn Kế hoạch (Plan Builder)**
@@ -1503,21 +1568,21 @@ BACKUP STRATEGY:
 
 **C.2 Quy tắc nghiệp vụ**
 
-| # | Quy tắc |
-| ---|--------- |
-| BR-PM-01 | Chỉ `admin` trở lên mới được tạo kế hoạch |
-| BR-PM-02 | Chỉ `super_admin` mới được phê duyệt kế hoạch |
+| #        | Quy tắc                                                   |
+| -------- | --------------------------------------------------------- |
+| BR-PM-01 | Chỉ `admin` trở lên mới được tạo kế hoạch                 |
+| BR-PM-02 | Chỉ `super_admin` mới được phê duyệt kế hoạch             |
 | BR-PM-03 | Kế hoạch đã approved không được sửa (tạo bản sửa đổi mới) |
-| BR-PM-04 | Task hoàn thành → auto publish event cho Module 9 |
-| BR-PM-05 | Mỗi task có tối đa 5 assignees |
+| BR-PM-04 | Task hoàn thành → auto publish event cho Module 9         |
+| BR-PM-05 | Mỗi task có tối đa 5 assignees                            |
 
 #### D. USER STORIES
 
-**US-PM-01**: *Là Trưởng Ngành, tôi muốn soạn kế hoạch sinh hoạt quý theo mẫu 9 phần, để nộp LĐT phê duyệt.*
+**US-PM-01**: _Là Trưởng Ngành, tôi muốn soạn kế hoạch sinh hoạt quý theo mẫu 9 phần, để nộp LĐT phê duyệt._
 
-**US-PM-02**: *Là LĐT, tôi muốn phê duyệt kế hoạch và hệ thống tự động tạo dự án, để giảm thời gian hành chính.*
+**US-PM-02**: _Là LĐT, tôi muốn phê duyệt kế hoạch và hệ thống tự động tạo dự án, để giảm thời gian hành chính._
 
-**US-PM-03**: *Là Đoàn sinh được giao task, tôi muốn cập nhật tiến độ trên Kanban board, để Trưởng biết tôi đang làm gì.*
+**US-PM-03**: _Là Đoàn sinh được giao task, tôi muốn cập nhật tiến độ trên Kanban board, để Trưởng biết tôi đang làm gì._
 
 ### MODULE 3 — PHIẾU YÊU CẦU & PHÊ DUYỆT (Ticket & Approval)
 
@@ -1534,30 +1599,34 @@ BACKUP STRATEGY:
 > Mục tiêu: Module 3 phải là “xương sống vận hành” cho mọi yêu cầu: xin phép, chi phí, sự cố, kỷ luật, bàn giao, duyệt kế hoạch, consent phụ huynh.
 
 **B.0.1 5 mẫu quy trình phê duyệt (bắt buộc hỗ trợ)**
-1) **Tuần tự (Sequential)**: A → B → C (phân cấp rõ ràng).  
-2) **Song song (Parallel)**: nhiều người/phòng ban duyệt cùng lúc.  
-3) **Có điều kiện (Conditional)**: đổi luồng theo thuộc tính (ngưỡng tiền, loại sự kiện, rủi ro).  
-4) **Đa cấp độ (Multi-level)**: tuần tự theo lớp, đặc biệt cho khoản lớn.  
-5) **Hỗn hợp (Hybrid)**: kết hợp tuần tự + song song + điều kiện.
+
+1. **Tuần tự (Sequential)**: A → B → C (phân cấp rõ ràng).
+2. **Song song (Parallel)**: nhiều người/phòng ban duyệt cùng lúc.
+3. **Có điều kiện (Conditional)**: đổi luồng theo thuộc tính (ngưỡng tiền, loại sự kiện, rủi ro).
+4. **Đa cấp độ (Multi-level)**: tuần tự theo lớp, đặc biệt cho khoản lớn.
+5. **Hỗn hợp (Hybrid)**: kết hợp tuần tự + song song + điều kiện.
 
 **B.0.2 Thích ứng riêng cho DTNDD/Hướng đạo (P0)**
-- **Consent phụ huynh**: mẫu đơn điện tử + chữ ký số (hoặc xác nhận OTP) + lưu trữ chứng cứ.  
-- **Phê duyệt thăng tiến**: quy trình nhiều bước qua “Hội đồng Duyệt xét”.  
-- **Chuỗi phê duyệt sự kiện**: Đội trưởng → LĐT → Trưởng ban/Ủy ban → (tuỳ Org).  
-- **Luồng chi phí có điều kiện**: theo ngưỡng (ví dụ 1M/3M/5M VND).  
-- **Phê duyệt cố vấn chuyên hiệu**: gắn LMS/Scout.  
-- **Kiểm tra lý lịch tình nguyện viên**: approval + expiry reminders.  
+
+- **Consent phụ huynh**: mẫu đơn điện tử + chữ ký số (hoặc xác nhận OTP) + lưu trữ chứng cứ.
+- **Phê duyệt thăng tiến**: quy trình nhiều bước qua “Hội đồng Duyệt xét”.
+- **Chuỗi phê duyệt sự kiện**: Đội trưởng → LĐT → Trưởng ban/Ủy ban → (tuỳ Org).
+- **Luồng chi phí có điều kiện**: theo ngưỡng (ví dụ 1M/3M/5M VND).
+- **Phê duyệt cố vấn chuyên hiệu**: gắn LMS/Scout.
+- **Kiểm tra lý lịch tình nguyện viên**: approval + expiry reminders.
 - **Báo cáo sự cố/khiếu nại**: escalation ladder + SLA.
 
 **B.0.3 Feature baseline từ hệ thống tham chiếu**
-- Zammad hỗ trợ automation theo “if-this-then-that” qua **Triggers** và cấu hình **Core Workflows** (dynamic field rules theo nhóm).  
+
+- Zammad hỗ trợ automation theo “if-this-then-that” qua **Triggers** và cấu hình **Core Workflows** (dynamic field rules theo nhóm).
 - Freshworks có hướng dẫn **multi-level approval workflows** (hierarchical approvals) và **parallel approvals** (phê duyệt song song).
 
 **Tài liệu tham chiếu**
-- Zammad Triggers: https://admin-docs.zammad.org/en/latest/manage/trigger.html  
-- Zammad Core Workflows: https://zammad.com/en/product/features/core-workflows  
-- Freshservice hierarchical approvals (Workflow Automator): https://support.freshservice.com/support/solutions/articles/211198-setting-hierarchical-approvals-for-service-requests-using-workflow-automator-  
-- Freshservice parallel approvals (FAQ): https://support.freshservice.com/support/solutions/articles/50000011703-new-approvals-process-frequently-asked-questions  
+
+- Zammad Triggers: https://admin-docs.zammad.org/en/latest/manage/trigger.html
+- Zammad Core Workflows: https://zammad.com/en/product/features/core-workflows
+- Freshservice hierarchical approvals (Workflow Automator): https://support.freshservice.com/support/solutions/articles/211198-setting-hierarchical-approvals-for-service-requests-using-workflow-automator-
+- Freshservice parallel approvals (FAQ): https://support.freshservice.com/support/solutions/articles/50000011703-new-approvals-process-frequently-asked-questions
 - Freshdesk approval workflow (KB articles): https://support.freshdesk.com/support/solutions/folders/50000000131
 
 **B.1 Tạo & Quản lý Ticket**
@@ -1593,9 +1662,9 @@ BACKUP STRATEGY:
 
 #### D. USER STORIES
 
-**US-TK-01**: *Là Đoàn sinh, tôi muốn tạo phiếu xin nghỉ sinh hoạt, để Trưởng biết lý do tôi vắng.*
+**US-TK-01**: _Là Đoàn sinh, tôi muốn tạo phiếu xin nghỉ sinh hoạt, để Trưởng biết lý do tôi vắng._
 
-**US-TK-02**: *Là Trưởng, tôi muốn duyệt hàng loạt ticket xin nghỉ, để tiết kiệm thời gian.*
+**US-TK-02**: _Là Trưởng, tôi muốn duyệt hàng loạt ticket xin nghỉ, để tiết kiệm thời gian._
 
 ---
 
@@ -1614,17 +1683,20 @@ BACKUP STRATEGY:
 > Mục tiêu: Module 4 phải “ledger-first” và có **cây trung tâm chi phí + budgeting** để minh bạch theo đơn vị/ngành/sự kiện.
 
 **B.0.1 Baseline (ERPNext-style)**
-- **Cost Center Tree**: phân cấp trung tâm chi phí để “roll up” báo cáo.  
-- **Budgeting**: đặt ngân sách theo cost center, theo dõi chênh lệch (variance) theo thời gian.  
+
+- **Cost Center Tree**: phân cấp trung tâm chi phí để “roll up” báo cáo.
+- **Budgeting**: đặt ngân sách theo cost center, theo dõi chênh lệch (variance) theo thời gian.
 - **Tagging transactions** theo cost center/dimension để báo cáo đúng.
 
 **B.0.2 Thích ứng riêng cho DTNDD/Hướng đạo (P0)**
-- **Phí đoàn viên** theo cá nhân/đơn vị: hóa đơn tự động, nhắc đóng phí.  
-- **Phí cắm trại**: cho phép **đóng từng phần**; có **campership/quỹ hỗ trợ**.  
-- **Gây quỹ theo sự kiện**: báo cáo thu/chi minh bạch (phi lợi nhuận).  
+
+- **Phí đoàn viên** theo cá nhân/đơn vị: hóa đơn tự động, nhắc đóng phí.
+- **Phí cắm trại**: cho phép **đóng từng phần**; có **campership/quỹ hỗ trợ**.
+- **Gây quỹ theo sự kiện**: báo cáo thu/chi minh bạch (phi lợi nhuận).
 - **Đóng góp vật chất (in‑kind)**: ghi nhận hiện vật (lều, gạo, nước…), quy đổi (tuỳ Org) để minh bạch.
 
 **Tài liệu tham chiếu**
+
 - ERPNext Cost Center & Budgeting (docs): https://docs.frappe.io/erpnext/user/manual/en/cost-center-and-budgeting
 
 **B.1 Quản lý Tài khoản/Quỹ**
@@ -1667,11 +1739,11 @@ BACKUP STRATEGY:
 
 #### D. USER STORIES
 
-**US-FIN-01**: *Là Trưởng, tôi muốn ghi nhận thu nguyệt liễm từ đoàn sinh, kèm ảnh biên lai, để minh bạch.*
+**US-FIN-01**: _Là Trưởng, tôi muốn ghi nhận thu nguyệt liễm từ đoàn sinh, kèm ảnh biên lai, để minh bạch._
 
-**US-FIN-02**: *Là Phụ huynh, khi con tôi chưa đóng phí quá hạn, tôi muốn nhận nhắc nhở qua Zalo.*
+**US-FIN-02**: _Là Phụ huynh, khi con tôi chưa đóng phí quá hạn, tôi muốn nhận nhắc nhở qua Zalo._
 
-**US-FIN-03**: *Là LĐT, tôi muốn xem báo cáo thu/chi tổng hợp theo quý để báo cáo Ban Cai Quản.*
+**US-FIN-03**: _Là LĐT, tôi muốn xem báo cáo thu/chi tổng hợp theo quý để báo cáo Ban Cai Quản._
 
 ---
 
@@ -1692,22 +1764,25 @@ BACKUP STRATEGY:
 > Mục tiêu: Module 5 phải “inventory + custody + condition + audit trail” cho tài sản Đoàn & tài sản Ngành.
 
 **B.0.1 Baseline (Snipe‑IT-style)**
-- Theo dõi **asset assigned → to whom → where**.  
-- **One-click checkin/checkout**, lịch sử mượn‑trả.  
-- **Custom fields** để theo dõi thuộc tính đặc thù.  
-- **Email alerts** cho bảo hành/giấy phép hết hạn.  
-- **User acceptance** khi checkout (EULA/terms acceptance).  
+
+- Theo dõi **asset assigned → to whom → where**.
+- **One-click checkin/checkout**, lịch sử mượn‑trả.
+- **Custom fields** để theo dõi thuộc tính đặc thù.
+- **Email alerts** cho bảo hành/giấy phép hết hạn.
+- **User acceptance** khi checkout (EULA/terms acceptance).
 
 **B.0.2 Thích ứng riêng cho DTNDD/Hướng đạo (P0)**
-- **Thiết bị cắm trại**: theo dõi tình trạng, xuất kho theo mùa.  
-- **Đồng phục**: cấp phát theo size, tình trạng, hoàn trả.  
-- **Vật tư tiêu hao** (chuyên hiệu): tồn kho + định mức theo chương trình.  
-- **Cơ sở vật chất/đất trại**: booking/maintenance.  
-- **Xe cộ**: lịch bảo dưỡng + số km.  
-- **Camp kits**: bộ dụng cụ đóng gói sẵn cho trại/sự kiện.  
+
+- **Thiết bị cắm trại**: theo dõi tình trạng, xuất kho theo mùa.
+- **Đồng phục**: cấp phát theo size, tình trạng, hoàn trả.
+- **Vật tư tiêu hao** (chuyên hiệu): tồn kho + định mức theo chương trình.
+- **Cơ sở vật chất/đất trại**: booking/maintenance.
+- **Xe cộ**: lịch bảo dưỡng + số km.
+- **Camp kits**: bộ dụng cụ đóng gói sẵn cho trại/sự kiện.
 - **Guardian assignment**: chỉ định phụ huynh/giám hộ khi tài sản được giao cho trẻ vị thành niên.
 
 **Tài liệu tham chiếu**
+
 - Snipe‑IT product features: https://snipeitapp.com/product
 
 **B.1 Danh mục & Hồ sơ Tài sản**
@@ -1790,11 +1865,13 @@ available → [Yêu cầu mượn] → requested → [Duyệt] → checked_out
 **Mục đích**: Module LMS là **kho tri thức số, học viện số và động cơ học tập liên tục** của DTNDD. Nó không chỉ là nơi lưu bài học, mà là nơi tổ chức toàn bộ trải nghiệm học tập cho Đoàn sinh, Trưởng, phụ huynh và cố vấn chuyên hiệu: từ học bài, làm quiz, nộp minh chứng, được mentor chấm, cho đến thi đấu quiz theo đội và đồng bộ thành tích sang Scout Core và Reward Engine.
 
 **Vai trò trong platform**:
+
 - là **learning engine** cho kỹ năng Hướng đạo, giáo lý Cao Đài, kỹ năng sống và an toàn;
 - là nguồn dữ liệu chính cho **progress**, **competency mastery**, **lesson completion**, **quiz pass/fail**, **mentor evaluation**;
 - là nơi tạo ra các tín hiệu học tập để đồng bộ sang **Scout Core (kỹ năng/đẳng thứ)** và **Reward Engine (EXP, badge, streak, leaderboard)**.
 
 **Phạm vi**:
+
 - Course catalog, course detail, lesson player, quiz engine, battle arena, mentor grading, parent dashboard, offline packs, content authoring, assignment theo Ngành/Đội/cá nhân.
 - Quản lý khóa học, bài học, nội dung đa phương tiện, competency, completion rules, prerequisite, progress, certificates/badges.
 - Quiz với nhiều dạng câu hỏi, quiz realtime kiểu Kahoot, self-paced quiz, manual grading, rubric, evidence review.
@@ -1805,11 +1882,13 @@ available → [Yêu cầu mượn] → requested → [Duyệt] → checked_out
 **Nguồn tham chiếu chủ đạo**: Moodle, Kahoot, Duolingo.
 
 **Khả năng chuẩn cần kế thừa**:
+
 - **Moodle**: course hierarchy, completion tracking, competency frameworks, badges, grading, mobile/offline, progress plans, mentor/teacher roles.
 - **Kahoot**: live quiz, question diversity, instant feedback, scoreboard theo phiên, team mode cho sinh hoạt tập thể.
 - **Duolingo-style habit loop**: microlearning, streak, daily goal, lesson completion, nhẹ nhàng nhưng lặp lại đều.
 
 **Thích ứng riêng cho DTNDD / Hướng đạo**:
+
 - **Mỗi chuyên hiệu có thể là một khóa học** với lesson, checklist bằng chứng, người chấm và chuẩn đạt.
 - **Đẳng thứ và tiến cấp** phải đi qua **khung năng lực** chứ không chỉ điểm quiz; LMS phải đẩy signal sang Module 8 để không xảy ra “học xong nhưng không ghi nhận vào sổ đẳng thứ”.
 - Có **danh mục riêng cho giáo dục Cao Đài**: giáo lý, lễ nghi, lịch sử, đạo đức ứng dụng, bài học theo mùa lễ.
@@ -1820,22 +1899,23 @@ available → [Yêu cầu mượn] → requested → [Duyệt] → checked_out
 
 #### A.2 SUB-PAGES BẮT BUỘC CỦA MODULE 7
 
-| Sub-page | Mục đích | Người dùng chính |
-|---|---|---|
-| Academy Home | Tổng quan học tập, shelf đang học, streak, nhiệm vụ học hôm nay | User/Parent/Leader |
-| Course Catalog | Duyệt khóa theo domain, Ngành, độ khó, chuyên hiệu | User/Leader |
-| Course Detail | Xem syllabus, prerequisite, mentor, phần thưởng, completion rules | User/Leader |
-| Lesson Player | Học bài, media, checklist, ghi chú, nộp phản hồi | User |
-| Quiz Arena | Thi quiz realtime hoặc self-paced | User/Leader |
-| Mentor Grading Queue | Cố vấn chấm minh chứng, rubric, feedback | Leader/Mentor |
-| Assignment & Cohort | Gán khóa cho Ngành/Đội/cá nhân | Leader |
-| Parent Learning Dashboard | Phụ huynh xem tiến độ của con | Parent |
-| Offline Packs | Tải gói học offline và quản lý sync | User |
-| Authoring Studio | Soạn course/lesson/quiz/template | Leader/Admin |
+| Sub-page                  | Mục đích                                                          | Người dùng chính   |
+| ------------------------- | ----------------------------------------------------------------- | ------------------ |
+| Academy Home              | Tổng quan học tập, shelf đang học, streak, nhiệm vụ học hôm nay   | User/Parent/Leader |
+| Course Catalog            | Duyệt khóa theo domain, Ngành, độ khó, chuyên hiệu                | User/Leader        |
+| Course Detail             | Xem syllabus, prerequisite, mentor, phần thưởng, completion rules | User/Leader        |
+| Lesson Player             | Học bài, media, checklist, ghi chú, nộp phản hồi                  | User               |
+| Quiz Arena                | Thi quiz realtime hoặc self-paced                                 | User/Leader        |
+| Mentor Grading Queue      | Cố vấn chấm minh chứng, rubric, feedback                          | Leader/Mentor      |
+| Assignment & Cohort       | Gán khóa cho Ngành/Đội/cá nhân                                    | Leader             |
+| Parent Learning Dashboard | Phụ huynh xem tiến độ của con                                     | Parent             |
+| Offline Packs             | Tải gói học offline và quản lý sync                               | User               |
+| Authoring Studio          | Soạn course/lesson/quiz/template                                  | Leader/Admin       |
 
 #### B. TÍNH NĂNG & CHỨC NĂNG
 
 **B.0 Bản đồ năng lực chuẩn của LMS**
+
 - **Course & content**: khóa học, module, bài học, media, prerequisites.
 - **Assessment**: quiz, assignment, rubric, evidence review, mentor feedback.
 - **Competency**: framework, mastery, progression, mapping sang rank/skill.
@@ -1844,6 +1924,7 @@ available → [Yêu cầu mượn] → requested → [Duyệt] → checked_out
 - **Offline & field mode**: caching, download packs, delayed sync, conflict-safe re-submit.
 
 **B.1 Quản lý Khóa học & Bài học**
+
 - **B.1.1 Phân cấp nội dung**: Course → Section/Module → Lesson → Activity.
 - **B.1.2 Authoring Studio** cho Trưởng: rich text, ảnh, video, H5P/embed, learning objectives, prerequisite, estimated time, target Ngành, EXP reward.
 - **B.1.3 Completion rules**: lesson complete theo video watched %, checklist, quiz score, mentor approval hoặc phối hợp nhiều điều kiện.
@@ -1851,25 +1932,30 @@ available → [Yêu cầu mượn] → requested → [Duyệt] → checked_out
 - **B.1.5 Certificates/badges**: xuất badge/chứng chỉ và đồng bộ sang Module 9.
 
 **B.2 Quiz & Assessment Engine**
+
 - Dạng câu hỏi: single choice, multiple choice, true/false, fill-in, matching, ordering, short answer, upload evidence.
 - Hỗ trợ: timer, randomization, attempts limit, pass score, review mode, manual grading, rubric, question bank, analytics theo câu hỏi.
 - Quiz realtime: lobby, countdown, score từng câu, anti-cheat cơ bản, team mode, host controls.
 
 **B.3 Competency & Scout Mapping**
+
 - Mỗi lesson/quiz/evidence có thể map vào **competency**; mỗi competency map vào **skill criteria** hoặc **badge requirements**.
 - Khi hoàn thành competency, hệ thống phát event `lms.lesson_completed`, `lms.quiz_passed`, `lms.competency_mastered` để Module 8/9 tiêu thụ.
 - Không cho ghi nhận đẳng thứ trực tiếp từ FE; phải qua event + verification queue để tránh sai lệch dữ liệu.
 
 **B.4 Parent/Mentor Experience**
+
 - Parent chỉ xem read-only: tiến độ, lịch sử học, các khóa đang học, mức hoàn thành, chứng chỉ, cảnh báo chậm tiến độ.
 - Mentor có grading queue, batch feedback, rubric, comment có audit, assignment re-open, escalation khi cần review thêm.
 
 **B.5 Offline, Camp Mode & Field Constraints**
+
 - Offline packs gồm metadata khóa học, lesson text/media đã nén, quiz config được phép offline, queue đồng bộ khi có mạng.
 - Những activity cần real-time hoặc signed media lớn sẽ được gắn `online_only`.
 - Có low-bandwidth mode: ưu tiên text/image nén, ẩn video HD, tắt arena/animation nặng khi budget/performance không cho phép.
 
 #### C. LUỒNG NGHIỆP VỤ CHÍNH
+
 1. Trưởng tạo course/quiz → publish → assign cho Ngành/Đội/cá nhân.
 2. Đoàn sinh mở Academy Home → vào Lesson Player → học bài → làm quiz → nhận feedback.
 3. Nếu lesson cần mentor verification, item đi vào **Mentor Grading Queue**.
@@ -1877,10 +1963,10 @@ available → [Yêu cầu mượn] → requested → [Duyệt] → checked_out
 5. Parent dashboard cập nhật tiến độ gần real-time theo read model.
 
 #### D. YÊU CẦU TRIỂN KHAI CỨNG
+
 - Không chấp nhận “chỉ có catalog và lesson page”; phải có đủ **catalog + lesson player + quiz engine + mentor queue + parent dashboard + offline packs + E2E**.
 - Content authoring, delivery, grading và event sync phải đi chung một bundle trước khi gọi là ACTIVE.
 - Arena phải có feature flag và degraded mode để bảo vệ chi phí/performance.
-
 
 ### MODULE 8 — QUẢN LÝ HƯỚNG ĐẠO SINH (Scout Management) — ★★★ MODULE LÕI ★★★
 
@@ -1891,6 +1977,7 @@ available → [Yêu cầu mượn] → requested → [Duyệt] → checked_out
 **Mục đích**: Module Scout Management là **tấm gương kỹ thuật số** phản chiếu hành trình phát triển toàn diện của mỗi Đoàn sinh theo 6 chiều SPICES (Social, Physical, Intellectual, Character, Emotional, Spiritual) + trụ cột Đạo Đức Cao Đài. Mọi hoạt động — từ sinh hoạt tuần, trại, kỹ năng, đến thiền định — đều được ghi nhận và chuyển thành dữ liệu phát triển có thể đo lường, review được và bàn giao được giữa các ngành.
 
 **Phạm vi**:
+
 - **8A**: Hệ thống Đẳng thứ (4 bậc/ngành), Cây Kỹ năng (Skill Tree), Chuyên hiệu, Theo dõi thói quen (Habit Tracker)
 - **8B**: Quản lý buổi sinh hoạt tuần, giáo án, điểm danh, chương trình năm, meeting planner
 - **8C**: Sự kiện & Trại: lập kế hoạch, đăng ký, RSVP, HIRARC, phiếu phụ huynh, y tế, điểm danh, organizers
@@ -1900,6 +1987,7 @@ available → [Yêu cầu mượn] → requested → [Duyệt] → checked_out
 - **8G**: Handover giữa ngành, transition bridge, lịch sử phạm vi quản lý theo thời gian
 
 **Nền benchmark để enhanced**:
+
 - Lấy cảm hứng từ **Scoutbook** cho phần theo dõi advancement, awards, calendar/reminders, parent/leader visibility.
 - Lấy cảm hứng từ **Scoutplan** cho phần RSVP reminders, event organizers, meeting planner, publishable calendar và operations around events.
 - Lấy khung **WOSM Youth Programme / SPICES / age-section transition** để bảo đảm module không chỉ lưu dữ liệu mà còn phản ánh tiến trình giáo dục và bàn giao giữa các ngành.
@@ -1907,6 +1995,7 @@ available → [Yêu cầu mượn] → requested → [Duyệt] → checked_out
 **Vị trí trong hệ thống**: Module 8 là nguồn phát event LỚN NHẤT → Module 9 (Reward) subscribe tất cả event từ Module 8 để tính EXP/Badge; Module 7 cung cấp lesson/evidence/quiz linkage; Module 10 cấp registry ngành/đơn vị/quyền; Module 1 hiển thị character/progress summary trong hồ sơ người.
 
 **Hard requirements V10**:
+
 - Không cho phép cập nhật thăng bậc/kỹ năng trực tiếp kiểu “edit số liệu”; mọi tiến độ phải đi qua **evidence → verify/reject → recompute → review/approve** hoặc **admin adjustment có audit reason**.
 - Mọi chuyển ngành phải có **handover packet** và **effective date range** để tránh mất lịch sử quản lý.
 - Parent/guardian chỉ có **read-only summary + consent/medical confirmation surfaces**, không được can thiệp vào logic đánh giá chuyên môn.
@@ -1914,6 +2003,7 @@ available → [Yêu cầu mượn] → requested → [Duyệt] → checked_out
 - Module 8 phải có **Character Sheet** đủ dùng như “hồ sơ sống” của Đoàn sinh, không chỉ là cây kỹ năng.
 
 **Sub-page map bắt buộc**:
+
 - `/guild/scout/dashboard` — dashboard scout core theo vai trò
 - `/guild/scout/character/:memberId` — character sheet + timeline + badges + ranks + progress radar
 - `/guild/scout/skillbook` / `/guild/scout/skillbook/:skillId` — skill tree, criteria, evidence, history
@@ -1935,11 +2025,11 @@ available → [Yêu cầu mượn] → requested → [Duyệt] → checked_out
 - **B.1.1 Cấu hình đẳng thứ theo Ngành** (admin):
   Mỗi Ngành có 4 bậc, tùy chỉnh tên + yêu cầu:
 
-| Ngành | Bậc 1 | Bậc 2 | Bậc 3 | Bậc 4 |
-| -------|-------|-------|-------|------- |
-| **Đồng** | Mầm Măng | Măng Non | Lột Bẹ | Vươn Thẳng |
-| **Thiếu** | Tân Sinh | Thiếu Sinh | Thiếu Sinh Cấp 1 | Thiếu Sinh Cấp 2 |
-| **Thanh** | Tân Thanh | Thanh Sinh | Tự Lực | Phụng Sự |
+| Ngành     | Bậc 1     | Bậc 2      | Bậc 3            | Bậc 4            |
+| --------- | --------- | ---------- | ---------------- | ---------------- |
+| **Đồng**  | Mầm Măng  | Măng Non   | Lột Bẹ           | Vươn Thẳng       |
+| **Thiếu** | Tân Sinh  | Thiếu Sinh | Thiếu Sinh Cấp 1 | Thiếu Sinh Cấp 2 |
+| **Thanh** | Tân Thanh | Thanh Sinh | Tự Lực           | Phụng Sự         |
 
 - **B.1.2 Yêu cầu thăng bậc**: Mỗi bậc có yêu cầu cụ thể:
   - Số buổi sinh hoạt tham gia (ví dụ: ≥ 80%)
@@ -2004,7 +2094,7 @@ available → [Yêu cầu mượn] → requested → [Duyệt] → checked_out
 
 #### 8B. BUỔI SINH HOẠT & ĐIỂM DANH (Session Management)
 
-> *Cựu Module 11, nay sáp nhập vào Module 8 vì buổi sinh hoạt là hoạt động cốt lõi của Hướng Đạo.*
+> _Cựu Module 11, nay sáp nhập vào Module 8 vì buổi sinh hoạt là hoạt động cốt lõi của Hướng Đạo._
 
 ##### B. TÍNH NĂNG & CHỨC NĂNG
 
@@ -2056,7 +2146,7 @@ available → [Yêu cầu mượn] → requested → [Duyệt] → checked_out
 
 #### 8C. SỰ KIỆN & TRẠI (Events & Camp Management)
 
-> *Cựu Module 12, nay sáp nhập vào Module 8 vì trại là hoạt động đặc thù Hướng Đạo.*
+> _Cựu Module 12, nay sáp nhập vào Module 8 vì trại là hoạt động đặc thù Hướng Đạo._
 
 ##### B. TÍNH NĂNG & CHỨC NĂNG
 
@@ -2216,30 +2306,30 @@ Module 9: +EXP + Badge → Notification → Lễ Thăng Đẳng
 
 **C.2 Quy tắc nghiệp vụ Module 8**
 
-| # | Quy tắc |
-| ---|--------- |
-| BR-SC-01 | KHÔNG hạ bậc đẳng thứ — chỉ suspend/kỷ luật |
-| BR-SC-02 | Chuyển ngành: EXP giữ, skills archive, rank reset, badge giữ |
-| BR-SC-03 | Mỗi buổi sinh hoạt phải cover 3 trụ (Đạo Đức/Phương pháp/Giáo dục) |
-| BR-SC-04 | Sự kiện qua đêm: PHẢI có HIRARC + consent phụ huynh |
+| #        | Quy tắc                                                                          |
+| -------- | -------------------------------------------------------------------------------- |
+| BR-SC-01 | KHÔNG hạ bậc đẳng thứ — chỉ suspend/kỷ luật                                      |
+| BR-SC-02 | Chuyển ngành: EXP giữ, skills archive, rank reset, badge giữ                     |
+| BR-SC-03 | Mỗi buổi sinh hoạt phải cover 3 trụ (Đạo Đức/Phương pháp/Giáo dục)               |
+| BR-SC-04 | Sự kiện qua đêm: PHẢI có HIRARC + consent phụ huynh                              |
 | BR-SC-05 | Đoàn sinh < 18: consent phụ huynh bắt buộc cho sự kiện ngoài sinh hoạt thường kỳ |
-| BR-SC-06 | Ngũ Giới assessment: Chỉ cá nhân xem — Trưởng chỉ thấy "đã hoàn thành" |
-| BR-SC-07 | Skill level chỉ tăng, không giảm tự động |
-| BR-SC-08 | EXP từ nhật ký tâm linh: cap 1 lần/ngày (chống lạm dụng) |
+| BR-SC-06 | Ngũ Giới assessment: Chỉ cá nhân xem — Trưởng chỉ thấy "đã hoàn thành"           |
+| BR-SC-07 | Skill level chỉ tăng, không giảm tự động                                         |
+| BR-SC-08 | EXP từ nhật ký tâm linh: cap 1 lần/ngày (chống lạm dụng)                         |
 
 #### D. USER STORIES
 
-**US-SC-01**: *Là Trưởng Thiếu, tôi muốn xem Cây Kỹ năng của một Đoàn sinh, để biết em đang ở đâu và cần rèn luyện gì tiếp theo.*
+**US-SC-01**: _Là Trưởng Thiếu, tôi muốn xem Cây Kỹ năng của một Đoàn sinh, để biết em đang ở đâu và cần rèn luyện gì tiếp theo._
 
-**US-SC-02**: *Là Đoàn sinh Ngành Thanh, tôi muốn ghi nhật ký thiền định hàng ngày, để nhận EXP và theo dõi streak.*
+**US-SC-02**: _Là Đoàn sinh Ngành Thanh, tôi muốn ghi nhật ký thiền định hàng ngày, để nhận EXP và theo dõi streak._
 
-**US-SC-03**: *Là Trưởng, tôi muốn tạo buổi sinh hoạt với giáo án đầy đủ 7 phần, liên kết với kỹ năng trong Skill Tree.*
+**US-SC-03**: _Là Trưởng, tôi muốn tạo buổi sinh hoạt với giáo án đầy đủ 7 phần, liên kết với kỹ năng trong Skill Tree._
 
-**US-SC-04**: *Là Phụ huynh, khi Đoàn có trại qua đêm, tôi muốn nhận phiếu đồng ý qua Zalo và ký điện tử.*
+**US-SC-04**: _Là Phụ huynh, khi Đoàn có trại qua đêm, tôi muốn nhận phiếu đồng ý qua Zalo và ký điện tử._
 
-**US-SC-05**: *Là LĐT, tôi muốn xem báo cáo chuyên cần tổng quan toàn Liên Đoàn, theo Ngành và Đơn vị.*
+**US-SC-05**: _Là LĐT, tôi muốn xem báo cáo chuyên cần tổng quan toàn Liên Đoàn, theo Ngành và Đơn vị._
 
-**US-SC-06**: *Là hệ thống, khi Đoàn sinh hoàn thành tất cả kỹ năng bắt buộc cho bậc hiện tại, tôi cần flag "Eligible for rank advancement".*
+**US-SC-06**: _Là hệ thống, khi Đoàn sinh hoàn thành tất cả kỹ năng bắt buộc cho bậc hiện tại, tôi cần flag "Eligible for rank advancement"._
 
 ---
 
@@ -2250,6 +2340,7 @@ Module 9: +EXP + Badge → Notification → Lễ Thăng Đẳng
 **Mục đích**: Module Reward Engine là **hệ thần kinh phần thưởng và tín hiệu tiến bộ** của toàn platform. Nó SUBSCRIBE domain events từ mọi module khác, tính toán EXP, đánh giá điều kiện badge, cập nhật bảng xếp hạng, quản lý cửa hàng đổi thưởng, xử lý penalty/remediation và phát ra các tín hiệu level-up/achievement cho UI.
 
 **Phạm vi**:
+
 - **EXP engine**: event → exp txns → balance/projections.
 - **Badge/achievement engine**: rule conditions, auto-award, manual-award, rarity, showcase.
 - **Reward economy**: visual currencies theo ngành, redeem shop, stock, approval, anti-inflation.
@@ -2260,11 +2351,13 @@ Module 9: +EXP + Badge → Notification → Lễ Thăng Đẳng
 #### A.1 NỀN TẢNG THIẾT KẾ DỰA TRÊN KHOA HỌC HÀNH VI
 
 Mục tiêu của gamification trong TTNDD_OPS là **khích lệ hành vi tốt ngoài đời thực**, không phải tối ưu screen time. Vì vậy module này bám 3 lớp guardrail:
+
 - **SDT**: autonomy, competence, relatedness.
 - **Flow**: mục tiêu rõ, phản hồi nhanh, thử thách vừa sức.
 - **Ethical gamification**: fixed-ratio ưu tiên hơn variable-ratio; natural stopping points; opt-out cạnh tranh; team-first ranking; anti-abuse và parent visibility.
 
 **Ánh xạ game hóa chuẩn cho TTNDD_OPS**:
+
 - Đẳng thứ = level progression.
 - Chuyên hiệu/badge = achievements.
 - Đội = party; Liên Đoàn = guild.
@@ -2273,19 +2366,20 @@ Mục tiêu của gamification trong TTNDD_OPS là **khích lệ hành vi tốt 
 
 #### A.2 SUB-PAGES BẮT BUỘC CỦA MODULE 9
 
-| Sub-page | Mục đích | Người dùng chính |
-|---|---|---|
-| Reward Home | Tổng quan EXP, badge mới, nhiệm vụ, level signal | User |
-| Badge Gallery | Danh mục badge, rarity, điều kiện, badge đã đạt/chưa đạt | User/Parent/Leader |
-| Leaderboards | BXH đội/cá nhân theo scope & season | User/Leader |
-| Reward Shop | Đổi quà, xem stock, lịch sử đổi thưởng | User/Leader |
-| Penalty & Remediation | Quản lý điểm trừ và nhiệm vụ sửa lỗi | Leader/Admin |
-| Reward Rules Admin | Cấu hình event→exp, caps, visuals, badges, season | Admin |
-| Recognition Wall | Kudos, thành tích, vinh danh theo kỳ | User/Leader |
+| Sub-page              | Mục đích                                                 | Người dùng chính   |
+| --------------------- | -------------------------------------------------------- | ------------------ |
+| Reward Home           | Tổng quan EXP, badge mới, nhiệm vụ, level signal         | User               |
+| Badge Gallery         | Danh mục badge, rarity, điều kiện, badge đã đạt/chưa đạt | User/Parent/Leader |
+| Leaderboards          | BXH đội/cá nhân theo scope & season                      | User/Leader        |
+| Reward Shop           | Đổi quà, xem stock, lịch sử đổi thưởng                   | User/Leader        |
+| Penalty & Remediation | Quản lý điểm trừ và nhiệm vụ sửa lỗi                     | Leader/Admin       |
+| Reward Rules Admin    | Cấu hình event→exp, caps, visuals, badges, season        | Admin              |
+| Recognition Wall      | Kudos, thành tích, vinh danh theo kỳ                     | User/Leader        |
 
 #### B. TÍNH NĂNG & CHỨC NĂNG
 
 **B.0 Bản đồ năng lực chuẩn của Reward Engine**
+
 - **Rules engine**: event → exp/badge/penalty.
 - **Progress signaling**: progress bars, milestones, level-up moments, celebration packets.
 - **Social layer**: team leaderboard, peer kudos, guild culture, season snapshots.
@@ -2293,33 +2387,39 @@ Mục tiêu của gamification trong TTNDD_OPS là **khích lệ hành vi tốt 
 - **Safety & observability**: caps, cooldowns, anomaly detection, reconciliation, audit trail.
 
 **B.1 EXP Engine**
+
 - Immutable ledger `exp_txn` với source event idempotent key; summary projections riêng cho đọc nhanh.
 - Cấu hình EXP theo event, scope, role, ngành, season, cap ngày/tuần/tháng.
 - Hình tượng hóa EXP theo Ngành/Chi/Đội (ngọc, hạt mầm, đạo tâm...) với conversion rules rõ ràng nhưng không làm sai ledger gốc.
 - Có distinction giữa **historical earned**, **available spendable**, **locked**, **penalty deducted**.
 
 **B.2 Badge/Achievement Engine**
+
 - Badge definitions gồm trigger condition, optional verification, rarity tier, visibility, expiry/season.
 - Hỗ trợ auto-award từ events, manual-award có audit, retraction có lý do.
 - Badge có thể map từ LMS completion, Scout milestone, Finance contribution campaign, volunteer service, attendance streak, conduct recognition.
 
 **B.3 Leaderboard & Recognition**
+
 - Ưu tiên **Đội/Ngành** hơn cá nhân; cá nhân chỉ hiển thị trong nhóm gần mình hoặc theo opt-in.
 - Scope: day/week/month/season/event/camp.
 - Snapshots theo kỳ để khóa lịch sử, tránh recompute nặng và tranh cãi hậu kỳ.
 - Recognition wall hiển thị thành tích mới, badge hiếm, kudos từ Trưởng/đội.
 
 **B.4 Reward Shop & Redemption**
+
 - Shop items có stock, cost, cooldown, approval rule, pick-up workflow, inventory linkage.
 - Redeem flow phải kiểm tra available spendable, không sửa lịch sử earned.
 - Có loại quà số (badge frame/title) và quà vật lý (vật phẩm, ưu tiên hoạt động, quà ngành).
 
 **B.5 Penalty, Remediation & Guardrails**
+
 - Penalty luôn đi cùng case record, reason code, issuer, evidence và remediation plan.
 - Remediation task có thể sinh sang Process/Ticket/Project để hoàn thành và gỡ penalty theo rule.
 - Anti-abuse: duplicate event suppression, burst detection, suspicious pattern review queue.
 
 #### C. TÍCH HỢP CHÉO BẮT BUỘC
+
 - **Module 1 HRM**: lấy roster, guardian-safe visibility, branch/team scopes.
 - **Module 7 LMS**: lesson/quiz completion, mentor grading outcomes.
 - **Module 8 Scout**: skill verified, rank eligible, handover, camp attendance.
@@ -2327,10 +2427,10 @@ Mục tiêu của gamification trong TTNDD_OPS là **khích lệ hành vi tốt 
 - **UI layer**: HUD progress, level-up modal, achievement toast, low-stimulus mode cho người dùng nhỏ tuổi.
 
 #### D. YÊU CẦU TRIỂN KHAI CỨNG
+
 - Không chấp nhận “chỉ có cộng/trừ điểm hiển thị”; phải có đủ **immutable ledger + rule engine + badge engine + leaderboard + shop + penalty/remediation + reconciliation + E2E**.
 - Reward Engine phải chạy idempotent trước duplicate events và phải có runbook/manual replay.
 - Team-first ranking, daily caps và anti-shame UX là hard requirement, không phải enhancement.
-
 
 ### MODULE 10 — QUẢN LÝ TỔ CHỨC & CẤU HÌNH (Org Config)
 
@@ -2339,6 +2439,7 @@ Mục tiêu của gamification trong TTNDD_OPS là **khích lệ hành vi tốt 
 **Mục đích**: Module 10 không phải chỉ là “trang settings”, mà là **control plane** của toàn TTNDD_OPS cho từng Org. Mọi tenant bootstrap, identity, role, policy, module activation, connector, audit, budget guardrail và release readiness đều đi qua module này. Vì vậy nó **phải triển khai đầu tiên** và phải có story riêng để bảo đảm khả dụng production.
 
 **Phạm vi**:
+
 - Org profile, branding, branch/Ngành/unit registry.
 - User lifecycle, invitations, guardian links, role templates, permission packs.
 - Settings registry theo scope (org/module/branch/team/user).
@@ -2349,6 +2450,7 @@ Mục tiêu của gamification trong TTNDD_OPS là **khích lệ hành vi tốt 
 #### A.1 TẠI SAO MODULE 10 LÀ MODULE LÕI HẠ TẦNG
 
 Nếu M10 yếu, toàn platform sẽ rơi vào trạng thái “có module nhưng không quản trị được”. Vì vậy M10 phải cung cấp:
+
 - **tenant bootstrap**: tạo Org, slug, default branches/roles/settings.
 - **identity & access control**: invite, activate, suspend, reset, session policy, role bindings.
 - **configuration registry**: nơi lưu đúng và version hóa các setting phục vụ module khác.
@@ -2357,52 +2459,58 @@ Nếu M10 yếu, toàn platform sẽ rơi vào trạng thái “có module nhưn
 
 #### A.2 SUB-PAGES BẮT BUỘC CỦA MODULE 10
 
-| Sub-page | Mục đích | Người dùng chính |
-|---|---|---|
-| Org Overview | Thông tin tổ chức, logo, theme, plan, health status | Super Admin |
-| Branch & Program Config | Ngành/Đội/Chi, độ tuổi, màu, biểu tượng, tên gọi | Super Admin/Admin |
-| User & Invitation Admin | Mời user, kích hoạt, khóa, reset, guardian linking | Super Admin/Admin |
-| Roles & Permissions | Role templates, grants, policy preview, permission diff | Super Admin |
-| Module Activation & Feature Flags | Bật/tắt module, flags, dependency warnings | Super Admin |
-| Integrations & Connectors | Zalo OA, email, webhook, storage, calendar, exports | Super Admin |
-| Settings Registry | Xem/sửa settings theo namespace và scope | Super Admin |
-| Audit, Budget & Release Dashboard | Audit logs, budget guardrails, readiness status, release evidence | Super Admin/CTO |
+| Sub-page                          | Mục đích                                                          | Người dùng chính  |
+| --------------------------------- | ----------------------------------------------------------------- | ----------------- |
+| Org Overview                      | Thông tin tổ chức, logo, theme, plan, health status               | Super Admin       |
+| Branch & Program Config           | Ngành/Đội/Chi, độ tuổi, màu, biểu tượng, tên gọi                  | Super Admin/Admin |
+| User & Invitation Admin           | Mời user, kích hoạt, khóa, reset, guardian linking                | Super Admin/Admin |
+| Roles & Permissions               | Role templates, grants, policy preview, permission diff           | Super Admin       |
+| Module Activation & Feature Flags | Bật/tắt module, flags, dependency warnings                        | Super Admin       |
+| Integrations & Connectors         | Zalo OA, email, webhook, storage, calendar, exports               | Super Admin       |
+| Settings Registry                 | Xem/sửa settings theo namespace và scope                          | Super Admin       |
+| Audit, Budget & Release Dashboard | Audit logs, budget guardrails, readiness status, release evidence | Super Admin/CTO   |
 
 #### B. TÍNH NĂNG & CHỨC NĂNG
 
 **B.1 Thông tin Tổ chức & Branding**
+
 - Tên, slug, logo, mô tả, địa chỉ, thông tin pháp lý/nội bộ, timezone, locale, theme variants.
 - Branding tokens phải chảy xuống FE qua settings registry, không hardcode.
 
 **B.2 Branch / Program / Unit Registry**
+
 - Tạo/sửa Ngành, độ tuổi min/max, màu theme, tên gọi TTKT, biểu tượng, policy packs áp dụng.
 - Map đơn vị theo cấu trúc Liên Đoàn → Ngành → Hàng/Đội/Nhóm; versioned effective dates để phục vụ handover/chuyển đơn vị.
 
 **B.3 Identity, User Lifecycle & Guardian Links**
+
 - Invite user, activate, suspend, reactivate, reset password, revoke sessions.
 - Link phụ huynh/guardian với trẻ; xác nhận consent và visibility scopes.
 - Role templates: super_admin, admin, leader, mentor, parent, member, guest; có permission matrix và preview.
 
 **B.4 Settings Registry & Feature Flags**
+
 - JSON settings có namespace rõ (`core.*`, `reward.*`, `lms.*`, `scout.*`, ...), schema validation, version history, rollback.
 - Feature flags per org/per branch/per environment; release toggles có mô tả, owner, expiry.
 - Module activation phải có dependency validation, ví dụ không bật Reward shop nếu Finance/Assets linkage chưa sẵn sàng.
 
 **B.5 Integrations & Operational Controls**
+
 - Kết nối Zalo OA/ZNS, email, storage, export destinations, calendar, webhook subscriptions.
 - Budget guardrail settings, threshold actions, degraded mode toggles, signed URL policies.
 - Release dashboard hiển thị readiness by module/story/gate/evidence link.
 
 **B.6 Audit, Policy & Compliance**
+
 - Audit log cho actions quan trọng, trước/sau thay đổi, actor, scope, correlation id.
 - Policy registry cho child safety, data retention, notification windows, file access policies.
 - Security events và admin actions phải truy vấn được qua dashboard và export.
 
 #### C. YÊU CẦU TRIỂN KHAI CỨNG
+
 - Không chấp nhận “chỉ có CRUD org/user”; phải có đủ **tenant bootstrap + role/permission packs + settings registry + module flags + connectors + audit/budget/release dashboard + E2E**.
 - M10 phải là nguồn truth cho config runtime của module khác; không cho module cất setting rải rác không version hóa.
 - M10 phải có route, API, schema, audit và Playwright pack riêng trước khi gọi là production-ready.
-
 
 ## PHẦN IV — KIẾN TRÚC BẢO MẬT & AN TOÀN TRẺ EM
 
@@ -2416,19 +2524,19 @@ Nếu M10 yếu, toàn platform sẽ rơi vào trạng thái “có module nhưn
 
 > **DTNDD phục vụ trẻ em từ 5-25 tuổi. An toàn trẻ em là đạo đức và trách nhiệm tôn giáo.**
 
-| # | Hạng mục | Biện pháp |
-| ---|---------|---------- |
-| CS-01 | Consent phụ huynh bắt buộc cho < 13 tuổi (COPPA) và < 16 tuổi (PDPD VN) | Form đồng ý + e-signature |
-| CS-02 | Ảnh đoàn sinh không public | Signed URL có TTL, private by default |
-| CS-03 | Content moderation | Filter ngôn từ trong comment, báo cáo vi phạm |
-| CS-04 | Không chat riêng 1-1 Trưởng ↔ Đoàn sinh | Mọi giao tiếp qua channel có audit trail |
-| CS-05 | Quyền xóa dữ liệu | Soft delete + hard delete sau 90 ngày |
-| CS-06 | Giới hạn thời gian sử dụng | Không push notification ban đêm (22:00-07:00) |
-| CS-07 | Không dark patterns | Không kỹ thuật nudge làm suy yếu quyền riêng tư |
-| CS-08 | **Nguyên tắc 2 người lớn (2‑adult rule)** | Session/Event (đặc biệt qua đêm) bắt buộc ≥2 Trưởng được assign; thiếu thì không cho approve |
-| CS-09 | Safe-from-Harm incident reporting | Ticket “Incident” bảo mật + escalation + audit log; có SLA xử lý |
-| CS-10 | Theo dõi huấn luyện/kiểm tra lý lịch Trưởng | Lưu chứng chỉ + nhắc gia hạn; hạn chế phạm vi nếu chưa đạt |
-| CS-11 | Minh bạch truy cập dữ liệu trẻ em | Audit log “ai xem dữ liệu con”; phụ huynh xem được lịch sử |
+| #     | Hạng mục                                                                | Biện pháp                                                                                    |
+| ----- | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| CS-01 | Consent phụ huynh bắt buộc cho < 13 tuổi (COPPA) và < 16 tuổi (PDPD VN) | Form đồng ý + e-signature                                                                    |
+| CS-02 | Ảnh đoàn sinh không public                                              | Signed URL có TTL, private by default                                                        |
+| CS-03 | Content moderation                                                      | Filter ngôn từ trong comment, báo cáo vi phạm                                                |
+| CS-04 | Không chat riêng 1-1 Trưởng ↔ Đoàn sinh                                 | Mọi giao tiếp qua channel có audit trail                                                     |
+| CS-05 | Quyền xóa dữ liệu                                                       | Soft delete + hard delete sau 90 ngày                                                        |
+| CS-06 | Giới hạn thời gian sử dụng                                              | Không push notification ban đêm (22:00-07:00)                                                |
+| CS-07 | Không dark patterns                                                     | Không kỹ thuật nudge làm suy yếu quyền riêng tư                                              |
+| CS-08 | **Nguyên tắc 2 người lớn (2‑adult rule)**                               | Session/Event (đặc biệt qua đêm) bắt buộc ≥2 Trưởng được assign; thiếu thì không cho approve |
+| CS-09 | Safe-from-Harm incident reporting                                       | Ticket “Incident” bảo mật + escalation + audit log; có SLA xử lý                             |
+| CS-10 | Theo dõi huấn luyện/kiểm tra lý lịch Trưởng                             | Lưu chứng chỉ + nhắc gia hạn; hạn chế phạm vi nếu chưa đạt                                   |
+| CS-11 | Minh bạch truy cập dữ liệu trẻ em                                       | Audit log “ai xem dữ liệu con”; phụ huynh xem được lịch sử                                   |
 
 > Liên kết chuẩn: DTNDD quy định ưu tiên **an toàn – bảo vệ trẻ em**, có **nguyên tắc hai người lớn**, và quy trình quản lý rủi ro cho hoạt động. Đồng thời tham chiếu chính sách quốc tế “Safe from Harm” của phong trào Hướng đạo để chuẩn hoá quy trình.
 
@@ -2446,12 +2554,14 @@ Nếu M10 yếu, toàn platform sẽ rơi vào trạng thái “có module nhưn
 ---
 
 ### 4.4 Tiêu chuẩn & Kiểm chứng bảo mật (Security Standards & Verification)
-- **OWASP Top 10**: dùng làm “baseline awareness” cho team (đặc biệt A01 Broken Access Control, A02 Cryptographic Failures, A03 Injection, Logging/Monitoring…).  
-- **OWASP ASVS**: dùng như checklist kiểm chứng controls theo level (khuyến nghị Level 2 cho hệ thống có dữ liệu nhạy cảm trẻ em).  
+
+- **OWASP Top 10**: dùng làm “baseline awareness” cho team (đặc biệt A01 Broken Access Control, A02 Cryptographic Failures, A03 Injection, Logging/Monitoring…).
+- **OWASP ASVS**: dùng như checklist kiểm chứng controls theo level (khuyến nghị Level 2 cho hệ thống có dữ liệu nhạy cảm trẻ em).
 - **Contract‑first security**: mọi endpoint phải có validation + auth scope trong OpenAPI, và có test (integration/contract).
 
 ### 4.5 Edge protection & rate limiting (GCP)
-- Ưu tiên chặn/throttle ở edge bằng **Google Cloud Armor rate limiting** trước khi request vào Cloud Run (giảm chi phí & giảm nguy cơ DoS).  
+
+- Ưu tiên chặn/throttle ở edge bằng **Google Cloud Armor rate limiting** trước khi request vào Cloud Run (giảm chi phí & giảm nguy cơ DoS).
 - Rate policy tách theo: per-client (IP/user) + per-org; log sampling để tránh “đốt” budget.
 - Authentication: nếu dùng **Firebase Auth**, backend bắt buộc **verify Firebase ID token** server-side trước khi issue session/access token nội bộ.
 
@@ -2459,46 +2569,53 @@ Nếu M10 yếu, toàn platform sẽ rơi vào trạng thái “có module nhưn
 
 <a id="REF-UX"></a>
 
-
 ## PHẦN V — HỆ THỐNG THIẾT KẾ UI/UX (MMORPG)
+
 > **Tôn chỉ**: UI/UX phải “đã như game” nhưng vẫn **dễ dùng như ERP**, ưu tiên **an toàn trẻ em (P0)** và **tối ưu chi phí (≤ 800k VND/tháng)**.  
-> **Thẩm mỹ**: *Tu tiên (xianxia/cultivation) × Hướng đạo × Cao Đài × Việt Nam*.
+> **Thẩm mỹ**: _Tu tiên (xianxia/cultivation) × Hướng đạo × Cao Đài × Việt Nam_.
 
 ### 5.1 Mục tiêu thiết kế (Design Goals)
+
 1. **Immersive như MMORPG**: người dùng cảm giác đang “đi quest”, “lên cấp”, “mở khóa kỹ năng”.
 2. **Rõ ràng & học nhanh**: dù giao diện phong cách game, luồng thao tác phải ngắn, ít nhầm.
 3. **An toàn trẻ em & đạo đức**: không dark patterns, không “shame ranking”, luôn có kiểm soát phụ huynh.
-4. **Budget-aware**: mọi hiệu ứng/ảnh/asset có chế độ *low-cost mode* để không “đốt” log, bandwidth, compute.
+4. **Budget-aware**: mọi hiệu ứng/ảnh/asset có chế độ _low-cost mode_ để không “đốt” log, bandwidth, compute.
 5. **Nhất quán xuyên module**: một design system, một vocabulary, một pattern library.
 
 ### 5.2 Art Direction — “Tu tiên × Hướng đạo × Cao Đài × Việt Nam”
+
 #### 5.2.1 DNA thẩm mỹ (4 lớp)
+
 - **Tu tiên/cultivation**: tầng cảnh giới, linh khí, pháp bảo, vòng sáng “độ kiếp” → dùng để biểu đạt **tiến bộ/level**.
 - **Hướng đạo**: la bàn, bản đồ, cắm trại, huy hiệu, “party 4–8”, “guild”, sổ tay.
 - **Cao Đài**: **Thiên Nhãn** (Divine Eye) là biểu tượng trung tâm; dùng như “Seal/Oracle UI” (không lạm dụng, chỉ đặt ở các màn hình nghi lễ/đánh dấu milestone).
 - **Việt Nam**: chất liệu **sơn mài**, **giấy dó**, họa tiết **vân mây**, **hoa sen**, **chim Lạc/Đông Sơn**.
 
-> Gợi ý biểu tượng Cao Đài: “God is represented as an eye in a triangle” (Thiên Nhãn) — dùng như *core emblem* ở header/temple scenes.  
+> Gợi ý biểu tượng Cao Đài: “God is represented as an eye in a triangle” (Thiên Nhãn) — dùng như _core emblem_ ở header/temple scenes.  
 > Gợi ý họa tiết Đông Sơn: “repeated patterns… complex architecture” trên trống đồng — phù hợp làm pattern nền/viền khung.
 
 #### 5.2.2 “Map” chất liệu vào UI
+
 - **Nền (Backgrounds)**: dark navy + noise nhẹ (giấy dó), gradient “linh khí”.
 - **Card surfaces**: hiệu ứng “sơn mài” bóng nhẹ, viền cánh sen + vân mây.
 - **Divider/Frame**: motif Đông Sơn (chim Lạc, vòng tròn đồng tâm) ở “Rank/Skillbook”.
 - **Milestone screens**: dùng “Temple UI” (Thiên Nhãn + ánh vàng) cho: lên bậc, hoàn tất đẳng thứ, bàn giao ngành.
 
 ### 5.3 Từ ERP → MMORPG: Bản đồ ẩn dụ (UI Metaphor Map)
-| Khái niệm hệ thống | Ẩn dụ MMORPG | UI pattern |
-|---|---|---|
-| Organization (Org) | **Guild / Bang hội** | Guild hall dashboard + roster |
-| Branch/Unit (Ngành/Đội/Nhóm) | **Party / Squad** | Party panel (4–8) + group progress |
-| Project/Plan | **Questline / Campaign** | Quest chain + checklist + timeline |
-| Ticket/Approval | **Request Scroll / Seal** | “scroll card” + approval stamps |
-| Skillbook/Rank | **Skill tree / Level** | Skill map (nodes + locks) |
-| Rewards/EXP | **Currency/XP + Loot** | Inventory + XP bar + badges |
+
+| Khái niệm hệ thống           | Ẩn dụ MMORPG              | UI pattern                         |
+| ---------------------------- | ------------------------- | ---------------------------------- |
+| Organization (Org)           | **Guild / Bang hội**      | Guild hall dashboard + roster      |
+| Branch/Unit (Ngành/Đội/Nhóm) | **Party / Squad**         | Party panel (4–8) + group progress |
+| Project/Plan                 | **Questline / Campaign**  | Quest chain + checklist + timeline |
+| Ticket/Approval              | **Request Scroll / Seal** | “scroll card” + approval stamps    |
+| Skillbook/Rank               | **Skill tree / Level**    | Skill map (nodes + locks)          |
+| Rewards/EXP                  | **Currency/XP + Loot**    | Inventory + XP bar + badges        |
 
 ### 5.4 Information Architecture (IA) — Layout như HUD game
+
 #### 5.4.1 Layout chuẩn (desktop)
+
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │ TOP HUD: Avatar · Tên · Ngành/Bậc · EXP Bar · Currency · Quick Nav   │
@@ -2513,42 +2630,49 @@ Nếu M10 yếu, toàn platform sẽ rơi vào trạng thái “có module nhưn
 ```
 
 #### 5.4.2 Layout chuẩn (mobile)
-- 1 cột, **Bottom Tab** 5 mục: Home · Map · Quest · Character · Inbox  
+
+- 1 cột, **Bottom Tab** 5 mục: Home · Map · Quest · Character · Inbox
 - “Camp Mode” (offline-first): tải pack, giảm animation, ưu tiên checklist + attendance.
 
 ### 5.5 Design Tokens (Design System) — chuẩn hoá để không lệch pha
+
 #### 5.5.1 Core palette (dark MMORPG)
-| Token | Hex | Usage | Notes |
-|---|---|---|---|
-| `bg.world` | `#0B1220` | nền chính | dark navy |
-| `bg.panel` | `#111A2E` | panel / sidebar | sâu hơn nền |
-| `surface.card` | `#141F36` | card | “sơn mài” bóng nhẹ |
-| `stroke.soft` | `#2A3A64` | viền | không quá gắt |
-| `text.primary` | `#E8EEF9` | chữ chính | |
-| `text.muted` | `#AAB8D6` | chữ phụ | |
+
+| Token          | Hex       | Usage           | Notes              |
+| -------------- | --------- | --------------- | ------------------ |
+| `bg.world`     | `#0B1220` | nền chính       | dark navy          |
+| `bg.panel`     | `#111A2E` | panel / sidebar | sâu hơn nền        |
+| `surface.card` | `#141F36` | card            | “sơn mài” bóng nhẹ |
+| `stroke.soft`  | `#2A3A64` | viền            | không quá gắt      |
+| `text.primary` | `#E8EEF9` | chữ chính       |                    |
+| `text.muted`   | `#AAB8D6` | chữ phụ         |                    |
 
 #### 5.5.2 Branch palette (ngành)
-| Ngành | Token | Màu | Ý nghĩa |
-|---|---|---|---|
-| Đồng | `accent.dong` | `#DC2626` | nhiệt huyết, bình minh |
-| Thiếu | `accent.thieu` | `#16A34A` | phát triển, thiên nhiên |
-| Thanh | `accent.thanh` | `#3B82F6` | lý tưởng, trí tuệ |
-| Trưởng | `accent.leader` | `#7C3AED` | khai sáng, dẫn dắt |
+
+| Ngành  | Token           | Màu       | Ý nghĩa                 |
+| ------ | --------------- | --------- | ----------------------- |
+| Đồng   | `accent.dong`   | `#DC2626` | nhiệt huyết, bình minh  |
+| Thiếu  | `accent.thieu`  | `#16A34A` | phát triển, thiên nhiên |
+| Thanh  | `accent.thanh`  | `#3B82F6` | lý tưởng, trí tuệ       |
+| Trưởng | `accent.leader` | `#7C3AED` | khai sáng, dẫn dắt      |
 
 #### 5.5.3 “Tam Giáo” (theme overlay)
-| Truyền thống | Màu gợi ý | Dùng ở đâu |
-|---|---|---|
-| Phật | `#F4C430` | milestone / “merit” |
-| Lão | `#2563EB` | meditation / flow |
-| Nho | `#DC2626` | duty / discipline |
+
+| Truyền thống | Màu gợi ý | Dùng ở đâu          |
+| ------------ | --------- | ------------------- |
+| Phật         | `#F4C430` | milestone / “merit” |
+| Lão          | `#2563EB` | meditation / flow   |
+| Nho          | `#DC2626` | duty / discipline   |
 
 ### 5.6 Typography & Grid
-- Font UI: **Be Vietnam Pro** (fallback: system-ui)  
-- Heading: 600–700, body: 400–500, line-height 1.4–1.6  
-- Grid: 12 columns (desktop), 4 columns (mobile)  
+
+- Font UI: **Be Vietnam Pro** (fallback: system-ui)
+- Heading: 600–700, body: 400–500, line-height 1.4–1.6
+- Grid: 12 columns (desktop), 4 columns (mobile)
 - Spacing tokens: 4/8/12/16/24/32
 
 ### 5.7 Iconography & Motifs (không “Tây hóa”)
+
 - **Thiên Nhãn**: đặt đúng chỗ (Temple/Milestone), tránh spam.
 - **Hoa sen + vân mây**: frame, divider, header ornaments.
 - **Chim Lạc/Đông Sơn**: rank ring, achievement border.
@@ -2556,45 +2680,54 @@ Nếu M10 yếu, toàn platform sẽ rơi vào trạng thái “có module nhưn
 - Icon style: 2px stroke + fill tối giản; dùng SVG sprite để nhẹ.
 
 ### 5.8 Component Library (MMORPG UI Kit) — “có thể build”
+
 **Core HUD**
+
 - `HUDTopBar` (avatar, exp bar, currency, quick nav)
 - `QuestTrackerPanel` (right panel queue)
 - `ActionBar` (bottom actions + shortcuts)
 
 **Progression**
+
 - `ExpBar`, `LevelBadge`, `RankRing` (Đông Sơn ring)
 - `SkillTree` (nodes: locked/unlocked/in-progress/verified)
 - `AchievementCard` + `RarityFrame` (common/rare/epic/legendary)
 - `CharacterPedestal3D`, `CampfireTimeline3D`, `RewardForge3D`, `ConstellationOrgChart3D` (hero surfaces only)
 
 **Org Social**
+
 - `PartyPanel` (4–8 members, roles)
 - `GuildRoster` (Org members, filters)
 - `MentorCard` (mentor/coach)
 
 **Work & Ops**
+
 - `KanbanBoard`, `WorkItemTree`, `Checklist`
 - `ApprovalStamp` (approve/reject seals)
 - `InvoiceCard`, `AssetLoanTicket`
 
 **Safety/Parents**
+
 - `GuardianConsentModal` (e-sign / confirmation)
 - `ChildDataAccessLog` (phụ huynh xem lịch sử truy cập)
 - `QuietHoursBanner` (22:00–07:00)
 
 ### 5.9 Micro‑interactions & Motion (đẹp nhưng không gây nghiện)
+
 - Feedback bắt buộc: **rõ – nhanh – đúng** (toast, haptic nhẹ trên mobile, sound optional).
 - “Level up” chỉ 1–2s, không loop; milestone có “ceremony screen” nhưng có nút Skip.
-- Bắt buộc hỗ trợ **Reduced Motion** (`prefers-reduced-motion`) để tắt animation.  
+- Bắt buộc hỗ trợ **Reduced Motion** (`prefers-reduced-motion`) để tắt animation.
 - Progress bars phải **chính xác**, tránh “fake progress”.
 
 #### 5.9.1 3D Scene System — dùng để làm đẹp đúng chỗ, không phá nghiệp vụ
+
 - Render stack chuẩn: `three` + `@react-three/fiber` + `@react-three/drei`; animation/gesture dùng Motion for React và Motion for R3F.
 - 3D chỉ dùng cho **scene header**, **module hero surface**, **ceremony/reward screens**, **character pedestal**, **world map transitions**; **không** đặt 3D nặng vào form, ledger, bảng duyệt, bảng dữ liệu dày.
 - Asset chuẩn: ưu tiên **GLB/GLTF** + texture nén; route phải có **static poster** hoặc 2D fallback.
 - Mọi scene 3D phải có **lazy load**, **suspend fallback**, **reduced-motion fallback**, **low-cost mode fallback** và **mobile-low-end fallback**.
 
 #### 5.9.2 Scene briefs bắt buộc cho các module trọng tâm
+
 - **Module 1 — HRM / Guild Hall**: đại sảnh nhân sự với `Constellation Org Chart`, pedestal avatar, spotlight cho vai trò/đơn vị.
 - **Module 7 — LMS / Celestial Academy**: cổng học viện, lesson portal, arena lobby, mentor podium, quiz reveal animation.
 - **Module 8 — Scout Core / Campfire Shrine**: character pedestal, skill tree shrine, campfire session timeline, bridge of transition giữa các ngành.
@@ -2602,46 +2735,53 @@ Nếu M10 yếu, toàn platform sẽ rơi vào trạng thái “có module nhưn
 - Các scene trên đều phải có **2D fallback** để hệ thống vẫn chạy production khi budget/perf không cho phép 3D.
 
 ### 5.10 Accessibility & Comfort (P0)
-- Tuân thủ **WCAG 2.2 AA** cho các màn hình chính (contrast, focus, keyboard).  
-- Có chế độ **Large Text / High Contrast**.  
+
+- Tuân thủ **WCAG 2.2 AA** cho các màn hình chính (contrast, focus, keyboard).
+- Có chế độ **Large Text / High Contrast**.
 - Không dùng animation “flash” nhanh; có “reduce motion”.
 
 ### 5.11 Offline & Camp Mode (đi trại)
-- “Camp Mode”:  
-  - tải **offline packs** cho LMS/Skill checklists;  
-  - caching assets + dữ liệu cần thiết bằng Service Worker + Cache Storage;  
+
+- “Camp Mode”:
+  - tải **offline packs** cho LMS/Skill checklists;
+  - caching assets + dữ liệu cần thiết bằng Service Worker + Cache Storage;
   - sync lại khi có mạng (background sync hạn chế).
 - Ưu tiên checklist, attendance, consent forms, emergency contacts.
 
 ### 5.12 UI by Module — screen map tối thiểu (P0)
-| Module | Screen P0 (phải có) | Game metaphor |
-|---|---|---|
-| HRM | Roster, Profile, Org chart | Guild roster |
-| Project | Kanban/List/Tree + Plan template | Quest board |
-| Ticket | Ticket inbox + approvals | Scroll requests |
-| Finance | Fees, ledger, reports | Treasury |
-| Assets | Inventory + loan workflow | Armory/Storehouse |
-| LMS | Course list + quiz + offline pack | Academy |
+
+| Module     | Screen P0 (phải có)                       | Game metaphor         |
+| ---------- | ----------------------------------------- | --------------------- |
+| HRM        | Roster, Profile, Org chart                | Guild roster          |
+| Project    | Kanban/List/Tree + Plan template          | Quest board           |
+| Ticket     | Ticket inbox + approvals                  | Scroll requests       |
+| Finance    | Fees, ledger, reports                     | Treasury              |
+| Assets     | Inventory + loan workflow                 | Armory/Storehouse     |
+| LMS        | Course list + quiz + offline pack         | Academy               |
 | Scout Core | Skill map + verification queue + handover | Character progression |
-| Rewards | XP ledger + badges + leaderboard | Inventory & rankings |
+| Rewards    | XP ledger + badges + leaderboard          | Inventory & rankings  |
 
 ### 5.13 UI Screen Map (CHI TIẾT) — theo từng module (wireframe text + component mapping)
 
-> **Nguyên tắc**  
-> 1) **Một App Shell, nhiều “Zone/Scene”**: mọi module chạy trong cùng HUD để không “đứt mạch game”.  
-> 2) **Cùng một vocabulary UI**: “Quest/Checklist”, “Inventory”, “Character Sheet”, “Guild/Party”, “Seal/Approval”.  
-> 3) **Safety + Budget luôn hiện hữu**: mọi màn hình có thể bật **low‑cost mode**; dữ liệu trẻ em luôn “privacy-by-default”.
+> **Nguyên tắc**
+>
+> 1. **Một App Shell, nhiều “Zone/Scene”**: mọi module chạy trong cùng HUD để không “đứt mạch game”.
+> 2. **Cùng một vocabulary UI**: “Quest/Checklist”, “Inventory”, “Character Sheet”, “Guild/Party”, “Seal/Approval”.
+> 3. **Safety + Budget luôn hiện hữu**: mọi màn hình có thể bật **low‑cost mode**; dữ liệu trẻ em luôn “privacy-by-default”.
 
 #### 5.13.1 Global App Shell (route & layout)
-**Routes (chuẩn hoá)**  
-- `/world` — World Map (hub)  
-- `/character/:memberId` — Character Sheet (profile MMORPG)  
-- `/quest` — Quest Log (projects/plans/tasks/approvals)  
-- `/inbox` — Inbox (tickets/approvals/notifications)  
-- `/guild` — Guild Hall (org dashboards, rosters)  
+
+**Routes (chuẩn hoá)**
+
+- `/world` — World Map (hub)
+- `/character/:memberId` — Character Sheet (profile MMORPG)
+- `/quest` — Quest Log (projects/plans/tasks/approvals)
+- `/inbox` — Inbox (tickets/approvals/notifications)
+- `/guild` — Guild Hall (org dashboards, rosters)
 - `/settings` — Settings (org/user/budget/flags)
 
 **Wireframe (desktop)**
+
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │ HUDTopBar  [Org Crest] [World ▾] [Search]     [EXP][Currency][Notif][Profile] │
@@ -2657,55 +2797,60 @@ Nếu M10 yếu, toàn platform sẽ rơi vào trạng thái “có module nhưn
 ```
 
 **Wireframe (mobile)**
-- Bottom Tabs: `Home · Map · Quest · Character · Inbox`  
+
+- Bottom Tabs: `Home · Map · Quest · Character · Inbox`
 - RightPanel → chuyển thành “Quest Drawer” dạng swipe.
 
 #### 5.13.2 Component ID Map (SSOT cho FE)
+
 > Component IDs dùng xuyên suốt screen map (để mapping vào code/components).  
-| Component ID | Tên | Mục đích | Gợi ý implement (FE) |
-|---|---|---|---|
-| `C-AppShell` | App Shell | Khung HUD chung | Next.js layout + CSS variables tokens |
-| `C-HUDTopBar` | Top HUD | avatar/exp/currency/search/notif | sticky header + responsive slots |
-| `C-LeftRailNav` | World Map Nav | nav modules | icon + badge + role gating |
-| `C-RightQuestPanel` | Quest/Queue | quest tracker + verify queue | collapsible; on mobile → drawer |
-| `C-ActionBar` | Action Bar | CTA theo context | keyboard shortcuts + safe confirm |
-| `C-SceneHeader` | Scene Header | tên scene + breadcrumbs | includes SPICES + cost tags |
-| `C-CardLacquer` | Lacquer Card | card “sơn mài” | shadow+border tokens |
-| `C-DrawerDetail` | Detail Drawer | xem/điều chỉnh entity | Headless UI dialog/sheet |
-| `C-QuestChain` | Quest Chain | chuỗi questline | tree view + checklist |
-| `C-Checklist` | Checklist | tick tasks/criteria | optimistic UI + audit |
-| `C-SkillTree` | Skill Tree | map kỹ năng | nodes + locks + tooltips |
-| `C-CharacterSheet` | Character Sheet | profile dạng game | stats + rank + badges |
-| `C-ExpBar` | EXP Bar | tiến độ lên cấp | accurate progress only |
-| `C-InventoryPanel` | Inventory | currencies/loot | ledger-backed view |
-| `C-ApprovalStamp` | Seal/Stamp | phê duyệt | approve/reject with reasons |
-| `C-PartyPanel` | Party 4–8 | nhóm nhỏ | roles + progress rollup |
-| `C-GuildRoster` | Guild roster | danh sách thành viên | filter + search + export gated |
-| `C-SafeBanner` | Safety banner | quiet hours/safety gates | always visible when active |
-| `C-LowCostBadge` | Low-cost badge | trạng thái tiết kiệm | driven by feature flags |
-| `C-SPICESTag` | SPICES tag | hiển thị SPICES | required for activities/lessons |
-| `C-ConsentModal` | Consent | đồng ý phụ huynh | e-sign + audit log |
-| `C-IncidentReport` | Incident | báo cáo sự cố | restricted visibility |
+> | Component ID | Tên | Mục đích | Gợi ý implement (FE) |
+> |---|---|---|---|
+> | `C-AppShell` | App Shell | Khung HUD chung | Next.js layout + CSS variables tokens |
+> | `C-HUDTopBar` | Top HUD | avatar/exp/currency/search/notif | sticky header + responsive slots |
+> | `C-LeftRailNav` | World Map Nav | nav modules | icon + badge + role gating |
+> | `C-RightQuestPanel` | Quest/Queue | quest tracker + verify queue | collapsible; on mobile → drawer |
+> | `C-ActionBar` | Action Bar | CTA theo context | keyboard shortcuts + safe confirm |
+> | `C-SceneHeader` | Scene Header | tên scene + breadcrumbs | includes SPICES + cost tags |
+> | `C-CardLacquer` | Lacquer Card | card “sơn mài” | shadow+border tokens |
+> | `C-DrawerDetail` | Detail Drawer | xem/điều chỉnh entity | Headless UI dialog/sheet |
+> | `C-QuestChain` | Quest Chain | chuỗi questline | tree view + checklist |
+> | `C-Checklist` | Checklist | tick tasks/criteria | optimistic UI + audit |
+> | `C-SkillTree` | Skill Tree | map kỹ năng | nodes + locks + tooltips |
+> | `C-CharacterSheet` | Character Sheet | profile dạng game | stats + rank + badges |
+> | `C-ExpBar` | EXP Bar | tiến độ lên cấp | accurate progress only |
+> | `C-InventoryPanel` | Inventory | currencies/loot | ledger-backed view |
+> | `C-ApprovalStamp` | Seal/Stamp | phê duyệt | approve/reject with reasons |
+> | `C-PartyPanel` | Party 4–8 | nhóm nhỏ | roles + progress rollup |
+> | `C-GuildRoster` | Guild roster | danh sách thành viên | filter + search + export gated |
+> | `C-SafeBanner` | Safety banner | quiet hours/safety gates | always visible when active |
+> | `C-LowCostBadge` | Low-cost badge | trạng thái tiết kiệm | driven by feature flags |
+> | `C-SPICESTag` | SPICES tag | hiển thị SPICES | required for activities/lessons |
+> | `C-ConsentModal` | Consent | đồng ý phụ huynh | e-sign + audit log |
+> | `C-IncidentReport` | Incident | báo cáo sự cố | restricted visibility |
 
 ---
 
 <a id="REF-SCREENMAP"></a>
+
 ### 5.14 Screen Map theo module (P0 → P1), kèm wireframe & component mapping
 
 > Format: **Screen → Route → Primary components → Data sources (API tags) → Events → Roles → Cost impact**  
 > **Cost impact**: LOW/MED/HIGH để gắn kill-switch theo Budget Guardrails.
 
 #### Module 10 — Org Config & IAM (Guild Admin)
-| Screen | Route | Primary components | API tags | Events | Roles | Cost |
-|---|---|---|---|---|---|---|
-| Org Overview | `/settings/org` | `C-SceneHeader`, `C-CardLacquer` | Org/IAM | `cfg.updated` | SuperAdmin | LOW |
-| Roles & Scopes | `/settings/iam` | `C-DrawerDetail`, tables | IAM | `iam.role.granted` | SuperAdmin | LOW |
-| Module Toggles | `/settings/modules` | toggles + `C-LowCostBadge` | Config | `cfg.updated` | SuperAdmin | LOW |
-| Budget Guardrails | `/settings/budget` | charts + runbook panel | Budget | budget alerts | SuperAdmin | LOW |
-| Release Gates Dashboard | `/settings/release` | `C-ReleaseGateDashboard`, `C-ModuleReadinessMatrix` | System/Release | — | SuperAdmin | LOW |
-| Audit Log | `/settings/audit` | table + filters | Audit | — | SuperAdmin | MED (export gated) |
+
+| Screen                  | Route               | Primary components                                  | API tags       | Events             | Roles      | Cost               |
+| ----------------------- | ------------------- | --------------------------------------------------- | -------------- | ------------------ | ---------- | ------------------ |
+| Org Overview            | `/settings/org`     | `C-SceneHeader`, `C-CardLacquer`                    | Org/IAM        | `cfg.updated`      | SuperAdmin | LOW                |
+| Roles & Scopes          | `/settings/iam`     | `C-DrawerDetail`, tables                            | IAM            | `iam.role.granted` | SuperAdmin | LOW                |
+| Module Toggles          | `/settings/modules` | toggles + `C-LowCostBadge`                          | Config         | `cfg.updated`      | SuperAdmin | LOW                |
+| Budget Guardrails       | `/settings/budget`  | charts + runbook panel                              | Budget         | budget alerts      | SuperAdmin | LOW                |
+| Release Gates Dashboard | `/settings/release` | `C-ReleaseGateDashboard`, `C-ModuleReadinessMatrix` | System/Release | —                  | SuperAdmin | LOW                |
+| Audit Log               | `/settings/audit`   | table + filters                                     | Audit          | —                  | SuperAdmin | MED (export gated) |
 
 **Wireframe: Roles & Scopes**
+
 ```
 [SceneHeader: IAM]  [Search]  [Create Role]
 ------------------------------------------------
@@ -2713,82 +2858,91 @@ Nếu M10 yếu, toàn platform sẽ rơi vào trạng thái “có module nhưn
 ```
 
 #### Module 1 — HRM (Roster & Character)
-| Screen | Route | Primary components | API tags | Events | Roles | Cost |
-|---|---|---|---|---|---|---|
-| Member Roster | `/guild/roster` | `C-GuildRoster`, `C-DrawerDetail` | HRM | `hrm.*` | Admin/Leader | MED |
-| Character Sheet | `/character/:id` | `C-CharacterSheet`, `C-ExpBar`, `C-InventoryPanel` | HRM/Scout/Reward | `reward.*` | Admin/Leader/User/Parent (limited) | MED |
-| Org Chart | `/guild/org-chart` | tree + `C-CardLacquer` | Org/HRM | `org.assignment.changed` | Admin/Leader | LOW |
-| Compliance Center | `/guild/compliance` | table + `C-SafeBanner` | HRM | compliance events | Admin | LOW |
-| Transfers | `/guild/transfers` | wizard + `C-ApprovalStamp` | HRM | `hrm.member_transferred` | SuperAdmin | LOW |
+
+| Screen            | Route               | Primary components                                 | API tags         | Events                   | Roles                              | Cost |
+| ----------------- | ------------------- | -------------------------------------------------- | ---------------- | ------------------------ | ---------------------------------- | ---- |
+| Member Roster     | `/guild/roster`     | `C-GuildRoster`, `C-DrawerDetail`                  | HRM              | `hrm.*`                  | Admin/Leader                       | MED  |
+| Character Sheet   | `/character/:id`    | `C-CharacterSheet`, `C-ExpBar`, `C-InventoryPanel` | HRM/Scout/Reward | `reward.*`               | Admin/Leader/User/Parent (limited) | MED  |
+| Org Chart         | `/guild/org-chart`  | tree + `C-CardLacquer`                             | Org/HRM          | `org.assignment.changed` | Admin/Leader                       | LOW  |
+| Compliance Center | `/guild/compliance` | table + `C-SafeBanner`                             | HRM              | compliance events        | Admin                              | LOW  |
+| Transfers         | `/guild/transfers`  | wizard + `C-ApprovalStamp`                         | HRM              | `hrm.member_transferred` | SuperAdmin                         | LOW  |
 
 #### Module 2 — Project/Planning (Quest Board)
-| Screen | Route | Primary components | API tags | Events | Roles | Cost |
-|---|---|---|---|---|---|---|
-| Quest Dashboard | `/quest` | `C-QuestChain`, `C-RightQuestPanel` | PM | `pm.*` | Admin/Leader | MED |
-| Plan Composer | `/quest/plans/new` | form blocks + `C-Checklist` | PM | `pm.plan.submitted` | Admin/Leader | LOW |
-| Kanban Board | `/quest/projects/:id/board` | `C-KanbanBoard` | PM | `pm.task.*` | Admin/Leader | MED |
-| Work Item Tree | `/quest/projects/:id/tree` | `C-QuestChain` | PM | — | Admin/Leader | LOW |
-| Gantt | `/quest/projects/:id/gantt` | gantt canvas | PM | — | Admin/Leader | HIGH (kill-switch) |
-| Wiki | `/quest/projects/:id/wiki` | editor | PM | — | Admin/Leader | MED |
+
+| Screen          | Route                       | Primary components                  | API tags | Events              | Roles        | Cost               |
+| --------------- | --------------------------- | ----------------------------------- | -------- | ------------------- | ------------ | ------------------ |
+| Quest Dashboard | `/quest`                    | `C-QuestChain`, `C-RightQuestPanel` | PM       | `pm.*`              | Admin/Leader | MED                |
+| Plan Composer   | `/quest/plans/new`          | form blocks + `C-Checklist`         | PM       | `pm.plan.submitted` | Admin/Leader | LOW                |
+| Kanban Board    | `/quest/projects/:id/board` | `C-KanbanBoard`                     | PM       | `pm.task.*`         | Admin/Leader | MED                |
+| Work Item Tree  | `/quest/projects/:id/tree`  | `C-QuestChain`                      | PM       | —                   | Admin/Leader | LOW                |
+| Gantt           | `/quest/projects/:id/gantt` | gantt canvas                        | PM       | —                   | Admin/Leader | HIGH (kill-switch) |
+| Wiki            | `/quest/projects/:id/wiki`  | editor                              | PM       | —                   | Admin/Leader | MED                |
 
 #### Module 3 — Ticket/Approval (Scroll Inbox)
-| Screen | Route | Primary components | API tags | Events | Roles | Cost |
-|---|---|---|---|---|---|---|
-| Inbox | `/inbox/tickets` | list + `C-ApprovalStamp` | Ticket | `ticket.*` | Admin/Leader | LOW |
-| New Request | `/inbox/tickets/new` | form + upload | Ticket/File | `ticket.submitted` | All | MED (uploads gated) |
-| Ticket Detail | `/inbox/tickets/:id` | timeline + drawer | Ticket | — | scoped | LOW |
-| Approval Flow Builder | `/inbox/approvals/builder` | flow canvas | Ticket/Proc | — | SuperAdmin | MED |
+
+| Screen                | Route                      | Primary components       | API tags    | Events             | Roles        | Cost                |
+| --------------------- | -------------------------- | ------------------------ | ----------- | ------------------ | ------------ | ------------------- |
+| Inbox                 | `/inbox/tickets`           | list + `C-ApprovalStamp` | Ticket      | `ticket.*`         | Admin/Leader | LOW                 |
+| New Request           | `/inbox/tickets/new`       | form + upload            | Ticket/File | `ticket.submitted` | All          | MED (uploads gated) |
+| Ticket Detail         | `/inbox/tickets/:id`       | timeline + drawer        | Ticket      | —                  | scoped       | LOW                 |
+| Approval Flow Builder | `/inbox/approvals/builder` | flow canvas              | Ticket/Proc | —                  | SuperAdmin   | MED                 |
 
 #### Module 4 — Finance (Treasury)
-| Screen | Route | Primary components | API tags | Events | Roles | Cost |
-|---|---|---|---|---|---|---|
-| Treasury Dashboard | `/guild/treasury` | cards + charts | Finance | `fin.*` | Admin/SuperAdmin | MED |
-| Fees & Invoices | `/guild/treasury/fees` | invoice list + `C-ApprovalStamp` | Finance | `fin.fee.*` | Admin | LOW |
-| Ledger | `/guild/treasury/ledger` | table + filters | Finance | — | Admin | LOW |
-| Budget & Cost Centers | `/guild/treasury/budgets` | tree + charts | Finance | — | SuperAdmin | MED |
-| Fundraising | `/guild/treasury/fundraising` | event cards | Finance/PM | — | Admin | LOW |
+
+| Screen                | Route                         | Primary components               | API tags   | Events      | Roles            | Cost |
+| --------------------- | ----------------------------- | -------------------------------- | ---------- | ----------- | ---------------- | ---- |
+| Treasury Dashboard    | `/guild/treasury`             | cards + charts                   | Finance    | `fin.*`     | Admin/SuperAdmin | MED  |
+| Fees & Invoices       | `/guild/treasury/fees`        | invoice list + `C-ApprovalStamp` | Finance    | `fin.fee.*` | Admin            | LOW  |
+| Ledger                | `/guild/treasury/ledger`      | table + filters                  | Finance    | —           | Admin            | LOW  |
+| Budget & Cost Centers | `/guild/treasury/budgets`     | tree + charts                    | Finance    | —           | SuperAdmin       | MED  |
+| Fundraising           | `/guild/treasury/fundraising` | event cards                      | Finance/PM | —           | Admin            | LOW  |
 
 #### Module 5 — Assets (Armory/Storehouse)
-| Screen | Route | Primary components | API tags | Events | Roles | Cost |
-|---|---|---|---|---|---|---|
-| Inventory | `/guild/armory` | table + `C-DrawerDetail` | Assets | `asset.*` | Admin/Leader | LOW |
-| Loan Requests | `/guild/armory/loans` | queue + `C-ApprovalStamp` | Assets | `asset.loan.*` | Admin/Leader | LOW |
-| Camp Kits | `/guild/armory/kits` | kit builder | Assets | — | Admin | MED |
-| Uniform Issue | `/guild/armory/uniform` | issue form | Assets/HRM | — | Admin | LOW |
-| Maintenance | `/guild/armory/maintenance` | schedule | Assets | — | Admin | LOW |
+
+| Screen        | Route                       | Primary components        | API tags   | Events         | Roles        | Cost |
+| ------------- | --------------------------- | ------------------------- | ---------- | -------------- | ------------ | ---- |
+| Inventory     | `/guild/armory`             | table + `C-DrawerDetail`  | Assets     | `asset.*`      | Admin/Leader | LOW  |
+| Loan Requests | `/guild/armory/loans`       | queue + `C-ApprovalStamp` | Assets     | `asset.loan.*` | Admin/Leader | LOW  |
+| Camp Kits     | `/guild/armory/kits`        | kit builder               | Assets     | —              | Admin        | MED  |
+| Uniform Issue | `/guild/armory/uniform`     | issue form                | Assets/HRM | —              | Admin        | LOW  |
+| Maintenance   | `/guild/armory/maintenance` | schedule                  | Assets     | —              | Admin        | LOW  |
 
 #### Module 6 — Process & SOP (Automation Shrine)
-| Screen | Route | Primary components | API tags | Events | Roles | Cost |
-|---|---|---|---|---|---|---|
-| Workflow Library | `/guild/process/workflows` | catalog | Process | `proc.*` | SuperAdmin/Admin | LOW |
-| Workflow Builder | `/guild/process/builder/:id` | node canvas | Process | `proc.workflow.executed` | SuperAdmin | MED |
-| SOP Library | `/guild/process/sop` | docs list | Process | — | Admin | LOW |
-| SOP Viewer | `/guild/process/sop/:id` | reader | Process | — | All (scoped) | LOW |
+
+| Screen           | Route                        | Primary components | API tags | Events                   | Roles            | Cost |
+| ---------------- | ---------------------------- | ------------------ | -------- | ------------------------ | ---------------- | ---- |
+| Workflow Library | `/guild/process/workflows`   | catalog            | Process  | `proc.*`                 | SuperAdmin/Admin | LOW  |
+| Workflow Builder | `/guild/process/builder/:id` | node canvas        | Process  | `proc.workflow.executed` | SuperAdmin       | MED  |
+| SOP Library      | `/guild/process/sop`         | docs list          | Process  | —                        | Admin            | LOW  |
+| SOP Viewer       | `/guild/process/sop/:id`     | reader             | Process  | —                        | All (scoped)     | LOW  |
 
 #### Module 7 — LMS (Academy)
-| Screen | Route | Primary components | API tags | Events | Roles | Cost |
-|---|---|---|---|---|---|---|
-| Academy Home | `/academy` | cards + progress | LMS | `lms.*` | User/Parent | MED |
-| Course Catalog | `/academy/courses` | filters + cards | LMS | — | User | LOW |
-| Lesson Player | `/academy/courses/:id/lessons/:lid` | player + checklist | LMS/File | `lms.lesson_completed` | User | HIGH (video gated) |
-| Quiz Arena | `/academy/quizzes/:id` | `C-QuizArena` | LMS | `lms.quiz_passed` | User | MED |
-| Mentor Grading | `/academy/mentor/queue` | queue + drawer | LMS | — | Leader | LOW |
-| Offline Packs | `/academy/offline` | download list | LMS | — | User | MED (bandwidth gated) |
+
+| Screen         | Route                               | Primary components | API tags | Events                 | Roles       | Cost                  |
+| -------------- | ----------------------------------- | ------------------ | -------- | ---------------------- | ----------- | --------------------- |
+| Academy Home   | `/academy`                          | cards + progress   | LMS      | `lms.*`                | User/Parent | MED                   |
+| Course Catalog | `/academy/courses`                  | filters + cards    | LMS      | —                      | User        | LOW                   |
+| Lesson Player  | `/academy/courses/:id/lessons/:lid` | player + checklist | LMS/File | `lms.lesson_completed` | User        | HIGH (video gated)    |
+| Quiz Arena     | `/academy/quizzes/:id`              | `C-QuizArena`      | LMS      | `lms.quiz_passed`      | User        | MED                   |
+| Mentor Grading | `/academy/mentor/queue`             | queue + drawer     | LMS      | —                      | Leader      | LOW                   |
+| Offline Packs  | `/academy/offline`                  | download list      | LMS      | —                      | User        | MED (bandwidth gated) |
 
 #### Module 8 — Scout Core (Character Progression)
-| Screen | Route | Primary components | API tags | Events | Roles | Cost |
-|---|---|---|---|---|---|---|
-| Scout Dashboard | `/guild/scout` | `C-PartyPanel`, `C-QuestChain` | Scout | `scout.*` | Leader | MED |
-| Skill Tree Map | `/character/:id/skills` | `C-SkillTree` | Scout | `scout.skill.*` | User/Leader | MED |
-| Skill Detail | `/character/:id/skills/:skillId` | criteria + evidence | Scout/File | `scout.skill.submitted` | User | MED (uploads gated) |
-| Verify Queue | `/guild/scout/verify` | queue + `C-ApprovalStamp` | Scout | `scout.skill.verified` | Leader | LOW |
-| Achievements Hall | `/character/:id/achievements` | cards + rarity frames | Scout/Reward | `scout.achievement.awarded` | User/Parent | LOW |
-| Habit Tracker | `/character/:id/habits` | streak calendar | Scout/Reward | `scout.habit.*` | User | LOW |
-| Service Log | `/character/:id/service` | activity list | Scout/PM | `scout.activity.*` | User/Leader | LOW |
-| Handover (Cầu Trưởng Thành) | `/guild/scout/handover/:caseId` | ceremony screen | Scout/HRM | `scout.handover.*` | Leader | LOW |
-| Incident Report | `/inbox/incidents` | `C-IncidentReport` | Ticket/Scout | `incident.*` | Restricted | LOW |
+
+| Screen                      | Route                            | Primary components             | API tags     | Events                      | Roles       | Cost                |
+| --------------------------- | -------------------------------- | ------------------------------ | ------------ | --------------------------- | ----------- | ------------------- |
+| Scout Dashboard             | `/guild/scout`                   | `C-PartyPanel`, `C-QuestChain` | Scout        | `scout.*`                   | Leader      | MED                 |
+| Skill Tree Map              | `/character/:id/skills`          | `C-SkillTree`                  | Scout        | `scout.skill.*`             | User/Leader | MED                 |
+| Skill Detail                | `/character/:id/skills/:skillId` | criteria + evidence            | Scout/File   | `scout.skill.submitted`     | User        | MED (uploads gated) |
+| Verify Queue                | `/guild/scout/verify`            | queue + `C-ApprovalStamp`      | Scout        | `scout.skill.verified`      | Leader      | LOW                 |
+| Achievements Hall           | `/character/:id/achievements`    | cards + rarity frames          | Scout/Reward | `scout.achievement.awarded` | User/Parent | LOW                 |
+| Habit Tracker               | `/character/:id/habits`          | streak calendar                | Scout/Reward | `scout.habit.*`             | User        | LOW                 |
+| Service Log                 | `/character/:id/service`         | activity list                  | Scout/PM     | `scout.activity.*`          | User/Leader | LOW                 |
+| Handover (Cầu Trưởng Thành) | `/guild/scout/handover/:caseId`  | ceremony screen                | Scout/HRM    | `scout.handover.*`          | Leader      | LOW                 |
+| Incident Report             | `/inbox/incidents`               | `C-IncidentReport`             | Ticket/Scout | `incident.*`                | Restricted  | LOW                 |
 
 **Wireframe: Skill Detail**
+
 ```
 [SceneHeader: Skill] [SPICES Tags] [Cost: MED] [Safety: Evidence private]
 --------------------------------------------------------------
@@ -2798,41 +2952,57 @@ Nếu M10 yếu, toàn platform sẽ rơi vào trạng thái “có module nhưn
 ```
 
 #### Module 9 — Rewards/EXP (Inventory & Rankings)
-| Screen | Route | Primary components | API tags | Events | Roles | Cost |
-|---|---|---|---|---|---|---|
-| Inventory | `/character/:id/inventory` | `C-InventoryPanel` | Reward | `reward.*` | User | LOW |
-| Badge Catalog | `/guild/rewards/badges` | catalog | Reward | `reward.badge_awarded` | All | LOW |
-| Leaderboard | `/guild/rewards/leaderboard` | table + filters | Reward | — | All | MED (anti-shame) |
-| Penalties & Remediation | `/guild/rewards/penalties` | cases | Reward/Proc | `reward.penalty.*` | Leader | LOW |
-| Shop | `/guild/rewards/shop` | items + redeem | Reward | `reward.redemption.*` | User | MED |
+
+| Screen                  | Route                        | Primary components | API tags    | Events                 | Roles  | Cost             |
+| ----------------------- | ---------------------------- | ------------------ | ----------- | ---------------------- | ------ | ---------------- |
+| Inventory               | `/character/:id/inventory`   | `C-InventoryPanel` | Reward      | `reward.*`             | User   | LOW              |
+| Badge Catalog           | `/guild/rewards/badges`      | catalog            | Reward      | `reward.badge_awarded` | All    | LOW              |
+| Leaderboard             | `/guild/rewards/leaderboard` | table + filters    | Reward      | —                      | All    | MED (anti-shame) |
+| Penalties & Remediation | `/guild/rewards/penalties`   | cases              | Reward/Proc | `reward.penalty.*`     | Leader | LOW              |
+| Shop                    | `/guild/rewards/shop`        | items + redeem     | Reward      | `reward.redemption.*`  | User   | MED              |
 
 ---
 
 <a id="REF-TOKENS"></a>
+
 ### 5.15 Design Tokens JSON (DTCG) — file để FE import thẳng
 
 > **Vì sao dùng DTCG**: chuẩn hoá trao đổi token giữa tools và codebase; DTCG dùng các field `$type`, `$value`, `$description` trong JSON.  
-> Tham chiếu: Design Tokens Format spec & W3C Design Tokens CG.  
-> - DTCG format draft: https://www.designtokens.org/tr/drafts/format/  
-> - W3C Design Tokens CG: https://www.w3.org/community/design-tokens/  
-> - Style Dictionary hỗ trợ DTCG (v4): https://styledictionary.com/info/dtcg/ ; repo: https://github.com/style-dictionary/style-dictionary  
+> Tham chiếu: Design Tokens Format spec & W3C Design Tokens CG.
+>
+> - DTCG format draft: https://www.designtokens.org/tr/drafts/format/
+> - W3C Design Tokens CG: https://www.w3.org/community/design-tokens/
+> - Style Dictionary hỗ trợ DTCG (v4): https://styledictionary.com/info/dtcg/ ; repo: https://github.com/style-dictionary/style-dictionary
 > - Material Design tokens overview: https://m3.material.io/foundations/design-tokens
 
 #### 5.15.1 `ttnddops.tokens.json` (DTCG)
+
 ```json
 {
   "$schema": "https://www.designtokens.org/tr/drafts/format/",
   "$description": "TTNDD_OPS Design Tokens — Tu tiên × Hướng đạo × Cao Đài × Việt Nam (Dark-first, MMORPG HUD).",
   "color": {
     "bg": {
-      "world": { "$type": "color", "$value": "#0B1220", "$description": "World background (dark navy)." },
+      "world": {
+        "$type": "color",
+        "$value": "#0B1220",
+        "$description": "World background (dark navy)."
+      },
       "panel": { "$type": "color", "$value": "#111A2E", "$description": "HUD panels / sidebars." }
     },
     "surface": {
-      "card": { "$type": "color", "$value": "#141F36", "$description": "Card surface (lacquer feel)." }
+      "card": {
+        "$type": "color",
+        "$value": "#141F36",
+        "$description": "Card surface (lacquer feel)."
+      }
     },
     "stroke": {
-      "soft": { "$type": "color", "$value": "#2A3A64", "$description": "Soft borders (not too harsh)." }
+      "soft": {
+        "$type": "color",
+        "$value": "#2A3A64",
+        "$description": "Soft borders (not too harsh)."
+      }
     },
     "text": {
       "primary": { "$type": "color", "$value": "#E8EEF9" },
@@ -2844,9 +3014,21 @@ Nếu M10 yếu, toàn platform sẽ rơi vào trạng thái “có module nhưn
       "thieu": { "$type": "color", "$value": "#16A34A", "$description": "Ngành Thiếu." },
       "thanh": { "$type": "color", "$value": "#3B82F6", "$description": "Ngành Thanh." },
       "leader": { "$type": "color", "$value": "#7C3AED", "$description": "Trưởng." },
-      "phat": { "$type": "color", "$value": "#F4C430", "$description": "Tam Giáo overlay — Phật (merit/milestone)." },
-      "lao": { "$type": "color", "$value": "#2563EB", "$description": "Tam Giáo overlay — Lão (flow/meditation)." },
-      "nho": { "$type": "color", "$value": "#DC2626", "$description": "Tam Giáo overlay — Nho (duty/discipline)." }
+      "phat": {
+        "$type": "color",
+        "$value": "#F4C430",
+        "$description": "Tam Giáo overlay — Phật (merit/milestone)."
+      },
+      "lao": {
+        "$type": "color",
+        "$value": "#2563EB",
+        "$description": "Tam Giáo overlay — Lão (flow/meditation)."
+      },
+      "nho": {
+        "$type": "color",
+        "$value": "#DC2626",
+        "$description": "Tam Giáo overlay — Nho (duty/discipline)."
+      }
     },
     "state": {
       "success": { "$type": "color", "$value": "#22C55E" },
@@ -2855,7 +3037,11 @@ Nếu M10 yếu, toàn platform sẽ rơi vào trạng thái “có module nhưn
       "info": { "$type": "color", "$value": "#60A5FA" }
     },
     "semantic": {
-      "primary": { "$type": "color", "$value": "{color.accent.thanh}", "$description": "Primary action default." },
+      "primary": {
+        "$type": "color",
+        "$value": "{color.accent.thanh}",
+        "$description": "Primary action default."
+      },
       "secondary": { "$type": "color", "$value": "{color.accent.thieu}" },
       "highlight": { "$type": "color", "$value": "{color.accent.phat}" }
     }
@@ -2877,7 +3063,13 @@ Nếu M10 yếu, toàn platform sẽ rơi vào trạng thái “có module nhưn
     "card": {
       "$type": "shadow",
       "$value": [
-        { "color": "rgba(0,0,0,0.35)", "offsetX": "0px", "offsetY": "10px", "blur": "30px", "spread": "-10px" }
+        {
+          "color": "rgba(0,0,0,0.35)",
+          "offsetX": "0px",
+          "offsetY": "10px",
+          "blur": "30px",
+          "spread": "-10px"
+        }
       ]
     }
   },
@@ -2905,7 +3097,10 @@ Nếu M10 yếu, toàn platform sẽ rơi vào trạng thái “có module nhưn
   },
   "typography": {
     "fontFamily": {
-      "ui": { "$type": "fontFamily", "$value": "Be Vietnam Pro, system-ui, -apple-system, Segoe UI, Roboto, Arial" }
+      "ui": {
+        "$type": "fontFamily",
+        "$value": "Be Vietnam Pro, system-ui, -apple-system, Segoe UI, Roboto, Arial"
+      }
     },
     "size": {
       "sm": { "$type": "fontSize", "$value": "12px" },
@@ -2929,93 +3124,103 @@ Nếu M10 yếu, toàn platform sẽ rơi vào trạng thái “có module nhưn
 ```
 
 #### 5.15.2 FE import path (khuyến nghị)
-- Lưu token JSON tại: `packages/tokens/ttnddops.tokens.json`  
+
+- Lưu token JSON tại: `packages/tokens/ttnddops.tokens.json`
 - Dùng **Style Dictionary** để build ra:
   - `packages/tokens/dist/tokens.css` (CSS variables)
   - `packages/tokens/dist/tailwind.tokens.js` (mapping Tailwind)
 
 **Example `style-dictionary.config.js` (rút gọn)**
+
 ```js
-import StyleDictionary from "style-dictionary";
+import StyleDictionary from 'style-dictionary';
 
 export default {
-  source: ["packages/tokens/ttnddops.tokens.json"],
+  source: ['packages/tokens/ttnddops.tokens.json'],
   platforms: {
     css: {
-      transformGroup: "css",
-      buildPath: "packages/tokens/dist/",
-      files: [{ destination: "tokens.css", format: "css/variables" }]
-    }
-  }
+      transformGroup: 'css',
+      buildPath: 'packages/tokens/dist/',
+      files: [{ destination: 'tokens.css', format: 'css/variables' }],
+    },
+  },
 };
 ```
 
 **Reduced motion rule (P0)**
+
 - Tất cả animation/motion phải respect `prefers-reduced-motion`.  
-  (Technique C39/Understanding SC 2.3.3).  
+  (Technique C39/Understanding SC 2.3.3).
 
 ### 5.16 Nguồn tham khảo (UI/UX & Tokens) — để team Design/Dev thống nhất
-- Cao Đài (Thiên Nhãn): Encyclopaedia Britannica — “God is represented as an eye in a triangle”. https://www.britannica.com/topic/Cao-Dai  
-- Đông Sơn drums (motif/pattern): Smarthistory — Đông Sơn drums overview. https://smarthistory.org/dong-son-drums/  
-- Design Tokens (DTCG) format draft: https://www.designtokens.org/tr/drafts/format/  
-- W3C Design Tokens Community Group: https://www.w3.org/community/design-tokens/  
-- Style Dictionary (tokens build system, supports DTCG): https://github.com/style-dictionary/style-dictionary ; https://styledictionary.com/info/dtcg/  
-- Material Design tokens (naming/semantic roles): https://m3.material.io/foundations/design-tokens  
-- Accessibility: W3C WCAG 2.2 Recommendation. https://www.w3.org/TR/WCAG22/  
-- Reduced motion technique: WCAG 2.2 CSS technique C39. https://www.w3.org/WAI/WCAG22/Techniques/css/C39  
-- Reduced motion (MDN): https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion  
-- Offline/PWA caching: web.dev Cache Storage & Service Workers. https://web.dev/learn/pwa/caching ; https://web.dev/learn/pwa/service-workers  
+
+- Cao Đài (Thiên Nhãn): Encyclopaedia Britannica — “God is represented as an eye in a triangle”. https://www.britannica.com/topic/Cao-Dai
+- Đông Sơn drums (motif/pattern): Smarthistory — Đông Sơn drums overview. https://smarthistory.org/dong-son-drums/
+- Design Tokens (DTCG) format draft: https://www.designtokens.org/tr/drafts/format/
+- W3C Design Tokens Community Group: https://www.w3.org/community/design-tokens/
+- Style Dictionary (tokens build system, supports DTCG): https://github.com/style-dictionary/style-dictionary ; https://styledictionary.com/info/dtcg/
+- Material Design tokens (naming/semantic roles): https://m3.material.io/foundations/design-tokens
+- Accessibility: W3C WCAG 2.2 Recommendation. https://www.w3.org/TR/WCAG22/
+- Reduced motion technique: WCAG 2.2 CSS technique C39. https://www.w3.org/WAI/WCAG22/Techniques/css/C39
+- Reduced motion (MDN): https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion
+- Offline/PWA caching: web.dev Cache Storage & Service Workers. https://web.dev/learn/pwa/caching ; https://web.dev/learn/pwa/service-workers
 - Moodle offline inspiration (LMS camp mode): Moodle Docs offline features. https://docs.moodle.org/en/Moodle_app_offline_features
 
-- Cao Đài (Thiên Nhãn): Encyclopaedia Britannica — “God is represented as an eye in a triangle”. https://www.britannica.com/topic/Cao-Dai  
-- Đông Sơn drums (motif/pattern): Smarthistory — Đông Sơn drums overview. https://smarthistory.org/dong-son-drums/  
-- Accessibility: W3C WCAG 2.2 Recommendation. https://www.w3.org/TR/WCAG22/  
-- Reduced motion: MDN `prefers-reduced-motion`. https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion  
-- Offline/PWA caching: web.dev Cache Storage & Service Workers. https://web.dev/learn/pwa/caching ; https://web.dev/learn/pwa/service-workers  
+- Cao Đài (Thiên Nhãn): Encyclopaedia Britannica — “God is represented as an eye in a triangle”. https://www.britannica.com/topic/Cao-Dai
+- Đông Sơn drums (motif/pattern): Smarthistory — Đông Sơn drums overview. https://smarthistory.org/dong-son-drums/
+- Accessibility: W3C WCAG 2.2 Recommendation. https://www.w3.org/TR/WCAG22/
+- Reduced motion: MDN `prefers-reduced-motion`. https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion
+- Offline/PWA caching: web.dev Cache Storage & Service Workers. https://web.dev/learn/pwa/caching ; https://web.dev/learn/pwa/service-workers
 - Moodle offline inspiration (LMS camp mode): Moodle Docs offline features. https://docs.moodle.org/en/Moodle_app_offline_features
 
 ### 5.17 Visual Design Bible — “game thật nhưng vận hành được”
+
 #### 5.17.1 World/Scene grammar
-- **World Map** = bản đồ thế giới của platform, mỗi module là 1 vùng đất/chánh điện/đạo trường/chòi trại; user không “nhảy app”, mà “di chuyển scene”.  
-- **Guild Hall** = dashboard Org/HRM; **Academy** = LMS; **Quest Board** = PM; **Armory/Storehouse** = Assets; **Treasury** = Finance; **Temple/Cultivation Chamber** = milestone, rank-up, spiritual screens.  
+
+- **World Map** = bản đồ thế giới của platform, mỗi module là 1 vùng đất/chánh điện/đạo trường/chòi trại; user không “nhảy app”, mà “di chuyển scene”.
+- **Guild Hall** = dashboard Org/HRM; **Academy** = LMS; **Quest Board** = PM; **Armory/Storehouse** = Assets; **Treasury** = Finance; **Temple/Cultivation Chamber** = milestone, rank-up, spiritual screens.
 - Mỗi scene phải có: `SceneHeader`, `Primary loop`, `Secondary panel`, `Quick action bar`, `Safety state`, `Low-cost state`.
 
 #### 5.17.2 UI laws (luật thiết kế không được vi phạm)
-1. **Một hành động chính / một scene**: tránh UI “tham lam” như dashboard doanh nghiệp.  
-2. **Thông tin nhiều nhưng không nhồi**: dùng quest panels, drawers, codex tabs, accordions, progress shelves.  
-3. **MMORPG là lớp biểu đạt, không phải lớp gây rối**: form, table, approval, ledger vẫn phải rõ như phần mềm nghiệp vụ.  
-4. **Không dùng ranking để làm nhục**: leaderboard mặc định ưu tiên đội, opt-out cạnh tranh cá nhân.  
+
+1. **Một hành động chính / một scene**: tránh UI “tham lam” như dashboard doanh nghiệp.
+2. **Thông tin nhiều nhưng không nhồi**: dùng quest panels, drawers, codex tabs, accordions, progress shelves.
+3. **MMORPG là lớp biểu đạt, không phải lớp gây rối**: form, table, approval, ledger vẫn phải rõ như phần mềm nghiệp vụ.
+4. **Không dùng ranking để làm nhục**: leaderboard mặc định ưu tiên đội, opt-out cạnh tranh cá nhân.
 5. **Camp mode trước visual effects**: khi offline/đi trại, ưu tiên checklist/attendance/consent/emergency view.
 
 ### 5.18 Art Asset Pipeline & Component Production Plan
-- **Design source of truth**: screen map → wireframe text → tokenized component → coded component.  
-- **Asset classes**: icon SVG, decorative frame SVG, static scene art WebP, animation sprite/Lottie (chỉ nơi cần), typography scale, badge frames, inventory items.  
-- **File strategy**: scene art dùng WebP/AVIF; decorative assets phải có low-resolution fallbacks; animation chỉ cho milestone screens hoặc quest completion.  
+
+- **Design source of truth**: screen map → wireframe text → tokenized component → coded component.
+- **Asset classes**: icon SVG, decorative frame SVG, static scene art WebP, animation sprite/Lottie (chỉ nơi cần), typography scale, badge frames, inventory items.
+- **File strategy**: scene art dùng WebP/AVIF; decorative assets phải có low-resolution fallbacks; animation chỉ cho milestone screens hoặc quest completion.
 - **FE build path**: `packages/tokens` → `packages/ui` → `/apps/web` scene assembly.
 
 ### 5.19 Motion, Sound, Performance & Budget Rules
-- Motion có 3 cấp: `subtle`, `celebration`, `ritual`. Mặc định chỉ dùng `subtle`; `celebration` chỉ cho reward/rank; `ritual` chỉ cho milestone screens.  
-- Mọi animation phải có **reduced-motion** fallback; âm thanh/haptics mặc định **off** và không bắt buộc để hoàn thành tác vụ.  
-- Mỗi scene phải định nghĩa **performance budget**: số ảnh nền, số component động, số request API, số animation đồng thời, kích thước JS hydrate.  
+
+- Motion có 3 cấp: `subtle`, `celebration`, `ritual`. Mặc định chỉ dùng `subtle`; `celebration` chỉ cho reward/rank; `ritual` chỉ cho milestone screens.
+- Mọi animation phải có **reduced-motion** fallback; âm thanh/haptics mặc định **off** và không bắt buộc để hoàn thành tác vụ.
+- Mỗi scene phải định nghĩa **performance budget**: số ảnh nền, số component động, số request API, số animation đồng thời, kích thước JS hydrate.
 - Low-cost mode phải tắt: confetti, nền động, avatar FX, large charts không cần thiết, preload video.
 
 ### 5.20 UI Production Checklist cho từng module
-| Module | UI obligations bắt buộc | Không được thiếu |
-|---|---|---|
-| M1 HRM | Character Sheet, Guild Roster, Guardian View | timeline, privacy states, branch palette |
-| M2 PM | Quest Board, Plan Composer, Work Tree | approval states, progress math, backlog table |
-| M3 Ticket | Scroll Inbox, Approval Stamp, Timeline | attachment safety, SLA badge, escalation state |
-| M4 Finance | Treasury HUD, fee ledger, invoice detail | immutable ledger cues, approval/audit view |
-| M5 Assets | Armory inventory, loan flow, QR asset detail | status chips, custody history, maintenance state |
-| M6 Process | SOP codex, workflow builder | versioning view, publish state, safe execution hints |
-| M7 LMS | Academy home, lesson player, quiz arena | progress shelf, mentor grading, offline pack state |
-| M8 Scout | Skill tree, verify queue, handover ritual | progression law, evidence privacy, mentoring state |
-| M9 Rewards | Inventory, badges, leaderboard, shop | anti-shame leaderboard, cap indicators, correction flows |
-| M10 Org | Guild admin screens | role/scope matrix, module switches, release dashboard |
+
+| Module     | UI obligations bắt buộc                      | Không được thiếu                                         |
+| ---------- | -------------------------------------------- | -------------------------------------------------------- |
+| M1 HRM     | Character Sheet, Guild Roster, Guardian View | timeline, privacy states, branch palette                 |
+| M2 PM      | Quest Board, Plan Composer, Work Tree        | approval states, progress math, backlog table            |
+| M3 Ticket  | Scroll Inbox, Approval Stamp, Timeline       | attachment safety, SLA badge, escalation state           |
+| M4 Finance | Treasury HUD, fee ledger, invoice detail     | immutable ledger cues, approval/audit view               |
+| M5 Assets  | Armory inventory, loan flow, QR asset detail | status chips, custody history, maintenance state         |
+| M6 Process | SOP codex, workflow builder                  | versioning view, publish state, safe execution hints     |
+| M7 LMS     | Academy home, lesson player, quiz arena      | progress shelf, mentor grading, offline pack state       |
+| M8 Scout   | Skill tree, verify queue, handover ritual    | progression law, evidence privacy, mentoring state       |
+| M9 Rewards | Inventory, badges, leaderboard, shop         | anti-shame leaderboard, cap indicators, correction flows |
+| M10 Org    | Guild admin screens                          | role/scope matrix, module switches, release dashboard    |
 
 ### 5.21 UI Engineering Handoff Format
-Mỗi màn hình P0 phải có đủ 8 artefacts: route, screen purpose, user roles, primary actions, empty/loading/error states, component IDs, API contracts, cost/safety tags. Nếu thiếu 1 trong 8 mục thì không được xem là ready for FE build.
 
+Mỗi màn hình P0 phải có đủ 8 artefacts: route, screen purpose, user roles, primary actions, empty/loading/error states, component IDs, API contracts, cost/safety tags. Nếu thiếu 1 trong 8 mục thì không được xem là ready for FE build.
 
 ## PHẦN VI — TÍCH HỢP & TUÂN THỦ
 
@@ -3035,7 +3240,6 @@ Templates: Thăng bậc, task sắp hạn, kế hoạch được duyệt, báo c
 - PII mã hóa at rest, right to erasure (90 ngày)
 
 ---
-
 
 ## PHẦN VII — TRIỂN KHAI GOOGLE CLOUD & BUDGET GUARDRAILS (≤ 800.000 VND/tháng)
 
@@ -3061,12 +3265,12 @@ Templates: Thăng bậc, task sắp hạn, kế hoạch được duyệt, báo c
 
 ### 7.2 Budget Alerts (4 ngưỡng)
 
-| Ngưỡng | Số tiền | Hành động |
-| --------|---------|----------- |
-| 50% | 400.000 VND | Email thông báo |
-| 80% | 640.000 VND | Email + SMS khẩn cấp |
-| 100% | 800.000 VND/tháng | Alert critical + Telegram |
-| 120% | 960.000 VND | Auto-shutdown Cloud Function: giảm max-instances=1 |
+| Ngưỡng | Số tiền           | Hành động                                          |
+| ------ | ----------------- | -------------------------------------------------- |
+| 50%    | 400.000 VND       | Email thông báo                                    |
+| 80%    | 640.000 VND       | Email + SMS khẩn cấp                               |
+| 100%   | 800.000 VND/tháng | Alert critical + Telegram                          |
+| 120%   | 960.000 VND       | Auto-shutdown Cloud Function: giảm max-instances=1 |
 
 ---
 
@@ -3076,38 +3280,44 @@ Templates: Thăng bậc, task sắp hạn, kế hoạch được duyệt, báo c
 > Công cụ chính: **Cloud Billing Budgets** + **email alerts** + **Pub/Sub programmatic notifications** + **auto actions**.
 
 ### 7.3.1 Cấu hình Budget & Alert thresholds (Console)
-1. Billing → **Budgets & alerts** → Create budget.  
-2. Budget amount: **800.000 VND/tháng** (hoặc amount tương đương).  
-3. Alert threshold rules: **50% / 80% / 100% / 120%** (đúng như v3), tick cả “actual” + “forecasted” để nhận cảnh báo sớm.  
-4. Link budget với email notification channels (Cloud Monitoring) để thêm recipients (tối đa 5 channels/budget).  
 
-> Tham khảo: tạo/sửa budgets và alert thresholds; và cách thêm email recipients.  
-> - Cloud Billing Budgets: https://docs.cloud.google.com/billing/docs/how-to/budgets  
-> - Notification recipients: https://docs.cloud.google.com/billing/docs/how-to/budgets-notification-recipients  
+1. Billing → **Budgets & alerts** → Create budget.
+2. Budget amount: **800.000 VND/tháng** (hoặc amount tương đương).
+3. Alert threshold rules: **50% / 80% / 100% / 120%** (đúng như v3), tick cả “actual” + “forecasted” để nhận cảnh báo sớm.
+4. Link budget với email notification channels (Cloud Monitoring) để thêm recipients (tối đa 5 channels/budget).
+
+> Tham khảo: tạo/sửa budgets và alert thresholds; và cách thêm email recipients.
+>
+> - Cloud Billing Budgets: https://docs.cloud.google.com/billing/docs/how-to/budgets
+> - Notification recipients: https://docs.cloud.google.com/billing/docs/how-to/budgets-notification-recipients
 
 ### 7.3.2 Programmatic notifications (Pub/Sub) — để “auto-thắt” chi phí
+
 Thiết lập để Budget gửi JSON message vào Pub/Sub:
-1. Tạo Pub/Sub topic: `billing-budget-alerts`.  
-2. Trong Budget → Manage notifications → chọn Pub/Sub topic.  
-3. Tạo subscriber (Cloud Run function / Cloud Functions) để nhận message.  
+
+1. Tạo Pub/Sub topic: `billing-budget-alerts`.
+2. Trong Budget → Manage notifications → chọn Pub/Sub topic.
+3. Tạo subscriber (Cloud Run function / Cloud Functions) để nhận message.
 
 Tham khảo chính thức:
-- Set up programmatic notifications: https://docs.cloud.google.com/billing/docs/how-to/budgets-programmatic-notifications  
-- Listen to notifications (reference architecture): https://docs.cloud.google.com/billing/docs/how-to/listen-to-notifications  
-- Control resource usage with notifications (chiến lược giảm chi phí mà không tắt billing): https://docs.cloud.google.com/billing/docs/how-to/control-usage  
+
+- Set up programmatic notifications: https://docs.cloud.google.com/billing/docs/how-to/budgets-programmatic-notifications
+- Listen to notifications (reference architecture): https://docs.cloud.google.com/billing/docs/how-to/listen-to-notifications
+- Control resource usage with notifications (chiến lược giảm chi phí mà không tắt billing): https://docs.cloud.google.com/billing/docs/how-to/control-usage
 
 ### 7.3.3 Auto-actions (Runbook) — phản ứng theo ngưỡng
 
-| Ngưỡng | Trigger | Auto action (ưu tiên “giảm thiểu” trước “shutdown”) |
-| ---:|---|--- |
-| 50% | spend ≥ 400K | Gửi email + in-app alert; bật “cost watch” dashboard; hạ log verbosity xuống INFO |
-| 80% | spend ≥ 640K | Giảm **Cloud Run max-instances** về 1; giảm concurrency; tắt các scheduled jobs không thiết yếu |
-| 100% | spend ≥ 800.000 VND/tháng | Khóa các tính năng “tốn tiền” (PDF export, video upload lớn); bật maintenance banner; set max-instances=1 (hard) |
-| 120% | spend ≥ 960K | “Emergency mode”: disable background workers; chỉ để HRM + Scout read-only; cân nhắc tạm dừng Cloud SQL nếu không dùng |
+| Ngưỡng | Trigger                   | Auto action (ưu tiên “giảm thiểu” trước “shutdown”)                                                                    |
+| -----: | ------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+|    50% | spend ≥ 400K              | Gửi email + in-app alert; bật “cost watch” dashboard; hạ log verbosity xuống INFO                                      |
+|    80% | spend ≥ 640K              | Giảm **Cloud Run max-instances** về 1; giảm concurrency; tắt các scheduled jobs không thiết yếu                        |
+|   100% | spend ≥ 800.000 VND/tháng | Khóa các tính năng “tốn tiền” (PDF export, video upload lớn); bật maintenance banner; set max-instances=1 (hard)       |
+|   120% | spend ≥ 960K              | “Emergency mode”: disable background workers; chỉ để HRM + Scout read-only; cân nhắc tạm dừng Cloud SQL nếu không dùng |
 
-> Cloud Run max-instances (docs): https://docs.cloud.google.com/run/docs/configuring/max-instances  
+> Cloud Run max-instances (docs): https://docs.cloud.google.com/run/docs/configuring/max-instances
 
 ### 7.3.4 Sample implementation (Cloud Run Function - Node.js) — cập nhật max-instances
+
 > Ý tưởng: Budget Pub/Sub message → Cloud Run Job/Function gọi Cloud Run Admin API cập nhật service revision flags.
 
 ```ts
@@ -3117,17 +3327,17 @@ Tham khảo chính thức:
  * - Parse: costAmount, budgetAmount, thresholdPercent
  * - If threshold >= 0.8: set Cloud Run services max instances = 1
  */
-import express from "express";
+import express from 'express';
 
 const app = express();
 app.use(express.json());
 
-app.post("/budget-alert", async (req, res) => {
+app.post('/budget-alert', async (req, res) => {
   const msg = req.body?.message?.data
-    ? Buffer.from(req.body.message.data, "base64").toString("utf8")
+    ? Buffer.from(req.body.message.data, 'base64').toString('utf8')
     : null;
 
-  if (!msg) return res.status(400).send("missing data");
+  if (!msg) return res.status(400).send('missing data');
 
   const payload = JSON.parse(msg);
   const costAmount = Number(payload?.costAmount ?? 0);
@@ -3150,20 +3360,22 @@ export default app;
 ```
 
 ### 7.3.5 Cost “leaks” cần chặn (P0)
-- **Cloud Logging**: log volume có thể “đốt tiền”. Dùng **exclusions** để loại log low-value.  
-  - Docs exclusions: https://docs.cloud.google.com/logging/docs/reference/v2/rest/v2/exclusions  
-  - Observability cost optimization: https://docs.cloud.google.com/stackdriver/docs/observability/pricing-optimize-and-monitor  
-- **Audit Logs**: một số audit logs không tắt được, nhưng có thể exclude phần lưu trữ tuỳ trường hợp.  
-  - Audit logs overview: https://docs.cloud.google.com/logging/docs/audit  
-- **Cloud SQL**: db-f1-micro là nhỏ nhất, shared core không có SLA (chấp nhận trong budget).  
+
+- **Cloud Logging**: log volume có thể “đốt tiền”. Dùng **exclusions** để loại log low-value.
+  - Docs exclusions: https://docs.cloud.google.com/logging/docs/reference/v2/rest/v2/exclusions
+  - Observability cost optimization: https://docs.cloud.google.com/stackdriver/docs/observability/pricing-optimize-and-monitor
+- **Audit Logs**: một số audit logs không tắt được, nhưng có thể exclude phần lưu trữ tuỳ trường hợp.
+  - Audit logs overview: https://docs.cloud.google.com/logging/docs/audit
+- **Cloud SQL**: db-f1-micro là nhỏ nhất, shared core không có SLA (chấp nhận trong budget).
   - Cloud SQL FAQ: https://docs.cloud.google.com/sql/docs/postgres/faq
 
 ### 7.3.6 Hard kill-switch (tuỳ chọn) — disable billing bằng notifications
-> **Cảnh báo:** Disable billing sẽ khiến **dịch vụ dừng** và một số tài nguyên có thể bị thu hồi/xoá theo cơ chế của GCP. Chỉ dùng khi vượt ngân sách nghiêm trọng.
-1) Dùng **Cloud Billing Budget** + **Pub/Sub** trigger.
-2) Cloud Run Function nhận message ở ngưỡng 120% → gọi Cloud Billing API để **unlink billing account** khỏi project.
-3) Nếu muốn hard kill-switch, phải có runbook riêng, IAM tối thiểu và xác nhận thủ công từ Super Admin.
 
+> **Cảnh báo:** Disable billing sẽ khiến **dịch vụ dừng** và một số tài nguyên có thể bị thu hồi/xoá theo cơ chế của GCP. Chỉ dùng khi vượt ngân sách nghiêm trọng.
+
+1. Dùng **Cloud Billing Budget** + **Pub/Sub** trigger.
+2. Cloud Run Function nhận message ở ngưỡng 120% → gọi Cloud Billing API để **unlink billing account** khỏi project.
+3. Nếu muốn hard kill-switch, phải có runbook riêng, IAM tối thiểu và xác nhận thủ công từ Super Admin.
 
 ## PHẦN VIII — LỘ TRÌNH TRIỂN KHAI (Jira-Structured Roadmap)
 
@@ -3172,6 +3384,7 @@ export default app;
 > **Nguyên tắc điều phối**: **Story-driven + Module-owned + Contract-first + SSOT Sync + Safety P0 + Budget ≤ 800.000 VND/tháng + Go-live only when playable**.
 
 ### 8.0 Canonical Sync Rules — đóng đinh để roadmap không lệch spec
+
 1. Mọi dòng roadmap phải map ngược được về **module/sub-page/workflow/state machine/API/schema/events/tests**.
 2. Không có Work Package nào được xem là DONE nếu chỉ có UI hoặc chỉ có DB — bắt buộc đủ **screen + service + schema + state + tests + seed/demo data**.
 3. Story nền tảng (**STORY-001 → STORY-009**) vẫn giữ nguyên vì đây là đường ray build ban đầu; từ V9 bổ sung **module-owned stories** và **cross-cutting engineering stories** để siết khả dụng production.
@@ -3183,6 +3396,7 @@ export default app;
    - owner rõ ràng ở FE/BE/DB/API/Ops.
 
 ### 8.1 Phân cấp công việc & mapping với Jira
+
 ```text
 STORY (release capability track / module-owned delivery stream)
   └── PHASE (giai đoạn triển khai theo logic sản phẩm hoặc kỹ thuật)
@@ -3192,6 +3406,7 @@ STORY (release capability track / module-owned delivery stream)
 ```
 
 **Quy ước dùng trong roadmap**
+
 - **Story** = đường build độc lập theo capability hoặc theo module.
 - **Phase** = nhịp triển khai cùng hướng kỹ thuật/nghiệp vụ.
 - **Work Package** = đơn vị giao việc có “thịt” đủ để code/test/review; đây là lớp thích hợp để map sang **Epic** trong Jira.
@@ -3200,70 +3415,70 @@ STORY (release capability track / module-owned delivery stream)
 
 ### 8.2 Story Portfolio V9 — bao phủ nền tảng, từng module và từng lớp engineering
 
-| Story ID | Family | Phạm vi chính | Bao phủ | Exit intent |
-|---|---|---|---|---|
-| STORY-001 | Foundation | Platform foundation & core runtime | Shared + M10 | Bật được platform skeleton đúng chuẩn |
-| STORY-002 | Foundation | People, org & parent operations | M1 + M10 scopes | Onboard người dùng và dữ liệu con người |
-| STORY-003 | Foundation | Scout core & reward engine | M8 + M9 | Lõi giáo dục DTNDD chạy thật |
-| STORY-004 | Foundation | LMS & learning engagement | M7 | Học tập số hoá + thi đấu |
-| STORY-005 | Foundation | Planning, projects, approvals & SOP | M2 + M3 + M6 | Vận hành kế hoạch và quy trình |
-| STORY-006 | Foundation | Treasury & armory operations | M4 + M5 | Thu chi và tài sản dùng được |
-| STORY-007 | Foundation | Integration, reporting & org readiness | Cross-module | Đồng bộ, báo cáo, admin control |
-| STORY-008 | Foundation | Hardening, pilot & production go-live | Toàn hệ thống | Đưa production thật và dùng ngay |
-| STORY-009 | Foundation | Spec-to-code contract completion & release evidence | PHẦN IX + PHỤ LỤC A/B/C + PHẦN X | Khóa contract, bằng chứng và sync |
-| STORY-010 | Module-owned | Module 1 — HRM implementation assurance | M1 | Hồ sơ, guardian, org chart, transfer, parent portal dùng được end-to-end |
-| STORY-011 | Module-owned | Module 2 — Project & Planning implementation assurance | M2 | Plan composer, approval, auto-project, boards/tree/calendar/wiki dùng được |
-| STORY-012 | Module-owned | Module 3 — Ticket & Approval implementation assurance | M3 | Ticketing, approval flows, escalation, incident workflows chạy ổn định |
-| STORY-013 | Module-owned | Module 4 — Finance implementation assurance | M4 | Ledger, fees, budgets, cost center, sponsor/in-kind, reports production-ready |
-| STORY-014 | Module-owned | Module 5 — Assets implementation assurance | M5 | Inventory, check-out/in, kits, uniform, maintenance, QR flows khả dụng |
-| STORY-015 | Module-owned | Module 6 — Process/SOP implementation assurance | M6 | SOP library, workflow builder, workflow executor, run history hoạt động |
-| STORY-016 | Module-owned | Module 7 — LMS implementation assurance | M7 | Catalog, lesson player, quiz, mentor grading, offline, arena, parent dashboard chạy thật |
-| STORY-017 | Module-owned | Module 8 — Scout core implementation assurance | M8 | Character sheet, skillbook, rank board, sessions, events/camps, guardian summary, spiritual, mentoring, handover và analytics dùng được end-to-end |
-| STORY-018 | Module-owned | Module 9 — Reward implementation assurance | M9 | EXP ledger, rule engine, badges, leaderboard, penalties, shop có logic đầy đủ |
-| STORY-019 | Module-owned | Module 10 — Org Config & Control Plane implementation assurance | M10 | tenant bootstrap, roles, settings registry, feature flags, connectors, audit/release dashboard dùng được |
-| STORY-020 | Cross-cutting engineering | UX/UI game system & screen contract | UI/UX toàn hệ thống | Giao diện MMORPG nhất quán, có component/spec/tokens/3D-scene-runtime/fallback rules đúng để build |
-| STORY-021 | Cross-cutting engineering | Frontend implementation track | FE toàn hệ thống | Routes, scenes, forms, offline/error states, FE tests, performance |
-| STORY-022 | Cross-cutting engineering | Backend implementation track | BE toàn hệ thống | Controllers, services, jobs, events, authz, validation, error contracts |
-| STORY-023 | Cross-cutting engineering | Database & warehouse implementation track | DB/DWH toàn hệ thống | Schemas, migrations, RLS, projections, reporting read models, imports |
-| STORY-024 | Cross-cutting engineering | API & integration implementation track | API/Gateway/Integrations | OpenAPI coverage, versioning, webhooks, exports, search, notifications |
-| STORY-025 | Cross-cutting engineering | Infrastructure, security & operations track | GCP / Sec / Ops | Environments, CI/CD, Cloud Run, Cloud SQL, backups, budgets, observability |
+| Story ID  | Family                    | Phạm vi chính                                                   | Bao phủ                          | Exit intent                                                                                                                                        |
+| --------- | ------------------------- | --------------------------------------------------------------- | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| STORY-001 | Foundation                | Platform foundation & core runtime                              | Shared + M10                     | Bật được platform skeleton đúng chuẩn                                                                                                              |
+| STORY-002 | Foundation                | People, org & parent operations                                 | M1 + M10 scopes                  | Onboard người dùng và dữ liệu con người                                                                                                            |
+| STORY-003 | Foundation                | Scout core & reward engine                                      | M8 + M9                          | Lõi giáo dục DTNDD chạy thật                                                                                                                       |
+| STORY-004 | Foundation                | LMS & learning engagement                                       | M7                               | Học tập số hoá + thi đấu                                                                                                                           |
+| STORY-005 | Foundation                | Planning, projects, approvals & SOP                             | M2 + M3 + M6                     | Vận hành kế hoạch và quy trình                                                                                                                     |
+| STORY-006 | Foundation                | Treasury & armory operations                                    | M4 + M5                          | Thu chi và tài sản dùng được                                                                                                                       |
+| STORY-007 | Foundation                | Integration, reporting & org readiness                          | Cross-module                     | Đồng bộ, báo cáo, admin control                                                                                                                    |
+| STORY-008 | Foundation                | Hardening, pilot & production go-live                           | Toàn hệ thống                    | Đưa production thật và dùng ngay                                                                                                                   |
+| STORY-009 | Foundation                | Spec-to-code contract completion & release evidence             | PHẦN IX + PHỤ LỤC A/B/C + PHẦN X | Khóa contract, bằng chứng và sync                                                                                                                  |
+| STORY-010 | Module-owned              | Module 1 — HRM implementation assurance                         | M1                               | Hồ sơ, guardian, org chart, transfer, parent portal dùng được end-to-end                                                                           |
+| STORY-011 | Module-owned              | Module 2 — Project & Planning implementation assurance          | M2                               | Plan composer, approval, auto-project, boards/tree/calendar/wiki dùng được                                                                         |
+| STORY-012 | Module-owned              | Module 3 — Ticket & Approval implementation assurance           | M3                               | Ticketing, approval flows, escalation, incident workflows chạy ổn định                                                                             |
+| STORY-013 | Module-owned              | Module 4 — Finance implementation assurance                     | M4                               | Ledger, fees, budgets, cost center, sponsor/in-kind, reports production-ready                                                                      |
+| STORY-014 | Module-owned              | Module 5 — Assets implementation assurance                      | M5                               | Inventory, check-out/in, kits, uniform, maintenance, QR flows khả dụng                                                                             |
+| STORY-015 | Module-owned              | Module 6 — Process/SOP implementation assurance                 | M6                               | SOP library, workflow builder, workflow executor, run history hoạt động                                                                            |
+| STORY-016 | Module-owned              | Module 7 — LMS implementation assurance                         | M7                               | Catalog, lesson player, quiz, mentor grading, offline, arena, parent dashboard chạy thật                                                           |
+| STORY-017 | Module-owned              | Module 8 — Scout core implementation assurance                  | M8                               | Character sheet, skillbook, rank board, sessions, events/camps, guardian summary, spiritual, mentoring, handover và analytics dùng được end-to-end |
+| STORY-018 | Module-owned              | Module 9 — Reward implementation assurance                      | M9                               | EXP ledger, rule engine, badges, leaderboard, penalties, shop có logic đầy đủ                                                                      |
+| STORY-019 | Module-owned              | Module 10 — Org Config & Control Plane implementation assurance | M10                              | tenant bootstrap, roles, settings registry, feature flags, connectors, audit/release dashboard dùng được                                           |
+| STORY-020 | Cross-cutting engineering | UX/UI game system & screen contract                             | UI/UX toàn hệ thống              | Giao diện MMORPG nhất quán, có component/spec/tokens/3D-scene-runtime/fallback rules đúng để build                                                 |
+| STORY-021 | Cross-cutting engineering | Frontend implementation track                                   | FE toàn hệ thống                 | Routes, scenes, forms, offline/error states, FE tests, performance                                                                                 |
+| STORY-022 | Cross-cutting engineering | Backend implementation track                                    | BE toàn hệ thống                 | Controllers, services, jobs, events, authz, validation, error contracts                                                                            |
+| STORY-023 | Cross-cutting engineering | Database & warehouse implementation track                       | DB/DWH toàn hệ thống             | Schemas, migrations, RLS, projections, reporting read models, imports                                                                              |
+| STORY-024 | Cross-cutting engineering | API & integration implementation track                          | API/Gateway/Integrations         | OpenAPI coverage, versioning, webhooks, exports, search, notifications                                                                             |
+| STORY-025 | Cross-cutting engineering | Infrastructure, security & operations track                     | GCP / Sec / Ops                  | Environments, CI/CD, Cloud Run, Cloud SQL, backups, budgets, observability                                                                         |
 
 ### 8.3 Phase Schedule & Delivery Lanes (high-level, production-oriented)
 
-| Lane / Phase | Window | Trọng tâm | Story groups |
-|---|---|---|---|
-| P0 | Tuần 1–3 | monorepo, contracts, local runtime, app shell foundation | STORY-001 |
-| P1 | Tuần 4–6 | M10 control plane, IAM, DB/RLS, files, event bus, CI skeleton | STORY-001, STORY-019, STORY-023, STORY-024, STORY-025 |
-| P2 | Tuần 7–10 | HRM canonical + guardian + org operations | STORY-002, STORY-010, STORY-020, STORY-021, STORY-022, STORY-023 |
-| P3 | Tuần 11–16 | Scout core + Reward core + child-safety critical paths | STORY-003, STORY-017, STORY-018, STORY-020→025 |
-| P4 | Tuần 17–20 | LMS + offline + arena + mentor grading | STORY-004, STORY-016, STORY-020→025 |
-| P5 | Tuần 21–29 | PM + Ticket + Process/SOP + Finance + Assets | STORY-005, STORY-006, STORY-011→015, STORY-020→025 |
-| P6 | Tuần 30–34 | integrations, reports, search, release dashboard, evidence | STORY-007, STORY-009, STORY-019, STORY-024, STORY-025 |
-| P7 | Tuần 35–38 | module assurance hardening, E2E, import/seed, readiness | STORY-010→019, STORY-020→025 |
-| P8 | Tuần 39–42 | pilot, canary, go-live, hypercare | STORY-008, STORY-025 |
-| Parallel-Doc | Tuần 4–42 | state machines, appendix schemas, engineering packs, checklist sync, traceability | STORY-009 |
-| Parallel-UI | Tuần 4–40 | screen contract, tokens, component kit, accessibility, performance budgets | STORY-020 |
-| Parallel-FE/BE/API/DB/Ops | Tuần 4–42 | implementation tracks chạy cùng module stories | STORY-021, STORY-022, STORY-023, STORY-024, STORY-025 |
+| Lane / Phase              | Window     | Trọng tâm                                                                         | Story groups                                                     |
+| ------------------------- | ---------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| P0                        | Tuần 1–3   | monorepo, contracts, local runtime, app shell foundation                          | STORY-001                                                        |
+| P1                        | Tuần 4–6   | M10 control plane, IAM, DB/RLS, files, event bus, CI skeleton                     | STORY-001, STORY-019, STORY-023, STORY-024, STORY-025            |
+| P2                        | Tuần 7–10  | HRM canonical + guardian + org operations                                         | STORY-002, STORY-010, STORY-020, STORY-021, STORY-022, STORY-023 |
+| P3                        | Tuần 11–16 | Scout core + Reward core + child-safety critical paths                            | STORY-003, STORY-017, STORY-018, STORY-020→025                   |
+| P4                        | Tuần 17–20 | LMS + offline + arena + mentor grading                                            | STORY-004, STORY-016, STORY-020→025                              |
+| P5                        | Tuần 21–29 | PM + Ticket + Process/SOP + Finance + Assets                                      | STORY-005, STORY-006, STORY-011→015, STORY-020→025               |
+| P6                        | Tuần 30–34 | integrations, reports, search, release dashboard, evidence                        | STORY-007, STORY-009, STORY-019, STORY-024, STORY-025            |
+| P7                        | Tuần 35–38 | module assurance hardening, E2E, import/seed, readiness                           | STORY-010→019, STORY-020→025                                     |
+| P8                        | Tuần 39–42 | pilot, canary, go-live, hypercare                                                 | STORY-008, STORY-025                                             |
+| Parallel-Doc              | Tuần 4–42  | state machines, appendix schemas, engineering packs, checklist sync, traceability | STORY-009                                                        |
+| Parallel-UI               | Tuần 4–40  | screen contract, tokens, component kit, accessibility, performance budgets        | STORY-020                                                        |
+| Parallel-FE/BE/API/DB/Ops | Tuần 4–42  | implementation tracks chạy cùng module stories                                    | STORY-021, STORY-022, STORY-023, STORY-024, STORY-025            |
 
 ### STORY-001 — PLATFORM FOUNDATION & CORE RUNTIME
 
 #### PHASE P0 — Repo, Contracts, Local Runtime, App Shell Baseline
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-0.1 Monorepo & Local Dev** | **M0.1 `pnpm dev` chạy được web/api/worker** | **T-0001** scaffold Turborepo<br/>**T-0002** pnpm workspace + package policy<br/>**T-0003** docker compose Postgres + Redis dev<br/>**T-0004** lint/format/husky/commitlint<br/>**T-0005** env templates + secrets contract | Dựng repo thật để AI Agent bám vào: `apps/web`, `apps/api`, `apps/worker`, `packages/shared`, `packages/ui`, `packages/tokens`, `contracts/*`. Thiết lập script `dev`, `build`, `test`, `lint`, `db:migrate`, `db:seed`. | Baseline theo Turborepo + pnpm; repo phải tách package shared rõ ràng. Map: REF-TECHSTACK, REF-COREENGINE. |
-| **WP-0.2 SSOT Contracts & Codegen** | **M0.2 hợp đồng API/event/schema có skeleton chuẩn** | **T-0006** tạo `contracts/openapi`<br/>**T-0007** tạo `contracts/events/catalog.json`<br/>**T-0008** tạo `contracts/db/migrations`<br/>**T-0009** codegen typed client/server stubs<br/>**T-0010** diff/lint contracts trong CI | Chưa viết business logic ngay; trước hết chốt cấu trúc OpenAPI, event naming, migration folder, schema validation, generator cho FE client và Nest DTO stubs. | Google API Gateway dùng OpenAPI làm bề mặt REST; OpenAPI phải là SSOT chứ không viết tay sau code. Refs: turn4search1, turn4search5, turn4search13. |
-| **WP-0.3 App Shell MMORPG + Global Navigation** | **M0.3 vào được Home, My Dashboard, Search, Inbox, Files** | **T-0011** layout HUD desktop/mobile<br/>**T-0012** world map nav + breadcrumbs<br/>**T-0013** empty/loading/error standards<br/>**T-0014** theme tokens import<br/>**T-0015** route guards + role-based menu | Dựng lớp shell dùng chung: sidebar, topbar, quick actions, notifications tray, search command palette, page frame, status badges. Đây là lớp FE nền để các module cắm scene vào, không còn page rời rạc. | Components: `C-AppShell`, `C-HUDTopBar`, `C-LeftRailNav`, `C-RightQuestPanel`, `C-ActionBar`. Đụng packages/ui + packages/tokens + apps/web. |
-| **WP-0.4 Baseline Testing & CI Skeleton** | **M0.4 pull request có lint/test/contract gates** | **T-0016** Vitest/Jest config<br/>**T-0017** Supertest harness<br/>**T-0018** Playwright smoke skeleton<br/>**T-0019** OpenAPI/Event lint<br/>**T-0020** artifact publishing skeleton | Thiết lập xương sống kiểm thử và pipeline để từ đầu đã có contract checks. CI phải biết fail nếu schema lệch, không chờ đến cuối dự án mới thêm. | Playwright report + artifact upload là nền cho release dashboard sau này. Refs: turn0search1, turn4search8. |
+| Work Package                                    | Milestone                                                  | Tasks                                                                                                                                                                                                                           | Task Description & Developer Detail                                                                                                                                                                                      | Dev Notes (Implementation)                                                                                                                          |
+| ----------------------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **WP-0.1 Monorepo & Local Dev**                 | **M0.1 `pnpm dev` chạy được web/api/worker**               | **T-0001** scaffold Turborepo<br/>**T-0002** pnpm workspace + package policy<br/>**T-0003** docker compose Postgres + Redis dev<br/>**T-0004** lint/format/husky/commitlint<br/>**T-0005** env templates + secrets contract     | Dựng repo thật để AI Agent bám vào: `apps/web`, `apps/api`, `apps/worker`, `packages/shared`, `packages/ui`, `packages/tokens`, `contracts/*`. Thiết lập script `dev`, `build`, `test`, `lint`, `db:migrate`, `db:seed`. | Baseline theo Turborepo + pnpm; repo phải tách package shared rõ ràng. Map: REF-TECHSTACK, REF-COREENGINE.                                          |
+| **WP-0.2 SSOT Contracts & Codegen**             | **M0.2 hợp đồng API/event/schema có skeleton chuẩn**       | **T-0006** tạo `contracts/openapi`<br/>**T-0007** tạo `contracts/events/catalog.json`<br/>**T-0008** tạo `contracts/db/migrations`<br/>**T-0009** codegen typed client/server stubs<br/>**T-0010** diff/lint contracts trong CI | Chưa viết business logic ngay; trước hết chốt cấu trúc OpenAPI, event naming, migration folder, schema validation, generator cho FE client và Nest DTO stubs.                                                            | Google API Gateway dùng OpenAPI làm bề mặt REST; OpenAPI phải là SSOT chứ không viết tay sau code. Refs: turn4search1, turn4search5, turn4search13. |
+| **WP-0.3 App Shell MMORPG + Global Navigation** | **M0.3 vào được Home, My Dashboard, Search, Inbox, Files** | **T-0011** layout HUD desktop/mobile<br/>**T-0012** world map nav + breadcrumbs<br/>**T-0013** empty/loading/error standards<br/>**T-0014** theme tokens import<br/>**T-0015** route guards + role-based menu                   | Dựng lớp shell dùng chung: sidebar, topbar, quick actions, notifications tray, search command palette, page frame, status badges. Đây là lớp FE nền để các module cắm scene vào, không còn page rời rạc.                 | Components: `C-AppShell`, `C-HUDTopBar`, `C-LeftRailNav`, `C-RightQuestPanel`, `C-ActionBar`. Đụng packages/ui + packages/tokens + apps/web.        |
+| **WP-0.4 Baseline Testing & CI Skeleton**       | **M0.4 pull request có lint/test/contract gates**          | **T-0016** Vitest/Jest config<br/>**T-0017** Supertest harness<br/>**T-0018** Playwright smoke skeleton<br/>**T-0019** OpenAPI/Event lint<br/>**T-0020** artifact publishing skeleton                                           | Thiết lập xương sống kiểm thử và pipeline để từ đầu đã có contract checks. CI phải biết fail nếu schema lệch, không chờ đến cuối dự án mới thêm.                                                                         | Playwright report + artifact upload là nền cho release dashboard sau này. Refs: turn0search1, turn4search8.                                         |
 
 #### PHASE P1 — Org/IAM, Database/RLS, File Storage, Event Foundation
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-1.1 Module 10 Org Config + IAM** | **M1.1 tạo được Org, branch, unit, role scope, module toggle** | **T-0021** org/branch/unit schema<br/>**T-0022** user/org_member model<br/>**T-0023** roles/scopes UI + APIs<br/>**T-0024** module toggle + feature flags<br/>**T-0025** audit trail foundation | Dựng M10 thật: khởi tạo organization, ngành, đơn vị, người dùng, gán vai trò, bật/tắt module, cấu hình budget guardrails, audit. Đây là năng lực nền production, không phải chỉ màn settings giả. | Tables: `organizations`, `branches`, `units`, `users`, `org_members`, `iam.*`, `cfg.*`, `audit.*`. APIs `/settings/org`, `/settings/iam`, `/settings/modules`. |
-| **WP-1.2 DB Foundation + PostgreSQL RLS** | **M1.2 mọi bảng business có `org_id` và policy test pass** | **T-0026** migration baseline shared tables<br/>**T-0027** `ALTER TABLE ... ENABLE ROW LEVEL SECURITY`<br/>**T-0028** `CREATE POLICY` patterns<br/>**T-0029** Nest middleware `SET LOCAL app.org_id`<br/>**T-0030** RLS smoke tests | Chốt multi-tenant đúng bản chất: mỗi request resolve org, set session context, policy đọc/ghi theo role + org. Làm sớm để tránh phải vá về sau. | PostgreSQL RLS/policies là nền isolation; xem `ENABLE ROW LEVEL SECURITY` + `CREATE POLICY`. Refs: turn4search3, turn4search19. |
-| **WP-1.3 File Storage & Attachment Subsystem** | **M1.3 avatar/evidence/export upload-download dùng được** | **T-0031** file metadata table<br/>**T-0032** signed URL upload/download<br/>**T-0033** mime sniff + size guard<br/>**T-0034** retention/TTL rules<br/>**T-0035** watermark export pipeline | Tách hệ file thành subsystem dùng chung: avatar, evidence, documents, SOP attachments, PDFs, Excel exports. FE phải có upload queue, retry, preview, permission checks. | Cloud Storage private-by-default; signed URLs theo TTL; bucket/object naming theo `org_id/module/entity`. |
-| **WP-1.4 Event Bus + Outbox + Notification Foundation** | **M1.4 phát và consume được domain events nội bộ** | **T-0036** outbox table `core.domain_events`<br/>**T-0037** publisher service + idempotency key<br/>**T-0038** in-process subscribers<br/>**T-0039** Pub/Sub adapter<br/>**T-0040** notification envelope schema | Mọi module sau này đều phải dùng một pattern event chung. WP này dựng event envelope, publisher, retry worker, subscriber contract, dead-letter handling, notification envelope. | Async sync dùng outbox + Pub/Sub để tránh gọi chéo module. Budget-aware vì chỉ fan-out async khi cần. Refs: turn4search4, turn4search16. |
+| Work Package                                            | Milestone                                                      | Tasks                                                                                                                                                                                                                               | Task Description & Developer Detail                                                                                                                                                               | Dev Notes (Implementation)                                                                                                                                     |
+| ------------------------------------------------------- | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **WP-1.1 Module 10 Org Config + IAM**                   | **M1.1 tạo được Org, branch, unit, role scope, module toggle** | **T-0021** org/branch/unit schema<br/>**T-0022** user/org_member model<br/>**T-0023** roles/scopes UI + APIs<br/>**T-0024** module toggle + feature flags<br/>**T-0025** audit trail foundation                                     | Dựng M10 thật: khởi tạo organization, ngành, đơn vị, người dùng, gán vai trò, bật/tắt module, cấu hình budget guardrails, audit. Đây là năng lực nền production, không phải chỉ màn settings giả. | Tables: `organizations`, `branches`, `units`, `users`, `org_members`, `iam.*`, `cfg.*`, `audit.*`. APIs `/settings/org`, `/settings/iam`, `/settings/modules`. |
+| **WP-1.2 DB Foundation + PostgreSQL RLS**               | **M1.2 mọi bảng business có `org_id` và policy test pass**     | **T-0026** migration baseline shared tables<br/>**T-0027** `ALTER TABLE ... ENABLE ROW LEVEL SECURITY`<br/>**T-0028** `CREATE POLICY` patterns<br/>**T-0029** Nest middleware `SET LOCAL app.org_id`<br/>**T-0030** RLS smoke tests | Chốt multi-tenant đúng bản chất: mỗi request resolve org, set session context, policy đọc/ghi theo role + org. Làm sớm để tránh phải vá về sau.                                                   | PostgreSQL RLS/policies là nền isolation; xem `ENABLE ROW LEVEL SECURITY` + `CREATE POLICY`. Refs: turn4search3, turn4search19.                                |
+| **WP-1.3 File Storage & Attachment Subsystem**          | **M1.3 avatar/evidence/export upload-download dùng được**      | **T-0031** file metadata table<br/>**T-0032** signed URL upload/download<br/>**T-0033** mime sniff + size guard<br/>**T-0034** retention/TTL rules<br/>**T-0035** watermark export pipeline                                         | Tách hệ file thành subsystem dùng chung: avatar, evidence, documents, SOP attachments, PDFs, Excel exports. FE phải có upload queue, retry, preview, permission checks.                           | Cloud Storage private-by-default; signed URLs theo TTL; bucket/object naming theo `org_id/module/entity`.                                                      |
+| **WP-1.4 Event Bus + Outbox + Notification Foundation** | **M1.4 phát và consume được domain events nội bộ**             | **T-0036** outbox table `core.domain_events`<br/>**T-0037** publisher service + idempotency key<br/>**T-0038** in-process subscribers<br/>**T-0039** Pub/Sub adapter<br/>**T-0040** notification envelope schema                    | Mọi module sau này đều phải dùng một pattern event chung. WP này dựng event envelope, publisher, retry worker, subscriber contract, dead-letter handling, notification envelope.                  | Async sync dùng outbox + Pub/Sub để tránh gọi chéo module. Budget-aware vì chỉ fan-out async khi cần. Refs: turn4search4, turn4search16.                       |
 
 ---
 
@@ -3271,19 +3486,19 @@ STORY (release capability track / module-owned delivery stream)
 
 #### PHASE P2A — Canonical Member, Guardian, Compliance, Org Structure
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-2.1 Canonical Member & Guardian Data Model** | **M2.1 tạo được hồ sơ thành viên chuẩn và bắt buộc guardian khi dưới tuổi** | **T-0041** `hrm.person_profile` + `guardian_link` + medical/contact<br/>**T-0042** custom fields JSONB<br/>**T-0043** validation age→branch<br/>**T-0044** under-age guardian rule<br/>**T-0045** compliance flags | Xây HRM “con người chuẩn”: member profile, guardian, emergency, medical, volunteer availability, background-check expiry, youth-protection training status. Input validation phải chặn case thiếu guardian hoặc thiếu y tế tối thiểu. | Benchmark theo OrangeHRM/BambooHR adaptation. Trường compliance phải đủ để gate camp/event approvals. |
-| **WP-2.2 Roster, Profile, Character Sheet Aggregation** | **M2.2 vào roster → profile → character sheet không lỗi** | **T-0046** member list API + filters/search<br/>**T-0047** profile read/write APIs<br/>**T-0048** cross-module summary read model<br/>**T-0049** FE pages roster/profile/character<br/>**T-0050** audit + field-level permissions | Không chỉ CRUD; cần trang chi tiết hợp nhất dữ liệu từ Scout, Reward, LMS, Finance, Project để người dùng thấy “tấm gương tiến bộ”. Phân quyền phải cho parent xem read-only các trường cho phép. | APIs: `/api/hrm/members`, `/api/hrm/members/:id`, `/api/hrm/members/:id/timeline`. FE routes `/guild/roster`, `/character/:id`. |
-| **WP-2.3 Org Chart, Unit Assignment & Volunteer Scheduling** | **M2.3 org chart và phân đơn vị chạy được** | **T-0051** org chart node schema<br/>**T-0052** drag/drop reorder APIs<br/>**T-0053** unit assignment flows<br/>**T-0054** volunteer availability calendar<br/>**T-0055** role-scope enforcement | Triển khai sơ đồ tổ chức, phân hàng/đội/nhóm, đội trưởng/nhóm trưởng, lịch rảnh của Trưởng/tình nguyện viên để làm base cho phân công session/event/project. | FE có tree/board/org chart; BE có recursive query + adjacency list; lưu `valid_from/valid_to` cho assignment. |
-| **WP-2.4 Parent Portal & Consent Read Models** | **M2.4 phụ huynh đăng nhập và xem đúng con em mình** | **T-0056** guest auth mapping<br/>**T-0057** parent dashboard read model<br/>**T-0058** child data access log<br/>**T-0059** notification preferences<br/>**T-0060** privacy masking | Parent portal phải có dashboard tiến bộ, điểm danh, phí, consent, nhưng không được lộ dữ liệu em khác. Log “ai xem dữ liệu trẻ em” để minh bạch. | Route `/parent/dashboard`; audit table riêng cho child-data access. Child safety P0. |
+| Work Package                                                 | Milestone                                                                   | Tasks                                                                                                                                                                                                                             | Task Description & Developer Detail                                                                                                                                                                                                   | Dev Notes (Implementation)                                                                                                      |
+| ------------------------------------------------------------ | --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| **WP-2.1 Canonical Member & Guardian Data Model**            | **M2.1 tạo được hồ sơ thành viên chuẩn và bắt buộc guardian khi dưới tuổi** | **T-0041** `hrm.person_profile` + `guardian_link` + medical/contact<br/>**T-0042** custom fields JSONB<br/>**T-0043** validation age→branch<br/>**T-0044** under-age guardian rule<br/>**T-0045** compliance flags                | Xây HRM “con người chuẩn”: member profile, guardian, emergency, medical, volunteer availability, background-check expiry, youth-protection training status. Input validation phải chặn case thiếu guardian hoặc thiếu y tế tối thiểu. | Benchmark theo OrangeHRM/BambooHR adaptation. Trường compliance phải đủ để gate camp/event approvals.                           |
+| **WP-2.2 Roster, Profile, Character Sheet Aggregation**      | **M2.2 vào roster → profile → character sheet không lỗi**                   | **T-0046** member list API + filters/search<br/>**T-0047** profile read/write APIs<br/>**T-0048** cross-module summary read model<br/>**T-0049** FE pages roster/profile/character<br/>**T-0050** audit + field-level permissions | Không chỉ CRUD; cần trang chi tiết hợp nhất dữ liệu từ Scout, Reward, LMS, Finance, Project để người dùng thấy “tấm gương tiến bộ”. Phân quyền phải cho parent xem read-only các trường cho phép.                                     | APIs: `/api/hrm/members`, `/api/hrm/members/:id`, `/api/hrm/members/:id/timeline`. FE routes `/guild/roster`, `/character/:id`. |
+| **WP-2.3 Org Chart, Unit Assignment & Volunteer Scheduling** | **M2.3 org chart và phân đơn vị chạy được**                                 | **T-0051** org chart node schema<br/>**T-0052** drag/drop reorder APIs<br/>**T-0053** unit assignment flows<br/>**T-0054** volunteer availability calendar<br/>**T-0055** role-scope enforcement                                  | Triển khai sơ đồ tổ chức, phân hàng/đội/nhóm, đội trưởng/nhóm trưởng, lịch rảnh của Trưởng/tình nguyện viên để làm base cho phân công session/event/project.                                                                          | FE có tree/board/org chart; BE có recursive query + adjacency list; lưu `valid_from/valid_to` cho assignment.                   |
+| **WP-2.4 Parent Portal & Consent Read Models**               | **M2.4 phụ huynh đăng nhập và xem đúng con em mình**                        | **T-0056** guest auth mapping<br/>**T-0057** parent dashboard read model<br/>**T-0058** child data access log<br/>**T-0059** notification preferences<br/>**T-0060** privacy masking                                              | Parent portal phải có dashboard tiến bộ, điểm danh, phí, consent, nhưng không được lộ dữ liệu em khác. Log “ai xem dữ liệu trẻ em” để minh bạch.                                                                                      | Route `/parent/dashboard`; audit table riêng cho child-data access. Child safety P0.                                            |
 
 #### PHASE P2B — Transfers, Handover, Onboarding/Offboarding, HR Ops
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-2.5 Branch Transition & Handover** | **M2.5 chuyển ngành giữ lịch sử, mở case bàn giao, không rơi dữ liệu** | **T-0061** transfer case schema<br/>**T-0062** age-trigger cron<br/>**T-0063** transfer wizard UI<br/>**T-0064** scout handover event<br/>**T-0065** timeline + notification | Khi đủ tuổi, hệ thống phải tạo case chuyển ngành, đóng gói summary, notify 2 trưởng + phụ huynh, và mở track mới bên Scout/Reward mà không mất lịch sử. | Events: `hrm.member_transferred`, `scout.handover_case_opened`. Test bắt buộc: EXP giữ nguyên, rank track mới đúng, audit đủ. |
-| **WP-2.6 Onboarding, Offboarding & Compliance Ops** | **M2.6 trưởng/tình nguyện viên có onboarding checklist và offboarding flow** | **T-0066** onboarding checklist template<br/>**T-0067** training completion records<br/>**T-0068** background-check expiry reminders<br/>**T-0069** offboarding archive flow<br/>**T-0070** HR helpdesk ticket types | Dựng luồng nhập môn/nghỉ công tác cho Trưởng/TNV: checklist, training, chứng chỉ, reminder hết hạn, archive quyền khi rời vai trò. | Liên kết Module 3 ticket types cho HR helpdesk; readiness gate cho role tiếp xúc trẻ em dựa vào compliance status. |
+| Work Package                                        | Milestone                                                                    | Tasks                                                                                                                                                                                                                | Task Description & Developer Detail                                                                                                                     | Dev Notes (Implementation)                                                                                                    |
+| --------------------------------------------------- | ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| **WP-2.5 Branch Transition & Handover**             | **M2.5 chuyển ngành giữ lịch sử, mở case bàn giao, không rơi dữ liệu**       | **T-0061** transfer case schema<br/>**T-0062** age-trigger cron<br/>**T-0063** transfer wizard UI<br/>**T-0064** scout handover event<br/>**T-0065** timeline + notification                                         | Khi đủ tuổi, hệ thống phải tạo case chuyển ngành, đóng gói summary, notify 2 trưởng + phụ huynh, và mở track mới bên Scout/Reward mà không mất lịch sử. | Events: `hrm.member_transferred`, `scout.handover_case_opened`. Test bắt buộc: EXP giữ nguyên, rank track mới đúng, audit đủ. |
+| **WP-2.6 Onboarding, Offboarding & Compliance Ops** | **M2.6 trưởng/tình nguyện viên có onboarding checklist và offboarding flow** | **T-0066** onboarding checklist template<br/>**T-0067** training completion records<br/>**T-0068** background-check expiry reminders<br/>**T-0069** offboarding archive flow<br/>**T-0070** HR helpdesk ticket types | Dựng luồng nhập môn/nghỉ công tác cho Trưởng/TNV: checklist, training, chứng chỉ, reminder hết hạn, archive quyền khi rời vai trò.                      | Liên kết Module 3 ticket types cho HR helpdesk; readiness gate cho role tiếp xúc trẻ em dựa vào compliance status.            |
 
 ---
 
@@ -3291,20 +3506,20 @@ STORY (release capability track / module-owned delivery stream)
 
 #### PHASE P3A — Program Versioning, Rank, Skills, Evidence, Verification
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-3.1 Program Version, Rank, Domain, Skill Schema** | **M3.1 mỗi ngành có version chương trình, rank tree, domains, skills, criteria** | **T-0071** `scout.program_version`<br/>**T-0072** rank/domain/skill/criteria tables<br/>**T-0073** branch-specific configs<br/>**T-0074** admin CRUD APIs<br/>**T-0075** seed data DTNDD | Lõi Scout không thể “hard-code”. Cần version chương trình, bậc, domain, kỹ năng, tiêu chí, prerequisite, SPICES tags để sau này thay đổi mà không phá lịch sử. | Schema phải tách definition khỏi progress. Seed đủ 3 ngành, 4 bậc/ngành, domain/kỹ năng/tiêu chí mẫu. |
-| **WP-3.2 Progress, Evidence Submission & Verification Queue** | **M3.2 submit minh chứng → verify/reject → cập nhật progress** | **T-0076** progress/evidence tables<br/>**T-0077** file-evidence integration<br/>**T-0078** verification queue APIs<br/>**T-0079** approval/reject reasons + audit<br/>**T-0080** rank eligibility checker | Dựng end-to-end skill workflow thật: xem skill, check criteria, nộp bằng chứng, vào queue, trưởng verify, hệ thống tính hoàn tất skill/level/rank eligibility. | APIs `/api/scout/skills/*`, `/api/scout/verify/*`; events `scout.skill.submitted`, `scout.skill.verified`, `scout.rank.eligible`. |
-| **WP-3.3 Achievements, Habit Tracker & Personal Progress Dashboard** | **M3.3 người dùng thấy tiến bộ cá nhân theo domain/SPICES** | **T-0081** habit tables + streak job<br/>**T-0082** achievements hall read model<br/>**T-0083** progress dashboard aggregates<br/>**T-0084** parent-safe views<br/>**T-0085** missing-skill suggestions | Cung cấp view tiến bộ rõ ràng: rank %, domain %, skill gaps, activity history, habits, achievements. Không để người dùng chỉ thấy danh sách thô. | FE routes `/character/:id/skills`, `/character/:id/habits`, `/character/:id/achievements`. |
+| Work Package                                                         | Milestone                                                                        | Tasks                                                                                                                                                                                                      | Task Description & Developer Detail                                                                                                                            | Dev Notes (Implementation)                                                                                                        |
+| -------------------------------------------------------------------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| **WP-3.1 Program Version, Rank, Domain, Skill Schema**               | **M3.1 mỗi ngành có version chương trình, rank tree, domains, skills, criteria** | **T-0071** `scout.program_version`<br/>**T-0072** rank/domain/skill/criteria tables<br/>**T-0073** branch-specific configs<br/>**T-0074** admin CRUD APIs<br/>**T-0075** seed data DTNDD                   | Lõi Scout không thể “hard-code”. Cần version chương trình, bậc, domain, kỹ năng, tiêu chí, prerequisite, SPICES tags để sau này thay đổi mà không phá lịch sử. | Schema phải tách definition khỏi progress. Seed đủ 3 ngành, 4 bậc/ngành, domain/kỹ năng/tiêu chí mẫu.                             |
+| **WP-3.2 Progress, Evidence Submission & Verification Queue**        | **M3.2 submit minh chứng → verify/reject → cập nhật progress**                   | **T-0076** progress/evidence tables<br/>**T-0077** file-evidence integration<br/>**T-0078** verification queue APIs<br/>**T-0079** approval/reject reasons + audit<br/>**T-0080** rank eligibility checker | Dựng end-to-end skill workflow thật: xem skill, check criteria, nộp bằng chứng, vào queue, trưởng verify, hệ thống tính hoàn tất skill/level/rank eligibility. | APIs `/api/scout/skills/*`, `/api/scout/verify/*`; events `scout.skill.submitted`, `scout.skill.verified`, `scout.rank.eligible`. |
+| **WP-3.3 Achievements, Habit Tracker & Personal Progress Dashboard** | **M3.3 người dùng thấy tiến bộ cá nhân theo domain/SPICES**                      | **T-0081** habit tables + streak job<br/>**T-0082** achievements hall read model<br/>**T-0083** progress dashboard aggregates<br/>**T-0084** parent-safe views<br/>**T-0085** missing-skill suggestions    | Cung cấp view tiến bộ rõ ràng: rank %, domain %, skill gaps, activity history, habits, achievements. Không để người dùng chỉ thấy danh sách thô.               | FE routes `/character/:id/skills`, `/character/:id/habits`, `/character/:id/achievements`.                                        |
 
 #### PHASE P3B — Sessions, Camps, Spiritual Growth, Mentoring, Rewards
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-3.4 Sessions, Attendance & Annual Program** | **M3.4 tạo session, lesson plan, điểm danh, báo cáo chuyên cần chạy được** | **T-0086** session + attendance schema<br/>**T-0087** lesson plan JSON blocks<br/>**T-0088** bulk attendance APIs<br/>**T-0089** annual program planner<br/>**T-0090** attendance alert jobs | Dựng quản lý sinh hoạt tuần: calendar, giáo án, điểm danh, debrief, annual program coverage. Đây là capability bắt buộc của DTNDD, không phải sub-page trang trí. | Events: `session.attendance_marked`, `session.completed`. Read models cho attendance reports theo member/unit/branch. |
-| **WP-3.5 Events, Camp Registration, Consent, HIRARC, 2-Adult Rule** | **M3.5 sự kiện/trại qua đêm được gate bởi risk + consent + staffing** | **T-0091** event/risk/consent tables<br/>**T-0092** registration + waitlist<br/>**T-0093** HIRARC form & scoring<br/>**T-0094** 2-adult staffing validator<br/>**T-0095** check-in/out + event report | Đây là điểm CTO hay thấy “vỏ ngoài”: phải build thật state machine từ draft→approved→open→checked_in→completed, với consent phụ huynh, HIRARC và 2-adult rule chặn approve. | Ticket/escalation liên quan incident; Finance/Assets hooks cho camp fee và kit loan. Child safety P0. |
-| **WP-3.6 Spiritual Logs, Evaluations & Mentoring** | **M3.6 có nhật ký tâm linh, đánh giá định kỳ, mentoring log** | **T-0096** spiritual log + ngũ giới records<br/>**T-0097** self/leader evaluation schema<br/>**T-0098** mentoring relationships + logs<br/>**T-0099** privacy controls<br/>**T-0100** radar/chart read model | Cần phân biệt dữ liệu riêng tư và dữ liệu trưởng được xem. Đánh giá, mentoring, spiritual log phải có field-level policy, không phơi lộ sai đối tượng. | APIs `/api/scout/spiritual/*`, `/api/scout/evaluations/*`, `/api/scout/mentoring/*`. |
-| **WP-3.7 Reward Core — EXP, Badge, Penalty, Shop, Leaderboard** | **M3.7 mọi event Scout/LMS/PM đổ về reward engine và sinh ledger đúng** | **T-0101** exp config + immutable ledger<br/>**T-0102** exp summary projection<br/>**T-0103** badge rule engine<br/>**T-0104** penalty/remediation flow<br/>**T-0105** shop/redemption + leaderboard | Reward engine phải là hệ thống kế toán điểm, không phải cộng trừ trực tiếp trong UI. Event in → ledger immutable → projection → badge evaluation → ranking/shop. | Tables `reward.exp_config`, `reward.exp_txn`, `reward.badge_def`, `reward.badge_award`, `reward_redemptions`, `leaderboard_snapshots`. Anti-abuse cap + idempotency bắt buộc. |
+| Work Package                                                        | Milestone                                                                  | Tasks                                                                                                                                                                                                        | Task Description & Developer Detail                                                                                                                                         | Dev Notes (Implementation)                                                                                                                                                    |
+| ------------------------------------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **WP-3.4 Sessions, Attendance & Annual Program**                    | **M3.4 tạo session, lesson plan, điểm danh, báo cáo chuyên cần chạy được** | **T-0086** session + attendance schema<br/>**T-0087** lesson plan JSON blocks<br/>**T-0088** bulk attendance APIs<br/>**T-0089** annual program planner<br/>**T-0090** attendance alert jobs                 | Dựng quản lý sinh hoạt tuần: calendar, giáo án, điểm danh, debrief, annual program coverage. Đây là capability bắt buộc của DTNDD, không phải sub-page trang trí.           | Events: `session.attendance_marked`, `session.completed`. Read models cho attendance reports theo member/unit/branch.                                                         |
+| **WP-3.5 Events, Camp Registration, Consent, HIRARC, 2-Adult Rule** | **M3.5 sự kiện/trại qua đêm được gate bởi risk + consent + staffing**      | **T-0091** event/risk/consent tables<br/>**T-0092** registration + waitlist<br/>**T-0093** HIRARC form & scoring<br/>**T-0094** 2-adult staffing validator<br/>**T-0095** check-in/out + event report        | Đây là điểm CTO hay thấy “vỏ ngoài”: phải build thật state machine từ draft→approved→open→checked_in→completed, với consent phụ huynh, HIRARC và 2-adult rule chặn approve. | Ticket/escalation liên quan incident; Finance/Assets hooks cho camp fee và kit loan. Child safety P0.                                                                         |
+| **WP-3.6 Spiritual Logs, Evaluations & Mentoring**                  | **M3.6 có nhật ký tâm linh, đánh giá định kỳ, mentoring log**              | **T-0096** spiritual log + ngũ giới records<br/>**T-0097** self/leader evaluation schema<br/>**T-0098** mentoring relationships + logs<br/>**T-0099** privacy controls<br/>**T-0100** radar/chart read model | Cần phân biệt dữ liệu riêng tư và dữ liệu trưởng được xem. Đánh giá, mentoring, spiritual log phải có field-level policy, không phơi lộ sai đối tượng.                      | APIs `/api/scout/spiritual/*`, `/api/scout/evaluations/*`, `/api/scout/mentoring/*`.                                                                                          |
+| **WP-3.7 Reward Core — EXP, Badge, Penalty, Shop, Leaderboard**     | **M3.7 mọi event Scout/LMS/PM đổ về reward engine và sinh ledger đúng**    | **T-0101** exp config + immutable ledger<br/>**T-0102** exp summary projection<br/>**T-0103** badge rule engine<br/>**T-0104** penalty/remediation flow<br/>**T-0105** shop/redemption + leaderboard         | Reward engine phải là hệ thống kế toán điểm, không phải cộng trừ trực tiếp trong UI. Event in → ledger immutable → projection → badge evaluation → ranking/shop.            | Tables `reward.exp_config`, `reward.exp_txn`, `reward.badge_def`, `reward.badge_award`, `reward_redemptions`, `leaderboard_snapshots`. Anti-abuse cap + idempotency bắt buộc. |
 
 ---
 
@@ -3312,18 +3527,18 @@ STORY (release capability track / module-owned delivery stream)
 
 #### PHASE P4A — Course, Lesson, Quiz, Mentor Grading
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-4.1 Course, Lesson & Assignment Core** | **M4.1 tạo khóa học/bài học, assign cho ngành hoặc member, progress lưu đúng** | **T-0106** course/module/lesson schema<br/>**T-0107** lesson block renderer<br/>**T-0108** assignment APIs<br/>**T-0109** progress tracking<br/>**T-0110** completion events | Dựng LMS core thực sự: catalog, lesson player, assignment, completion tracking, visibility theo branch/role. Nội dung phải dùng block structure để còn render nhất quán web/mobile. | Benchmark Moodle course hierarchy + competency thinking. Refs: turn0search6, turn0search16, turn0search22. |
-| **WP-4.2 Quiz Engine, Attempts, Gradebook & Mentor Queue** | **M4.2 quiz làm được, chấm được, mentor review được** | **T-0111** question bank schema<br/>**T-0112** attempt state machine<br/>**T-0113** auto grading rules<br/>**T-0114** essay/manual grading queue<br/>**T-0115** gradebook read model | Không chỉ hiển thị câu hỏi; cần có lifecycle attempts, scoring, pass/fail, explanations, manual grading, reattempt rules, gradebook per member/course. | APIs `/api/lms/quizzes/*`, `/api/lms/attempts/*`, `/api/lms/mentor/queue`. Events `lms.quiz_passed`, `lms.course_completed`. |
+| Work Package                                               | Milestone                                                                      | Tasks                                                                                                                                                                                | Task Description & Developer Detail                                                                                                                                                 | Dev Notes (Implementation)                                                                                                   |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| **WP-4.1 Course, Lesson & Assignment Core**                | **M4.1 tạo khóa học/bài học, assign cho ngành hoặc member, progress lưu đúng** | **T-0106** course/module/lesson schema<br/>**T-0107** lesson block renderer<br/>**T-0108** assignment APIs<br/>**T-0109** progress tracking<br/>**T-0110** completion events         | Dựng LMS core thực sự: catalog, lesson player, assignment, completion tracking, visibility theo branch/role. Nội dung phải dùng block structure để còn render nhất quán web/mobile. | Benchmark Moodle course hierarchy + competency thinking. Refs: turn0search6, turn0search16, turn0search22.                   |
+| **WP-4.2 Quiz Engine, Attempts, Gradebook & Mentor Queue** | **M4.2 quiz làm được, chấm được, mentor review được**                          | **T-0111** question bank schema<br/>**T-0112** attempt state machine<br/>**T-0113** auto grading rules<br/>**T-0114** essay/manual grading queue<br/>**T-0115** gradebook read model | Không chỉ hiển thị câu hỏi; cần có lifecycle attempts, scoring, pass/fail, explanations, manual grading, reattempt rules, gradebook per member/course.                              | APIs `/api/lms/quizzes/*`, `/api/lms/attempts/*`, `/api/lms/mentor/queue`. Events `lms.quiz_passed`, `lms.course_completed`. |
 
 #### PHASE P4B — Offline Packs, Arena, Parent Learning Visibility
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-4.3 Offline Packs & PWA Sync** | **M4.3 lesson pack tải offline, sync kết quả khi online lại** | **T-0116** service worker + cache manifest<br/>**T-0117** offline pack builder<br/>**T-0118** local queue for attempts/checklists<br/>**T-0119** conflict resolution rules<br/>**T-0120** storage quotas + cleanup | Học khi đi trại là use case thật. Offline pack phải chọn lesson/quiz/checklist cần mang theo, lưu local, đồng bộ lại khi có mạng. | Moodle app hỗ trợ offline/mobile learning và competencies là benchmark quan trọng. Refs: turn0search2, turn0search6, turn0search13. |
-| **WP-4.4 Battle Arena & Live Quiz Rooms** | **M4.4 host room, join room, score realtime, kết thúc ghi reward** | **T-0121** room/session schema<br/>**T-0122** Socket.IO gateway + room lifecycle<br/>**T-0123** answer timers + scoring<br/>**T-0124** live leaderboard UI<br/>**T-0125** budget flag / room-size limit | Arena là cost-heavy nên phải có feature flag, room quota, graceful degrade. Nhưng code vẫn phải chạy thật, không phải mock UI. | Kahoot-style realtime but capped. Room size default 30, low-cost mode 15. Events `lms.battle_won`, `lms.quiz_passed`. |
-| **WP-4.5 Parent Learning Dashboard & Mentor-Advisor Roles** | **M4.5 phụ huynh và mentor thấy đúng tiến độ, đúng quyền** | **T-0126** parent learning read model<br/>**T-0127** mentor-role scopes<br/>**T-0128** evidence-to-course linkage<br/>**T-0129** notification hooks<br/>**T-0130** privacy masking | Phụ huynh xem tiến bộ học tập, mentor thấy queue và evidence liên quan chuyên hiệu, nhưng không lộ dữ liệu lớp khác/người khác. | Liên kết chặt với Scout Core để course chuyên hiệu đẩy competency/progress ngược lại. |
+| Work Package                                                | Milestone                                                          | Tasks                                                                                                                                                                                                              | Task Description & Developer Detail                                                                                               | Dev Notes (Implementation)                                                                                                          |
+| ----------------------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| **WP-4.3 Offline Packs & PWA Sync**                         | **M4.3 lesson pack tải offline, sync kết quả khi online lại**      | **T-0116** service worker + cache manifest<br/>**T-0117** offline pack builder<br/>**T-0118** local queue for attempts/checklists<br/>**T-0119** conflict resolution rules<br/>**T-0120** storage quotas + cleanup | Học khi đi trại là use case thật. Offline pack phải chọn lesson/quiz/checklist cần mang theo, lưu local, đồng bộ lại khi có mạng. | Moodle app hỗ trợ offline/mobile learning và competencies là benchmark quan trọng. Refs: turn0search2, turn0search6, turn0search13. |
+| **WP-4.4 Battle Arena & Live Quiz Rooms**                   | **M4.4 host room, join room, score realtime, kết thúc ghi reward** | **T-0121** room/session schema<br/>**T-0122** Socket.IO gateway + room lifecycle<br/>**T-0123** answer timers + scoring<br/>**T-0124** live leaderboard UI<br/>**T-0125** budget flag / room-size limit            | Arena là cost-heavy nên phải có feature flag, room quota, graceful degrade. Nhưng code vẫn phải chạy thật, không phải mock UI.    | Kahoot-style realtime but capped. Room size default 30, low-cost mode 15. Events `lms.battle_won`, `lms.quiz_passed`.               |
+| **WP-4.5 Parent Learning Dashboard & Mentor-Advisor Roles** | **M4.5 phụ huynh và mentor thấy đúng tiến độ, đúng quyền**         | **T-0126** parent learning read model<br/>**T-0127** mentor-role scopes<br/>**T-0128** evidence-to-course linkage<br/>**T-0129** notification hooks<br/>**T-0130** privacy masking                                 | Phụ huynh xem tiến bộ học tập, mentor thấy queue và evidence liên quan chuyên hiệu, nhưng không lộ dữ liệu lớp khác/người khác.   | Liên kết chặt với Scout Core để course chuyên hiệu đẩy competency/progress ngược lại.                                               |
 
 ---
 
@@ -3331,19 +3546,19 @@ STORY (release capability track / module-owned delivery stream)
 
 #### PHASE P5A — Kế hoạch, Dự án, Thực thi công việc
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-5.1 Plan Composer & Approval Flow** | **M5.1 soạn kế hoạch 9 phần → submit → approve/reject chạy thật** | **T-0131** plan schema 9 sections<br/>**T-0132** structured form composer<br/>**T-0133** approval workflow state machine<br/>**T-0134** revision history<br/>**T-0135** Zalo/in-app reminders | Đây là điểm benchmark từ nhu cầu DTNDD. Plan phải có template, autosave, structured sections, validation, revision, submit/approve/reject, comment trail. | APIs `/api/projects/plans/*`; ticket/approval integration optional only for escalations. |
-| **WP-5.2 Project Tree, Backlog, Kanban, Calendar** | **M5.2 project được auto-generate và thao tác task thật** | **T-0136** project/phase/sprint/wp/task schema<br/>**T-0137** plan→project generator<br/>**T-0138** list/tree/kanban APIs<br/>**T-0139** status transitions + assignees<br/>**T-0140** reminders/comments/files | Dựng PM core: project hierarchy, backlog/list/tree, kanban board, calendar, task detail, assignees, comments, attachments, reminders. | OpenProject/Plane benchmarks nhấn mạnh work packages, issues, cycles, modules, docs/wiki, views. Refs: turn0search0, turn0search4, turn0search17, turn0search23, turn3view5. |
-| **WP-5.3 Gantt, Dependencies, Wiki & Time/Cost Tracking** | **M5.3 advanced PM views và docs gắn với project hoạt động được** | **T-0141** dependency model<br/>**T-0142** gantt/timeline read model<br/>**T-0143** project wiki/docs<br/>**T-0144** time log + cost log<br/>**T-0145** feature flag for heavy views | Gantt và docs/wiki không được chỉ là tab rỗng. Tối thiểu phải render dependencies, milestones, critical dates, embedded docs/wiki. Time/cost logs feed sang Finance reporting ở mức cần thiết. | Gantt/work package/wiki từ OpenProject; cycles/modules/work-items từ Plane. Gantt nên budget-gated. |
+| Work Package                                              | Milestone                                                         | Tasks                                                                                                                                                                                                           | Task Description & Developer Detail                                                                                                                                                            | Dev Notes (Implementation)                                                                                                                                                   |
+| --------------------------------------------------------- | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **WP-5.1 Plan Composer & Approval Flow**                  | **M5.1 soạn kế hoạch 9 phần → submit → approve/reject chạy thật** | **T-0131** plan schema 9 sections<br/>**T-0132** structured form composer<br/>**T-0133** approval workflow state machine<br/>**T-0134** revision history<br/>**T-0135** Zalo/in-app reminders                   | Đây là điểm benchmark từ nhu cầu DTNDD. Plan phải có template, autosave, structured sections, validation, revision, submit/approve/reject, comment trail.                                      | APIs `/api/projects/plans/*`; ticket/approval integration optional only for escalations.                                                                                     |
+| **WP-5.2 Project Tree, Backlog, Kanban, Calendar**        | **M5.2 project được auto-generate và thao tác task thật**         | **T-0136** project/phase/sprint/wp/task schema<br/>**T-0137** plan→project generator<br/>**T-0138** list/tree/kanban APIs<br/>**T-0139** status transitions + assignees<br/>**T-0140** reminders/comments/files | Dựng PM core: project hierarchy, backlog/list/tree, kanban board, calendar, task detail, assignees, comments, attachments, reminders.                                                          | OpenProject/Plane benchmarks nhấn mạnh work packages, issues, cycles, modules, docs/wiki, views. Refs: turn0search0, turn0search4, turn0search17, turn0search23, turn3view5. |
+| **WP-5.3 Gantt, Dependencies, Wiki & Time/Cost Tracking** | **M5.3 advanced PM views và docs gắn với project hoạt động được** | **T-0141** dependency model<br/>**T-0142** gantt/timeline read model<br/>**T-0143** project wiki/docs<br/>**T-0144** time log + cost log<br/>**T-0145** feature flag for heavy views                            | Gantt và docs/wiki không được chỉ là tab rỗng. Tối thiểu phải render dependencies, milestones, critical dates, embedded docs/wiki. Time/cost logs feed sang Finance reporting ở mức cần thiết. | Gantt/work package/wiki từ OpenProject; cycles/modules/work-items từ Plane. Gantt nên budget-gated.                                                                          |
 
 #### PHASE P5B — Ticketing, Approval Engine, Workflow Builder, SOP
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-5.4 Ticket Types, Inbox, Timeline, SLA** | **M5.4 ticket tạo được, route được, xử lý được đến close** | **T-0146** ticket schema + comments/history<br/>**T-0147** ticket categories + auto-routing<br/>**T-0148** inbox/detail/timeline UIs<br/>**T-0149** SLA timers + escalations<br/>**T-0150** attachment + audit | Ticket module phải đủ cho free-form request, incident, complaint, leave, approval requests. Timeline đầy đủ, status history, assignee, comment thread, SLA/escalation. | Zammad benchmark: triggers, core workflows, dynamic mandatory fields. Refs: turn1search0, turn1search4, turn1search16. |
-| **WP-5.5 Approval Engine (Sequential/Parallel/Conditional/Multi-level/Hybrid)** | **M5.5 5 kiểu phê duyệt đều chạy được trên một engine** | **T-0151** approval definition schema<br/>**T-0152** rule evaluator<br/>**T-0153** signer steps + branching logic<br/>**T-0154** threshold-based finance/event rules<br/>**T-0155** reusable approval widgets | Xây engine phê duyệt tổng quát, không hard-code từng module. Hỗ trợ sequential, parallel, conditional, multi-level, hybrid. Modules khác gọi engine bằng definition + payload. | Approval engine dùng bởi Plan, Expense, Consent, Promotion Review, Asset Loan, Background Check. |
-| **WP-5.6 Process Builder & SOP Library** | **M5.6 vẽ workflow được, chạy được, SOP versioned được** | **T-0156** workflow def/run schema<br/>**T-0157** React Flow builder<br/>**T-0158** trigger-condition-action executor<br/>**T-0159** SOP docs versioning/search<br/>**T-0160** publish/retire flows | Quy trình tự động hóa phải chạy thực: save graph, validate nodes/edges, execute on trigger, inspect run history. SOP library phải versioned, searchable, role-scoped. | React Flow phù hợp workflow builder, có save/restore, validation, prevent cycles. Refs: turn1search3, turn1search15, turn3view6. |
+| Work Package                                                                    | Milestone                                                  | Tasks                                                                                                                                                                                                          | Task Description & Developer Detail                                                                                                                                            | Dev Notes (Implementation)                                                                                                       |
+| ------------------------------------------------------------------------------- | ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| **WP-5.4 Ticket Types, Inbox, Timeline, SLA**                                   | **M5.4 ticket tạo được, route được, xử lý được đến close** | **T-0146** ticket schema + comments/history<br/>**T-0147** ticket categories + auto-routing<br/>**T-0148** inbox/detail/timeline UIs<br/>**T-0149** SLA timers + escalations<br/>**T-0150** attachment + audit | Ticket module phải đủ cho free-form request, incident, complaint, leave, approval requests. Timeline đầy đủ, status history, assignee, comment thread, SLA/escalation.         | Zammad benchmark: triggers, core workflows, dynamic mandatory fields. Refs: turn1search0, turn1search4, turn1search16.           |
+| **WP-5.5 Approval Engine (Sequential/Parallel/Conditional/Multi-level/Hybrid)** | **M5.5 5 kiểu phê duyệt đều chạy được trên một engine**    | **T-0151** approval definition schema<br/>**T-0152** rule evaluator<br/>**T-0153** signer steps + branching logic<br/>**T-0154** threshold-based finance/event rules<br/>**T-0155** reusable approval widgets  | Xây engine phê duyệt tổng quát, không hard-code từng module. Hỗ trợ sequential, parallel, conditional, multi-level, hybrid. Modules khác gọi engine bằng definition + payload. | Approval engine dùng bởi Plan, Expense, Consent, Promotion Review, Asset Loan, Background Check.                                 |
+| **WP-5.6 Process Builder & SOP Library**                                        | **M5.6 vẽ workflow được, chạy được, SOP versioned được**   | **T-0156** workflow def/run schema<br/>**T-0157** React Flow builder<br/>**T-0158** trigger-condition-action executor<br/>**T-0159** SOP docs versioning/search<br/>**T-0160** publish/retire flows            | Quy trình tự động hóa phải chạy thực: save graph, validate nodes/edges, execute on trigger, inspect run history. SOP library phải versioned, searchable, role-scoped.          | React Flow phù hợp workflow builder, có save/restore, validation, prevent cycles. Refs: turn1search3, turn1search15, turn3view6. |
 
 ---
 
@@ -3351,17 +3566,17 @@ STORY (release capability track / module-owned delivery stream)
 
 #### PHASE P6A — Finance Core, Fees, Budgets, Transparency
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-6.1 Ledger, Cost Centers & Budget Control** | **M6.1 chart/cost-center/budget chạy được ở cấp org/ngành/sự kiện** | **T-0161** account/cost-center/budget schema<br/>**T-0162** transaction journal service<br/>**T-0163** approval + reversal logic<br/>**T-0164** variance reports<br/>**T-0165** budget threshold alerts | Finance phải ledger-first: nhập thu/chi, duyệt, post, reverse, rollup theo cost center. Cost center tree map đúng DTNDD org hierarchy. | ERPNext benchmark về Cost Center, Budget, Allocation. Refs: turn1search2, turn1search6, turn1search10, turn1search18. |
-| **WP-6.2 Fees, Camp Fees, Sponsors & In-kind** | **M6.2 quản lý đoàn phí/camp fee/phần đóng góp minh bạch** | **T-0166** fee plan schema<br/>**T-0167** invoice/installment logic<br/>**T-0168** campership/waiver flow<br/>**T-0169** sponsor & in-kind records<br/>**T-0170** parent payment views | Dựng fee engine có kỳ đóng, trạng thái unpaid/partial/paid/waived/overdue, camp fee installment, sponsor history và hiện vật đóng góp. | APIs `/api/finance/fees/*`, `/api/finance/transactions/*`, `/api/finance/sponsors/*`. Parent portal đọc từ fee read model. |
+| Work Package                                     | Milestone                                                           | Tasks                                                                                                                                                                                                   | Task Description & Developer Detail                                                                                                    | Dev Notes (Implementation)                                                                                                 |
+| ------------------------------------------------ | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| **WP-6.1 Ledger, Cost Centers & Budget Control** | **M6.1 chart/cost-center/budget chạy được ở cấp org/ngành/sự kiện** | **T-0161** account/cost-center/budget schema<br/>**T-0162** transaction journal service<br/>**T-0163** approval + reversal logic<br/>**T-0164** variance reports<br/>**T-0165** budget threshold alerts | Finance phải ledger-first: nhập thu/chi, duyệt, post, reverse, rollup theo cost center. Cost center tree map đúng DTNDD org hierarchy. | ERPNext benchmark về Cost Center, Budget, Allocation. Refs: turn1search2, turn1search6, turn1search10, turn1search18.      |
+| **WP-6.2 Fees, Camp Fees, Sponsors & In-kind**   | **M6.2 quản lý đoàn phí/camp fee/phần đóng góp minh bạch**          | **T-0166** fee plan schema<br/>**T-0167** invoice/installment logic<br/>**T-0168** campership/waiver flow<br/>**T-0169** sponsor & in-kind records<br/>**T-0170** parent payment views                  | Dựng fee engine có kỳ đóng, trạng thái unpaid/partial/paid/waived/overdue, camp fee installment, sponsor history và hiện vật đóng góp. | APIs `/api/finance/fees/*`, `/api/finance/transactions/*`, `/api/finance/sponsors/*`. Parent portal đọc từ fee read model. |
 
 #### PHASE P6B — Asset Catalog, Checkout, Kits, Maintenance
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-6.3 Asset Catalog, QR, Custom Fields, Import** | **M6.3 tài sản có hồ sơ đầy đủ, quét/tra cứu/import được** | **T-0171** asset/category/model/custom-field schema<br/>**T-0172** QR/barcode labels<br/>**T-0173** import/export tools<br/>**T-0174** condition/location tracking<br/>**T-0175** attachments/warranty fields | Xây kho tài sản đúng nghĩa: catalog, custom fields, QR lookup, import batch, location, condition, warranty/license-like dates. | Snipe-IT benchmark: custom fields, QR/barcode, assigned-to, import/export, checkin/out. Refs: turn1search1, turn1search9, turn1search13, turn1search21. |
-| **WP-6.4 Loans, Camp Kits, Uniform, Maintenance & Guardian Acceptance** | **M6.4 mượn-trả, kit cấp phát, đồng phục, bảo trì chạy end-to-end** | **T-0176** loan/checkout state machine<br/>**T-0177** kit composition tables<br/>**T-0178** uniform sizing/issue/return<br/>**T-0179** maintenance schedule<br/>**T-0180** guardian acceptance for minors | Đây là capability thực chiến của DTNDD: mượn lều/gậy/kits, cấp đồng phục, bảo trì, giao tài sản cho trẻ vị thành niên phải có guardian acceptance hoặc trưởng xác nhận. | Asset state machine: available → reserved/requested → checked_out → returned/overdue/repair/disposed. |
+| Work Package                                                            | Milestone                                                           | Tasks                                                                                                                                                                                                         | Task Description & Developer Detail                                                                                                                                     | Dev Notes (Implementation)                                                                                                                              |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **WP-6.3 Asset Catalog, QR, Custom Fields, Import**                     | **M6.3 tài sản có hồ sơ đầy đủ, quét/tra cứu/import được**          | **T-0171** asset/category/model/custom-field schema<br/>**T-0172** QR/barcode labels<br/>**T-0173** import/export tools<br/>**T-0174** condition/location tracking<br/>**T-0175** attachments/warranty fields | Xây kho tài sản đúng nghĩa: catalog, custom fields, QR lookup, import batch, location, condition, warranty/license-like dates.                                          | Snipe-IT benchmark: custom fields, QR/barcode, assigned-to, import/export, checkin/out. Refs: turn1search1, turn1search9, turn1search13, turn1search21. |
+| **WP-6.4 Loans, Camp Kits, Uniform, Maintenance & Guardian Acceptance** | **M6.4 mượn-trả, kit cấp phát, đồng phục, bảo trì chạy end-to-end** | **T-0176** loan/checkout state machine<br/>**T-0177** kit composition tables<br/>**T-0178** uniform sizing/issue/return<br/>**T-0179** maintenance schedule<br/>**T-0180** guardian acceptance for minors     | Đây là capability thực chiến của DTNDD: mượn lều/gậy/kits, cấp đồng phục, bảo trì, giao tài sản cho trẻ vị thành niên phải có guardian acceptance hoặc trưởng xác nhận. | Asset state machine: available → reserved/requested → checked_out → returned/overdue/repair/disposed.                                                   |
 
 ---
 
@@ -3369,16 +3584,16 @@ STORY (release capability track / module-owned delivery stream)
 
 #### PHASE P7A — Notifications, Search, Reports, Files-in-Context
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-7.1 Notification Center (In-app, Zalo, FCM)** | **M7.1 event → notification delivery → inbox history chạy được** | **T-0181** notification schema/inbox<br/>**T-0182** channel adapter (Zalo/FCM/email fallback)<br/>**T-0183** quiet hours + parental routing<br/>**T-0184** retry/dead-letter<br/>**T-0185** template registry | Thông báo không được cài “đi thẳng từ service A gọi Zalo”. Phải qua notification center có template registry, quiet hours, target resolution, retry, delivery logs. | Ưu tiên Zalo OA/ZNS; fallback FCM/email. Child safety: tránh gửi ban đêm cho trẻ em. |
-| **WP-7.2 Global Search, Activity Timeline, Reports Center** | **M7.2 tìm kiếm toàn cục và xuất báo cáo có watermark, TTL** | **T-0186** search index/read model<br/>**T-0187** activity timeline aggregator<br/>**T-0188** CSV/Excel/PDF exports<br/>**T-0189** report permissions + TTL URLs<br/>**T-0190** downloadable artifacts UI | Người dùng cần tìm person/task/asset/course nhanh. Báo cáo cần xuất được nhưng phải có watermark, TTL, audit. Timeline hợp nhất là màn “nhịp tim” của platform. | Export subsystem tận dụng file storage + signed URLs + background job. |
-| **WP-7.3 Release Dashboard, Module Health & Readiness Manifests** | **M7.3 admin thấy module nào đủ dùng, build nào pass/fail** | **T-0191** release report table<br/>**T-0192** runtime module health endpoint<br/>**T-0193** coverage/report artifact ingestion<br/>**T-0194** admin dashboard UI<br/>**T-0195** activation blockers | Release Dashboard không phải “đồ chơi quản trị”: nó là nơi khóa module ACTIVE nếu thiếu templates/entities/workflow/API/test. Dùng cho CTO/PM để ngăn deploy rỗng. | Routes `/settings/release`, APIs `/system/release-gates/*`, `/system/module-health`. Liên kết CI artifacts + runtime probes. |
+| Work Package                                                      | Milestone                                                        | Tasks                                                                                                                                                                                                         | Task Description & Developer Detail                                                                                                                                 | Dev Notes (Implementation)                                                                                                   |
+| ----------------------------------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| **WP-7.1 Notification Center (In-app, Zalo, FCM)**                | **M7.1 event → notification delivery → inbox history chạy được** | **T-0181** notification schema/inbox<br/>**T-0182** channel adapter (Zalo/FCM/email fallback)<br/>**T-0183** quiet hours + parental routing<br/>**T-0184** retry/dead-letter<br/>**T-0185** template registry | Thông báo không được cài “đi thẳng từ service A gọi Zalo”. Phải qua notification center có template registry, quiet hours, target resolution, retry, delivery logs. | Ưu tiên Zalo OA/ZNS; fallback FCM/email. Child safety: tránh gửi ban đêm cho trẻ em.                                         |
+| **WP-7.2 Global Search, Activity Timeline, Reports Center**       | **M7.2 tìm kiếm toàn cục và xuất báo cáo có watermark, TTL**     | **T-0186** search index/read model<br/>**T-0187** activity timeline aggregator<br/>**T-0188** CSV/Excel/PDF exports<br/>**T-0189** report permissions + TTL URLs<br/>**T-0190** downloadable artifacts UI     | Người dùng cần tìm person/task/asset/course nhanh. Báo cáo cần xuất được nhưng phải có watermark, TTL, audit. Timeline hợp nhất là màn “nhịp tim” của platform.     | Export subsystem tận dụng file storage + signed URLs + background job.                                                       |
+| **WP-7.3 Release Dashboard, Module Health & Readiness Manifests** | **M7.3 admin thấy module nào đủ dùng, build nào pass/fail**      | **T-0191** release report table<br/>**T-0192** runtime module health endpoint<br/>**T-0193** coverage/report artifact ingestion<br/>**T-0194** admin dashboard UI<br/>**T-0195** activation blockers          | Release Dashboard không phải “đồ chơi quản trị”: nó là nơi khóa module ACTIVE nếu thiếu templates/entities/workflow/API/test. Dùng cho CTO/PM để ngăn deploy rỗng.  | Routes `/settings/release`, APIs `/system/release-gates/*`, `/system/module-health`. Liên kết CI artifacts + runtime probes. |
 
 #### PHASE P7B — Warehouse Sync, Analytics, Admin Insight
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
+| Work Package                                            | Milestone                                                                     | Tasks                                                                                                                                                                                                           | Task Description & Developer Detail                                                                                                                      | Dev Notes (Implementation)                                                                           |
+| ------------------------------------------------------- | ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | **WP-7.4 Event Warehouse Sync & Analytics Read Models** | **M7.4 analytics org/module/member chạy được, warehouse sync có thể bật/tắt** | **T-0196** event→warehouse mapping<br/>**T-0197** BigQuery optional pipeline<br/>**T-0198** SPICES coverage metrics<br/>**T-0199** progress/fee/attendance dashboards<br/>**T-0200** backfill + partition rules | Production nhỏ vẫn chạy bằng OLTP read models; nếu org cần analytics sâu thì bật BigQuery sync. Mapping phải chuẩn event catalog, tránh bắn dữ liệu bừa. | Dataflow/PubSub→BQ là optional/gated; default OFF để giữ budget. Analytics P0 vẫn có từ read models. |
 
 ---
@@ -3387,22 +3602,21 @@ STORY (release capability track / module-owned delivery stream)
 
 #### PHASE P8A — Security, Performance, DR, Budget Guardrails
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-8.1 Security Hardening & Edge Controls** | **M8.1 authz/authn/rate-limit/WAF/secrets pass checklist** | **T-0201** Cloud Armor/rate rules<br/>**T-0202** security headers/CSP/HSTS<br/>**T-0203** secret rotation plan<br/>**T-0204** file validation & malware hooks<br/>**T-0205** sensitive-field encryption | Lớp security phải đi từ edge → gateway → app → DB → file storage. Đây là checklist cứng trước production, đặc biệt vì có dữ liệu trẻ em và tín ngưỡng. | WAF/rate-limit ở edge, CASL + RLS ở app/DB, signed URLs + TTL cho file. |
-| **WP-8.2 Performance, Resilience, PITR & Restore Drill** | **M8.2 load baseline + restore drill + migration rollback pass** | **T-0206** k6 load plan<br/>**T-0207** slow-query/index tuning<br/>**T-0208** PITR/backup restore drill<br/>**T-0209** job retry/idempotency tests<br/>**T-0210** synthetic probes | Chạy load cho flows P0, đo top endpoints, tối ưu indexes, diễn tập khôi phục DB, mô phỏng job publish/consume lỗi. Không được go-live nếu restore drill chưa làm. | Cloud SQL PITR/restore + synthetic probes + retry rules cho worker/outbox. |
-| **WP-8.3 Budget Guardrails, Low-cost Mode & Kill Switches** | **M8.3 budget drill pass, low-cost mode tự kích hoạt đúng ngưỡng** | **T-0211** budget alert thresholds 50/80/100/120<br/>**T-0212** Pub/Sub → Cloud Run function hooks<br/>**T-0213** feature degradation policy<br/>**T-0214** concurrency/max-instances settings<br/>**T-0215** monthly cost dashboard | Dựng cost governance thật: alerts, notification topics, runtime throttles, feature flags, emergency kill-switch runbook. Đây là nền giữ trần 800k/tháng. | Billing Budgets hỗ trợ Pub/Sub notifications; Cloud Run cho phép khống chế concurrency và max instances. Refs: turn4search0, turn4search4, turn4search8, turn4search2, turn4search10, turn4search14. |
+| Work Package                                                | Milestone                                                          | Tasks                                                                                                                                                                                                                                | Task Description & Developer Detail                                                                                                                               | Dev Notes (Implementation)                                                                                                                                                                           |
+| ----------------------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **WP-8.1 Security Hardening & Edge Controls**               | **M8.1 authz/authn/rate-limit/WAF/secrets pass checklist**         | **T-0201** Cloud Armor/rate rules<br/>**T-0202** security headers/CSP/HSTS<br/>**T-0203** secret rotation plan<br/>**T-0204** file validation & malware hooks<br/>**T-0205** sensitive-field encryption                              | Lớp security phải đi từ edge → gateway → app → DB → file storage. Đây là checklist cứng trước production, đặc biệt vì có dữ liệu trẻ em và tín ngưỡng.            | WAF/rate-limit ở edge, CASL + RLS ở app/DB, signed URLs + TTL cho file.                                                                                                                              |
+| **WP-8.2 Performance, Resilience, PITR & Restore Drill**    | **M8.2 load baseline + restore drill + migration rollback pass**   | **T-0206** k6 load plan<br/>**T-0207** slow-query/index tuning<br/>**T-0208** PITR/backup restore drill<br/>**T-0209** job retry/idempotency tests<br/>**T-0210** synthetic probes                                                   | Chạy load cho flows P0, đo top endpoints, tối ưu indexes, diễn tập khôi phục DB, mô phỏng job publish/consume lỗi. Không được go-live nếu restore drill chưa làm. | Cloud SQL PITR/restore + synthetic probes + retry rules cho worker/outbox.                                                                                                                           |
+| **WP-8.3 Budget Guardrails, Low-cost Mode & Kill Switches** | **M8.3 budget drill pass, low-cost mode tự kích hoạt đúng ngưỡng** | **T-0211** budget alert thresholds 50/80/100/120<br/>**T-0212** Pub/Sub → Cloud Run function hooks<br/>**T-0213** feature degradation policy<br/>**T-0214** concurrency/max-instances settings<br/>**T-0215** monthly cost dashboard | Dựng cost governance thật: alerts, notification topics, runtime throttles, feature flags, emergency kill-switch runbook. Đây là nền giữ trần 800k/tháng.          | Billing Budgets hỗ trợ Pub/Sub notifications; Cloud Run cho phép khống chế concurrency và max instances. Refs: turn4search0, turn4search4, turn4search8, turn4search2, turn4search10, turn4search14. |
 
 #### PHASE P8B — Seed Data, Import, Pilot, E2E Gates, Production Release
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-8.4 Seed Data Pack, Demo Scenarios & Data Import** | **M8.4 fresh environment vào là dùng được, import dữ liệu thực có runbook** | **T-0216** org demo seed pack<br/>**T-0217** module template packs<br/>**T-0218** CSV importers/validators<br/>**T-0219** demo journeys script<br/>**T-0220** rollback/import correction tools | Đây là cách chặn tình trạng “vào module trắng trơn”. Mỗi module phải có template/seed/demo data; migration/import có validator và correction path. | Seed tối thiểu: 1 org, 3 ngành, 2 đội/ngành, member/guardian, 1 plan, 1 project, 1 course, 1 event, 1 fee plan, 10 assets, 5 exp rules. |
-| **WP-8.5 E2E Gate Pack & Canary Release** | **M8.5 toàn bộ critical journeys pass trên staging và canary prod** | **T-0221** Playwright critical pack<br/>**T-0222** module-active readiness check<br/>**T-0223** post-deploy canary endpoints<br/>**T-0224** signed release manifest<br/>**T-0225** rollback automation | Viết E2E quanh hành trình thực, không chỉ page loads: onboarding member, submit evidence, verify skill, collect fee, approve plan, checkout asset, create ticket, create SOP run, login parent, export report. | Module ACTIVE phải có ít nhất 1 E2E ownable. Release manifest ký bằng build ID + commit SHA + profile. |
-| **WP-8.6 Pilot Org, Training, Go-live & Hypercare** | **M8.6 pilot pass, training hoàn tất, production go-live with hypercare** | **T-0226** pilot org selection<br/>**T-0227** training decks + SOPs<br/>**T-0228** go-live checklist walkthrough<br/>**T-0229** hypercare backlog & triage rules<br/>**T-0230** post-go-live metrics review | Triển khai thật cho 1 org pilot, đào tạo trưởng/admin, chạy hypercare 2–4 tuần, đo incidents, missing capabilities, adoption, budget drift rồi mới nhân rộng. | Hypercare dashboard phải bám release dashboard + ticket incidents + cost + runtime health. |
+| Work Package                                            | Milestone                                                                   | Tasks                                                                                                                                                                                                       | Task Description & Developer Detail                                                                                                                                                                            | Dev Notes (Implementation)                                                                                                              |
+| ------------------------------------------------------- | --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **WP-8.4 Seed Data Pack, Demo Scenarios & Data Import** | **M8.4 fresh environment vào là dùng được, import dữ liệu thực có runbook** | **T-0216** org demo seed pack<br/>**T-0217** module template packs<br/>**T-0218** CSV importers/validators<br/>**T-0219** demo journeys script<br/>**T-0220** rollback/import correction tools              | Đây là cách chặn tình trạng “vào module trắng trơn”. Mỗi module phải có template/seed/demo data; migration/import có validator và correction path.                                                             | Seed tối thiểu: 1 org, 3 ngành, 2 đội/ngành, member/guardian, 1 plan, 1 project, 1 course, 1 event, 1 fee plan, 10 assets, 5 exp rules. |
+| **WP-8.5 E2E Gate Pack & Canary Release**               | **M8.5 toàn bộ critical journeys pass trên staging và canary prod**         | **T-0221** Playwright critical pack<br/>**T-0222** module-active readiness check<br/>**T-0223** post-deploy canary endpoints<br/>**T-0224** signed release manifest<br/>**T-0225** rollback automation      | Viết E2E quanh hành trình thực, không chỉ page loads: onboarding member, submit evidence, verify skill, collect fee, approve plan, checkout asset, create ticket, create SOP run, login parent, export report. | Module ACTIVE phải có ít nhất 1 E2E ownable. Release manifest ký bằng build ID + commit SHA + profile.                                  |
+| **WP-8.6 Pilot Org, Training, Go-live & Hypercare**     | **M8.6 pilot pass, training hoàn tất, production go-live with hypercare**   | **T-0226** pilot org selection<br/>**T-0227** training decks + SOPs<br/>**T-0228** go-live checklist walkthrough<br/>**T-0229** hypercare backlog & triage rules<br/>**T-0230** post-go-live metrics review | Triển khai thật cho 1 org pilot, đào tạo trưởng/admin, chạy hypercare 2–4 tuần, đo incidents, missing capabilities, adoption, budget drift rồi mới nhân rộng.                                                  | Hypercare dashboard phải bám release dashboard + ticket incidents + cost + runtime health.                                              |
 
 ---
-
 
 ---
 
@@ -3412,328 +3626,331 @@ STORY (release capability track / module-owned delivery stream)
 
 #### PHASE P9A — Canonical States, Schemas, API Contracts, RLS & Playbooks
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-9.1 Canonical State Machine Registry** | **M9.1 mọi state machine P0/P1 có source chuẩn, guard chuẩn, test chuẩn** | **T-0901** chuẩn hóa registry `contracts/state-machines/*.ts|json`<br/>**T-0902** map state ↔ DB status enum ↔ OpenAPI enum<br/>**T-0903** sinh transition tables cho PHẦN IX<br/>**T-0904** tạo test harness cho legal/illegal transitions<br/>**T-0905** nối audit + event emission rules | Không chỉ vẽ Mermaid. Mỗi state machine phải có nguồn triển khai thực sự: enum/status, guards, transition functions, emitted events, actor permission, failure states. FE forms, BE services, DB constraints, event handlers và Playwright đều phải bám một registry duy nhất. | Khuyến nghị dùng statechart mindset với XState/Stately để model và test logic phức tạp; với flow builder có thể dùng React Flow cho editor nhưng transition guard vẫn nằm ở BE. Refs: OpenAPI SSOT, XState docs, React Flow docs. |
-| **WP-9.2 Appendix A — All Modules Database Schemas** | **M9.2 PHỤ LỤC A phủ đủ 10 module + shared tables + indexes + RLS notes** | **T-0906** rà coverage schema toàn hệ thống<br/>**T-0907** viết canonical table specs per module<br/>**T-0908** bổ sung indexes/unique/check/fk matrix<br/>**T-0909** map migration file ↔ appendix row IDs<br/>**T-0910** tạo migration smoke & seed verification | Chuyển Appendix A thành bản đồ DB thật sự để dev có thể build/migrate/seed: bảng, cột lõi, PK/FK, enum, index, constraints, data retention, PII class, org_id/RLS requirement, write-owner module. Mỗi table phải map về service sở hữu và workflow dùng đến nó. | Prisma Migrate cho luồng review/test migrations; phần RLS vẫn cho phép raw SQL migration để `ENABLE ROW LEVEL SECURITY` + `CREATE POLICY`. Refs: Prisma Migrate, PostgreSQL RLS/CREATE POLICY. |
-| **WP-9.3 Appendix B — Scout Core Implementation Contract** | **M9.3 Module 8 có contract triển khai đủ OpenAPI + SQL + RLS + playbook + backlog** | **T-0911** chốt `scout.yaml` OpenAPI theo sub-modules 8A-8E<br/>**T-0912** chốt SQL migration baseline + projection tables<br/>**T-0913** chốt RLS/write rules theo leader/member/guardian<br/>**T-0914** mở rộng AI-agent playbook per flow<br/>**T-0915** map Story S8-x ↔ WP-3.x ↔ state machines | Appendix B phải là “module contract pack hoàn chỉnh” cho mega-module Scout: skillbook, sessions, events, spiritual, mentoring, reward hooks. Không được dừng ở 1 story rút gọn. Cần explicit API tags, SQL tables, RLS guards, worker subscriptions, file evidence flow, seed program data và backlog nhập thẳng Jira được. | Dùng Module 8 làm mẫu chuẩn cho các module khác vì đây là module khó nhất. OpenAPI phải đủ cho API Gateway surface; SQL và projections phải đủ cho dashboard/parent views. |
-| **WP-9.4 PART B/C/D Contract Packaging for AI-Agent** | **M9.4 AI Agent có bộ input hoàn chỉnh để code không suy diễn** | **T-0916** package OpenAPI + DTO/codegen rules<br/>**T-0917** package migrations + rollback notes<br/>**T-0918** package seed/demo data pack<br/>**T-0919** package repo paths/service boundaries<br/>**T-0920** package runbook troubleshoot/import/rebuild | Mục tiêu là biến contract thành input trực tiếp cho AI Agent và dev: biết file nào sửa, service nào gọi, guard nào áp dụng, test nào thêm, dữ liệu demo nào nạp, rollback ra sao. | Đây là chỗ nối **spec → code → test → demo**; thiếu phần này sẽ tạo “vỏ ngoài”. |
+| Work Package                                               | Milestone                                                                            | Tasks                                                                                                                                                                                                                                                                                                | Task Description & Developer Detail                                                                                                                                                                                                                                                                                         | Dev Notes (Implementation)                                                                                                                                                                                                                                                     |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **WP-9.1 Canonical State Machine Registry**                | **M9.1 mọi state machine P0/P1 có source chuẩn, guard chuẩn, test chuẩn**            | **T-0901** chuẩn hóa registry `contracts/state-machines/\*.ts                                                                                                                                                                                                                                        | json`<br/>**T-0902** map state ↔ DB status enum ↔ OpenAPI enum<br/>**T-0903** sinh transition tables cho PHẦN IX<br/>**T-0904** tạo test harness cho legal/illegal transitions<br/>**T-0905** nối audit + event emission rules                                                                                              | Không chỉ vẽ Mermaid. Mỗi state machine phải có nguồn triển khai thực sự: enum/status, guards, transition functions, emitted events, actor permission, failure states. FE forms, BE services, DB constraints, event handlers và Playwright đều phải bám một registry duy nhất. | Khuyến nghị dùng statechart mindset với XState/Stately để model và test logic phức tạp; với flow builder có thể dùng React Flow cho editor nhưng transition guard vẫn nằm ở BE. Refs: OpenAPI SSOT, XState docs, React Flow docs. |
+| **WP-9.2 Appendix A — All Modules Database Schemas**       | **M9.2 PHỤ LỤC A phủ đủ 10 module + shared tables + indexes + RLS notes**            | **T-0906** rà coverage schema toàn hệ thống<br/>**T-0907** viết canonical table specs per module<br/>**T-0908** bổ sung indexes/unique/check/fk matrix<br/>**T-0909** map migration file ↔ appendix row IDs<br/>**T-0910** tạo migration smoke & seed verification                                   | Chuyển Appendix A thành bản đồ DB thật sự để dev có thể build/migrate/seed: bảng, cột lõi, PK/FK, enum, index, constraints, data retention, PII class, org_id/RLS requirement, write-owner module. Mỗi table phải map về service sở hữu và workflow dùng đến nó.                                                            | Prisma Migrate cho luồng review/test migrations; phần RLS vẫn cho phép raw SQL migration để `ENABLE ROW LEVEL SECURITY` + `CREATE POLICY`. Refs: Prisma Migrate, PostgreSQL RLS/CREATE POLICY.                                                                                 |
+| **WP-9.3 Appendix B — Scout Core Implementation Contract** | **M9.3 Module 8 có contract triển khai đủ OpenAPI + SQL + RLS + playbook + backlog** | **T-0911** chốt `scout.yaml` OpenAPI theo sub-modules 8A-8E<br/>**T-0912** chốt SQL migration baseline + projection tables<br/>**T-0913** chốt RLS/write rules theo leader/member/guardian<br/>**T-0914** mở rộng AI-agent playbook per flow<br/>**T-0915** map Story S8-x ↔ WP-3.x ↔ state machines | Appendix B phải là “module contract pack hoàn chỉnh” cho mega-module Scout: skillbook, sessions, events, spiritual, mentoring, reward hooks. Không được dừng ở 1 story rút gọn. Cần explicit API tags, SQL tables, RLS guards, worker subscriptions, file evidence flow, seed program data và backlog nhập thẳng Jira được. | Dùng Module 8 làm mẫu chuẩn cho các module khác vì đây là module khó nhất. OpenAPI phải đủ cho API Gateway surface; SQL và projections phải đủ cho dashboard/parent views.                                                                                                     |
+| **WP-9.4 PART B/C/D Contract Packaging for AI-Agent**      | **M9.4 AI Agent có bộ input hoàn chỉnh để code không suy diễn**                      | **T-0916** package OpenAPI + DTO/codegen rules<br/>**T-0917** package migrations + rollback notes<br/>**T-0918** package seed/demo data pack<br/>**T-0919** package repo paths/service boundaries<br/>**T-0920** package runbook troubleshoot/import/rebuild                                         | Mục tiêu là biến contract thành input trực tiếp cho AI Agent và dev: biết file nào sửa, service nào gọi, guard nào áp dụng, test nào thêm, dữ liệu demo nào nạp, rollback ra sao.                                                                                                                                           | Đây là chỗ nối **spec → code → test → demo**; thiếu phần này sẽ tạo “vỏ ngoài”.                                                                                                                                                                                                |
 
 #### PHASE P9B — Module Contract Packs, Checklist Sync, Readiness Evidence & CTO Handoff
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-9.5 Appendix C — Module-by-Module Engineering Contract Packs** | **M9.5 mọi module M1–M10 có contract pack đủ service/api/event/db/test/dod** | **T-0921** normalize contract template per module<br/>**T-0922** điền service list + repo boundaries<br/>**T-0923** điền API/event/db/test matrices<br/>**T-0924** map each module to routes/sub-pages/workflows<br/>**T-0925** add readiness manifest fields | Appendix C phải đóng vai trò “deployment contract” cho từng module: module owner, repo boundary, APIs, events, schema, projections, state machines, tests, feature flags, cost impact, readiness manifest. | Đây là nơi Product, QA, Dev, AI Agent, CTO cùng kiểm tra cùng một khung. |
-| **WP-9.6 PHẦN X Checklist Sync & Release Gates** | **M9.6 checklists không còn đứng riêng, mỗi checklist map ngược được về WP/module/gate** | **T-0926** checklist↔roadmap matrix<br/>**T-0927** checklist↔module coverage matrix<br/>**T-0928** checklist↔Playwright suite mapping<br/>**T-0929** checklist↔release gate ownership<br/>**T-0930** fail conditions documented | PHẦN X phải có giá trị thực thi: checklist nào do ai chạy, chạy ở đâu, gate nào fail nếu checklist chưa pass, module nào phụ thuộc checklist nào. Không để checklist là danh sách đẹp nhưng không ai sở hữu. | Map trực tiếp vào CI/CD, staging sign-off và cutover checklist. |
-| **WP-9.7 Readiness Manifests, Release Evidence & CTO Review Pack** | **M9.7 mỗi module ACTIVE có manifest + evidence pack + sign-off trail** | **T-0931** readiness manifest JSON/MD per module<br/>**T-0932** release evidence bundle (API diff, migrations, e2e, screenshots, logs)<br/>**T-0933** CTO review dashboard links<br/>**T-0934** canary/rollback evidence format<br/>**T-0935** final handoff pack | Đây là lớp bằng chứng để CTO không phải “bấm thử đoán mò”: có manifest, test results, route list, API list, seed/demo scenarios, rollback notes, known issues, budget profile, ownership. | Reuse release dashboard concept; artifacts xuất ra `/contracts/release/*` và `/artifacts/release/*`. |
-| **WP-9.8 Canonical Traceability & Closure** | **M9.8 tất cả row IDs trong roadmap truy xuất được sang PRD/UI/API/DB/Event/Test** | **T-0936** traceability matrix generator<br/>**T-0937** module coverage diff check<br/>**T-0938** dead-link/heading audit<br/>**T-0939** numbering/section audit<br/>**T-0940** publish canonical V7 pack | Đây là bước khóa tài liệu để tránh lỗi cấu trúc, heading, numbering, section drift mà anh đã phản hồi. Mỗi row roadmap, mỗi API tag, mỗi schema appendix, mỗi state machine đều có anchor/reference rõ ràng. | Có thể generate một phần tự động từ contracts + headings + manifest metadata để giảm lệch pha về sau. |
-
+| Work Package                                                        | Milestone                                                                                | Tasks                                                                                                                                                                                                                                                             | Task Description & Developer Detail                                                                                                                                                                          | Dev Notes (Implementation)                                                                            |
+| ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| **WP-9.5 Appendix C — Module-by-Module Engineering Contract Packs** | **M9.5 mọi module M1–M10 có contract pack đủ service/api/event/db/test/dod**             | **T-0921** normalize contract template per module<br/>**T-0922** điền service list + repo boundaries<br/>**T-0923** điền API/event/db/test matrices<br/>**T-0924** map each module to routes/sub-pages/workflows<br/>**T-0925** add readiness manifest fields     | Appendix C phải đóng vai trò “deployment contract” cho từng module: module owner, repo boundary, APIs, events, schema, projections, state machines, tests, feature flags, cost impact, readiness manifest.   | Đây là nơi Product, QA, Dev, AI Agent, CTO cùng kiểm tra cùng một khung.                              |
+| **WP-9.6 PHẦN X Checklist Sync & Release Gates**                    | **M9.6 checklists không còn đứng riêng, mỗi checklist map ngược được về WP/module/gate** | **T-0926** checklist↔roadmap matrix<br/>**T-0927** checklist↔module coverage matrix<br/>**T-0928** checklist↔Playwright suite mapping<br/>**T-0929** checklist↔release gate ownership<br/>**T-0930** fail conditions documented                                   | PHẦN X phải có giá trị thực thi: checklist nào do ai chạy, chạy ở đâu, gate nào fail nếu checklist chưa pass, module nào phụ thuộc checklist nào. Không để checklist là danh sách đẹp nhưng không ai sở hữu. | Map trực tiếp vào CI/CD, staging sign-off và cutover checklist.                                       |
+| **WP-9.7 Readiness Manifests, Release Evidence & CTO Review Pack**  | **M9.7 mỗi module ACTIVE có manifest + evidence pack + sign-off trail**                  | **T-0931** readiness manifest JSON/MD per module<br/>**T-0932** release evidence bundle (API diff, migrations, e2e, screenshots, logs)<br/>**T-0933** CTO review dashboard links<br/>**T-0934** canary/rollback evidence format<br/>**T-0935** final handoff pack | Đây là lớp bằng chứng để CTO không phải “bấm thử đoán mò”: có manifest, test results, route list, API list, seed/demo scenarios, rollback notes, known issues, budget profile, ownership.                    | Reuse release dashboard concept; artifacts xuất ra `/contracts/release/*` và `/artifacts/release/*`.  |
+| **WP-9.8 Canonical Traceability & Closure**                         | **M9.8 tất cả row IDs trong roadmap truy xuất được sang PRD/UI/API/DB/Event/Test**       | **T-0936** traceability matrix generator<br/>**T-0937** module coverage diff check<br/>**T-0938** dead-link/heading audit<br/>**T-0939** numbering/section audit<br/>**T-0940** publish canonical V7 pack                                                         | Đây là bước khóa tài liệu để tránh lỗi cấu trúc, heading, numbering, section drift mà anh đã phản hồi. Mỗi row roadmap, mỗi API tag, mỗi schema appendix, mỗi state machine đều có anchor/reference rõ ràng. | Có thể generate một phần tự động từ contracts + headings + manifest metadata để giảm lệch pha về sau. |
 
 ### STORY-010 — MODULE 1 HRM IMPLEMENTATION ASSURANCE
 
 #### PHASE M1-A — Canonical Data, Lifecycle, Guardian & Compliance
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-010.1 Member/Guardian Core** | **M010.1 tạo/sửa/xem hồ sơ thành viên và guardian không lỗi** | **T-1001** member/guardian schemas<br/>**T-1002** under-age validation + medical/emergency model<br/>**T-1003** member lifecycle state machine<br/>**T-1004** CRUD APIs + DTOs + validators<br/>**T-1005** audit trail + field-level permissions | Build canonical HRM core cho Đoàn sinh/Trưởng/Phụ huynh: create/update/view/search member, guardian link, emergency, medical, volunteer availability, compliance flags. Dev phải chốt state machine `pending → active → inactive|suspended|left|transferred`. | BE: `hrm/member.service.ts`, `guardian.service.ts`, DTO Zod/class-validator; DB: `hrm.person_profile`, `guardian_link`, `member_medical`, `member_compliance`; API: `/api/hrm/members*`; Tests: validation, RLS, audit, age→branch. |
-| **WP-010.2 Org Structure, Assignment & Transfer** | **M010.2 org chart, unit assignment và transfer case dùng được** | **T-1006** org chart tables + recursive reads<br/>**T-1007** unit assignment flows<br/>**T-1008** transfer case workflow + approvals<br/>**T-1009** timeline events<br/>**T-1010** signed handover summary export | Build org chart tree, branch/unit assignment, transfer case giữa ngành, handover summary, timeline aggregation. Phải có logic preserve history khi chuyển ngành và trigger event cho Scout/Reward. | Read/write owner là HRM; emit `hrm.member_transferred`; projections cập nhật character sheet; FE pages `/guild/org-chart`, `/guild/transfers`; Export PDF summary cho bàn giao ngành. |
+| Work Package                                      | Milestone                                                        | Tasks                                                                                                                                                                                                                                            | Task Description & Developer Detail                                                                                                                                                                                              | Dev Notes (Implementation)                                                                                                                                                            |
+| ------------------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **WP-010.1 Member/Guardian Core**                 | **M010.1 tạo/sửa/xem hồ sơ thành viên và guardian không lỗi**    | **T-1001** member/guardian schemas<br/>**T-1002** under-age validation + medical/emergency model<br/>**T-1003** member lifecycle state machine<br/>**T-1004** CRUD APIs + DTOs + validators<br/>**T-1005** audit trail + field-level permissions | Build canonical HRM core cho Đoàn sinh/Trưởng/Phụ huynh: create/update/view/search member, guardian link, emergency, medical, volunteer availability, compliance flags. Dev phải chốt state machine `pending → active → inactive | suspended                                                                                                                                                                             | left | transferred`. | BE: `hrm/member.service.ts`, `guardian.service.ts`, DTO Zod/class-validator; DB: `hrm.person_profile`, `guardian_link`, `member_medical`, `member_compliance`; API: `/api/hrm/members*`; Tests: validation, RLS, audit, age→branch. |
+| **WP-010.2 Org Structure, Assignment & Transfer** | **M010.2 org chart, unit assignment và transfer case dùng được** | **T-1006** org chart tables + recursive reads<br/>**T-1007** unit assignment flows<br/>**T-1008** transfer case workflow + approvals<br/>**T-1009** timeline events<br/>**T-1010** signed handover summary export                                | Build org chart tree, branch/unit assignment, transfer case giữa ngành, handover summary, timeline aggregation. Phải có logic preserve history khi chuyển ngành và trigger event cho Scout/Reward.                               | Read/write owner là HRM; emit `hrm.member_transferred`; projections cập nhật character sheet; FE pages `/guild/org-chart`, `/guild/transfers`; Export PDF summary cho bàn giao ngành. |
 
 #### PHASE M1-B — Screens, Parent Portal, Imports & Production Readiness
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
+| Work Package                            | Milestone                                                  | Tasks                                                                                                                                                                                                                          | Task Description & Developer Detail                                                                                                                                  | Dev Notes (Implementation)                                                                                                                                   |
+| --------------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **WP-010.3 HRM Screens & Parent Views** | **M010.3 roster/profile/character/parent portal playable** | **T-1011** roster page + advanced filters<br/>**T-1012** profile + character sheet scenes<br/>**T-1013** parent dashboard + access logs<br/>**T-1014** compliance center UI<br/>**T-1015** loading/empty/error/skeleton states | FE phải render đầy đủ sub-pages của HRM, không chỉ list page. Parent portal chỉ xem đúng dữ liệu linked child; child data access log phải hiển thị lịch sử truy cập. | Next.js App Router routes; TanStack Query + optimistic refresh; signed URL previews; component mapping: `C-GuildRoster`, `C-CharacterSheet`, `C-SafeBanner`. |
-| **WP-010.4 Import, E2E & Go-live Pack** | **M010.4 HRM pass import + e2e + release evidence** | **T-1016** CSV import validators<br/>**T-1017** seed roster/org demo data<br/>**T-1018** Playwright HRM journey<br/>**T-1019** readiness manifest<br/>**T-1020** known-issues + rollback notes | Đảm bảo environment mới có thể import roster thực, parent login được, transfers chạy được, E2E pass và có evidence bundle cho CTO. | E2E: create member <18 → guardian link → parent login → view dashboard; Import corrections + duplicate detection là bắt buộc. |
+| **WP-010.4 Import, E2E & Go-live Pack** | **M010.4 HRM pass import + e2e + release evidence**        | **T-1016** CSV import validators<br/>**T-1017** seed roster/org demo data<br/>**T-1018** Playwright HRM journey<br/>**T-1019** readiness manifest<br/>**T-1020** known-issues + rollback notes                                 | Đảm bảo environment mới có thể import roster thực, parent login được, transfers chạy được, E2E pass và có evidence bundle cho CTO.                                   | E2E: create member <18 → guardian link → parent login → view dashboard; Import corrections + duplicate detection là bắt buộc.                                |
 
 ### STORY-011 — MODULE 2 PROJECT & PLANNING IMPLEMENTATION ASSURANCE
 
 #### PHASE M2-A — Plan Composer, Approval & Auto-Project Generation
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-011.1 Plan Composer & Templates** | **M011.1 soạn kế hoạch 9 phần và lưu draft/submitted được** | **T-1021** plan schema 9 sections<br/>**T-1022** template engine (camp/event/year plan)<br/>**T-1023** autosave + version history<br/>**T-1024** validation rules<br/>**T-1025** approval submit APIs | Build plan builder thật với rich sections, checklist blocks, attachments, autosave/versioning. Trưởng phải có thể dùng ngay để soạn kế hoạch hoạt động, không chỉ thấy mock form. | Tables: `pm.plans`, `pm.plan_versions`, `pm.plan_templates`; API tags `plans`; FE route `/quest/plans/new`; tests cho draft/reject/resubmit. |
+| Work Package                                         | Milestone                                                      | Tasks                                                                                                                                                                                                         | Task Description & Developer Detail                                                                                                                                                  | Dev Notes (Implementation)                                                                                                                             |
+| ---------------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **WP-011.1 Plan Composer & Templates**               | **M011.1 soạn kế hoạch 9 phần và lưu draft/submitted được**    | **T-1021** plan schema 9 sections<br/>**T-1022** template engine (camp/event/year plan)<br/>**T-1023** autosave + version history<br/>**T-1024** validation rules<br/>**T-1025** approval submit APIs         | Build plan builder thật với rich sections, checklist blocks, attachments, autosave/versioning. Trưởng phải có thể dùng ngay để soạn kế hoạch hoạt động, không chỉ thấy mock form.    | Tables: `pm.plans`, `pm.plan_versions`, `pm.plan_templates`; API tags `plans`; FE route `/quest/plans/new`; tests cho draft/reject/resubmit.           |
 | **WP-011.2 Approval Chain & Plan→Project Generator** | **M011.2 approved plan auto-generate project tree đúng logic** | **T-1026** approval state machine<br/>**T-1027** RACI/personnel parsing<br/>**T-1028** plan-to-project generator<br/>**T-1029** budget/timeline propagation<br/>**T-1030** domain events + notification hooks | Khi kế hoạch approved, hệ thống phải tạo project/phases/sprints/work packages/tasks theo mapping đã mô tả. Dev cần code generator idempotent, rollback-safe và có re-run protection. | Services: `plan-approval.service.ts`, `plan-project-generator.ts`; events: `pm.plan.approved`, `pm.project.generated`; state machine sync với PHẦN IX. |
 
 #### PHASE M2-B — Project Views, Risks, Wiki, E2E
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-011.3 Work Item Views & Collaboration** | **M011.3 board/list/tree/calendar/wiki hoạt động không vỡ dữ liệu** | **T-1031** work item tree APIs<br/>**T-1032** Kanban drag-drop persistence<br/>**T-1033** calendar/gantt data adapters<br/>**T-1034** comments/@mentions/wiki linkage<br/>**T-1035** risk register + checklists | Build các sub-pages thực chiến của module PM: board, list, tree, calendar, wiki, risk register, cost/time fields. Tất cả phải bám cùng 1 work item source of truth. | OpenProject/Plane-inspired; `pm.work_items`, `pm.task_comments`, `pm.risks`; Gantt có feature flag; wiki links tới work items; audit status transitions. |
-| **WP-011.4 Notifications, E2E & Go-live Pack** | **M011.4 create plan→approve→auto-project→complete task pass end-to-end** | **T-1036** reminder jobs + due alerts<br/>**T-1037** EXP hooks for completed tasks<br/>**T-1038** Playwright PM journey<br/>**T-1039** sample templates + demo project<br/>**T-1040** release evidence | Chặn tình trạng PM chỉ đẹp mà không chạy: phải có E2E từ plan đến task completion, reminders, EXP integration, demo templates và release evidence. | E2E route: create plan → submit → approve → auto-tree → move card → mark done → verify reward event. |
+| Work Package                                   | Milestone                                                                 | Tasks                                                                                                                                                                                                           | Task Description & Developer Detail                                                                                                                                 | Dev Notes (Implementation)                                                                                                                               |
+| ---------------------------------------------- | ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **WP-011.3 Work Item Views & Collaboration**   | **M011.3 board/list/tree/calendar/wiki hoạt động không vỡ dữ liệu**       | **T-1031** work item tree APIs<br/>**T-1032** Kanban drag-drop persistence<br/>**T-1033** calendar/gantt data adapters<br/>**T-1034** comments/@mentions/wiki linkage<br/>**T-1035** risk register + checklists | Build các sub-pages thực chiến của module PM: board, list, tree, calendar, wiki, risk register, cost/time fields. Tất cả phải bám cùng 1 work item source of truth. | OpenProject/Plane-inspired; `pm.work_items`, `pm.task_comments`, `pm.risks`; Gantt có feature flag; wiki links tới work items; audit status transitions. |
+| **WP-011.4 Notifications, E2E & Go-live Pack** | **M011.4 create plan→approve→auto-project→complete task pass end-to-end** | **T-1036** reminder jobs + due alerts<br/>**T-1037** EXP hooks for completed tasks<br/>**T-1038** Playwright PM journey<br/>**T-1039** sample templates + demo project<br/>**T-1040** release evidence          | Chặn tình trạng PM chỉ đẹp mà không chạy: phải có E2E từ plan đến task completion, reminders, EXP integration, demo templates và release evidence.                  | E2E route: create plan → submit → approve → auto-tree → move card → mark done → verify reward event.                                                     |
 
 ### STORY-012 — MODULE 3 TICKET & APPROVAL IMPLEMENTATION ASSURANCE
 
 #### PHASE M3-A — Ticket Core, Approval Engine, Escalation
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-012.1 Ticket Core & Routing** | **M012.1 ticket inbox/detail/new request hoạt động ổn định** | **T-1041** ticket schema + attachments<br/>**T-1042** category routing rules<br/>**T-1043** thread/comments/internal notes<br/>**T-1044** SLA timestamps<br/>**T-1045** inbox/detail APIs | Build ticket backbone: create ticket, comment, attach evidence, route by category, SLA timestamps, audit trail. | Tables: `ticket.tickets`, `ticket.comments`, `ticket.status_history`, `ticket.attachments`; APIs `/api/tickets*`; RLS by org and scope. |
-| **WP-012.2 Approval Flow Engine** | **M012.2 sequential/parallel/conditional/multi-level/hybrid approvals dùng được** | **T-1046** approval graph schema<br/>**T-1047** approver resolution logic<br/>**T-1048** conditional thresholds rules<br/>**T-1049** escalation timers/jobs<br/>**T-1050** signature/consent attachments | Build reusable approval engine cho mọi request type: consent phụ huynh, chi phí, advancement review, volunteer checks. State machine và audit bắt buộc phải thống nhất. | Process/Zammad-inspired rules; dynamic fields and conditional routing; services `approval-engine.service.ts`, `escalation.job.ts`. |
+| Work Package                       | Milestone                                                                         | Tasks                                                                                                                                                                                                    | Task Description & Developer Detail                                                                                                                                     | Dev Notes (Implementation)                                                                                                              |
+| ---------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **WP-012.1 Ticket Core & Routing** | **M012.1 ticket inbox/detail/new request hoạt động ổn định**                      | **T-1041** ticket schema + attachments<br/>**T-1042** category routing rules<br/>**T-1043** thread/comments/internal notes<br/>**T-1044** SLA timestamps<br/>**T-1045** inbox/detail APIs                | Build ticket backbone: create ticket, comment, attach evidence, route by category, SLA timestamps, audit trail.                                                         | Tables: `ticket.tickets`, `ticket.comments`, `ticket.status_history`, `ticket.attachments`; APIs `/api/tickets*`; RLS by org and scope. |
+| **WP-012.2 Approval Flow Engine**  | **M012.2 sequential/parallel/conditional/multi-level/hybrid approvals dùng được** | **T-1046** approval graph schema<br/>**T-1047** approver resolution logic<br/>**T-1048** conditional thresholds rules<br/>**T-1049** escalation timers/jobs<br/>**T-1050** signature/consent attachments | Build reusable approval engine cho mọi request type: consent phụ huynh, chi phí, advancement review, volunteer checks. State machine và audit bắt buộc phải thống nhất. | Process/Zammad-inspired rules; dynamic fields and conditional routing; services `approval-engine.service.ts`, `escalation.job.ts`.      |
 
 #### PHASE M3-B — Incident, Consent, E2E
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-012.3 Incident & Sensitive Workflows** | **M012.3 incident/complaint flow có escalation và restricted visibility** | **T-1051** incident ticket subtype<br/>**T-1052** restricted visibility RLS rules<br/>**T-1053** escalation ladder UI/API<br/>**T-1054** guardian consent templates<br/>**T-1055** notification + evidence retention | Các flow nhạy cảm phải chạy thật và không lộ dữ liệu: incident, complaint, child-safety escalation, consent forms. | Separate scopes for incident viewers; signed files; quiet-hours-safe notifications; evidence retention notes. |
-| **WP-012.4 Ticket E2E & Ops Pack** | **M012.4 create request→approve/reject→close pass production gates** | **T-1056** Playwright ticket journeys<br/>**T-1057** seed approval templates<br/>**T-1058** SLA dashboards<br/>**T-1059** release manifest<br/>**T-1060** rollback/runbook | Chứng minh module ticket không còn là vỏ: must pass at least request, conditional approval, consent, incident escalation journeys. | Demo templates cho xin nghỉ, xin cấp kinh phí, consent trại, complaint escalation. |
+| Work Package                                | Milestone                                                                 | Tasks                                                                                                                                                                                                                | Task Description & Developer Detail                                                                                                | Dev Notes (Implementation)                                                                                    |
+| ------------------------------------------- | ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| **WP-012.3 Incident & Sensitive Workflows** | **M012.3 incident/complaint flow có escalation và restricted visibility** | **T-1051** incident ticket subtype<br/>**T-1052** restricted visibility RLS rules<br/>**T-1053** escalation ladder UI/API<br/>**T-1054** guardian consent templates<br/>**T-1055** notification + evidence retention | Các flow nhạy cảm phải chạy thật và không lộ dữ liệu: incident, complaint, child-safety escalation, consent forms.                 | Separate scopes for incident viewers; signed files; quiet-hours-safe notifications; evidence retention notes. |
+| **WP-012.4 Ticket E2E & Ops Pack**          | **M012.4 create request→approve/reject→close pass production gates**      | **T-1056** Playwright ticket journeys<br/>**T-1057** seed approval templates<br/>**T-1058** SLA dashboards<br/>**T-1059** release manifest<br/>**T-1060** rollback/runbook                                           | Chứng minh module ticket không còn là vỏ: must pass at least request, conditional approval, consent, incident escalation journeys. | Demo templates cho xin nghỉ, xin cấp kinh phí, consent trại, complaint escalation.                            |
 
 ### STORY-013 — MODULE 4 FINANCE IMPLEMENTATION ASSURANCE
 
 #### PHASE M4-A — Ledger, Fees, Budgeting, Sponsors
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-013.1 Ledger & Transaction Backbone** | **M013.1 tạo thu/chi/reverse và ledger rollup không sai số** | **T-1061** chart/account/cost-center schemas<br/>**T-1062** double-entry-like transaction model<br/>**T-1063** approval states + reverse flow<br/>**T-1064** cash/bank balance projections<br/>**T-1065** audit/export APIs | Build finance core theo ledger-first: transactions, approvals, reversals, balances, cost centers. Không được chỉ ghi row thu/chi đơn giản. | `fin.accounts`, `fin.transactions`, `fin.cost_centers`, `fin.transaction_lines`; reports via read models; tests cho reverse, balance consistency. |
-| **WP-013.2 Fees, Camp Fees, Sponsors & In-kind** | **M013.2 fee plan/partial payment/waiver/sponsor flows chạy được** | **T-1066** fee plan + invoice model<br/>**T-1067** partial payment + overdue rules<br/>**T-1068** waiver/campership flow<br/>**T-1069** sponsor + in-kind contribution tables<br/>**T-1070** parent payment visibility | Build recurring fee plans, camp fee partials, waiver, sponsor/in-kind tracking và parent view. | APIs `/api/finance/fees*`, `/sponsors*`; exports with watermark; notifications for overdue/paid. |
+| Work Package                                     | Milestone                                                          | Tasks                                                                                                                                                                                                                       | Task Description & Developer Detail                                                                                                        | Dev Notes (Implementation)                                                                                                                        |
+| ------------------------------------------------ | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **WP-013.1 Ledger & Transaction Backbone**       | **M013.1 tạo thu/chi/reverse và ledger rollup không sai số**       | **T-1061** chart/account/cost-center schemas<br/>**T-1062** double-entry-like transaction model<br/>**T-1063** approval states + reverse flow<br/>**T-1064** cash/bank balance projections<br/>**T-1065** audit/export APIs | Build finance core theo ledger-first: transactions, approvals, reversals, balances, cost centers. Không được chỉ ghi row thu/chi đơn giản. | `fin.accounts`, `fin.transactions`, `fin.cost_centers`, `fin.transaction_lines`; reports via read models; tests cho reverse, balance consistency. |
+| **WP-013.2 Fees, Camp Fees, Sponsors & In-kind** | **M013.2 fee plan/partial payment/waiver/sponsor flows chạy được** | **T-1066** fee plan + invoice model<br/>**T-1067** partial payment + overdue rules<br/>**T-1068** waiver/campership flow<br/>**T-1069** sponsor + in-kind contribution tables<br/>**T-1070** parent payment visibility      | Build recurring fee plans, camp fee partials, waiver, sponsor/in-kind tracking và parent view.                                             | APIs `/api/finance/fees*`, `/sponsors*`; exports with watermark; notifications for overdue/paid.                                                  |
 
 #### PHASE M4-B — Reports, Dashboards, E2E
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-013.3 Treasury Dashboards & Reports** | **M013.3 treasury dashboard, budget variance, fee status reports dùng được** | **T-1071** treasury dashboard queries<br/>**T-1072** budget variance reports<br/>**T-1073** parent/org report views<br/>**T-1074** PDF/Excel exports<br/>**T-1075** search/filter/pagination | FE/BE phải có dashboard và reports thật, không phải hình tĩnh. Queries phải tối ưu và budget-aware. | Read models/materialized views cho summary; heavy reports chạy async nếu cần; signed export URLs. |
-| **WP-013.4 Finance E2E & Readiness** | **M013.4 create fee→partial pay→overdue→report pass end-to-end** | **T-1076** finance Playwright pack<br/>**T-1077** seed fee plans + sample sponsors<br/>**T-1078** reconciliation checks<br/>**T-1079** readiness manifest<br/>**T-1080** operator runbook | Finance phải có E2E quanh fee collection và reports; operator có runbook cho reverse/correction/import. | Smoke tests cho invariants balance, overdue notifications, sponsor/in-kind aggregation. |
+| Work Package                               | Milestone                                                                    | Tasks                                                                                                                                                                                        | Task Description & Developer Detail                                                                     | Dev Notes (Implementation)                                                                        |
+| ------------------------------------------ | ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| **WP-013.3 Treasury Dashboards & Reports** | **M013.3 treasury dashboard, budget variance, fee status reports dùng được** | **T-1071** treasury dashboard queries<br/>**T-1072** budget variance reports<br/>**T-1073** parent/org report views<br/>**T-1074** PDF/Excel exports<br/>**T-1075** search/filter/pagination | FE/BE phải có dashboard và reports thật, không phải hình tĩnh. Queries phải tối ưu và budget-aware.     | Read models/materialized views cho summary; heavy reports chạy async nếu cần; signed export URLs. |
+| **WP-013.4 Finance E2E & Readiness**       | **M013.4 create fee→partial pay→overdue→report pass end-to-end**             | **T-1076** finance Playwright pack<br/>**T-1077** seed fee plans + sample sponsors<br/>**T-1078** reconciliation checks<br/>**T-1079** readiness manifest<br/>**T-1080** operator runbook    | Finance phải có E2E quanh fee collection và reports; operator có runbook cho reverse/correction/import. | Smoke tests cho invariants balance, overdue notifications, sponsor/in-kind aggregation.           |
 
 ### STORY-014 — MODULE 5 ASSETS IMPLEMENTATION ASSURANCE
 
 #### PHASE M5-A — Inventory, QR, Checkout/Checkin, Maintenance
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-014.1 Inventory Core & Classification** | **M014.1 inventory, categories, custom fields, QR labels hoạt động** | **T-1081** asset/category/model schemas<br/>**T-1082** custom fields/fieldsets<br/>**T-1083** QR/barcode metadata + label export<br/>**T-1084** condition/location tracking<br/>**T-1085** inventory APIs | Build inventory backbone cho lều, đồng phục, kits, vehicles, consumables. Custom fields and location/condition are required, not optional. | `asset.assets`, `asset.models`, `asset.categories`, `asset.custom_fields`; QR label export + scan lookup. |
-| **WP-014.2 Checkout/Checkin, Minor Acceptance & Maintenance** | **M014.2 request→approve→checkout→return/repair chạy đúng state machine** | **T-1086** loan request state machine<br/>**T-1087** user/guardian acceptance flow<br/>**T-1088** overdue reminders<br/>**T-1089** maintenance tickets/schedules<br/>**T-1090** loss/damage/disposal logic | Build operational borrowing lifecycle with guardian acceptance when minor receives asset, plus maintenance/disposal. | State machine sync với PHẦN IX; loan docs/files via signed URLs; links to Ticket for incident damage cases. |
+| Work Package                                                  | Milestone                                                                 | Tasks                                                                                                                                                                                                      | Task Description & Developer Detail                                                                                                        | Dev Notes (Implementation)                                                                                  |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| **WP-014.1 Inventory Core & Classification**                  | **M014.1 inventory, categories, custom fields, QR labels hoạt động**      | **T-1081** asset/category/model schemas<br/>**T-1082** custom fields/fieldsets<br/>**T-1083** QR/barcode metadata + label export<br/>**T-1084** condition/location tracking<br/>**T-1085** inventory APIs  | Build inventory backbone cho lều, đồng phục, kits, vehicles, consumables. Custom fields and location/condition are required, not optional. | `asset.assets`, `asset.models`, `asset.categories`, `asset.custom_fields`; QR label export + scan lookup.   |
+| **WP-014.2 Checkout/Checkin, Minor Acceptance & Maintenance** | **M014.2 request→approve→checkout→return/repair chạy đúng state machine** | **T-1086** loan request state machine<br/>**T-1087** user/guardian acceptance flow<br/>**T-1088** overdue reminders<br/>**T-1089** maintenance tickets/schedules<br/>**T-1090** loss/damage/disposal logic | Build operational borrowing lifecycle with guardian acceptance when minor receives asset, plus maintenance/disposal.                       | State machine sync với PHẦN IX; loan docs/files via signed URLs; links to Ticket for incident damage cases. |
 
 #### PHASE M5-B — Kits, Uniform, E2E
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-014.3 Kits, Uniform & Camp Pack Operations** | **M014.3 camp kits/uniform issue screens chạy dùng được** | **T-1091** kit composition tables<br/>**T-1092** uniform issue/return flow<br/>**T-1093** pack/unpack checklists<br/>**T-1094** stock thresholds alerts<br/>**T-1095** sub-pages + dashboards | Module assets phải cover use cases thật của DTNDD: camp kits, uniform by size/status, consumables, stock thresholds. | FE routes `/guild/armory`, `/loans`, `/kits`, `/uniform`, `/maintenance`; read models for low stock and overdue assets. |
-| **WP-014.4 Asset E2E & Readiness** | **M014.4 checkout kit→guardian accept→return→maintenance pass E2E** | **T-1096** asset Playwright pack<br/>**T-1097** seed armory inventory<br/>**T-1098** import/export CSV<br/>**T-1099** readiness manifest<br/>**T-1100** ops runbook | Chứng minh module không phải vỏ: asset kit thật được checkout, guardian accept, return, damage/maintenance. | Include scanner-friendly QR test and printable labels. |
+| Work Package                                      | Milestone                                                           | Tasks                                                                                                                                                                                         | Task Description & Developer Detail                                                                                  | Dev Notes (Implementation)                                                                                              |
+| ------------------------------------------------- | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **WP-014.3 Kits, Uniform & Camp Pack Operations** | **M014.3 camp kits/uniform issue screens chạy dùng được**           | **T-1091** kit composition tables<br/>**T-1092** uniform issue/return flow<br/>**T-1093** pack/unpack checklists<br/>**T-1094** stock thresholds alerts<br/>**T-1095** sub-pages + dashboards | Module assets phải cover use cases thật của DTNDD: camp kits, uniform by size/status, consumables, stock thresholds. | FE routes `/guild/armory`, `/loans`, `/kits`, `/uniform`, `/maintenance`; read models for low stock and overdue assets. |
+| **WP-014.4 Asset E2E & Readiness**                | **M014.4 checkout kit→guardian accept→return→maintenance pass E2E** | **T-1096** asset Playwright pack<br/>**T-1097** seed armory inventory<br/>**T-1098** import/export CSV<br/>**T-1099** readiness manifest<br/>**T-1100** ops runbook                           | Chứng minh module không phải vỏ: asset kit thật được checkout, guardian accept, return, damage/maintenance.          | Include scanner-friendly QR test and printable labels.                                                                  |
 
 ### STORY-015 — MODULE 6 PROCESS/SOP IMPLEMENTATION ASSURANCE
 
 #### PHASE M6-A — SOP Library, Versioning, Workflow Builder
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-015.1 SOP Library & Version Control** | **M015.1 tạo/sửa/ban hành SOP có version, approvals, search** | **T-1101** SOP document/version schemas<br/>**T-1102** rich text + attachments<br/>**T-1103** version diff/approval flow<br/>**T-1104** tagging/search<br/>**T-1105** viewer permissions | Build SOP docs as governed content, not loose markdown blobs. Need versioning, publishing, superseded states, search and role-based access. | Tables `proc.sop_docs`, `proc.sop_versions`, `proc.sop_approvals`; TipTap editor + signed attachments; full-text search. |
-| **WP-015.2 Workflow Builder & Executor** | **M015.2 visual workflow builder save/run/debug được** | **T-1106** node/edge JSON schemas<br/>**T-1107** React Flow builder UI<br/>**T-1108** executor runtime + guards<br/>**T-1109** trigger/action adapters<br/>**T-1110** run history + debugging | Build node-based builder for workflow templates and runtime executor with audit/debug. Triggers, conditions, delays, actions phải thực thi được chứ không chỉ lưu diagram. | FE: React Flow node editor; BE: `workflow-executor.service.ts`, queue/jobs, event adapters; DB run history tables. |
+| Work Package                               | Milestone                                                     | Tasks                                                                                                                                                                                         | Task Description & Developer Detail                                                                                                                                        | Dev Notes (Implementation)                                                                                               |
+| ------------------------------------------ | ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| **WP-015.1 SOP Library & Version Control** | **M015.1 tạo/sửa/ban hành SOP có version, approvals, search** | **T-1101** SOP document/version schemas<br/>**T-1102** rich text + attachments<br/>**T-1103** version diff/approval flow<br/>**T-1104** tagging/search<br/>**T-1105** viewer permissions      | Build SOP docs as governed content, not loose markdown blobs. Need versioning, publishing, superseded states, search and role-based access.                                | Tables `proc.sop_docs`, `proc.sop_versions`, `proc.sop_approvals`; TipTap editor + signed attachments; full-text search. |
+| **WP-015.2 Workflow Builder & Executor**   | **M015.2 visual workflow builder save/run/debug được**        | **T-1106** node/edge JSON schemas<br/>**T-1107** React Flow builder UI<br/>**T-1108** executor runtime + guards<br/>**T-1109** trigger/action adapters<br/>**T-1110** run history + debugging | Build node-based builder for workflow templates and runtime executor with audit/debug. Triggers, conditions, delays, actions phải thực thi được chứ không chỉ lưu diagram. | FE: React Flow node editor; BE: `workflow-executor.service.ts`, queue/jobs, event adapters; DB run history tables.       |
 
 #### PHASE M6-B — Templates, Runs, E2E
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
+| Work Package                                         | Milestone                                                                        | Tasks                                                                                                                                                                               | Task Description & Developer Detail                                     | Dev Notes (Implementation)                                                                          |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
 | **WP-015.3 Template Library & Org Automation Packs** | **M015.3 có template workflow/SOP cho onboarding, consent, reminders, incident** | **T-1111** template catalog<br/>**T-1112** workflow import/export JSON<br/>**T-1113** safety-focused templates<br/>**T-1114** admin configuration UI<br/>**T-1115** docs + examples | Provide ready-to-use automation packs so module is usable from day one. | Seed templates for onboarding, fee reminder, consent reminder, incident escalation, camp checklist. |
-| **WP-015.4 Process E2E & Readiness** | **M015.4 trigger event→workflow executes→run history visible** | **T-1116** process Playwright pack<br/>**T-1117** runtime health metrics<br/>**T-1118** stuck-run handling<br/>**T-1119** readiness manifest<br/>**T-1120** rollback/runbook | Must prove a real workflow fires from event and executes action chain. | Canary workflow on staging; dead-letter handling for failed actions; operator restart runbook. |
+| **WP-015.4 Process E2E & Readiness**                 | **M015.4 trigger event→workflow executes→run history visible**                   | **T-1116** process Playwright pack<br/>**T-1117** runtime health metrics<br/>**T-1118** stuck-run handling<br/>**T-1119** readiness manifest<br/>**T-1120** rollback/runbook        | Must prove a real workflow fires from event and executes action chain.  | Canary workflow on staging; dead-letter handling for failed actions; operator restart runbook.      |
 
 ### STORY-016 — MODULE 7 LMS IMPLEMENTATION ASSURANCE
 
 #### PHASE M7-A — Courses, Lessons, Quiz, Mentor Grading
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-016.1 Course/Lesson/Competency Backbone** | **M016.1 catalog, lesson player, progress tracking chạy ổn định** | **T-1121** course/module/lesson schemas<br/>**T-1122** competency mapping + completion rules<br/>**T-1123** lesson player + rich content blocks<br/>**T-1124** progress tracking + badges hooks<br/>**T-1125** mentor assignment/grading queue | Build LMS core for courses, lessons, competencies, learning progress and mentor queue. | Tables `lms.courses`, `lessons`, `progress`, `competencies`, `mentor_assignments`; FE routes `/academy*`; signed media/file handling. |
-| **WP-016.2 Quiz Engine & Assessment Workflows** | **M016.2 quizzes/attempts/grading/retry logic dùng được** | **T-1126** quiz/question schemas<br/>**T-1127** attempt timer/state machine<br/>**T-1128** scoring + pass/fail + retry rules<br/>**T-1129** manual grading flow<br/>**T-1130** reward events | Implement full quiz lifecycle, not just form screens. Must support timed attempts, scoring, retries and manual grading when needed. | APIs `/api/lms/quizzes*`, websocket optional for live updates; events `lms.quiz_passed`, `lms.quiz_failed`, `lms.lesson_completed`. |
+| Work Package                                    | Milestone                                                         | Tasks                                                                                                                                                                                                                                          | Task Description & Developer Detail                                                                                                 | Dev Notes (Implementation)                                                                                                            |
+| ----------------------------------------------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| **WP-016.1 Course/Lesson/Competency Backbone**  | **M016.1 catalog, lesson player, progress tracking chạy ổn định** | **T-1121** course/module/lesson schemas<br/>**T-1122** competency mapping + completion rules<br/>**T-1123** lesson player + rich content blocks<br/>**T-1124** progress tracking + badges hooks<br/>**T-1125** mentor assignment/grading queue | Build LMS core for courses, lessons, competencies, learning progress and mentor queue.                                              | Tables `lms.courses`, `lessons`, `progress`, `competencies`, `mentor_assignments`; FE routes `/academy*`; signed media/file handling. |
+| **WP-016.2 Quiz Engine & Assessment Workflows** | **M016.2 quizzes/attempts/grading/retry logic dùng được**         | **T-1126** quiz/question schemas<br/>**T-1127** attempt timer/state machine<br/>**T-1128** scoring + pass/fail + retry rules<br/>**T-1129** manual grading flow<br/>**T-1130** reward events                                                   | Implement full quiz lifecycle, not just form screens. Must support timed attempts, scoring, retries and manual grading when needed. | APIs `/api/lms/quizzes*`, websocket optional for live updates; events `lms.quiz_passed`, `lms.quiz_failed`, `lms.lesson_completed`.   |
 
 #### PHASE M7-B — Arena, Offline, E2E
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-016.3 Battle Arena & Offline Packs** | **M016.3 arena realtime và offline packs chạy được theo feature flags** | **T-1131** arena room/lobby state machine<br/>**T-1132** websocket gateway<br/>**T-1133** scoreboard + anti-cheat basics<br/>**T-1134** offline pack manifest/cache<br/>**T-1135** bandwidth guardrails | Build Kahoot-like arena and offline packs carefully because these are budget-sensitive. | WebSocket gateway on BE, PWA cache manifests on FE, feature flags for arena/video-heavy lessons. |
-| **WP-016.4 LMS E2E & Readiness** | **M016.4 course→lesson→quiz→pass and arena journey pass** | **T-1136** LMS Playwright pack<br/>**T-1137** seed course packs (Scout/Cao Đài)<br/>**T-1138** mentor grading E2E<br/>**T-1139** readiness manifest<br/>**T-1140** low-cost runtime profile | LMS must prove both self-paced and live-learning journeys. | Include offline sync smoke on supported environment; evidence of low-cost mode when budget alarms fire. |
+| Work Package                              | Milestone                                                               | Tasks                                                                                                                                                                                                   | Task Description & Developer Detail                                                     | Dev Notes (Implementation)                                                                              |
+| ----------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| **WP-016.3 Battle Arena & Offline Packs** | **M016.3 arena realtime và offline packs chạy được theo feature flags** | **T-1131** arena room/lobby state machine<br/>**T-1132** websocket gateway<br/>**T-1133** scoreboard + anti-cheat basics<br/>**T-1134** offline pack manifest/cache<br/>**T-1135** bandwidth guardrails | Build Kahoot-like arena and offline packs carefully because these are budget-sensitive. | WebSocket gateway on BE, PWA cache manifests on FE, feature flags for arena/video-heavy lessons.        |
+| **WP-016.4 LMS E2E & Readiness**          | **M016.4 course→lesson→quiz→pass and arena journey pass**               | **T-1136** LMS Playwright pack<br/>**T-1137** seed course packs (Scout/Cao Đài)<br/>**T-1138** mentor grading E2E<br/>**T-1139** readiness manifest<br/>**T-1140** low-cost runtime profile             | LMS must prove both self-paced and live-learning journeys.                              | Include offline sync smoke on supported environment; evidence of low-cost mode when budget alarms fire. |
 
 ### STORY-017 — MODULE 8 SCOUT CORE IMPLEMENTATION ASSURANCE
 
 #### PHASE M8-A — Character Sheet, Advancement, Verification & Review Board
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-017.1 Program Graph, Character Sheet & Skillbook Backbone** | **M017.1 character sheet, skill tree, criteria, progression, evidence submission dùng được** | **T-1141** program/rank/domain/skill/criteria schemas<br/>**T-1142** member progress/evidence/timeline tables<br/>**T-1143** character sheet projections + APIs<br/>**T-1144** evidence upload/download rules<br/>**T-1145** verification queue APIs | Build Scout core source of truth for ranks, skills, criteria, evidence and the **character sheet** as a read model. Đây là “màn hình sống” mà lãnh đạo, mentor, phụ huynh nhìn vào để hiểu tiến bộ thật. | Tables under `scout.*`; projections for leader/parent dashboards; routes `/guild/scout/character/:memberId`, `/guild/scout/skillbook*`; events `scout.skill.submitted`, `scout.skill.verified`, `scout.timeline.appended`. |
-| **WP-017.2 Verification, Review Board, Advancement & Handover Guards** | **M017.2 submit→verify/reject→eligibility→review board→handover flows pass** | **T-1146** legal transition guards<br/>**T-1147** reviewer scopes + audit<br/>**T-1148** advancement proposal + board packet flow<br/>**T-1149** handover/branch transition hooks<br/>**T-1150** ceremony/milestone records | Đây là lane CTO đang quan tâm nhất: không chỉ render skill tree mà phải có **review packet**, **board flow**, **handover** và **approved milestone records** thực sự dùng được. | Implementation surfaces: `verification.controller.ts`, `advancement.service.ts`, `rank-board.service.ts`, `handover.service.ts`; appendix B contract, state machines full sync; generate packet PDF/HTML read model. |
+| Work Package                                                           | Milestone                                                                                    | Tasks                                                                                                                                                                                                                                                | Task Description & Developer Detail                                                                                                                                                                      | Dev Notes (Implementation)                                                                                                                                                                                                 |
+| ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **WP-017.1 Program Graph, Character Sheet & Skillbook Backbone**       | **M017.1 character sheet, skill tree, criteria, progression, evidence submission dùng được** | **T-1141** program/rank/domain/skill/criteria schemas<br/>**T-1142** member progress/evidence/timeline tables<br/>**T-1143** character sheet projections + APIs<br/>**T-1144** evidence upload/download rules<br/>**T-1145** verification queue APIs | Build Scout core source of truth for ranks, skills, criteria, evidence and the **character sheet** as a read model. Đây là “màn hình sống” mà lãnh đạo, mentor, phụ huynh nhìn vào để hiểu tiến bộ thật. | Tables under `scout.*`; projections for leader/parent dashboards; routes `/guild/scout/character/:memberId`, `/guild/scout/skillbook*`; events `scout.skill.submitted`, `scout.skill.verified`, `scout.timeline.appended`. |
+| **WP-017.2 Verification, Review Board, Advancement & Handover Guards** | **M017.2 submit→verify/reject→eligibility→review board→handover flows pass**                 | **T-1146** legal transition guards<br/>**T-1147** reviewer scopes + audit<br/>**T-1148** advancement proposal + board packet flow<br/>**T-1149** handover/branch transition hooks<br/>**T-1150** ceremony/milestone records                          | Đây là lane CTO đang quan tâm nhất: không chỉ render skill tree mà phải có **review packet**, **board flow**, **handover** và **approved milestone records** thực sự dùng được.                          | Implementation surfaces: `verification.controller.ts`, `advancement.service.ts`, `rank-board.service.ts`, `handover.service.ts`; appendix B contract, state machines full sync; generate packet PDF/HTML read model.       |
 
 #### PHASE M8-B — Sessions, Annual Programme, Events, Camps & Safe Participation
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-017.3 Sessions, Attendance, Meeting Planner & Programme Coverage** | **M017.3 session planning, attendance, meeting planner, SPICES/Cao Đài coverage chạy được** | **T-1151** session/attendance schemas<br/>**T-1152** attendance state rules + rewards hooks<br/>**T-1153** annual program coverage logic<br/>**T-1154** session lesson plan + meeting planner sub-pages<br/>**T-1155** parent summary notifications | Build session module thật, including lesson plans, attendance rules, meeting planner, annual coverage and SPICES enforcement. It must help leaders decide what to run next, not only log attendance. | Routes `/guild/scout/sessions*`, `/guild/scout/calendar`, `/guild/scout/program-year`; events `session.attendance_marked`, `session.perfect_month`; dashboards by unit/branch/org. |
-| **WP-017.4 Events/Camps, RSVP, Consent, Medical, Check-in/out & HIRARC** | **M017.4 event/camp/consent/HIRARC/RSVP organizer journeys đều hoạt động** | **T-1156** event/camp state machines + HIRARC<br/>**T-1157** RSVP, organizer assignment, consent + 2-adult rule guards<br/>**T-1158** medical/emergency pack + privacy scopes<br/>**T-1159** check-in/check-out + attendance reconciliation<br/>**T-1160** event reports + reward hooks | Build overnight event lifecycle theo thực tế vận hành trại: organizer, RSVP, consent, medical, HIRARC, check-in/out, report after action. Đây là phần “ops” của Scout core. | Must map to Event/Camp state machines and Appendix B. Notification adapters for reminders; guardian confirmation gates before `confirmed`; offline check-in allowed with later sync. |
+| Work Package                                                             | Milestone                                                                                   | Tasks                                                                                                                                                                                                                                                                                   | Task Description & Developer Detail                                                                                                                                                                  | Dev Notes (Implementation)                                                                                                                                                           |
+| ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **WP-017.3 Sessions, Attendance, Meeting Planner & Programme Coverage**  | **M017.3 session planning, attendance, meeting planner, SPICES/Cao Đài coverage chạy được** | **T-1151** session/attendance schemas<br/>**T-1152** attendance state rules + rewards hooks<br/>**T-1153** annual program coverage logic<br/>**T-1154** session lesson plan + meeting planner sub-pages<br/>**T-1155** parent summary notifications                                     | Build session module thật, including lesson plans, attendance rules, meeting planner, annual coverage and SPICES enforcement. It must help leaders decide what to run next, not only log attendance. | Routes `/guild/scout/sessions*`, `/guild/scout/calendar`, `/guild/scout/program-year`; events `session.attendance_marked`, `session.perfect_month`; dashboards by unit/branch/org.   |
+| **WP-017.4 Events/Camps, RSVP, Consent, Medical, Check-in/out & HIRARC** | **M017.4 event/camp/consent/HIRARC/RSVP organizer journeys đều hoạt động**                  | **T-1156** event/camp state machines + HIRARC<br/>**T-1157** RSVP, organizer assignment, consent + 2-adult rule guards<br/>**T-1158** medical/emergency pack + privacy scopes<br/>**T-1159** check-in/check-out + attendance reconciliation<br/>**T-1160** event reports + reward hooks | Build overnight event lifecycle theo thực tế vận hành trại: organizer, RSVP, consent, medical, HIRARC, check-in/out, report after action. Đây là phần “ops” của Scout core.                          | Must map to Event/Camp state machines and Appendix B. Notification adapters for reminders; guardian confirmation gates before `confirmed`; offline check-in allowed with later sync. |
 
 #### PHASE M8-C — Spiritual, Mentoring, Guardian Visibility, Continuity Analytics & Production Proof
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-017.5 Spiritual Logs, Mentoring, Guardian Summary & Privacy** | **M017.5 spiritual/mentoring/guardian-summary journeys chạy đúng quyền riêng tư** | **T-1160A** spiritual logs + privacy partitions<br/>**T-1160B** competency/self-assessment projections<br/>**T-1160C** mentoring logs + restricted/shareable notes<br/>**T-1160D** guardian summary dashboard + consent center<br/>**T-1160E** access log + quiet-hours notification rules | Build the sensitive human layer of Scout core: spiritual practice, mentoring, guardian summary and privacy. It must be safe-by-default and not leak restricted notes. | Split private vs shareable notes; parent-safe projections; routes `/guild/scout/spiritual`, `/guild/scout/mentoring`, `/guild/scout/guardian-summary`; audit all guardian-facing data access. |
-| **WP-017.6 Transition Analytics, Recommendation Engine & Scout E2E** | **M017.6 handover continuity, recommendation engine và Scout end-to-end pack pass** | **T-1160F** transition bridge + scope history projections<br/>**T-1160G** continuity heatmaps + stalled-progress rules<br/>**T-1160H** rules-based recommendations (lesson/session/badge)<br/>**T-1160I** Scout Playwright pack (character→verify→event→guardian→reward)<br/>**T-1160J** readiness manifest + demo seed org | This WP proves Module 8 is no longer a shell. It must show an end-to-end journey from character sheet to advancement to camp participation to guardian confirmation to reward updates. | E2E: create member → assign mentor → submit evidence → verify → schedule session → create overnight event → guardian consent → check-in/out → badge/EXP update → handover preview. |
+| Work Package                                                         | Milestone                                                                           | Tasks                                                                                                                                                                                                                                                                                                                       | Task Description & Developer Detail                                                                                                                                                    | Dev Notes (Implementation)                                                                                                                                                                    |
+| -------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **WP-017.5 Spiritual Logs, Mentoring, Guardian Summary & Privacy**   | **M017.5 spiritual/mentoring/guardian-summary journeys chạy đúng quyền riêng tư**   | **T-1160A** spiritual logs + privacy partitions<br/>**T-1160B** competency/self-assessment projections<br/>**T-1160C** mentoring logs + restricted/shareable notes<br/>**T-1160D** guardian summary dashboard + consent center<br/>**T-1160E** access log + quiet-hours notification rules                                  | Build the sensitive human layer of Scout core: spiritual practice, mentoring, guardian summary and privacy. It must be safe-by-default and not leak restricted notes.                  | Split private vs shareable notes; parent-safe projections; routes `/guild/scout/spiritual`, `/guild/scout/mentoring`, `/guild/scout/guardian-summary`; audit all guardian-facing data access. |
+| **WP-017.6 Transition Analytics, Recommendation Engine & Scout E2E** | **M017.6 handover continuity, recommendation engine và Scout end-to-end pack pass** | **T-1160F** transition bridge + scope history projections<br/>**T-1160G** continuity heatmaps + stalled-progress rules<br/>**T-1160H** rules-based recommendations (lesson/session/badge)<br/>**T-1160I** Scout Playwright pack (character→verify→event→guardian→reward)<br/>**T-1160J** readiness manifest + demo seed org | This WP proves Module 8 is no longer a shell. It must show an end-to-end journey from character sheet to advancement to camp participation to guardian confirmation to reward updates. | E2E: create member → assign mentor → submit evidence → verify → schedule session → create overnight event → guardian consent → check-in/out → badge/EXP update → handover preview.            |
 
 ### STORY-018 — MODULE 9 REWARD IMPLEMENTATION ASSURANCE
 
 #### PHASE M9-A — EXP Ledger, Badge Engine, Leaderboard
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-018.1 EXP Backbone & Config Engine** | **M018.1 event-driven EXP ledger chạy đúng caps, idempotent** | **T-1161** exp config schemas<br/>**T-1162** immutable ledger + summary projections<br/>**T-1163** cap/idempotency logic<br/>**T-1164** branch visual currencies<br/>**T-1165** admin config UI/APIs | Reward engine phải xử lý event fan-in từ toàn hệ thống, ledger bất biến, caps, visuals theo ngành. | `reward.exp_configs`, `exp_txn`, `exp_summary`; consumers idempotent; tests on duplicate events and cap rules. |
-| **WP-018.2 Badge Engine & Leaderboards** | **M018.2 badge auto-award và leaderboard scope/period hoạt động** | **T-1166** badge definition condition engine<br/>**T-1167** auto-award + manual-award flows<br/>**T-1168** leaderboard aggregation/snapshots<br/>**T-1169** anti-shame UX rules<br/>**T-1170** parent-safe read models | Build badges, rarity, auto-award conditions and leaderboards with team-first display and safe ranking rules. | Leaderboards may use Redis or DB sorted projections depending cost profile; snapshot jobs for history. |
+| Work Package                              | Milestone                                                         | Tasks                                                                                                                                                                                                                  | Task Description & Developer Detail                                                                          | Dev Notes (Implementation)                                                                                     |
+| ----------------------------------------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| **WP-018.1 EXP Backbone & Config Engine** | **M018.1 event-driven EXP ledger chạy đúng caps, idempotent**     | **T-1161** exp config schemas<br/>**T-1162** immutable ledger + summary projections<br/>**T-1163** cap/idempotency logic<br/>**T-1164** branch visual currencies<br/>**T-1165** admin config UI/APIs                   | Reward engine phải xử lý event fan-in từ toàn hệ thống, ledger bất biến, caps, visuals theo ngành.           | `reward.exp_configs`, `exp_txn`, `exp_summary`; consumers idempotent; tests on duplicate events and cap rules. |
+| **WP-018.2 Badge Engine & Leaderboards**  | **M018.2 badge auto-award và leaderboard scope/period hoạt động** | **T-1166** badge definition condition engine<br/>**T-1167** auto-award + manual-award flows<br/>**T-1168** leaderboard aggregation/snapshots<br/>**T-1169** anti-shame UX rules<br/>**T-1170** parent-safe read models | Build badges, rarity, auto-award conditions and leaderboards with team-first display and safe ranking rules. | Leaderboards may use Redis or DB sorted projections depending cost profile; snapshot jobs for history.         |
 
 #### PHASE M9-B — Penalties, Shop, E2E
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-018.3 Penalties, Remediation & Shop** | **M018.3 penalty/remediation/shop flows chạy đúng nghiệp vụ** | **T-1171** penalty case model<br/>**T-1172** remediation task linkage<br/>**T-1173** shop catalog/redeem flow<br/>**T-1174** stock/approval rules<br/>**T-1175** admin moderation tools | Implement constructive penalty/remediation and reward shop without corrupting ledger integrity. | Links to Process/Ticket for remediation tasks; redeem flow decreases available XP only, not total historical XP. |
-| **WP-018.4 Reward E2E & Readiness** | **M018.4 cross-module event→EXP→badge→leaderboard→shop pass** | **T-1176** reward Playwright pack<br/>**T-1177** seed exp configs + badge defs + shop items<br/>**T-1178** regression tests for duplicate events<br/>**T-1179** readiness manifest<br/>**T-1180** ops runbook | Must prove the engine works as the system nervous system. | E2E route: attendance event → EXP ledger → badge threshold → leaderboard update → redeem shop item. |
+| Work Package                               | Milestone                                                     | Tasks                                                                                                                                                                                                         | Task Description & Developer Detail                                                             | Dev Notes (Implementation)                                                                                       |
+| ------------------------------------------ | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| **WP-018.3 Penalties, Remediation & Shop** | **M018.3 penalty/remediation/shop flows chạy đúng nghiệp vụ** | **T-1171** penalty case model<br/>**T-1172** remediation task linkage<br/>**T-1173** shop catalog/redeem flow<br/>**T-1174** stock/approval rules<br/>**T-1175** admin moderation tools                       | Implement constructive penalty/remediation and reward shop without corrupting ledger integrity. | Links to Process/Ticket for remediation tasks; redeem flow decreases available XP only, not total historical XP. |
+| **WP-018.4 Reward E2E & Readiness**        | **M018.4 cross-module event→EXP→badge→leaderboard→shop pass** | **T-1176** reward Playwright pack<br/>**T-1177** seed exp configs + badge defs + shop items<br/>**T-1178** regression tests for duplicate events<br/>**T-1179** readiness manifest<br/>**T-1180** ops runbook | Must prove the engine works as the system nervous system.                                       | E2E route: attendance event → EXP ledger → badge threshold → leaderboard update → redeem shop item.              |
 
 ### STORY-019 — MODULE 10 ORG CONFIG & CONTROL PLANE IMPLEMENTATION ASSURANCE
 
 #### PHASE M10-A — Tenant Bootstrap, Roles, Settings Registry
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-019.1 Org Bootstrap & Branch Registry** | **M019.1 tạo Org xong vào được control plane với branch/program registry thật** | **T-1181** org schemas + bootstrap seeds<br/>**T-1182** branch/program/unit registry tables<br/>**T-1183** org overview APIs/UI<br/>**T-1184** branding/theme settings pipeline<br/>**T-1185** bootstrap Playwright flow | Build tenant bootstrap thực sự: tạo org, sinh default roles, default branches, default module flags, default settings và vào được trang Org Overview. | Tables `core.orgs`, `core.branches`, `core.units`, `core.settings_registry`; FE routes `/org`, `/org/branches`; seed templates per org type. |
-| **WP-019.2 Identity, Role Templates & Settings Registry** | **M019.2 invite/activate/suspend user, role grants, settings registry và feature flags hoạt động** | **T-1186** user invitation lifecycle APIs<br/>**T-1187** role template/permission matrix schemas<br/>**T-1188** settings registry schema validation + versioning<br/>**T-1189** feature flags UI/APIs<br/>**T-1190** guardian link admin flow | Module 10 phải sở hữu control plane cho người dùng và cấu hình runtime, không chỉ form settings. Mọi thay đổi phải có audit và rollback rõ ràng. | RBAC + ABAC + RLS scopes; namespace settings (`core.*`, `lms.*`, `reward.*`, `scout.*`); audit before/after snapshots. |
+| Work Package                                              | Milestone                                                                                          | Tasks                                                                                                                                                                                                                                         | Task Description & Developer Detail                                                                                                                   | Dev Notes (Implementation)                                                                                                                   |
+| --------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| **WP-019.1 Org Bootstrap & Branch Registry**              | **M019.1 tạo Org xong vào được control plane với branch/program registry thật**                    | **T-1181** org schemas + bootstrap seeds<br/>**T-1182** branch/program/unit registry tables<br/>**T-1183** org overview APIs/UI<br/>**T-1184** branding/theme settings pipeline<br/>**T-1185** bootstrap Playwright flow                      | Build tenant bootstrap thực sự: tạo org, sinh default roles, default branches, default module flags, default settings và vào được trang Org Overview. | Tables `core.orgs`, `core.branches`, `core.units`, `core.settings_registry`; FE routes `/org`, `/org/branches`; seed templates per org type. |
+| **WP-019.2 Identity, Role Templates & Settings Registry** | **M019.2 invite/activate/suspend user, role grants, settings registry và feature flags hoạt động** | **T-1186** user invitation lifecycle APIs<br/>**T-1187** role template/permission matrix schemas<br/>**T-1188** settings registry schema validation + versioning<br/>**T-1189** feature flags UI/APIs<br/>**T-1190** guardian link admin flow | Module 10 phải sở hữu control plane cho người dùng và cấu hình runtime, không chỉ form settings. Mọi thay đổi phải có audit và rollback rõ ràng.      | RBAC + ABAC + RLS scopes; namespace settings (`core.*`, `lms.*`, `reward.*`, `scout.*`); audit before/after snapshots.                       |
 
 #### PHASE M10-B — Connectors, Audit, Budget & Release Controls
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-019.3 Connectors, Audit & Budget Guardrails** | **M019.3 cấu hình connector, audit log và budget settings dùng được** | **T-1191** connector secrets/config UI<br/>**T-1192** audit explorer + export<br/>**T-1193** budget threshold settings/read models<br/>**T-1194** signed URL/file policy config<br/>**T-1195** ops alerts wiring | Build operational control surface cho super admin/CTO: connectors, audit, budget guardrails, notification windows và file access policies. | Connector adapters for Zalo/email/webhooks; budget read model fed from ops events; `/org/audit`, `/org/integrations`, `/org/budget`. |
-| **WP-019.4 Release Dashboard, Dependency Rules & M10 E2E** | **M019.4 module toggles, dependency checks, release dashboard và M10 journeys pass** | **T-1196** module dependency matrix engine<br/>**T-1197** release readiness dashboard UI/API<br/>**T-1198** environment/feature flag runbook<br/>**T-1199** M10 Playwright pack<br/>**T-1200** readiness manifest | M10 phải chứng minh nó khóa được production behavior của toàn platform: bật/tắt module đúng dependency, hiển thị readiness theo story/gate/evidence và hỗ trợ canary/rollback. | Release dashboard consumes readiness manifests from module stories; dependency graph blocks unsafe activation. |
+| Work Package                                               | Milestone                                                                            | Tasks                                                                                                                                                                                                             | Task Description & Developer Detail                                                                                                                                            | Dev Notes (Implementation)                                                                                                           |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| **WP-019.3 Connectors, Audit & Budget Guardrails**         | **M019.3 cấu hình connector, audit log và budget settings dùng được**                | **T-1191** connector secrets/config UI<br/>**T-1192** audit explorer + export<br/>**T-1193** budget threshold settings/read models<br/>**T-1194** signed URL/file policy config<br/>**T-1195** ops alerts wiring  | Build operational control surface cho super admin/CTO: connectors, audit, budget guardrails, notification windows và file access policies.                                     | Connector adapters for Zalo/email/webhooks; budget read model fed from ops events; `/org/audit`, `/org/integrations`, `/org/budget`. |
+| **WP-019.4 Release Dashboard, Dependency Rules & M10 E2E** | **M019.4 module toggles, dependency checks, release dashboard và M10 journeys pass** | **T-1196** module dependency matrix engine<br/>**T-1197** release readiness dashboard UI/API<br/>**T-1198** environment/feature flag runbook<br/>**T-1199** M10 Playwright pack<br/>**T-1200** readiness manifest | M10 phải chứng minh nó khóa được production behavior của toàn platform: bật/tắt module đúng dependency, hiển thị readiness theo story/gate/evidence và hỗ trợ canary/rollback. | Release dashboard consumes readiness manifests from module stories; dependency graph blocks unsafe activation.                       |
 
 ### STORY-020 — UX/UI GAME SYSTEM & SCREEN CONTRACT
 
 #### PHASE UX-A — Screen Bible, Component Kit, Tokens
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-020.1 World Map, HUD & Module Scene Contracts** | **M020.1 mọi module có route map + scene blueprint + nav rules** | **T-2001** route tree canonicalization<br/>**T-2002** scene headers + breadcrumbs spec<br/>**T-2003** global HUD/action bar spec<br/>**T-2004** module scene blueprints<br/>**T-2005** role-based navigation rules | Product/Design phải chốt world map, HUD, navigation, breadcrumbs, quick actions, module scenes để FE không tự bịa layout. | Output là UI Contract SSOT: route map, component mapping, scene states, action hierarchy. |
-| **WP-020.2 Design Tokens & MMORPG Component Kit** | **M020.2 tokens và core components import được vào FE** | **T-2006** DTCG tokens JSON<br/>**T-2007** style dictionary build<br/>**T-2008** core HUD/components package<br/>**T-2009** motion/reduced-motion rules<br/>**T-2010** theme variants per branch | Build usable design system chứ không chỉ moodboard. | Components: HUD, quest tracker, skill tree cards, rarity frames, tables, forms, approval stamps, low-cost indicators. |
+| Work Package                                         | Milestone                                                        | Tasks                                                                                                                                                                                                              | Task Description & Developer Detail                                                                                       | Dev Notes (Implementation)                                                                                            |
+| ---------------------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| **WP-020.1 World Map, HUD & Module Scene Contracts** | **M020.1 mọi module có route map + scene blueprint + nav rules** | **T-2001** route tree canonicalization<br/>**T-2002** scene headers + breadcrumbs spec<br/>**T-2003** global HUD/action bar spec<br/>**T-2004** module scene blueprints<br/>**T-2005** role-based navigation rules | Product/Design phải chốt world map, HUD, navigation, breadcrumbs, quick actions, module scenes để FE không tự bịa layout. | Output là UI Contract SSOT: route map, component mapping, scene states, action hierarchy.                             |
+| **WP-020.2 Design Tokens & MMORPG Component Kit**    | **M020.2 tokens và core components import được vào FE**          | **T-2006** DTCG tokens JSON<br/>**T-2007** style dictionary build<br/>**T-2008** core HUD/components package<br/>**T-2009** motion/reduced-motion rules<br/>**T-2010** theme variants per branch                   | Build usable design system chứ không chỉ moodboard.                                                                       | Components: HUD, quest tracker, skill tree cards, rarity frames, tables, forms, approval stamps, low-cost indicators. |
 
 #### PHASE UX-B — Accessibility, Performance, Asset Pipeline & 2D/3D Guardrails
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-020.3 Accessibility, Low-cost Mode & Asset Discipline** | **M020.3 UI pass a11y/performance/low-cost gates** | **T-2011** WCAG AA checklist pack<br/>**T-2012** low-cost mode states<br/>**T-2013** asset size/perf budget<br/>**T-2014** skeleton/loading/error patterns<br/>**T-2015** visual QA checklist | Ensure MMORPG UI still usable as ERP and safe on low-end devices. | Focus, contrast, keyboard support, reduced motion, asset lazy-loading, image compression, perf budgets per route. |
-| **WP-020.4 3D Scene Runtime & Asset Pipeline** | **M020.4 3D hero surfaces có runtime chuẩn, lazy-load và fallback rõ ràng** | **T-2015A** three/r3f/drei scene runtime package<br/>**T-2015B** GLTF/GLB asset conventions + poster fallbacks<br/>**T-2015C** motion-for-r3f interaction presets<br/>**T-2015D** scene lazy-loading + suspense fallbacks<br/>**T-2015E** mobile-low-end & reduced-motion downgrade rules | Build a controlled 3D layer cho platform, không để từng team nhúng canvas tùy hứng. Đây là runtime chuẩn cho hero scenes, celebration scenes và world-map transitions. | Packages `packages/ui-3d`, `packages/assets-3d`; only route-level scene mounting; static image fallback required; budget tags on every 3D route. |
+| Work Package                                                 | Milestone                                                                   | Tasks                                                                                                                                                                                                                                                                                     | Task Description & Developer Detail                                                                                                                                    | Dev Notes (Implementation)                                                                                                                       |
+| ------------------------------------------------------------ | --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **WP-020.3 Accessibility, Low-cost Mode & Asset Discipline** | **M020.3 UI pass a11y/performance/low-cost gates**                          | **T-2011** WCAG AA checklist pack<br/>**T-2012** low-cost mode states<br/>**T-2013** asset size/perf budget<br/>**T-2014** skeleton/loading/error patterns<br/>**T-2015** visual QA checklist                                                                                             | Ensure MMORPG UI still usable as ERP and safe on low-end devices.                                                                                                      | Focus, contrast, keyboard support, reduced motion, asset lazy-loading, image compression, perf budgets per route.                                |
+| **WP-020.4 3D Scene Runtime & Asset Pipeline**               | **M020.4 3D hero surfaces có runtime chuẩn, lazy-load và fallback rõ ràng** | **T-2015A** three/r3f/drei scene runtime package<br/>**T-2015B** GLTF/GLB asset conventions + poster fallbacks<br/>**T-2015C** motion-for-r3f interaction presets<br/>**T-2015D** scene lazy-loading + suspense fallbacks<br/>**T-2015E** mobile-low-end & reduced-motion downgrade rules | Build a controlled 3D layer cho platform, không để từng team nhúng canvas tùy hứng. Đây là runtime chuẩn cho hero scenes, celebration scenes và world-map transitions. | Packages `packages/ui-3d`, `packages/assets-3d`; only route-level scene mounting; static image fallback required; budget tags on every 3D route. |
 
 #### PHASE UX-C — Module-Specific 3D Scene Design for M1, M7, M8, M9
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-020.5 Hero Scenes for Module 1 / 7 / 8 / 9** | **M020.5 bốn module lõi có scene brief, animation states và fallback pack dùng được** | **T-2015F** M1 Guild Hall / Constellation Org Chart scene brief<br/>**T-2015G** M7 Celestial Academy / Arena Lobby scene brief<br/>**T-2015H** M8 Campfire Shrine / Character Pedestal / Transition Bridge brief<br/>**T-2015I** M9 Reward Forge / Chest Reveal / Podium brief<br/>**T-2015J** fallback posters + still-state QA | Define module-specific hero scenes that make the platform feel “MMORPG” while staying practical for operations. Each brief must list purpose, triggers, motion states, audio policy, fallback state and performance budget. | Scene briefs must map to routes, triggers, analytics names and feature flags. 3D is decorative/supportive, never the only way to complete work. |
-| **WP-020.6 UI Motion QA, Event Triggers & Release Evidence** | **M020.6 scene triggers, motion QA và evidence pack pass** | **T-2015K** animation trigger catalog<br/>**T-2015L** motion QA checklist per route<br/>**T-2015M** low-bandwidth fallback verification<br/>**T-2015N** visual regression packs (2D + 3D states)<br/>**T-2015O** design sign-off evidence bundle | This WP closes the loop so animations are not just pretty ideas. It defines what triggers which scene, what state must be testable, and what evidence design/FE must provide before release. | Hook triggers from domain events, keep design sign-off artifacts in `/contracts/ui/evidence/*`; include screenshots/video and reduced-motion captures. |
+| Work Package                                                 | Milestone                                                                             | Tasks                                                                                                                                                                                                                                                                                                                            | Task Description & Developer Detail                                                                                                                                                                                         | Dev Notes (Implementation)                                                                                                                             |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **WP-020.5 Hero Scenes for Module 1 / 7 / 8 / 9**            | **M020.5 bốn module lõi có scene brief, animation states và fallback pack dùng được** | **T-2015F** M1 Guild Hall / Constellation Org Chart scene brief<br/>**T-2015G** M7 Celestial Academy / Arena Lobby scene brief<br/>**T-2015H** M8 Campfire Shrine / Character Pedestal / Transition Bridge brief<br/>**T-2015I** M9 Reward Forge / Chest Reveal / Podium brief<br/>**T-2015J** fallback posters + still-state QA | Define module-specific hero scenes that make the platform feel “MMORPG” while staying practical for operations. Each brief must list purpose, triggers, motion states, audio policy, fallback state and performance budget. | Scene briefs must map to routes, triggers, analytics names and feature flags. 3D is decorative/supportive, never the only way to complete work.        |
+| **WP-020.6 UI Motion QA, Event Triggers & Release Evidence** | **M020.6 scene triggers, motion QA và evidence pack pass**                            | **T-2015K** animation trigger catalog<br/>**T-2015L** motion QA checklist per route<br/>**T-2015M** low-bandwidth fallback verification<br/>**T-2015N** visual regression packs (2D + 3D states)<br/>**T-2015O** design sign-off evidence bundle                                                                                 | This WP closes the loop so animations are not just pretty ideas. It defines what triggers which scene, what state must be testable, and what evidence design/FE must provide before release.                                | Hook triggers from domain events, keep design sign-off artifacts in `/contracts/ui/evidence/*`; include screenshots/video and reduced-motion captures. |
 
 ### STORY-021 — FRONTEND IMPLEMENTATION TRACK
 
 #### PHASE FE-A — App Router, Auth, Data Fetching, Shared UI
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-021.1 FE App Shell & Runtime** | **M021.1 App Router, auth guards, data fetching skeleton dùng được** | **T-2016** Next.js App Router layouts<br/>**T-2017** auth/session handling<br/>**T-2018** TanStack Query setup<br/>**T-2019** error boundaries + suspense<br/>**T-2020** shared form/table patterns | Build frontend runtime nền tảng để module pages không tản mạn. | Route groups, server/client boundary rules, session refresh, query keys, form schemas shared with BE. |
-| **WP-021.2 Module Screens Implementation** | **M021.2 mọi module P0 screens render dữ liệu thật từ APIs** | **T-2021** connect module routes to APIs<br/>**T-2022** create/edit/detail drawers<br/>**T-2023** loading/empty/error per screen<br/>**T-2024** tables/filters/pagination<br/>**T-2025** optimistic UX where safe | FE owns the playable screens for all modules and sub-pages listed in Product View. | Keep route coverage matrix; screen states documented; avoid speculative UI without API contract. |
+| Work Package                               | Milestone                                                            | Tasks                                                                                                                                                                                                             | Task Description & Developer Detail                                                | Dev Notes (Implementation)                                                                            |
+| ------------------------------------------ | -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| **WP-021.1 FE App Shell & Runtime**        | **M021.1 App Router, auth guards, data fetching skeleton dùng được** | **T-2016** Next.js App Router layouts<br/>**T-2017** auth/session handling<br/>**T-2018** TanStack Query setup<br/>**T-2019** error boundaries + suspense<br/>**T-2020** shared form/table patterns               | Build frontend runtime nền tảng để module pages không tản mạn.                     | Route groups, server/client boundary rules, session refresh, query keys, form schemas shared with BE. |
+| **WP-021.2 Module Screens Implementation** | **M021.2 mọi module P0 screens render dữ liệu thật từ APIs**         | **T-2021** connect module routes to APIs<br/>**T-2022** create/edit/detail drawers<br/>**T-2023** loading/empty/error per screen<br/>**T-2024** tables/filters/pagination<br/>**T-2025** optimistic UX where safe | FE owns the playable screens for all modules and sub-pages listed in Product View. | Keep route coverage matrix; screen states documented; avoid speculative UI without API contract.      |
 
 #### PHASE FE-B — PWA, Offline, FE Quality Gates
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
+| Work Package                                   | Milestone                                                          | Tasks                                                                                                                                                                                                           | Task Description & Developer Detail                                                                                                          | Dev Notes (Implementation)                                                                |
+| ---------------------------------------------- | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
 | **WP-021.3 PWA/Offline & Frontend Test Gates** | **M021.3 Camp mode, offline packs, FE tests, bundle budgets pass** | **T-2026** service worker/caching rules<br/>**T-2027** offline queues for approved flows<br/>**T-2028** component tests/visual smoke<br/>**T-2029** bundle analysis budgets<br/>**T-2030** FE release checklist | Build practical PWA features without overpromising: cache safe read-only data, queue selected writes, protect against stale harmful actions. | Bundle budgets, hydration checks, mobile layout QA, Lighthouse smoke, low-bandwidth mode. |
 
 ### STORY-022 — BACKEND IMPLEMENTATION TRACK
 
 #### PHASE BE-A — Service Boundaries, Controllers, Workers, Security
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-022.1 Modular Monolith Service Skeleton** | **M022.1 controllers/services/repositories/jobs có boundary rõ ràng** | **T-2031** module folder contracts<br/>**T-2032** controller/service/repository templates<br/>**T-2033** config module + feature flags<br/>**T-2034** background jobs/queues skeleton<br/>**T-2035** error contract standardization | Backend must have predictable code structure for AI Agent and developers. | NestJS module boundaries, shared libraries, config loading, standard error envelopes, request IDs. |
-| **WP-022.2 Authz, Validation, Domain Logic & Events** | **M022.2 every API path has authz/validation and emits correct events** | **T-2036** auth guards + scopes<br/>**T-2037** class-validator/Zod patterns<br/>**T-2038** domain service patterns<br/>**T-2039** outbox publishers/subscribers<br/>**T-2040** idempotent consumers | This story is the hardening layer that turns endpoints into reliable business operations. | CASL-like abilities or custom policy layer; outbox idempotency keys; retry/backoff and DLQ notes. |
+| Work Package                                          | Milestone                                                               | Tasks                                                                                                                                                                                                                               | Task Description & Developer Detail                                                       | Dev Notes (Implementation)                                                                         |
+| ----------------------------------------------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| **WP-022.1 Modular Monolith Service Skeleton**        | **M022.1 controllers/services/repositories/jobs có boundary rõ ràng**   | **T-2031** module folder contracts<br/>**T-2032** controller/service/repository templates<br/>**T-2033** config module + feature flags<br/>**T-2034** background jobs/queues skeleton<br/>**T-2035** error contract standardization | Backend must have predictable code structure for AI Agent and developers.                 | NestJS module boundaries, shared libraries, config loading, standard error envelopes, request IDs. |
+| **WP-022.2 Authz, Validation, Domain Logic & Events** | **M022.2 every API path has authz/validation and emits correct events** | **T-2036** auth guards + scopes<br/>**T-2037** class-validator/Zod patterns<br/>**T-2038** domain service patterns<br/>**T-2039** outbox publishers/subscribers<br/>**T-2040** idempotent consumers                                 | This story is the hardening layer that turns endpoints into reliable business operations. | CASL-like abilities or custom policy layer; outbox idempotency keys; retry/backoff and DLQ notes.  |
 
 #### PHASE BE-B — Backend Quality Gates
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
+| Work Package                                            | Milestone                                                      | Tasks                                                                                                                                                                                                   | Task Description & Developer Detail                                    | Dev Notes (Implementation)                                                                                   |
+| ------------------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | **WP-022.3 Contract/Integration/Performance Test Pack** | **M022.3 BE tests pass for active modules and critical flows** | **T-2041** unit/integration harnesses<br/>**T-2042** OpenAPI conformance tests<br/>**T-2043** event consumer tests<br/>**T-2044** performance smoke tests<br/>**T-2045** exception/observability checks | BE cannot be declared ready without contract and integration coverage. | Test DB with RLS enabled; measure hot routes; verify logs/metrics/traces emit request IDs and actor context. |
 
 ### STORY-023 — DATABASE & WAREHOUSE IMPLEMENTATION TRACK
 
 #### PHASE DB-A — Schemas, Migrations, RLS, Read Models
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-023.1 Shared DB Foundation** | **M023.1 shared tables, indexes, RLS policies, migration discipline chuẩn hóa** | **T-2046** shared schemas + org_id rules<br/>**T-2047** index/constraint matrix<br/>**T-2048** RLS policy migration helpers<br/>**T-2049** seed and rollback patterns<br/>**T-2050** migration smoke tests | Database track ensures module stories have a safe substrate. | PostgreSQL schemas + `ENABLE ROW LEVEL SECURITY` + `CREATE POLICY`; Prisma Migrate + raw SQL for policies where needed. |
-| **WP-023.2 Module Schemas & Projections** | **M023.2 all modules have canonical write tables + read models** | **T-2051** module write models<br/>**T-2052** summary/materialized views<br/>**T-2053** reporting projections<br/>**T-2054** event-to-projection jobs<br/>**T-2055** retention/PII classification | Build write models for OLTP and read models/projections for dashboards/reports so FE does not query raw tables inefficiently. | Separate write ownership per bounded context; projections for character sheet, dashboards, reports, release dashboard. |
+| Work Package                              | Milestone                                                                       | Tasks                                                                                                                                                                                                      | Task Description & Developer Detail                                                                                           | Dev Notes (Implementation)                                                                                              |
+| ----------------------------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **WP-023.1 Shared DB Foundation**         | **M023.1 shared tables, indexes, RLS policies, migration discipline chuẩn hóa** | **T-2046** shared schemas + org_id rules<br/>**T-2047** index/constraint matrix<br/>**T-2048** RLS policy migration helpers<br/>**T-2049** seed and rollback patterns<br/>**T-2050** migration smoke tests | Database track ensures module stories have a safe substrate.                                                                  | PostgreSQL schemas + `ENABLE ROW LEVEL SECURITY` + `CREATE POLICY`; Prisma Migrate + raw SQL for policies where needed. |
+| **WP-023.2 Module Schemas & Projections** | **M023.2 all modules have canonical write tables + read models**                | **T-2051** module write models<br/>**T-2052** summary/materialized views<br/>**T-2053** reporting projections<br/>**T-2054** event-to-projection jobs<br/>**T-2055** retention/PII classification          | Build write models for OLTP and read models/projections for dashboards/reports so FE does not query raw tables inefficiently. | Separate write ownership per bounded context; projections for character sheet, dashboards, reports, release dashboard.  |
 
 #### PHASE DB-B — Imports, Backfills, DWH Sync
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
+| Work Package                                 | Milestone                                                          | Tasks                                                                                                                                                                                         | Task Description & Developer Detail                                        | Dev Notes (Implementation)                                                                                        |
+| -------------------------------------------- | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | **WP-023.3 Import/Backfill/Analytics Track** | **M023.3 imports, backfills, analytics sync có quy trình an toàn** | **T-2056** CSV import staging tables<br/>**T-2057** dedupe/correction workflows<br/>**T-2058** backfill jobs for old data<br/>**T-2059** warehouse sync contracts<br/>**T-2060** analytics QA | Prepare the platform for real org data and downstream analytics/reporting. | Staging + validation + apply steps; optional BigQuery sync for analytics in later phases; keep budget guardrails. |
 
 ### STORY-024 — API & INTEGRATION IMPLEMENTATION TRACK
 
 #### PHASE API-A — OpenAPI, Gateway, Versioning, Webhooks
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-024.1 OpenAPI Coverage & API Gateway** | **M024.1 all active module APIs have OpenAPI coverage and deployable gateway config** | **T-2061** path/tag inventory per module<br/>**T-2062** OpenAPI authoring/linting<br/>**T-2063** generated clients/server stubs<br/>**T-2064** API Gateway deployment descriptors<br/>**T-2065** versioning/deprecation policy | API track makes the surface explicit and testable before code drifts. | API Gateway/OpenAPI SSOT; tag per module; path security, auth scopes and error schemas mandatory. |
-| **WP-024.2 Integrations, Files, Exports, Search** | **M024.2 notifications, webhooks, file/export/search flows usable by modules** | **T-2066** Zalo/FCM integration adapters<br/>**T-2067** webhook verification/idempotency<br/>**T-2068** search index contracts<br/>**T-2069** export jobs/signed URLs<br/>**T-2070** integration error handling | Cross-module integration surfaces must be operational and testable, not hard-coded side effects. | Includes notification templates, export endpoints, search endpoint contracts, external callback verification. |
+| Work Package                                      | Milestone                                                                             | Tasks                                                                                                                                                                                                                          | Task Description & Developer Detail                                                              | Dev Notes (Implementation)                                                                                    |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| **WP-024.1 OpenAPI Coverage & API Gateway**       | **M024.1 all active module APIs have OpenAPI coverage and deployable gateway config** | **T-2061** path/tag inventory per module<br/>**T-2062** OpenAPI authoring/linting<br/>**T-2063** generated clients/server stubs<br/>**T-2064** API Gateway deployment descriptors<br/>**T-2065** versioning/deprecation policy | API track makes the surface explicit and testable before code drifts.                            | API Gateway/OpenAPI SSOT; tag per module; path security, auth scopes and error schemas mandatory.             |
+| **WP-024.2 Integrations, Files, Exports, Search** | **M024.2 notifications, webhooks, file/export/search flows usable by modules**        | **T-2066** Zalo/FCM integration adapters<br/>**T-2067** webhook verification/idempotency<br/>**T-2068** search index contracts<br/>**T-2069** export jobs/signed URLs<br/>**T-2070** integration error handling                | Cross-module integration surfaces must be operational and testable, not hard-coded side effects. | Includes notification templates, export endpoints, search endpoint contracts, external callback verification. |
 
 #### PHASE API-B — Contract Tests & Release Safety
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
+| Work Package                                       | Milestone                                                             | Tasks                                                                                                                                                                               | Task Description & Developer Detail                         | Dev Notes (Implementation)                                                              |
+| -------------------------------------------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- | --------------------------------------------------------------------------------------- |
 | **WP-024.3 Contract Regression & Consumer Safety** | **M024.3 API diff gates block breaking changes for active consumers** | **T-2071** OpenAPI diff checks<br/>**T-2072** contract test packs<br/>**T-2073** mock servers for FE/QA<br/>**T-2074** compatibility notes<br/>**T-2075** release evidence bundling | Protect FE, AI Agent and integrators from silent API drift. | Include generated changelog, schema examples, backwards-compatible deprecation windows. |
 
 ### STORY-025 — INFRASTRUCTURE, SECURITY & OPERATIONS TRACK
 
 #### PHASE OPS-A — Environments, Deploy, Security, Observability
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
-| **WP-025.1 Environment & Deployment Baseline** | **M025.1 dev/staging/prod deployable via CI/CD with repeatable config** | **T-2076** Cloud Run services/jobs setup<br/>**T-2077** Cloud SQL/Storage/PubSub provisioning contracts<br/>**T-2078** env-specific config and secrets<br/>**T-2079** build/deploy pipelines<br/>**T-2080** smoke checks post-deploy | Ops track ensures what is built can actually run. | Cloud Build/Artifact Registry/Cloud Run; secrets in Secret Manager; staging parity rules. |
-| **WP-025.2 Security, Budgets & Observability** | **M025.2 auth, rate limits, budgets, logs, alerts and dashboards are live** | **T-2081** Cloud Armor/rate-limit setup<br/>**T-2082** secret rotation/runbooks<br/>**T-2083** budget alerts + low-cost actions<br/>**T-2084** logging/metrics dashboards<br/>**T-2085** backup/PITR monitoring | Security and ops are not postscript; they are part of go-live capability. | Use Cloud Run max instances/concurrency, budget alerts, audit logs, request IDs, backup verification. |
+| Work Package                                   | Milestone                                                                   | Tasks                                                                                                                                                                                                                                | Task Description & Developer Detail                                       | Dev Notes (Implementation)                                                                            |
+| ---------------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| **WP-025.1 Environment & Deployment Baseline** | **M025.1 dev/staging/prod deployable via CI/CD with repeatable config**     | **T-2076** Cloud Run services/jobs setup<br/>**T-2077** Cloud SQL/Storage/PubSub provisioning contracts<br/>**T-2078** env-specific config and secrets<br/>**T-2079** build/deploy pipelines<br/>**T-2080** smoke checks post-deploy | Ops track ensures what is built can actually run.                         | Cloud Build/Artifact Registry/Cloud Run; secrets in Secret Manager; staging parity rules.             |
+| **WP-025.2 Security, Budgets & Observability** | **M025.2 auth, rate limits, budgets, logs, alerts and dashboards are live** | **T-2081** Cloud Armor/rate-limit setup<br/>**T-2082** secret rotation/runbooks<br/>**T-2083** budget alerts + low-cost actions<br/>**T-2084** logging/metrics dashboards<br/>**T-2085** backup/PITR monitoring                      | Security and ops are not postscript; they are part of go-live capability. | Use Cloud Run max instances/concurrency, budget alerts, audit logs, request IDs, backup verification. |
 
 #### PHASE OPS-B — DR, Cutover, Hypercare
 
-| Work Package | Milestone | Tasks | Task Description & Developer Detail | Dev Notes (Implementation) |
-|---|---|---|---|---|
+| Work Package                                | Milestone                                                                | Tasks                                                                                                                                                                                                       | Task Description & Developer Detail                                   | Dev Notes (Implementation)                                                               |
+| ------------------------------------------- | ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
 | **WP-025.3 DR, Pilot, Cutover & Hypercare** | **M025.3 rollback, restore, pilot, cutover and hypercare are rehearsed** | **T-2086** restore drills + evidence<br/>**T-2087** canary/rollback automation<br/>**T-2088** cutover checklist and approvals<br/>**T-2089** hypercare dashboards/triage<br/>**T-2090** post-go-live review | Finish the loop from deployable system to production-operable system. | Pilot org, incident thresholds, canary criteria, rollback criteria, postmortem template. |
 
 ### 8.4 Module & Engineering Coverage Matrix — không để module nào “rỗng ruột”, không để layer nào “vắng owner”
 
-| Capability / Layer | Story / Phase / WP bắt buộc | Deliverable tối thiểu trước ACTIVE / GO-LIVE |
-|---|---|---|
-| **M10 Org Config** | STORY-001 + STORY-019 + STORY-023/024/025 | org overview, IAM, module toggles, settings registry, feature flags, connectors, budget/audit/release dashboard, gateway/security/deploy pack |
-| **M1 HRM** | STORY-002 + STORY-010 + STORY-020/021/022/023/024/025 | roster, profile, character sheet, org chart, transfers, parent portal, import, E2E, ops pack |
-| **M2 Project** | STORY-005 + STORY-011 + STORY-020/021/022/023/024/025 | plan composer, approval, auto-project, board/list/tree/calendar/wiki, reminders, E2E |
-| **M3 Ticket** | STORY-005 + STORY-012 + STORY-020/021/022/023/024/025 | inbox, detail, new request, approval engine, incident/escalation, consent workflows |
-| **M4 Finance** | STORY-006 + STORY-013 + STORY-020/021/022/023/024/025 | ledger, fees, budgets, sponsors/in-kind, reports, exports, E2E |
-| **M5 Assets** | STORY-006 + STORY-014 + STORY-020/021/022/023/024/025 | inventory, QR, loan flow, kits, uniform, maintenance, guardian acceptance |
-| **M6 Process** | STORY-005 + STORY-015 + STORY-020/021/022/023/024/025 | SOP library, workflow builder, executor, run history, template packs |
-| **M7 LMS** | STORY-004 + STORY-016 + STORY-020/021/022/023/024/025 | catalog, lesson player, quiz engine, mentor queue, offline packs, arena, parent dashboard, E2E |
-| **M8 Scout** | STORY-003 + STORY-017 + STORY-009/9.3 + STORY-020/021/022/023/024/025 | dashboard, character sheet, skill tree, verification queue, rank board packet, sessions/calendar, events/camps/consents, spiritual, mentoring, guardian summary, handover bridge, Scout contract pack, E2E |
-| **M9 Reward** | STORY-003 + STORY-018 + STORY-020/021/022/023/024/025 | EXP ledger, rules/config engine, badges, leaderboard, penalties, shop, regression pack |
-| **UX/UI Game System** | STORY-020 | route map, scene bible, tokens, components, 3D scene runtime, hero-scene briefs (M1/M7/M8/M9), accessibility, reduced-motion, low-cost mode, asset/perf budgets |
-| **Frontend Track** | STORY-021 | App Router, auth guards, FE data layer, screen states, PWA/offline, FE tests |
-| **Backend Track** | STORY-022 | modular services/controllers/jobs, validation, authz, events, integration/perf tests |
-| **Database & Warehouse** | STORY-023 + STORY-009/9.2 | schemas, migrations, indexes, RLS, projections, import/backfill, analytics contracts |
-| **API & Integrations** | STORY-024 + STORY-009/9.1, 9.3, 9.4 | OpenAPI/gateway, webhooks, notifications, exports, search, contract diffs |
-| **Infrastructure / Security / Ops** | STORY-025 + STORY-008 | CI/CD, environments, Cloud Run/SQL/Storage/PubSub, budgets, monitoring, DR, cutover |
-| **PHẦN IX — State Machines** | STORY-009 / WP-9.1 + STORY-010→019 where applicable | canonical state registry, transition guards, API/DB/event enum sync, illegal transition tests |
-| **PHỤ LỤC A — DB Schemas** | STORY-009 / WP-9.2 + STORY-023 | all module schemas, migrations, indexes, seeds, RLS coverage |
-| **PHỤ LỤC B — Module 8 Contract Pack** | STORY-009 / WP-9.3 + STORY-017 + STORY-024 + STORY-023 | Scout Core OpenAPI, SQL, RLS, playbook, E2E evidence |
-| **PHỤ LỤC C — Engineering Contract Packs** | STORY-010→019 + STORY-020→025 + STORY-009 / WP-9.5 | per-module/layer contract packs with service/api/event/db/test/dod/readiness data |
-| **PHẦN X — Checklists** | STORY-008 + STORY-009 / WP-9.6, 9.7 + STORY-025 | checklist-to-gate mapping, sign-off ownership, release evidence links, cutover/hypercare |
+| Capability / Layer                         | Story / Phase / WP bắt buộc                                           | Deliverable tối thiểu trước ACTIVE / GO-LIVE                                                                                                                                                               |
+| ------------------------------------------ | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **M10 Org Config**                         | STORY-001 + STORY-019 + STORY-023/024/025                             | org overview, IAM, module toggles, settings registry, feature flags, connectors, budget/audit/release dashboard, gateway/security/deploy pack                                                              |
+| **M1 HRM**                                 | STORY-002 + STORY-010 + STORY-020/021/022/023/024/025                 | roster, profile, character sheet, org chart, transfers, parent portal, import, E2E, ops pack                                                                                                               |
+| **M2 Project**                             | STORY-005 + STORY-011 + STORY-020/021/022/023/024/025                 | plan composer, approval, auto-project, board/list/tree/calendar/wiki, reminders, E2E                                                                                                                       |
+| **M3 Ticket**                              | STORY-005 + STORY-012 + STORY-020/021/022/023/024/025                 | inbox, detail, new request, approval engine, incident/escalation, consent workflows                                                                                                                        |
+| **M4 Finance**                             | STORY-006 + STORY-013 + STORY-020/021/022/023/024/025                 | ledger, fees, budgets, sponsors/in-kind, reports, exports, E2E                                                                                                                                             |
+| **M5 Assets**                              | STORY-006 + STORY-014 + STORY-020/021/022/023/024/025                 | inventory, QR, loan flow, kits, uniform, maintenance, guardian acceptance                                                                                                                                  |
+| **M6 Process**                             | STORY-005 + STORY-015 + STORY-020/021/022/023/024/025                 | SOP library, workflow builder, executor, run history, template packs                                                                                                                                       |
+| **M7 LMS**                                 | STORY-004 + STORY-016 + STORY-020/021/022/023/024/025                 | catalog, lesson player, quiz engine, mentor queue, offline packs, arena, parent dashboard, E2E                                                                                                             |
+| **M8 Scout**                               | STORY-003 + STORY-017 + STORY-009/9.3 + STORY-020/021/022/023/024/025 | dashboard, character sheet, skill tree, verification queue, rank board packet, sessions/calendar, events/camps/consents, spiritual, mentoring, guardian summary, handover bridge, Scout contract pack, E2E |
+| **M9 Reward**                              | STORY-003 + STORY-018 + STORY-020/021/022/023/024/025                 | EXP ledger, rules/config engine, badges, leaderboard, penalties, shop, regression pack                                                                                                                     |
+| **UX/UI Game System**                      | STORY-020                                                             | route map, scene bible, tokens, components, 3D scene runtime, hero-scene briefs (M1/M7/M8/M9), accessibility, reduced-motion, low-cost mode, asset/perf budgets                                            |
+| **Frontend Track**                         | STORY-021                                                             | App Router, auth guards, FE data layer, screen states, PWA/offline, FE tests                                                                                                                               |
+| **Backend Track**                          | STORY-022                                                             | modular services/controllers/jobs, validation, authz, events, integration/perf tests                                                                                                                       |
+| **Database & Warehouse**                   | STORY-023 + STORY-009/9.2                                             | schemas, migrations, indexes, RLS, projections, import/backfill, analytics contracts                                                                                                                       |
+| **API & Integrations**                     | STORY-024 + STORY-009/9.1, 9.3, 9.4                                   | OpenAPI/gateway, webhooks, notifications, exports, search, contract diffs                                                                                                                                  |
+| **Infrastructure / Security / Ops**        | STORY-025 + STORY-008                                                 | CI/CD, environments, Cloud Run/SQL/Storage/PubSub, budgets, monitoring, DR, cutover                                                                                                                        |
+| **PHẦN IX — State Machines**               | STORY-009 / WP-9.1 + STORY-010→019 where applicable                   | canonical state registry, transition guards, API/DB/event enum sync, illegal transition tests                                                                                                              |
+| **PHỤ LỤC A — DB Schemas**                 | STORY-009 / WP-9.2 + STORY-023                                        | all module schemas, migrations, indexes, seeds, RLS coverage                                                                                                                                               |
+| **PHỤ LỤC B — Module 8 Contract Pack**     | STORY-009 / WP-9.3 + STORY-017 + STORY-024 + STORY-023                | Scout Core OpenAPI, SQL, RLS, playbook, E2E evidence                                                                                                                                                       |
+| **PHỤ LỤC C — Engineering Contract Packs** | STORY-010→019 + STORY-020→025 + STORY-009 / WP-9.5                    | per-module/layer contract packs with service/api/event/db/test/dod/readiness data                                                                                                                          |
+| **PHẦN X — Checklists**                    | STORY-008 + STORY-009 / WP-9.6, 9.7 + STORY-025                       | checklist-to-gate mapping, sign-off ownership, release evidence links, cutover/hypercare                                                                                                                   |
 
 ### 8.5 Deliverables chuẩn cho mỗi Work Package — để CTO kiểm tra có “thịt” hay chưa
+
 Mỗi WP bắt buộc phải giao đủ:
-1. **Screens/Sub-pages** có `loading/empty/error/success` states  
-2. **OpenAPI endpoints** đủ cho workflow P0/P1  
-3. **Schema + constraints + RLS + migrations**  
-4. **State machine + transition guards + audit rules** nếu có trạng thái  
-5. **Event publishing/consuming** nếu có sync liên module  
-6. **Seed/template/demo data** để môi trường mới vào là dùng được  
-7. **Tests**: unit + integration + e2e tối thiểu 1 flow  
-8. **Feature flags / cost tags / low-cost mode** nếu tốn CPU, RAM, bandwidth hoặc logging  
-9. **Runbook** cho import/rollback/troubleshooting nếu chạm production data  
+
+1. **Screens/Sub-pages** có `loading/empty/error/success` states
+2. **OpenAPI endpoints** đủ cho workflow P0/P1
+3. **Schema + constraints + RLS + migrations**
+4. **State machine + transition guards + audit rules** nếu có trạng thái
+5. **Event publishing/consuming** nếu có sync liên module
+6. **Seed/template/demo data** để môi trường mới vào là dùng được
+7. **Tests**: unit + integration + e2e tối thiểu 1 flow
+8. **Feature flags / cost tags / low-cost mode** nếu tốn CPU, RAM, bandwidth hoặc logging
+9. **Runbook** cho import/rollback/troubleshooting nếu chạm production data
 
 ### 8.6 Canonical Task Anatomy — task phải viết như dev thực thi được
+
 Mỗi task trong backlog Jira nên có format:
+
 - **Intent**: build capability gì.
 - **Inputs**: PRD section, screen map, OpenAPI path, tables, states, events.
 - **Implementation surface**: repo paths, modules/services/controllers/hooks/components/functions.
@@ -3741,6 +3958,7 @@ Mỗi task trong backlog Jira nên có format:
 - **Risk**: budget, child safety, migration, backward compatibility, queue/idempotency, data privacy.
 
 Ví dụ:
+
 ```text
 T-1146 Scout Verification Guards
 - Inputs: Module 8 / Skill verification flow / state machine `submitted -> verified|rejected`
@@ -3766,6 +3984,7 @@ T-1146 Scout Verification Guards
 ```
 
 ### 8.7 Production Go-live Gates — fail một gate là block release
+
 - **Gate G1 — Module Active ≠ Empty**: mọi module ACTIVE phải pass module-health và module story riêng.
 - **Gate G2 — Critical journeys pass**: Playwright pack pass trên staging + canary.
 - **Gate G3 — Contract sync pass**: OpenAPI/event/schema/state/test/roadmap/ADR không lệch.
@@ -3777,20 +3996,22 @@ T-1146 Scout Verification Guards
 - **Gate G9 — Module Story Closure pass**: mọi module 1–10 phải close được story module-owned tương ứng trước GA.
 
 ### 8.8 Critical E2E Journeys — đây là thứ CTO bấm để biết hệ thống “sống”
-1. **Create Org → invite admin → create branches/units → login admin**  
-2. **Create member < 18 → link guardian → parent login → parent sees child dashboard**  
-3. **Create session → mark attendance → reward ledger updates → profile timeline updates**  
-4. **Submit skill evidence → verify/reject → rank eligibility recompute → badge/EXP issue**  
-5. **Create overnight event → HIRARC → consent → 2-adult rule pass → check-in/out**  
-6. **Create plan → approve → auto project tree → task assignment → reminder → done**  
-7. **Create fee plan → partial payment → overdue notice → ledger/report update**  
-8. **Checkout asset kit to member/team → guardian acceptance if minor → return/maintenance**  
-9. **Create ticket → route → approve conditionally → close with audit trail**  
-10. **Create SOP workflow → trigger event → action executes → run history visible**  
-11. **Create course → complete lesson → quiz pass → mentor review → reward update**  
+
+1. **Create Org → invite admin → create branches/units → login admin**
+2. **Create member < 18 → link guardian → parent login → parent sees child dashboard**
+3. **Create session → mark attendance → reward ledger updates → profile timeline updates**
+4. **Submit skill evidence → verify/reject → rank eligibility recompute → badge/EXP issue**
+5. **Create overnight event → HIRARC → consent → 2-adult rule pass → check-in/out**
+6. **Create plan → approve → auto project tree → task assignment → reminder → done**
+7. **Create fee plan → partial payment → overdue notice → ledger/report update**
+8. **Checkout asset kit to member/team → guardian acceptance if minor → return/maintenance**
+9. **Create ticket → route → approve conditionally → close with audit trail**
+10. **Create SOP workflow → trigger event → action executes → run history visible**
+11. **Create course → complete lesson → quiz pass → mentor review → reward update**
 12. **Redeem reward item → approval (if needed) → stock decreases → ledger preserved**
 
 ### 8.9 External Benchmark References dùng để rà roadmap V8
+
 - **OpenProject** — work packages, project views, Gantt, wiki/docs, product roadmap patterns.
 - **Plane** — issues/cycles/modules/docs mindset cho PM delivery.
 - **Moodle** — course structure, progress/competency, offline learning.
@@ -3801,12 +4022,14 @@ T-1146 Scout Verification Guards
 - **Google Cloud / PostgreSQL / Prisma / Next.js / NestJS** — contracts, API gateway, RLS, concurrency, migrations, App Router, service patterns.
 
 ### 8.10 Budget-aware Runtime Notes cho roadmap
+
 - **Battle Arena**, **video-heavy lessons**, **Gantt**, **warehouse sync**, **verbose logging**, **heavy export jobs** phải có feature flags và degraded mode theo ngưỡng budget.
 - **Cloud Run**: điều tiết bằng `max instances` + `concurrency` + profile-specific resource classes.
 - **Billing budgets**: dùng alert + notifications + automated throttling actions; không mô tả như hard quota cap.
 - **Search / reporting / export**: ưu tiên async jobs + caching + signed URLs để không kéo sập runtime chính.
 
 ### 8.11 CTO Review Checklist — dùng để phản biện roadmap trước khi dev tiếp
+
 - Có giữ đủ **story nền tảng** nhưng đồng thời đã thêm **story riêng cho từng module 1–10** chưa?
 - Mỗi module đã có **schema + APIs + screens + workflow + state machine + events + tests + seed data + ops pack** chưa?
 - Có story/layer riêng cho **UX/UI, frontend, backend, database, API, infrastructure** chưa?
@@ -3821,30 +4044,30 @@ T-1146 Scout Verification Guards
 
 ### 9.0 Canonical State & Contract Registry (nguồn chuẩn để đối chiếu Roadmap ↔ API ↔ DB ↔ Tests)
 
-| Domain entity | Canonical states | Lưu ở đâu | API/Workflow chạm vào | E2E bắt buộc |
-|---|---|---|---|---|
-| Member lifecycle | `pending`, `active`, `inactive`, `suspended`, `transferred`, `left` | `org_members.status` + history tables | HRM create/update/transfer/leave | onboard member, transfer member |
-| Plan approval | `draft`, `submitted`, `approved`, `rejected`, `archived` | `plans.status` | submit/approve/reject/revise | plan → project |
-| Project | `planning`, `active`, `on_hold`, `completed`, `cancelled` | `projects.status` | project CRUD + progress | active project flow |
-| Task | `todo`, `in_progress`, `blocked`, `review`, `done`, `cancelled` | `tasks.status` | task lifecycle | task complete grants reward |
-| Ticket | `open`, `assigned`, `in_review`, `approved`, `rejected`, `closed`, `reopened` | `tickets.status` | approval engine | ticket approval/reject/reopen |
-| Finance transaction | `pending`, `approved`, `rejected`, `posted`, `reversed` | `financial_transactions.status` | finance approval/post/reverse | post + reverse transaction |
-| Member fee | `unpaid`, `partial`, `paid`, `overdue`, `waived`, `cancelled` | `member_fees.status` | fee engine | partial pay → paid |
-| Asset loan | `pending`, `approved`, `checked_out`, `overdue`, `returned`, `under_repair`, `disposed`, `cancelled` | `asset_loans.status` + asset status | armory loan/return | checkout/return/damage |
-| LMS attempt | `not_started`, `in_progress`, `submitted`, `graded`, `passed`, `failed`, `locked` | attempts/progress | lesson/quiz grading | lesson + quiz pass |
-| Scout skill progress | `not_started`, `in_progress`, `submitted`, `verified`, `rejected`, `awarded`, `archived` | `member_skill_progress.status` | evidence/verify/rank | submit evidence → verify |
-| Rank progression | `not_eligible`, `eligible`, `proposed`, `approved`, `awarded`, `archived` | rank progress/read model | rank-up flow | eligible → awarded |
-| Session | `draft`, `scheduled`, `in_progress`, `completed`, `cancelled`, `archived` | sessions | attendance/event reward | run session + attendance |
-| Event/Camp | `draft`, `open`, `approval_pending`, `approved`, `registration_open`, `confirmed`, `in_progress`, `completed`, `cancelled`, `archived` | events | consent/HIRARC/attendance | camp workflow |
-| Process workflow run | `draft`, `published`, `running`, `waiting`, `succeeded`, `failed`, `cancelled`, `archived` | `proc.workflow_*` | workflow builder/executor | SOP/workflow execution |
+| Domain entity        | Canonical states                                                                                                                       | Lưu ở đâu                             | API/Workflow chạm vào            | E2E bắt buộc                    |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- | -------------------------------- | ------------------------------- |
+| Member lifecycle     | `pending`, `active`, `inactive`, `suspended`, `transferred`, `left`                                                                    | `org_members.status` + history tables | HRM create/update/transfer/leave | onboard member, transfer member |
+| Plan approval        | `draft`, `submitted`, `approved`, `rejected`, `archived`                                                                               | `plans.status`                        | submit/approve/reject/revise     | plan → project                  |
+| Project              | `planning`, `active`, `on_hold`, `completed`, `cancelled`                                                                              | `projects.status`                     | project CRUD + progress          | active project flow             |
+| Task                 | `todo`, `in_progress`, `blocked`, `review`, `done`, `cancelled`                                                                        | `tasks.status`                        | task lifecycle                   | task complete grants reward     |
+| Ticket               | `open`, `assigned`, `in_review`, `approved`, `rejected`, `closed`, `reopened`                                                          | `tickets.status`                      | approval engine                  | ticket approval/reject/reopen   |
+| Finance transaction  | `pending`, `approved`, `rejected`, `posted`, `reversed`                                                                                | `financial_transactions.status`       | finance approval/post/reverse    | post + reverse transaction      |
+| Member fee           | `unpaid`, `partial`, `paid`, `overdue`, `waived`, `cancelled`                                                                          | `member_fees.status`                  | fee engine                       | partial pay → paid              |
+| Asset loan           | `pending`, `approved`, `checked_out`, `overdue`, `returned`, `under_repair`, `disposed`, `cancelled`                                   | `asset_loans.status` + asset status   | armory loan/return               | checkout/return/damage          |
+| LMS attempt          | `not_started`, `in_progress`, `submitted`, `graded`, `passed`, `failed`, `locked`                                                      | attempts/progress                     | lesson/quiz grading              | lesson + quiz pass              |
+| Scout skill progress | `not_started`, `in_progress`, `submitted`, `verified`, `rejected`, `awarded`, `archived`                                               | `member_skill_progress.status`        | evidence/verify/rank             | submit evidence → verify        |
+| Rank progression     | `not_eligible`, `eligible`, `proposed`, `approved`, `awarded`, `archived`                                                              | rank progress/read model              | rank-up flow                     | eligible → awarded              |
+| Session              | `draft`, `scheduled`, `in_progress`, `completed`, `cancelled`, `archived`                                                              | sessions                              | attendance/event reward          | run session + attendance        |
+| Event/Camp           | `draft`, `open`, `approval_pending`, `approved`, `registration_open`, `confirmed`, `in_progress`, `completed`, `cancelled`, `archived` | events                                | consent/HIRARC/attendance        | camp workflow                   |
+| Process workflow run | `draft`, `published`, `running`, `waiting`, `succeeded`, `failed`, `cancelled`, `archived`                                             | `proc.workflow_*`                     | workflow builder/executor        | SOP/workflow execution          |
 
 > Mọi state machine, schema enum/check constraint, API response/status mapping và test fixtures phải dùng đúng registry này. Nếu có thêm state mới, phải update **cùng lúc**: PRD + OpenAPI + migration + state machine + roadmap capability + tests.
-
 
 > Mục tiêu: Product + Dev đều thống nhất “đời sống” (lifecycle) của các đối tượng chính.
 > Mọi state transition **phải**: (1) validate permissions, (2) ghi audit, (3) emit domain event (nếu có sync liên module).
 
 ### SM-1 — Member Lifecycle (HRM)
+
 ```mermaid
 stateDiagram-v2
   [*] --> pending: register/create
@@ -3866,6 +4089,7 @@ stateDiagram-v2
 ```
 
 ### SM-2 — Plan Approval (Project / Planning)
+
 ```mermaid
 stateDiagram-v2
   [*] --> draft: create
@@ -3881,6 +4105,7 @@ stateDiagram-v2
 ```
 
 ### SM-3 — Project Lifecycle
+
 ```mermaid
 stateDiagram-v2
   [*] --> planning
@@ -3895,6 +4120,7 @@ stateDiagram-v2
 ```
 
 ### SM-4 — Task Lifecycle
+
 ```mermaid
 stateDiagram-v2
   [*] --> todo: created
@@ -3914,6 +4140,7 @@ stateDiagram-v2
 ```
 
 ### SM-5 — Ticket / Request & Approval
+
 ```mermaid
 stateDiagram-v2
   [*] --> open: created
@@ -3927,6 +4154,7 @@ stateDiagram-v2
 ```
 
 ### SM-6 — Financial Transaction (Ledger-first)
+
 ```mermaid
 stateDiagram-v2
   [*] --> pending: created
@@ -3940,6 +4168,7 @@ stateDiagram-v2
 ```
 
 ### SM-7 — Member Fee (Nguyệt liễm / Trại phí / ...)
+
 ```mermaid
 stateDiagram-v2
   [*] --> unpaid: created
@@ -3956,6 +4185,7 @@ stateDiagram-v2
 ```
 
 ### SM-8 — Asset Loan (Checkout/Checkin)
+
 ```mermaid
 stateDiagram-v2
   [*] --> requested: request
@@ -3976,6 +4206,7 @@ stateDiagram-v2
 ```
 
 ### SM-9 — Quiz Attempt (LMS)
+
 ```mermaid
 stateDiagram-v2
   [*] --> not_started
@@ -3991,6 +4222,7 @@ stateDiagram-v2
 ```
 
 ### SM-10 — Skill Progress (Scout Skillbook)
+
 ```mermaid
 stateDiagram-v2
   [*] --> not_started
@@ -4003,6 +4235,7 @@ stateDiagram-v2
 ```
 
 ### SM-11 — Rank Progression (Scout)
+
 ```mermaid
 stateDiagram-v2
   [*] --> in_progress
@@ -4016,6 +4249,7 @@ stateDiagram-v2
 ```
 
 ### SM-12 — Session (Buổi Sinh hoạt)
+
 ```mermaid
 stateDiagram-v2
   [*] --> planned: create
@@ -4030,6 +4264,7 @@ stateDiagram-v2
 ```
 
 ### SM-13 — Event/Camp
+
 ```mermaid
 stateDiagram-v2
   [*] --> planning: create
@@ -4048,6 +4283,7 @@ stateDiagram-v2
 ```
 
 ### SM-14 — Cross-module Event Sync (conceptual)
+
 ```mermaid
 flowchart TB
   A[State change in Module X] --> B[DB Transaction committed]
@@ -4078,96 +4314,94 @@ stateDiagram-v2
     cancelled --> archived
 ```
 
-
 ## PHẦN X — CHECKLISTS (FULL)
 
 ### 10.0 Data Consistency Checklist
 
-| # | Checklist | Owner | DoD |
-| ---|---|---|--- |
-| DC-01 | Mọi bảng có `org_id` + RLS enable | Backend/DB | Không query nào leak cross-org |
-| DC-02 | Canonical IDs: `person_id` (HRM) dùng xuyên module | Backend | Không tạo “member_id” chồng chéo |
-| DC-03 | Transaction + Event: “1 DB TX + 1 Domain Event” | Backend | Event store có record cho mọi state change |
-| DC-04 | Idempotency cho endpoints tạo/verify/award | Backend | Re-run request không tạo double |
-| DC-05 | Data ownership theo bounded context | Tech Lead | Không module nào write DB của module khác |
-| DC-06 | Migrations có version + rollback | DevOps | Flyway/Liquibase/Prisma migrate chạy CI |
-| DC-07 | Seed data tối thiểu (Org demo) | Backend | E2E smoke chạy được trên seed |
-| DC-08 | Referential integrity + indexes | DB | EXPLAIN không full-scan các query chính |
+| #     | Checklist                                          | Owner      | DoD                                        |
+| ----- | -------------------------------------------------- | ---------- | ------------------------------------------ |
+| DC-01 | Mọi bảng có `org_id` + RLS enable                  | Backend/DB | Không query nào leak cross-org             |
+| DC-02 | Canonical IDs: `person_id` (HRM) dùng xuyên module | Backend    | Không tạo “member_id” chồng chéo           |
+| DC-03 | Transaction + Event: “1 DB TX + 1 Domain Event”    | Backend    | Event store có record cho mọi state change |
+| DC-04 | Idempotency cho endpoints tạo/verify/award         | Backend    | Re-run request không tạo double            |
+| DC-05 | Data ownership theo bounded context                | Tech Lead  | Không module nào write DB của module khác  |
+| DC-06 | Migrations có version + rollback                   | DevOps     | Flyway/Liquibase/Prisma migrate chạy CI    |
+| DC-07 | Seed data tối thiểu (Org demo)                     | Backend    | E2E smoke chạy được trên seed              |
+| DC-08 | Referential integrity + indexes                    | DB         | EXPLAIN không full-scan các query chính    |
 
 ### 10.1 Error Handling Checklist
 
-| # | Checklist | Owner | DoD |
-| ---|---|---|--- |
-| ER-01 | Error format chuẩn `{code,message,details,request_id}` | Backend | Tất cả controllers dùng filter chung |
-| ER-02 | Request tracing: `X-Request-Id` | Backend/DevOps | Logs có request_id, user_id, org_id |
-| ER-03 | Retry + DLQ cho worker | DevOps | Pub/Sub DLQ/Dead-letter policy |
-| ER-04 | Timeout budgets (DB/API) | Backend | timeouts rõ ràng, không treo |
-| ER-05 | Validation fail returns 400 w/ fields | Backend | Zod/class-validator mapping |
-| ER-06 | File upload errors safe | Backend | MIME sniff + size limit + safe delete |
+| #     | Checklist                                              | Owner          | DoD                                   |
+| ----- | ------------------------------------------------------ | -------------- | ------------------------------------- |
+| ER-01 | Error format chuẩn `{code,message,details,request_id}` | Backend        | Tất cả controllers dùng filter chung  |
+| ER-02 | Request tracing: `X-Request-Id`                        | Backend/DevOps | Logs có request_id, user_id, org_id   |
+| ER-03 | Retry + DLQ cho worker                                 | DevOps         | Pub/Sub DLQ/Dead-letter policy        |
+| ER-04 | Timeout budgets (DB/API)                               | Backend        | timeouts rõ ràng, không treo          |
+| ER-05 | Validation fail returns 400 w/ fields                  | Backend        | Zod/class-validator mapping           |
+| ER-06 | File upload errors safe                                | Backend        | MIME sniff + size limit + safe delete |
 
 ### 10.2 Security Checklist (Child Safety = P0)
 
-| # | Checklist | Owner | DoD |
-| ---|---|---|--- |
-| SE-01 | Firebase/Identity verify token server-side | Backend | Reject invalid/expired tokens |
-| SE-02 | RBAC + scope (Org/Branch/Unit) | Backend | CASL policies test coverage |
-| SE-03 | RLS enforced in DB | DB | policies exist for all tables |
-| SE-04 | Audit log for sensitive actions | Backend | verify/award/approval/config changes logged |
-| SE-05 | PII encryption at rest for sensitive fields | DB | pgcrypto/KMS plan defined |
-| SE-06 | Signed URLs for child media | Backend | TTL enforced; no public bucket |
-| SE-07 | Content moderation (comments/uploads) | Backend | basic profanity + report/flag |
-| SE-08 | Notification quiet hours for <18 | Product/Backend | 22:00–07:00 default |
-| SE-09 | Data retention & erasure flow | Product/Backend | 90‑day retention + delete workflow |
+| #     | Checklist                                   | Owner           | DoD                                         |
+| ----- | ------------------------------------------- | --------------- | ------------------------------------------- |
+| SE-01 | Firebase/Identity verify token server-side  | Backend         | Reject invalid/expired tokens               |
+| SE-02 | RBAC + scope (Org/Branch/Unit)              | Backend         | CASL policies test coverage                 |
+| SE-03 | RLS enforced in DB                          | DB              | policies exist for all tables               |
+| SE-04 | Audit log for sensitive actions             | Backend         | verify/award/approval/config changes logged |
+| SE-05 | PII encryption at rest for sensitive fields | DB              | pgcrypto/KMS plan defined                   |
+| SE-06 | Signed URLs for child media                 | Backend         | TTL enforced; no public bucket              |
+| SE-07 | Content moderation (comments/uploads)       | Backend         | basic profanity + report/flag               |
+| SE-08 | Notification quiet hours for <18            | Product/Backend | 22:00–07:00 default                         |
+| SE-09 | Data retention & erasure flow               | Product/Backend | 90‑day retention + delete workflow          |
 
 ### 10.3 Performance Checklist
 
-| # | Checklist | Owner | DoD |
-| ---|---|---|--- |
-| PF-01 | Cloud Run `max-instances` guardrail | DevOps | max set (cost control) |
-| PF-02 | Connection pool limit (Cloud SQL micro) | Backend | Prisma pool <= 5 |
-| PF-03 | Hot paths cached (LRU TTL) | Backend | cache hit ratio tracked |
-| PF-04 | Leaderboard in Redis ZSET | Backend | query < 100ms for top 100 |
-| PF-05 | Export jobs async (queue) | Backend | no long request > 30s |
-| PF-06 | Index strategy for org_id filters | DB | p95 query time < 200ms |
+| #     | Checklist                               | Owner   | DoD                       |
+| ----- | --------------------------------------- | ------- | ------------------------- |
+| PF-01 | Cloud Run `max-instances` guardrail     | DevOps  | max set (cost control)    |
+| PF-02 | Connection pool limit (Cloud SQL micro) | Backend | Prisma pool <= 5          |
+| PF-03 | Hot paths cached (LRU TTL)              | Backend | cache hit ratio tracked   |
+| PF-04 | Leaderboard in Redis ZSET               | Backend | query < 100ms for top 100 |
+| PF-05 | Export jobs async (queue)               | Backend | no long request > 30s     |
+| PF-06 | Index strategy for org_id filters       | DB      | p95 query time < 200ms    |
 
 ### 10.4 Testing Checklist
 
-| # | Checklist | Owner | DoD |
-| ---|---|---|--- |
-| TS-01 | Unit tests for state transitions | Backend | SM-1..SM-13 transitions covered |
-| TS-02 | Contract tests for events | Backend | schema validated in CI |
-| TS-03 | API tests (Supertest) | Backend | basic CRUD per module |
-| TS-04 | E2E tests (Playwright) | QA | login + core journeys J1–J5 |
-| TS-05 | Load test (k6) | DevOps | p95 latency under target |
-| TS-06 | Security test (OWASP checks) | DevSecOps | baseline scan ok |
+| #     | Checklist                        | Owner     | DoD                             |
+| ----- | -------------------------------- | --------- | ------------------------------- |
+| TS-01 | Unit tests for state transitions | Backend   | SM-1..SM-13 transitions covered |
+| TS-02 | Contract tests for events        | Backend   | schema validated in CI          |
+| TS-03 | API tests (Supertest)            | Backend   | basic CRUD per module           |
+| TS-04 | E2E tests (Playwright)           | QA        | login + core journeys J1–J5     |
+| TS-05 | Load test (k6)                   | DevOps    | p95 latency under target        |
+| TS-06 | Security test (OWASP checks)     | DevSecOps | baseline scan ok                |
 
 ### 10.5 Go-Live Checklist
 
-| # | Checklist | Owner | DoD |
-| ---|---|---|--- |
-| GL-01 | Billing budget ≤ 800.000 VND/tháng + alerts + Pub/Sub | DevOps | 50/80/100/120% actions set |
-| GL-02 | Monitoring dashboards + alerts | DevOps | error rate, latency, spend, DB conn |
-| GL-03 | Backup + restore drill | DevOps | restore works on staging |
-| GL-04 | Data import plan (members/assets) | Product/Backend | CSV import validated |
-| GL-05 | Training materials for Trưởng | Product | 1h onboarding script + SOP |
-| GL-06 | Rollback plan | DevOps | previous revision deployable |
+| #     | Checklist                                             | Owner           | DoD                                 |
+| ----- | ----------------------------------------------------- | --------------- | ----------------------------------- |
+| GL-01 | Billing budget ≤ 800.000 VND/tháng + alerts + Pub/Sub | DevOps          | 50/80/100/120% actions set          |
+| GL-02 | Monitoring dashboards + alerts                        | DevOps          | error rate, latency, spend, DB conn |
+| GL-03 | Backup + restore drill                                | DevOps          | restore works on staging            |
+| GL-04 | Data import plan (members/assets)                     | Product/Backend | CSV import validated                |
+| GL-05 | Training materials for Trưởng                         | Product         | 1h onboarding script + SOP          |
+| GL-06 | Rollback plan                                         | DevOps          | previous revision deployable        |
 
 ---
 
-
-
 ### 10.6 Checklist-to-Roadmap Synchronization Matrix
 
-| Checklist | Roadmap WP tối thiểu phải cover | Module / phần bị chặn nếu fail |
-|---|---|---|
-| Data consistency | WP-1.2, 3.1, 3.2, 5.1, 6.1, 9.1, 9.2 | mọi module có state/status/write models |
-| Error handling | WP-0.4, 1.4, 4.2, 5.4, 7.1, 9.4 | UI shell, APIs, workers, notifications |
-| Security / Child safety | WP-1.1, 2.1, 2.4, 3.5, 7.1, 8.1, 9.6 | HRM, Scout, Files, Notifications, Auth |
-| Performance | WP-0.3, 3.7, 4.2, 5.2, 6.3, 8.1 | shell, reward, arena, reports, finance |
-| Testing | WP-0.4 + tất cả WP nghiệp vụ | toàn platform |
-| Go-live | WP-7.3, 8.2, 9.7, 9.8 | release / production cutover |
+| Checklist               | Roadmap WP tối thiểu phải cover      | Module / phần bị chặn nếu fail          |
+| ----------------------- | ------------------------------------ | --------------------------------------- |
+| Data consistency        | WP-1.2, 3.1, 3.2, 5.1, 6.1, 9.1, 9.2 | mọi module có state/status/write models |
+| Error handling          | WP-0.4, 1.4, 4.2, 5.4, 7.1, 9.4      | UI shell, APIs, workers, notifications  |
+| Security / Child safety | WP-1.1, 2.1, 2.4, 3.5, 7.1, 8.1, 9.6 | HRM, Scout, Files, Notifications, Auth  |
+| Performance             | WP-0.3, 3.7, 4.2, 5.2, 6.3, 8.1      | shell, reward, arena, reports, finance  |
+| Testing                 | WP-0.4 + tất cả WP nghiệp vụ         | toàn platform                           |
+| Go-live                 | WP-7.3, 8.2, 9.7, 9.8                | release / production cutover            |
 
 ### 10.7 Checklist Execution Ownership
+
 - **PM/BA**: xác nhận checklist nghiệp vụ, acceptance criteria, coverage theo module.
 - **UX/UI**: xác nhận screen states, a11y, reduced motion, offline/low-cost mode.
 - **Backend**: xác nhận OpenAPI, state machine, schema/RLS, events, workers, idempotency.
@@ -4176,26 +4410,25 @@ stateDiagram-v2
 - **SRE/Security**: xác nhận secrets, logs, rate limits, backups, budget guardrails, canary, rollback.
 - **CTO/LĐT sign-off**: chỉ ký khi checklist pass + manifest + release evidence đã có link rõ ràng.
 
-
 ## PHẦN XI — KIỂM SOÁT TÀI LIỆU
 
 ### 11.1 Lịch sử Phiên bản
 
-| Phiên bản | Ngày | Thay đổi |
-| -----------|------|--------- |
-| v1.0 | 03/2026 | Bản gốc (công ty ngoài) — 10 modules, chỉ kỹ thuật |
-| v2.0 | 04/03/2026 | Hợp nhất + Budget 800.000 VND/tháng VND + Module 11+12 + State Machines + Checklists |
-| **v3.0** | **05/03/2026** | **PRD hoàn chỉnh** — Mỗi module có lớp nghiệp vụ (tính năng, luồng, logic, user stories) TRƯỚC kỹ thuật. Module 11+12 sáp nhập vào Module 8. Roadmap Jira-structured (Story→Phase→WP→Milestone→Task). Child Safety Checklist. Tham chiếu nghiên cứu quốc tế (WOSM SPICES, SDT, IEEE 29148) |
+| Phiên bản | Ngày           | Thay đổi                                                                                                                                                                                                                                                                                   |
+| --------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| v1.0      | 03/2026        | Bản gốc (công ty ngoài) — 10 modules, chỉ kỹ thuật                                                                                                                                                                                                                                         |
+| v2.0      | 04/03/2026     | Hợp nhất + Budget 800.000 VND/tháng VND + Module 11+12 + State Machines + Checklists                                                                                                                                                                                                       |
+| **v3.0**  | **05/03/2026** | **PRD hoàn chỉnh** — Mỗi module có lớp nghiệp vụ (tính năng, luồng, logic, user stories) TRƯỚC kỹ thuật. Module 11+12 sáp nhập vào Module 8. Roadmap Jira-structured (Story→Phase→WP→Milestone→Task). Child Safety Checklist. Tham chiếu nghiên cứu quốc tế (WOSM SPICES, SDT, IEEE 29148) |
 
 ### 11.2 Tài liệu Liên quan
 
-| Tài liệu | Mã số |
-| ----------|------- |
-| Quy chế Tổ chức và Hoạt động DTNDD | DTNDD-QC-001 |
-| Thiện Tâm Kỳ Truyện — Quy tắc Thiết kế Nhiệm vụ | TTNDD-QUEST-001 |
-| Nguyên lý Hướng Đạo 2017 | HVN-NL-2017 |
-| Phương pháp Hướng Đạo (WOSM) | WOSM-METHOD-001 |
-| Nghiên cứu PRD Foundation (Deep Research) | TTNDD-RESEARCH-001 |
+| Tài liệu                                        | Mã số              |
+| ----------------------------------------------- | ------------------ |
+| Quy chế Tổ chức và Hoạt động DTNDD              | DTNDD-QC-001       |
+| Thiện Tâm Kỳ Truyện — Quy tắc Thiết kế Nhiệm vụ | TTNDD-QUEST-001    |
+| Nguyên lý Hướng Đạo 2017                        | HVN-NL-2017        |
+| Phương pháp Hướng Đạo (WOSM)                    | WOSM-METHOD-001    |
+| Nghiên cứu PRD Foundation (Deep Research)       | TTNDD-RESEARCH-001 |
 
 ---
 
@@ -4204,6 +4437,7 @@ stateDiagram-v2
 > Tài liệu này là **tài liệu sống** — phải cập nhật khi có thay đổi kiến trúc hoặc business logic. Mọi thay đổi qua **Change Request (CR)** phê duyệt bởi LĐT và Tech Lead.
 >
 > **Ba nguyên tắc thiết kế xuyên suốt:**
+>
 > 1. **Business first, Tech second**: Hiểu "xây cái gì" trước "xây bằng gì"
 > 2. **Child Safety = P0**: Mọi lỗ hổng an toàn trẻ em → fix ngay lập tức
 > 3. **SPICES coverage**: Mọi tính năng phải map được vào ít nhất 1 chiều phát triển SPICES
@@ -4216,7 +4450,7 @@ stateDiagram-v2
 
 _"Cung Kiếm Trí Tuệ — Xây Nền Vững Chắc Cho Hành Trình Thiện Tâm"_
 
-```
+````
 
 ---
 
@@ -4351,7 +4585,7 @@ CREATE POLICY "user_own_data" ON org_members
             )
         )
     );
-```
+````
 
 ### A.2 Module 1 — HRM
 
@@ -5068,10 +5302,10 @@ CREATE TABLE leaderboard_snapshots (
 );
 ```
 
-
 ## PHỤ LỤC B — MODULE 8 (SCOUT CORE) IMPLEMENTATION CONTRACT
 
 ### B.0 TTNDD_OPS — Core App Engine Module Map + PRD (Module 8: Scout Core)
+
 **Project:** Thanh Thiếu Niên Đại Đạo — Operations Platform (TTNDD_OPS)  
 **Audience:** LDT‑DTNDD (nghiệp vụ), PM‑SDT + AI Agents (thiết kế/thi công)  
 **Version:** v1.0 (Baseline)  
@@ -5080,11 +5314,13 @@ CREATE TABLE leaderboard_snapshots (
 ---
 
 #### 0) “Không được làm sai” — ràng buộc từ Quy chế DTNDD (nền tảng nghiệp vụ)
+
 > Mọi quyết định kiến trúc & module đều phải đáp ứng các yêu cầu cốt lõi sau (trích Quy chế Tổ chức & Hoạt động ĐTNĐĐ, 04/2025):
-- **Kênh chính thức vs kênh hỗ trợ:** thông tin quan trọng phải xác thực lại từ kênh chính thức; kênh hỗ trợ có thể là Facebook/Zalo.  
-- **CSDL thành viên tập trung + số hoá hồ sơ thành tích/khen thưởng/kỷ luật** để truy xuất và tổng hợp nhanh/chính xác.  
-- **Bảo mật & phân quyền truy cập**: chỉ người có thẩm quyền được xem dữ liệu trong phạm vi quản lý.  
-- **Chuyển đơn vị/ngành**: phải chuyển hồ sơ điện tử trên hệ thống, hồ sơ giấy sao lưu theo quy định.  
+
+- **Kênh chính thức vs kênh hỗ trợ:** thông tin quan trọng phải xác thực lại từ kênh chính thức; kênh hỗ trợ có thể là Facebook/Zalo.
+- **CSDL thành viên tập trung + số hoá hồ sơ thành tích/khen thưởng/kỷ luật** để truy xuất và tổng hợp nhanh/chính xác.
+- **Bảo mật & phân quyền truy cập**: chỉ người có thẩm quyền được xem dữ liệu trong phạm vi quản lý.
+- **Chuyển đơn vị/ngành**: phải chuyển hồ sơ điện tử trên hệ thống, hồ sơ giấy sao lưu theo quy định.
 - **Nghi thức chuyển ngành (“Cầu Trưởng Thành”)** là một “milestone” nghiệp vụ quan trọng: phải được hỗ trợ bằng checklist + gói bàn giao.
 
 > Các điểm trên quyết định vì sao “Scout Core” phải là **data hub** (nguồn sự thật) của toàn hệ thống.
@@ -5094,19 +5330,23 @@ CREATE TABLE leaderboard_snapshots (
 #### 1) Architecture Overview (AO) — quyết định kiến trúc
 
 ##### 1.1. Kiểu kiến trúc
+
 **Modular Monolith + Event‑Driven nội bộ**
+
 - Monolith để **giữ nhất quán dữ liệu OLTP** (ERP‑style).
 - Modular để có “bounded context”, dễ mở rộng.
 - Event‑Driven để tách xử lý async (nhắc việc, leaderboard, DWH sync…): dùng Pub/Sub khi cần.
 
 **Nguồn tham khảo kỹ thuật (web):**
-- Identity Platform Multi‑tenancy: https://docs.cloud.google.com/identity-platform/docs/multi-tenancy  
-- PostgreSQL Row Level Security + CREATE POLICY: https://www.postgresql.org/docs/current/ddl-rowsecurity.html , https://www.postgresql.org/docs/current/sql-createpolicy.html  
-- API Gateway + OpenAPI: https://docs.cloud.google.com/api-gateway/docs/openapi-overview  
-- Event‑Driven với Pub/Sub: https://docs.cloud.google.com/solutions/event-driven-architecture-pubsub  
+
+- Identity Platform Multi‑tenancy: https://docs.cloud.google.com/identity-platform/docs/multi-tenancy
+- PostgreSQL Row Level Security + CREATE POLICY: https://www.postgresql.org/docs/current/ddl-rowsecurity.html , https://www.postgresql.org/docs/current/sql-createpolicy.html
+- API Gateway + OpenAPI: https://docs.cloud.google.com/api-gateway/docs/openapi-overview
+- Event‑Driven với Pub/Sub: https://docs.cloud.google.com/solutions/event-driven-architecture-pubsub
 - Signed URLs (GCS): https://docs.cloud.google.com/storage/docs/access-control/signed-urls
 
 ##### 1.2. Multi‑tenant (Org) — “defense in depth”
+
 - **Identity tenant**: mỗi Org là một tenant (silo users/config) trong Identity Platform.
 - **Data tenant**: mọi record có `org_id` + **RLS** ở PostgreSQL (chặn cross‑Org ngay tại DB).
 - **Scope tenant**: quyền theo Org/Ngành/Đội/Nhóm.
@@ -5114,13 +5354,14 @@ CREATE TABLE leaderboard_snapshots (
 > Lưu ý: backend phải `SET LOCAL app.org_id`, `SET LOCAL app.user_id`, `SET LOCAL app.roles` cho mỗi request/transaction để RLS chạy đúng.
 
 ##### 1.3. GCP deployment baseline (khuyến nghị)
-- **Cloud Run** (API + Web + workers)  
-- **Cloud SQL (PostgreSQL)** (OLTP)  
-- **Cloud Storage** (File evidence) + Signed URLs  
-- **API Gateway** (OpenAPI contract)  
-- **Pub/Sub** (domain events)  
-- **BigQuery** (DWH/reporting)  
-- **Secret Manager** (secrets)  
+
+- **Cloud Run** (API + Web + workers)
+- **Cloud SQL (PostgreSQL)** (OLTP)
+- **Cloud Storage** (File evidence) + Signed URLs
+- **API Gateway** (OpenAPI contract)
+- **Pub/Sub** (domain events)
+- **BigQuery** (DWH/reporting)
+- **Secret Manager** (secrets)
 - **Cloud Audit Logs + app audit** (truy vết)
 
 ---
@@ -5129,53 +5370,58 @@ CREATE TABLE leaderboard_snapshots (
 
 ##### 2.1. Canonical Core (bắt buộc có trước)
 
-| BC | Domain | “Owner data” | DB schema | Key entities | Key events |
-| ---|---|---|---|---|--- |
-| BC‑00 | Tenant & IAM | Auth, tenant mapping, RBAC/Scope | `iam.*` | org, user, role, permission, user_role_scope | `iam.user.created`, `iam.role.granted` |
-| BC‑01 | Org Structure | Liên đoàn/Ngành/Đội/Nhóm, org chart, assignment | `org.*` | unit, unit_assignment, election_record | `org.unit.created`, `org.assignment.changed` |
-| BC‑02 | HRM | hồ sơ người, membership, guardian, transfer lifecycle | `hrm.*` | person_profile, membership, guardian_link, transfer_case | `hrm.member.joined`, `hrm.member.transferred` |
-| BC‑A0 | Audit | bất biến truy vết | `audit.*` | audit_log | `audit.logged` |
+| BC    | Domain        | “Owner data”                                          | DB schema | Key entities                                             | Key events                                    |
+| ----- | ------------- | ----------------------------------------------------- | --------- | -------------------------------------------------------- | --------------------------------------------- |
+| BC‑00 | Tenant & IAM  | Auth, tenant mapping, RBAC/Scope                      | `iam.*`   | org, user, role, permission, user_role_scope             | `iam.user.created`, `iam.role.granted`        |
+| BC‑01 | Org Structure | Liên đoàn/Ngành/Đội/Nhóm, org chart, assignment       | `org.*`   | unit, unit_assignment, election_record                   | `org.unit.created`, `org.assignment.changed`  |
+| BC‑02 | HRM           | hồ sơ người, membership, guardian, transfer lifecycle | `hrm.*`   | person_profile, membership, guardian_link, transfer_case | `hrm.member.joined`, `hrm.member.transferred` |
+| BC‑A0 | Audit         | bất biến truy vết                                     | `audit.*` | audit_log                                                | `audit.logged`                                |
 
 ##### 2.2. Business Modules (ERP modules)
 
-| BC | Module | DB schema | Notes |
-| ---|---|---|--- |
-| BC‑03 | Project + Planning | `pm.*` | Clone Jira‑like hierarchy bằng tree work_items; tham chiếu “Work Packages” của OpenProject |
-| BC‑04 | Ticket/Request + Approval | `ticket.*` | Clone osTicket/Zammad pattern; loop approve/reject |
-| BC‑05 | Finance | `fin.*` | Ledger‑first + in‑kind contributions |
-| BC‑06 | Assets | `asset.*` | Clone Snipe‑IT checkin/checkout |
-| BC‑07 | Process & SOP | `proc.*` | workflow builder + SOP doc |
-| BC‑08 | LMS | `lms.*` | course/quiz/badges (Moodle‑style) |
-| **BC‑09** | **Scout Core (Module 8)** | **`scout.*`** | **Linh hồn: sổ đẳng thứ + tiến bộ + phụng sự + bàn giao** |
-| BC‑10 | Rewards/EXP | `reward.*` | exp ledger + badge rules + shop |
-| BC‑11 | Org Config/System | `cfg.*` | module configs, metrics, theming |
-| BC‑12 | Comms/Notification | `msg.*` | template + delivery logs (Zalo) |
-| BC‑13 | File/Content | `file.*` | object references, signed URLs |
+| BC        | Module                    | DB schema     | Notes                                                                                      |
+| --------- | ------------------------- | ------------- | ------------------------------------------------------------------------------------------ |
+| BC‑03     | Project + Planning        | `pm.*`        | Clone Jira‑like hierarchy bằng tree work_items; tham chiếu “Work Packages” của OpenProject |
+| BC‑04     | Ticket/Request + Approval | `ticket.*`    | Clone osTicket/Zammad pattern; loop approve/reject                                         |
+| BC‑05     | Finance                   | `fin.*`       | Ledger‑first + in‑kind contributions                                                       |
+| BC‑06     | Assets                    | `asset.*`     | Clone Snipe‑IT checkin/checkout                                                            |
+| BC‑07     | Process & SOP             | `proc.*`      | workflow builder + SOP doc                                                                 |
+| BC‑08     | LMS                       | `lms.*`       | course/quiz/badges (Moodle‑style)                                                          |
+| **BC‑09** | **Scout Core (Module 8)** | **`scout.*`** | **Linh hồn: sổ đẳng thứ + tiến bộ + phụng sự + bàn giao**                                  |
+| BC‑10     | Rewards/EXP               | `reward.*`    | exp ledger + badge rules + shop                                                            |
+| BC‑11     | Org Config/System         | `cfg.*`       | module configs, metrics, theming                                                           |
+| BC‑12     | Comms/Notification        | `msg.*`       | template + delivery logs (Zalo)                                                            |
+| BC‑13     | File/Content              | `file.*`      | object references, signed URLs                                                             |
 
 ---
 
 #### 3) PRD — Module 8 (Scout Core)
 
 ##### 3.1. Product statement
+
 **Scout Core** là hệ thống “hành trình trưởng thành” cho Đoàn sinh:
+
 - Tracking **đẳng thứ → domain → kỹ năng → tiêu chí đo lường → minh chứng → xác nhận**.
 - Tổng hợp **tiến bộ – thành tựu – phụng sự – thói quen**.
 - Hỗ trợ **bàn giao ngành/đơn vị** (handover package) & nghi thức “Cầu Trưởng Thành”.
 - Là **data hub** cho Rewards/EXP, Ranking, Dashboard toàn Org.
 
 ##### 3.2. Goals & Success Metrics
+
 - **G1 (Coverage):** 95% đoàn sinh có “hồ sơ tiến bộ số” sau 6 tháng rollout.
 - **G2 (Handover):** 100% chuyển ngành/đơn vị có gói bàn giao được tạo & hoàn tất trong 7 ngày.
 - **G3 (Engagement):** +30% hoàn thành kỹ năng/thử thách theo tháng sau 3 tháng.
 - **G4 (Security):** 0 lỗi truy cập cross‑Org; 100% hành động nhạy cảm có audit.
 
 ##### 3.3. Personas & permissions
+
 - **Super Admin (LĐT Org):** cấu hình chương trình đẳng thứ, domain, metric; xem toàn Org.
 - **Admin/Trưởng:** xác nhận kỹ năng, duyệt thành tựu, quản lý ngành/đội/nhóm.
 - **User/Đoàn sinh:** xem hành trình, nộp minh chứng, theo dõi “còn thiếu gì”.
 - **Guest/Phụ huynh:** xem tiến bộ + lịch sử công nhận; nhận nhắc việc.
 
 ##### 3.4. Non‑Goals (v1)
+
 - AI chấm điểm video tự động (phase sau).
 - Arena realtime (thuộc LMS; phase sau).
 
@@ -5184,59 +5430,78 @@ CREATE TABLE leaderboard_snapshots (
 #### 4) Scope (v1) — Epics, Features, Acceptance Criteria
 
 ##### Epic E1 — Skillbook (Sổ đẳng thứ) + Versioning
+
 **FR**
+
 1. Cấu trúc: Branch → Rank Tier → Domain → Skill → Criteria (≥4 criteria/skill).
 2. Skill có trạng thái: `not_started → in_progress → submitted → verified → awarded`.
 3. Versioning: mọi thay đổi “program structure” tạo **program_version**; dữ liệu progress giữ nguyên.
 4. Đoàn sinh thấy “bậc hiện tại, đã đạt, còn thiếu, bậc kế tiếp”.
 
 **AC**
+
 - Kỹ năng chỉ “awarded” khi có `verifier_id` + đủ criteria.
 - Cấu trúc thay đổi không làm mất lịch sử.
 
 ##### Epic E2 — Evidence submission & Verification workflow
+
 **FR**
+
 - Đoàn sinh nộp minh chứng (ảnh/video/file/link) → tạo case “submitted”.
 - Trưởng duyệt/không duyệt (reject reasons); đoàn sinh có thể nộp lại.
 - SLA nhắc việc theo config Org (msg module).
 
 ##### Epic E3 — Progress dashboards (cá nhân & trưởng)
+
 **FR**
+
 - Dashboard cá nhân: % domain, % bậc, streak habit, giờ phụng sự.
 - Dashboard trưởng: aggregate theo ngành/đội/nhóm (6–8).
 - Drill down đến từng em + lịch sử xác nhận.
 
 ##### Epic E4 — Achievements / Specialities / Awards
+
 **FR**
+
 - Catalog achievement_def (rarity, icon).
 - Award history (nguồn: skill awarded / event / project / phụng sự).
 - Xuất “chứng nhận” theo template Org.
 
 ##### Epic E5 — Habit tracking
+
 **FR**
+
 - Habit template theo ngành/bậc; cadence daily/weekly.
 - Check‑in; streak; milestone.
 - Liên kết “remediation” cho điểm trừ (phối hợp Rewards/EXP).
 
 ##### Epic E6 — Activity & Service log
+
 **FR**
+
 - Ghi nhận hoạt động: sinh hoạt, trại, phụng sự, dự án.
 - Link project/work items, link attendance.
 - Tổng hợp giờ phụng sự (service hours).
 
 ##### Epic E7 — Evaluation rubric
+
 **FR**
+
 - Rubric theo ngành/bậc: đạo đức, kỹ năng, hợp tác, phụng sự.
 - Dữ liệu đầu vào từ nhiều module (Scout/LMS/PM/Ticket…).
 - Xuất “Báo cáo phát triển cá nhân” (IDP report).
 
 ##### Epic E8 — Ranking / Leaderboard
+
 **FR**
+
 - Ranking theo: EXP, badges, giờ phụng sự, streak.
 - Anti‑abuse: cap/period, suspicious flags.
 
 ##### Epic E9 — Handover & Graduation (Chuyển ngành/đơn vị)
+
 **FR**
+
 - Điều kiện chuyển ngành tạo `handover_case` + summary_json (progress highlights + recommendations).
 - Checklist nghi thức “Cầu Trưởng Thành”.
 - Chuyển quyền xác nhận từ trưởng ngành cũ → trưởng ngành mới (scope).
@@ -5244,6 +5509,7 @@ CREATE TABLE leaderboard_snapshots (
 ---
 
 #### 5) UX Spec (MMORPG‑style) — Minimum screens (v1)
+
 1. **Scout Profile Card**: stats/EXP/branch/rank + huy hiệu.
 2. **Skill Map**: cây kỹ năng theo branch/rank/domain.
 3. **Skill Detail**: criteria checklist + submit evidence.
@@ -5256,6 +5522,7 @@ CREATE TABLE leaderboard_snapshots (
 #### 6) Data Model (LLD‑ready) — `scout.*` schema
 
 ##### 6.1. Program structure
+
 - `scout.program_branch(id, org_id, code, name, order_no, is_active)`
 - `scout.program_version(id, org_id, version_name, status, effective_from, effective_to, notes)`
 - `scout.rank_tier(id, org_id, branch_id, code, name, order_no, version_id)`
@@ -5264,29 +5531,35 @@ CREATE TABLE leaderboard_snapshots (
 - `scout.skill_criteria(id, org_id, skill_id, metric_type, target_value, unit, text, order_no, version_id)`
 
 ##### 6.2. Progress & verification
+
 - `scout.scout_skill_progress(id, org_id, person_id, skill_id, status, started_at, submitted_at, verified_at, awarded_at)`
 - `scout.skill_evidence(id, org_id, progress_id, file_object_id, url, note, captured_at)`
 - `scout.skill_verification(id, org_id, progress_id, verifier_person_id, decision, comment, decided_at)`
 
 ##### 6.3. Achievements
+
 - `scout.achievement_def(id, org_id, key, name, description, rarity, icon_file_object_id)`
 - `scout.achievement_award(id, org_id, person_id, achievement_def_id, awarded_by_person_id, awarded_at, source_event_id)`
 
 ##### 6.4. Habit
+
 - `scout.habit_def(id, org_id, key, name, cadence, scoring_rule_json, is_active)`
 - `scout.habit_log(id, org_id, person_id, habit_def_id, log_date, status, note)`
 
 ##### 6.5. Activity & service
+
 - `scout.activity_log(id, org_id, person_id, activity_type, project_id, work_item_id, hours, location, note, happened_at)`
 - `scout.attendance(id, org_id, event_id, person_id, status, checkin_at, checkout_at)`
 
 ##### 6.6. Evaluation
+
 - `scout.rubric_def(id, org_id, branch_id, version_id, name, scale_min, scale_max)`
 - `scout.rubric_item(id, org_id, rubric_def_id, dimension, description, weight)`
 - `scout.evaluation(id, org_id, person_id, evaluator_person_id, rubric_def_id, period_from, period_to, overall_note, created_at)`
 - `scout.evaluation_score(id, org_id, evaluation_id, rubric_item_id, score, note)`
 
 ##### 6.7. Handover
+
 - `scout.handover_case(id, org_id, person_id, from_branch_code, to_branch_code, status, summary_json, created_at, completed_at)`
 - `scout.handover_ack(id, org_id, handover_case_id, from_leader_person_id, to_leader_person_id, acknowledged_at)`
 
@@ -5295,9 +5568,11 @@ CREATE TABLE leaderboard_snapshots (
 ---
 
 #### 7) Domain Events (contract) — phục vụ đồng bộ module khác
+
 **Topic naming:** `ttndd.<org_id>.<domain>.<event>` (hoặc `ttndd.shared.<domain>.<event>` nếu multi‑tenant routing ở payload)
 
 ##### 7.1. Events publish từ Scout Core
+
 - `scout.skill.submitted`
 - `scout.skill.verified`
 - `scout.skill.awarded`
@@ -5308,6 +5583,7 @@ CREATE TABLE leaderboard_snapshots (
 - `scout.handover.completed`
 
 **Base envelope (JSON)**
+
 ```json
 {
   "event_id": "uuid",
@@ -5316,7 +5592,7 @@ CREATE TABLE leaderboard_snapshots (
   "occurred_at": "2026-03-05T12:34:56Z",
   "actor": { "user_id": "uuid", "person_id": "uuid", "roles": ["LEADER"] },
   "entity": { "type": "scout_skill_progress", "id": "uuid" },
-  "data": { }
+  "data": {}
 }
 ```
 
@@ -5325,6 +5601,7 @@ CREATE TABLE leaderboard_snapshots (
 #### 8) Flows (Mermaid)
 
 ##### 8.1. Submit evidence → verify → award → notify → reward
+
 ```mermaid
 sequenceDiagram
   autonumber
@@ -5362,6 +5639,7 @@ sequenceDiagram
 ```
 
 ##### 8.2. Handover (chuyển ngành/đơn vị)
+
 ```mermaid
 flowchart LR
   A[Eligibility rule hit] --> B[Create handover_case]
@@ -5377,27 +5655,33 @@ flowchart LR
 ### B.1 PART B — API CONTRACT (OpenAPI 3.0)
 
 > Dùng cho API Gateway + codegen.  
-> Tham khảo: OpenAPI overview (API Gateway) + OASv3 extensions.  
-> - https://docs.cloud.google.com/api-gateway/docs/openapi-overview  
+> Tham khảo: OpenAPI overview (API Gateway) + OASv3 extensions.
+>
+> - https://docs.cloud.google.com/api-gateway/docs/openapi-overview
 > - https://docs.cloud.google.com/api-gateway/docs/oasv3-extensions
 
 #### 9) API Conventions
+
 ##### 9.1. Auth & tenant resolution
+
 - `Authorization: Bearer <JWT>`
 - `X-Org-Id`: bắt buộc cho superadmin khi “switch Org”; optional với user thường (backend có thể tự suy ra).
 - Backend **phải validate**: token ↔ org_id ↔ scope.
 
 ##### 9.2. Idempotency & tracing
+
 - `Idempotency-Key` (optional) cho POST “award/verify/create”.
 - `X-Request-Id` (optional) để trace logs.
 
 ##### 9.3. Pagination & filtering
+
 - `page`, `page_size`, `sort`, `filter[...]`
 - Response trả `meta: { page, page_size, total }`
 
 ---
 
 #### 10) OpenAPI (YAML) — Scout Core (v1)
+
 > **Ghi chú:** Đây là bản đầy đủ “đủ để AI Agent code” (controllers/services/DTOs/migrations).  
 > Bạn có thể tách file sau này; hiện tại giữ chung trong MD theo yêu cầu.
 
@@ -5405,7 +5689,7 @@ flowchart LR
 openapi: 3.0.3
 info:
   title: TTNDD_OPS Scout Core API
-  version: "1.0.0"
+  version: '1.0.0'
   description: >
     Scout Core (Module 8): Skillbook, Progress, Verification, Achievements, Habits,
     Activity/Service, Evaluation, Leaderboard, Handover.
@@ -5452,7 +5736,7 @@ components:
       type: object
       required: [code, message]
       properties:
-        code: { type: string, example: "SCOUT_403_FORBIDDEN" }
+        code: { type: string, example: 'SCOUT_403_FORBIDDEN' }
         message: { type: string }
         details: { type: object, additionalProperties: true }
         request_id: { type: string }
@@ -5467,7 +5751,7 @@ components:
     PagedResponse:
       type: object
       properties:
-        meta: { $ref: "#/components/schemas/PageMeta" }
+        meta: { $ref: '#/components/schemas/PageMeta' }
         data:
           type: array
           items: { type: object }
@@ -5477,8 +5761,8 @@ components:
       required: [id, code, name, order_no, is_active]
       properties:
         id: { type: string, format: uuid }
-        code: { type: string, example: "DONG" }
-        name: { type: string, example: "Ngành Đồng" }
+        code: { type: string, example: 'DONG' }
+        name: { type: string, example: 'Ngành Đồng' }
         order_no: { type: integer }
         is_active: { type: boolean }
 
@@ -5487,7 +5771,7 @@ components:
       required: [id, version_name, status, effective_from]
       properties:
         id: { type: string, format: uuid }
-        version_name: { type: string, example: "2026-Q1" }
+        version_name: { type: string, example: '2026-Q1' }
         status: { type: string, enum: [DRAFT, ACTIVE, RETIRED] }
         effective_from: { type: string, format: date }
         effective_to: { type: string, format: date, nullable: true }
@@ -5499,8 +5783,8 @@ components:
       properties:
         id: { type: string, format: uuid }
         branch_id: { type: string, format: uuid }
-        code: { type: string, example: "TANSINH" }
-        name: { type: string, example: "Tân Sinh" }
+        code: { type: string, example: 'TANSINH' }
+        name: { type: string, example: 'Tân Sinh' }
         order_no: { type: integer }
         version_id: { type: string, format: uuid }
 
@@ -5510,8 +5794,8 @@ components:
       properties:
         id: { type: string, format: uuid }
         rank_tier_id: { type: string, format: uuid }
-        code: { type: string, example: "GIAOLY" }
-        name: { type: string, example: "Giáo lý Cao Đài" }
+        code: { type: string, example: 'GIAOLY' }
+        name: { type: string, example: 'Giáo lý Cao Đài' }
         description: { type: string, nullable: true }
         order_no: { type: integer }
         version_id: { type: string, format: uuid }
@@ -5522,7 +5806,7 @@ components:
       properties:
         id: { type: string, format: uuid }
         domain_id: { type: string, format: uuid }
-        code: { type: string, example: "GL-01" }
+        code: { type: string, example: 'GL-01' }
         name: { type: string }
         description: { type: string, nullable: true }
         difficulty: { type: integer, minimum: 1, maximum: 5, nullable: true }
@@ -5548,16 +5832,16 @@ components:
     SkillMapNode:
       type: object
       properties:
-        rank_tier: { $ref: "#/components/schemas/RankTier" }
+        rank_tier: { $ref: '#/components/schemas/RankTier' }
         domains:
           type: array
           items:
             type: object
             properties:
-              domain: { $ref: "#/components/schemas/Domain" }
+              domain: { $ref: '#/components/schemas/Domain' }
               skills:
                 type: array
-                items: { $ref: "#/components/schemas/Skill" }
+                items: { $ref: '#/components/schemas/Skill' }
 
     ProgressStatus:
       type: string
@@ -5570,7 +5854,7 @@ components:
         id: { type: string, format: uuid }
         person_id: { type: string, format: uuid }
         skill_id: { type: string, format: uuid }
-        status: { $ref: "#/components/schemas/ProgressStatus" }
+        status: { $ref: '#/components/schemas/ProgressStatus' }
         started_at: { type: string, format: date-time, nullable: true }
         submitted_at: { type: string, format: date-time, nullable: true }
         verified_at: { type: string, format: date-time, nullable: true }
@@ -5680,8 +5964,8 @@ components:
       properties:
         id: { type: string, format: uuid }
         person_id: { type: string, format: uuid }
-        from_branch_code: { type: string, example: "DONG" }
-        to_branch_code: { type: string, example: "THIEU" }
+        from_branch_code: { type: string, example: 'DONG' }
+        to_branch_code: { type: string, example: 'THIEU' }
         status: { type: string, enum: [DRAFT, IN_PROGRESS, ACKED, COMPLETED, CANCELLED] }
         summary_json: { type: object, additionalProperties: true, nullable: true }
         created_at: { type: string, format: date-time }
@@ -5692,9 +5976,9 @@ paths:
     get:
       tags: [Program]
       summary: List program branches
-      parameters: [ { $ref: "#/components/parameters/XOrgId" } ]
+      parameters: [{ $ref: '#/components/parameters/XOrgId' }]
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -5703,17 +5987,17 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: { $ref: "#/components/schemas/ProgramBranch" }
-        "401": { description: Unauthorized }
-        "403": { description: Forbidden }
+                    items: { $ref: '#/components/schemas/ProgramBranch' }
+        '401': { description: Unauthorized }
+        '403': { description: Forbidden }
 
   /scout/program/versions:
     get:
       tags: [Program]
       summary: List program versions
-      parameters: [ { $ref: "#/components/parameters/XOrgId" } ]
+      parameters: [{ $ref: '#/components/parameters/XOrgId' }]
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -5722,14 +6006,14 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: { $ref: "#/components/schemas/ProgramVersion" }
+                    items: { $ref: '#/components/schemas/ProgramVersion' }
 
     post:
       tags: [Admin, Program]
       summary: Create a program version (DRAFT)
       parameters:
-        - { $ref: "#/components/parameters/XOrgId" }
-        - { $ref: "#/components/parameters/IdempotencyKey" }
+        - { $ref: '#/components/parameters/XOrgId' }
+        - { $ref: '#/components/parameters/IdempotencyKey' }
       requestBody:
         required: true
         content:
@@ -5742,24 +6026,24 @@ paths:
                 effective_from: { type: string, format: date }
                 notes: { type: string, nullable: true }
       responses:
-        "201":
+        '201':
           description: Created
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/ProgramVersion" }
+              schema: { $ref: '#/components/schemas/ProgramVersion' }
 
   /scout/skillmap:
     get:
       tags: [Skillbook]
       summary: Get skill map for a branch + active version
       parameters:
-        - { $ref: "#/components/parameters/XOrgId" }
+        - { $ref: '#/components/parameters/XOrgId' }
         - name: branch_code
           in: query
           required: true
-          schema: { type: string, example: "THIEU" }
+          schema: { type: string, example: 'THIEU' }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -5768,20 +6052,20 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: { $ref: "#/components/schemas/SkillMapNode" }
+                    items: { $ref: '#/components/schemas/SkillMapNode' }
 
   /scout/people/{personId}/progress:
     get:
       tags: [Skillbook]
       summary: Get progress overview for a person
       parameters:
-        - { $ref: "#/components/parameters/XOrgId" }
+        - { $ref: '#/components/parameters/XOrgId' }
         - name: personId
           in: path
           required: true
           schema: { type: string, format: uuid }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -5804,15 +6088,15 @@ paths:
                             percent: { type: number }
                       skills:
                         type: array
-                        items: { $ref: "#/components/schemas/ScoutSkillProgress" }
+                        items: { $ref: '#/components/schemas/ScoutSkillProgress' }
 
   /scout/skills/{skillId}/progress:start:
     post:
       tags: [Skillbook]
       summary: Start a skill (create progress if missing)
       parameters:
-        - { $ref: "#/components/parameters/XOrgId" }
-        - { $ref: "#/components/parameters/IdempotencyKey" }
+        - { $ref: '#/components/parameters/XOrgId' }
+        - { $ref: '#/components/parameters/IdempotencyKey' }
         - name: skillId
           in: path
           required: true
@@ -5827,19 +6111,19 @@ paths:
               properties:
                 person_id: { type: string, format: uuid }
       responses:
-        "201":
+        '201':
           description: Created/OK
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/ScoutSkillProgress" }
+              schema: { $ref: '#/components/schemas/ScoutSkillProgress' }
 
   /scout/progress/{progressId}/evidence:
     post:
       tags: [Evidence]
       summary: Add evidence to a progress
       parameters:
-        - { $ref: "#/components/parameters/XOrgId" }
-        - { $ref: "#/components/parameters/IdempotencyKey" }
+        - { $ref: '#/components/parameters/XOrgId' }
+        - { $ref: '#/components/parameters/IdempotencyKey' }
         - name: progressId
           in: path
           required: true
@@ -5848,25 +6132,25 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/EvidenceCreateRequest" }
+            schema: { $ref: '#/components/schemas/EvidenceCreateRequest' }
       responses:
-        "201":
+        '201':
           description: Created
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/Evidence" }
+              schema: { $ref: '#/components/schemas/Evidence' }
 
     get:
       tags: [Evidence]
       summary: List evidence of a progress
       parameters:
-        - { $ref: "#/components/parameters/XOrgId" }
+        - { $ref: '#/components/parameters/XOrgId' }
         - name: progressId
           in: path
           required: true
           schema: { type: string, format: uuid }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -5875,15 +6159,15 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: { $ref: "#/components/schemas/Evidence" }
+                    items: { $ref: '#/components/schemas/Evidence' }
 
   /scout/progress/{progressId}/submit:
     post:
       tags: [Verification]
       summary: Submit a progress for verification
       parameters:
-        - { $ref: "#/components/parameters/XOrgId" }
-        - { $ref: "#/components/parameters/IdempotencyKey" }
+        - { $ref: '#/components/parameters/XOrgId' }
+        - { $ref: '#/components/parameters/IdempotencyKey' }
         - name: progressId
           in: path
           required: true
@@ -5892,20 +6176,20 @@ paths:
         required: false
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/SubmitProgressRequest" }
+            schema: { $ref: '#/components/schemas/SubmitProgressRequest' }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/ScoutSkillProgress" }
+              schema: { $ref: '#/components/schemas/ScoutSkillProgress' }
 
   /scout/verify/queue:
     get:
       tags: [Verification]
       summary: Get leader verification queue (by scope)
       parameters:
-        - { $ref: "#/components/parameters/XOrgId" }
+        - { $ref: '#/components/parameters/XOrgId' }
         - name: status
           in: query
           required: false
@@ -5919,21 +6203,21 @@ paths:
           required: false
           schema: { type: integer, minimum: 1, maximum: 200, default: 50 }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
                 allOf:
-                  - { $ref: "#/components/schemas/PagedResponse" }
+                  - { $ref: '#/components/schemas/PagedResponse' }
 
   /scout/progress/{progressId}/verify:
     post:
       tags: [Verification]
       summary: Approve or reject a submitted progress
       parameters:
-        - { $ref: "#/components/parameters/XOrgId" }
-        - { $ref: "#/components/parameters/IdempotencyKey" }
+        - { $ref: '#/components/parameters/XOrgId' }
+        - { $ref: '#/components/parameters/IdempotencyKey' }
         - name: progressId
           in: path
           required: true
@@ -5942,26 +6226,26 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/VerifyRequest" }
+            schema: { $ref: '#/components/schemas/VerifyRequest' }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/ScoutSkillProgress" }
-        "409":
+              schema: { $ref: '#/components/schemas/ScoutSkillProgress' }
+        '409':
           description: Conflict (already verified/awarded)
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/ErrorResponse" }
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
 
   /scout/achievements/defs:
     get:
       tags: [Achievements]
       summary: List achievement definitions
-      parameters: [ { $ref: "#/components/parameters/XOrgId" } ]
+      parameters: [{ $ref: '#/components/parameters/XOrgId' }]
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -5970,20 +6254,20 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: { $ref: "#/components/schemas/AchievementDef" }
+                    items: { $ref: '#/components/schemas/AchievementDef' }
 
   /scout/people/{personId}/achievements:
     get:
       tags: [Achievements]
       summary: List achievements of a person
       parameters:
-        - { $ref: "#/components/parameters/XOrgId" }
+        - { $ref: '#/components/parameters/XOrgId' }
         - name: personId
           in: path
           required: true
           schema: { type: string, format: uuid }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -5992,15 +6276,15 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: { $ref: "#/components/schemas/AchievementAward" }
+                    items: { $ref: '#/components/schemas/AchievementAward' }
 
   /scout/habits/defs:
     get:
       tags: [Habits]
       summary: List habit definitions
-      parameters: [ { $ref: "#/components/parameters/XOrgId" } ]
+      parameters: [{ $ref: '#/components/parameters/XOrgId' }]
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -6009,14 +6293,14 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: { $ref: "#/components/schemas/HabitDef" }
+                    items: { $ref: '#/components/schemas/HabitDef' }
 
   /scout/people/{personId}/habits/logs:
     get:
       tags: [Habits]
       summary: List habit logs
       parameters:
-        - { $ref: "#/components/parameters/XOrgId" }
+        - { $ref: '#/components/parameters/XOrgId' }
         - name: personId
           in: path
           required: true
@@ -6030,7 +6314,7 @@ paths:
           required: false
           schema: { type: string, format: date }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -6039,14 +6323,14 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: { $ref: "#/components/schemas/HabitLog" }
+                    items: { $ref: '#/components/schemas/HabitLog' }
 
     post:
       tags: [Habits]
       summary: Create a habit log (check-in)
       parameters:
-        - { $ref: "#/components/parameters/XOrgId" }
-        - { $ref: "#/components/parameters/IdempotencyKey" }
+        - { $ref: '#/components/parameters/XOrgId' }
+        - { $ref: '#/components/parameters/IdempotencyKey' }
         - name: personId
           in: path
           required: true
@@ -6064,18 +6348,18 @@ paths:
                 status: { type: string, enum: [DONE, SKIPPED, MISSED] }
                 note: { type: string, nullable: true }
       responses:
-        "201":
+        '201':
           description: Created
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/HabitLog" }
+              schema: { $ref: '#/components/schemas/HabitLog' }
 
   /scout/people/{personId}/activities:
     get:
       tags: [Activities]
       summary: List activity/service logs
       parameters:
-        - { $ref: "#/components/parameters/XOrgId" }
+        - { $ref: '#/components/parameters/XOrgId' }
         - name: personId
           in: path
           required: true
@@ -6089,7 +6373,7 @@ paths:
           required: false
           schema: { type: string, format: date }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -6098,14 +6382,14 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: { $ref: "#/components/schemas/ActivityLog" }
+                    items: { $ref: '#/components/schemas/ActivityLog' }
 
     post:
       tags: [Activities]
       summary: Create an activity/service log
       parameters:
-        - { $ref: "#/components/parameters/XOrgId" }
-        - { $ref: "#/components/parameters/IdempotencyKey" }
+        - { $ref: '#/components/parameters/XOrgId' }
+        - { $ref: '#/components/parameters/IdempotencyKey' }
         - name: personId
           in: path
           required: true
@@ -6126,18 +6410,18 @@ paths:
                 project_id: { type: string, format: uuid, nullable: true }
                 work_item_id: { type: string, format: uuid, nullable: true }
       responses:
-        "201":
+        '201':
           description: Created
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/ActivityLog" }
+              schema: { $ref: '#/components/schemas/ActivityLog' }
 
   /scout/leaderboard:
     get:
       tags: [Leaderboard]
       summary: Get leaderboard entries
       parameters:
-        - { $ref: "#/components/parameters/XOrgId" }
+        - { $ref: '#/components/parameters/XOrgId' }
         - name: metric
           in: query
           required: true
@@ -6151,7 +6435,7 @@ paths:
           required: false
           schema: { type: string, format: uuid }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -6160,15 +6444,15 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: { $ref: "#/components/schemas/LeaderboardEntry" }
+                    items: { $ref: '#/components/schemas/LeaderboardEntry' }
 
   /scout/handover:
     post:
       tags: [Handover]
       summary: Create handover case
       parameters:
-        - { $ref: "#/components/parameters/XOrgId" }
-        - { $ref: "#/components/parameters/IdempotencyKey" }
+        - { $ref: '#/components/parameters/XOrgId' }
+        - { $ref: '#/components/parameters/IdempotencyKey' }
       requestBody:
         required: true
         content:
@@ -6181,36 +6465,36 @@ paths:
                 from_branch_code: { type: string }
                 to_branch_code: { type: string }
       responses:
-        "201":
+        '201':
           description: Created
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/HandoverCase" }
+              schema: { $ref: '#/components/schemas/HandoverCase' }
 
   /scout/handover/{handoverId}:
     get:
       tags: [Handover]
       summary: Get handover case detail
       parameters:
-        - { $ref: "#/components/parameters/XOrgId" }
+        - { $ref: '#/components/parameters/XOrgId' }
         - name: handoverId
           in: path
           required: true
           schema: { type: string, format: uuid }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/HandoverCase" }
+              schema: { $ref: '#/components/schemas/HandoverCase' }
 
   /scout/handover/{handoverId}/ack:
     post:
       tags: [Handover]
       summary: Acknowledge handover (from/to leader)
       parameters:
-        - { $ref: "#/components/parameters/XOrgId" }
-        - { $ref: "#/components/parameters/IdempotencyKey" }
+        - { $ref: '#/components/parameters/XOrgId' }
+        - { $ref: '#/components/parameters/IdempotencyKey' }
         - name: handoverId
           in: path
           required: true
@@ -6226,11 +6510,11 @@ paths:
                 role: { type: string, enum: [FROM_LEADER, TO_LEADER] }
                 note: { type: string, nullable: true }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/HandoverCase" }
+              schema: { $ref: '#/components/schemas/HandoverCase' }
 ```
 
 ---
@@ -6242,6 +6526,7 @@ paths:
 > **Khuyến nghị**: dùng SQL migrations (Flyway/Liquibase) để đảm bảo RLS/Policies được apply chuẩn.
 
 #### 11) SQL Migration — baseline (scout schema)
+
 ```sql
 -- 00_extensions.sql
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
@@ -6588,6 +6873,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_handover_ack_case ON scout.handover_ack(org
 ```
 
 #### 12) RLS Policies — Org isolation + role‑based writes
+
 ```sql
 -- 10_rls_enable.sql
 ALTER TABLE scout.program_branch ENABLE ROW LEVEL SECURITY;
@@ -6676,6 +6962,7 @@ END $$;
 ### B.3 PART D — IMPLEMENTATION PLAYBOOK (AI‑AGENT FRIENDLY)
 
 #### 13) Repo & module layout (NestJS example)
+
 ```
 apps/api/src/modules/scout/
   scout.module.ts
@@ -6705,22 +6992,26 @@ apps/api/src/modules/scout/
 ```
 
 #### 14) “SET LOCAL” middleware (bắt buộc để RLS chạy đúng)
+
 Pseudo‑code:
+
 ```ts
 // on request start (per transaction / per db connection)
 await db.tx(async (tx) => {
-  await tx.none("SET LOCAL app.org_id = $1", [orgId]);
-  await tx.none("SET LOCAL app.user_id = $1", [userId]);
-  await tx.none("SET LOCAL app.roles = $1", [roles.join(",")]);
+  await tx.none('SET LOCAL app.org_id = $1', [orgId]);
+  await tx.none('SET LOCAL app.user_id = $1', [userId]);
+  await tx.none('SET LOCAL app.roles = $1', [roles.join(',')]);
   // proceed with queries under RLS
 });
 ```
 
 #### 15) Worker subscriptions (Pub/Sub)
+
 - Subscribe `scout.skill.awarded` → Rewards service applies rules.
 - Subscribe `scout.skill.submitted` → Notification service pings verifier.
 
 #### 16) File evidence upload (Signed URLs)
+
 - API creates signed URL for a specific object path and TTL.
 - Browser uploads directly to GCS with `PUT`.
 - Client posts `file_object_id` back to Scout Core as evidence.
@@ -6732,6 +7023,7 @@ await db.tx(async (tx) => {
 #### 17) Story → Phase → Sprint → Work Package → Task (Module 8)
 
 ##### Story S8‑0: Scout Core Foundation
+
 - Phase 8.0: Program structure + versioning
   - Sprint 8.0.1
     - WP 8.0.1‑DB: Create `scout.*` schema & RLS
@@ -6749,6 +7041,7 @@ await db.tx(async (tx) => {
       - Task: leader verification counters
 
 ##### Story S8‑1: Skillbook, Evidence & Verification
+
 - Phase 8.1: Progress + evidence + verification
   - Sprint 8.1.1
     - WP 8.1.1‑Progress
@@ -6766,6 +7059,7 @@ await db.tx(async (tx) => {
       - Task: rank eligibility recompute
 
 ##### Story S8‑2: Sessions, Attendance & Annual Program
+
 - Phase 8.2: Sessions core
   - Sprint 8.2.1
     - WP 8.2.1‑Session
@@ -6779,6 +7073,7 @@ await db.tx(async (tx) => {
       - Task: session debrief logs
 
 ##### Story S8‑3: Events, Camp, Consent & HIRARC
+
 - Phase 8.3: Events lifecycle
   - Sprint 8.3.1
     - WP 8.3.1‑EventCore
@@ -6793,6 +7088,7 @@ await db.tx(async (tx) => {
       - Task: incident escalation hooks
 
 ##### Story S8‑4: Spiritual, Evaluation & Mentoring
+
 - Phase 8.4: Spiritual and human development
   - Sprint 8.4.1
     - WP 8.4.1‑Spiritual
@@ -6807,6 +7103,7 @@ await db.tx(async (tx) => {
       - Task: mentoring logs + reminders
 
 ##### Story S8‑5: Handover, Analytics & Release Evidence
+
 - Phase 8.5: Handover & production-readiness
   - Sprint 8.5.1
     - WP 8.5.1‑Handover
@@ -6819,18 +7116,18 @@ await db.tx(async (tx) => {
       - Task: leaderboard endpoints
       - Task: readiness manifest + e2e evidence links
 
-
-
 ### B.5 PART F — APPENDIX: External inspiration (feature references)
-- OpenProject “Work packages”: https://www.openproject.org/docs/user-guide/work-packages/  
-- Moodle “Badges”: https://docs.moodle.org/en/Badges  
-- Zalo Official Account API docs: https://developers.zalo.me/docs/sdk/php-sdk/tai-lieu/official-account-api  
-- Snipe‑IT (asset checkin/checkout): https://snipeitapp.com/product  
+
+- OpenProject “Work packages”: https://www.openproject.org/docs/user-guide/work-packages/
+- Moodle “Badges”: https://docs.moodle.org/en/Badges
+- Zalo Official Account API docs: https://developers.zalo.me/docs/sdk/php-sdk/tai-lieu/official-account-api
+- Snipe‑IT (asset checkin/checkout): https://snipeitapp.com/product
 - GCP Docs: Cloud Run / Cloud SQL / PubSub / API Gateway / BigQuery / Secret Manager / Audit Logs (see links above)
 
 ---
 
 #### 18) Definition of Done (DoD) — Scout Core v1
+
 - API endpoints implemented per OpenAPI contract.
 - DB migrations + RLS enabled and verified.
 - Unit tests for: verification state transitions, idempotency, RLS isolation.
@@ -6840,24 +7137,25 @@ await db.tx(async (tx) => {
 
 ---
 
-
 ## PHỤ LỤC C — MODULE-BY-MODULE ENGINEERING CONTRACT PACK (AI-Agent/Dev)
 
-> **Mục tiêu**: Chuẩn hoá “hợp đồng kỹ thuật” cho *từng module* theo một mẫu thống nhất:
+> **Mục tiêu**: Chuẩn hoá “hợp đồng kỹ thuật” cho _từng module_ theo một mẫu thống nhất:
 > **Service list → API (OpenAPI) → Event catalog → Schema (DB) → Test cases → DoD**  
-> Đây là “điểm neo” để team Product/Dev/AI Agent cùng nhìn một hướng: *Sản phẩm rõ trước, contract kỹ thuật rõ sau*.
+> Đây là “điểm neo” để team Product/Dev/AI Agent cùng nhìn một hướng: _Sản phẩm rõ trước, contract kỹ thuật rõ sau_.
 >
 > **Chuẩn tham chiếu**:
-> - OpenAPI là “nguồn sự thật” mô tả surface của REST API. (OAS 3.0.3) https://spec.openapis.org/oas/v3.0.3.html  
-> - API Gateway (GCP) dùng OpenAPI để định nghĩa endpoints/auth/quota & backend integration. https://docs.cloud.google.com/api-gateway/docs/openapi-overview  
-> - Contract testing (consumer‑driven) giúp bảo vệ tích hợp API; có thể dùng Pact cho provider/consumer. https://pact.io/  
-> - PostgreSQL Row Level Security & CREATE POLICY để cô lập tenant. https://www.postgresql.org/docs/current/ddl-rowsecurity.html , https://www.postgresql.org/docs/current/sql-createpolicy.html  
+>
+> - OpenAPI là “nguồn sự thật” mô tả surface của REST API. (OAS 3.0.3) https://spec.openapis.org/oas/v3.0.3.html
+> - API Gateway (GCP) dùng OpenAPI để định nghĩa endpoints/auth/quota & backend integration. https://docs.cloud.google.com/api-gateway/docs/openapi-overview
+> - Contract testing (consumer‑driven) giúp bảo vệ tích hợp API; có thể dùng Pact cho provider/consumer. https://pact.io/
+> - PostgreSQL Row Level Security & CREATE POLICY để cô lập tenant. https://www.postgresql.org/docs/current/ddl-rowsecurity.html , https://www.postgresql.org/docs/current/sql-createpolicy.html
 
 ---
 
 ### 13.1 Quy ước Contract chung áp dụng cho TẤT CẢ modules (P0)
 
 #### 13.1.1 REST Contract rules
+
 - **OpenAPI 3.x** là single source of truth (SSOT):
   - Mọi endpoint phải có: request schema, response schema, error schema, auth scope, rate limit tags.
 - **Response format** chuẩn:
@@ -6867,7 +7165,9 @@ await db.tx(async (tx) => {
 - **Pagination**: `page`, `page_size`, `sort`, `filter[...]`.
 
 #### 13.1.2 Event Contract rules
+
 - **Event envelope** (bắt buộc):
+
 ```json
 {
   "event_id": "uuid",
@@ -6876,23 +7176,27 @@ await db.tx(async (tx) => {
   "occurred_at": "ISO-8601",
   "actor": { "user_id": "uuid", "member_id": "uuid", "roles": ["admin"] },
   "entity": { "type": "table_or_aggregate", "id": "uuid" },
-  "data": { }
+  "data": {}
 }
 ```
+
 - **Atomicity rule**: 1 state change = 1 DB transaction + 1 domain event.
 - **Idempotent consumers**: xử lý event theo `event_id` (dedupe) để tránh double grant EXP/Badge.
 
 #### 13.1.3 Data Contract rules (DB)
+
 - Mọi bảng: `org_id` + timestamps + audit fields.
 - **RLS enabled** cho mọi bảng multi‑tenant; app phải `SET LOCAL app.current_org_id` (hoặc `app.org_id`) mỗi request/transaction.
 - **Audit**: các action nhạy cảm phải ghi before/after diff.
 
 #### 13.1.4 Security & Child Safety gates (P0)
+
 - Signed URL TTL cho ảnh/trẻ em; không public bucket.
 - Role scopes: trưởng ngành chỉ xem ngành mình; phụ huynh chỉ xem dữ liệu con mình.
 - Không chat riêng 1‑1 (nếu có messaging): mọi tương tác có audit trail.
 
 #### 13.1.5 Testing layers (bắt buộc)
+
 - **Unit tests** (Service): state machine transitions, calculators (EXP, caps), validators.
 - **Integration tests** (API): Supertest chạy against test DB + RLS on.
 - **Contract tests**: validate OpenAPI schema + (tuỳ chọn) Pact provider verification.
@@ -6903,16 +7207,17 @@ await db.tx(async (tx) => {
 ### 13.2 Template Engineering Contract Pack (mẫu chuẩn để nhân bản)
 
 #### 13.2.1 Module card (tối thiểu)
-1) **Module boundary & responsibilities**  
-2) **Service list** (Controllers/Services/Repositories/Handlers/Crons)  
-3) **API Contract** (endpoints + permissions + idempotency)  
-4) **Event Catalog** (produces/consumes + payload fields)  
-5) **DB Schema** (tables + keys + constraints + indexes)  
-6) **State Machines** (states + transitions + guards)  
-7) **Test cases** (unit/integration/contract/e2e)  
-8) **SPICES tags & measurement hooks** (module tạo dữ liệu SPICES thế nào?)
-9) **Cost impact guardrail** (tác động chi phí + kill-switch)
-10) **Definition of Done** (code + doc + ops + budget)
+
+1. **Module boundary & responsibilities**
+2. **Service list** (Controllers/Services/Repositories/Handlers/Crons)
+3. **API Contract** (endpoints + permissions + idempotency)
+4. **Event Catalog** (produces/consumes + payload fields)
+5. **DB Schema** (tables + keys + constraints + indexes)
+6. **State Machines** (states + transitions + guards)
+7. **Test cases** (unit/integration/contract/e2e)
+8. **SPICES tags & measurement hooks** (module tạo dữ liệu SPICES thế nào?)
+9. **Cost impact guardrail** (tác động chi phí + kill-switch)
+10. **Definition of Done** (code + doc + ops + budget)
 
 ---
 
@@ -6925,6 +7230,7 @@ await db.tx(async (tx) => {
 ### MODULE 10 — ORG CONFIG & IAM (BC‑00)
 
 #### (1) Service list
+
 - `OrgController`, `BranchController`, `UnitController`, `UserAdminController`, `ModuleToggleController`, `IntegrationController`, `AuditController`
 - Services:
   - `OrgService`, `BranchService`, `UnitService`, `UserService`, `RoleService`, `ModuleToggleService`, `SettingsService`
@@ -6934,7 +7240,9 @@ await db.tx(async (tx) => {
 - Crons: none (P0)
 
 #### (2) API Contract (OpenAPI tags: Org, IAM)
+
 **Endpoints (P0)**
+
 - `GET/PUT /api/org/info`
 - `GET/PUT /api/org/settings`
 - `GET/POST/PUT /api/org/branches`
@@ -6945,33 +7253,41 @@ await db.tx(async (tx) => {
 - `GET /api/org/audit-log` (paginated filters)
 
 **Permissions**
+
 - super_admin: full
 - admin: read + limited writes (units members)
 - user/guest: read org public info only
 
 **Idempotency**
+
 - `POST /users` invite, `PUT /modules`, `PUT /settings`
 
 #### (3) Event catalog
+
 Produces:
+
 - `cfg.updated {changed_keys[]}`
 - `iam.role.granted {user_id, member_id, role, scope}`
 - `org.branch.updated {branch_id}`
-Consumes: none
+  Consumes: none
 
 #### (4) DB Schema
+
 Core tables: `organizations`, `branches`, `units`, `users`, `org_members`, `domain_events`, `audit_log`
 Indexes (P0):
+
 - `org_members(org_id, user_id)` unique
 - `branches(org_id, code)` unique
 - `units(org_id, branch_id, parent_unit_id)`
 
 #### (5) Test cases
+
 - RBAC: super_admin can toggle module; admin cannot toggle org-wide modules.
 - RLS: orgA cannot read orgB branches (hard fail).
 - Idempotency: re‑sending invite same key returns same result.
 
 #### (6) DoD
+
 - OpenAPI updated + codegen client
 - Migrations applied + RLS verified
 - Audit log for every write
@@ -6982,44 +7298,53 @@ Indexes (P0):
 ### MODULE 1 — HRM (BC‑01)
 
 #### (1) Service list
+
 Controllers:
+
 - `MembersController`, `ProfilesController`, `OrgChartController`, `TransfersController`, `GuardiansController`, `ComplianceController`
-Services:
+  Services:
 - `MemberLifecycleService`, `ProfileService`, `OrgChartService`, `TransferService`, `GuardianService`
 - **Scout adaptation add-on**: `VolunteerAvailabilityService`, `BackgroundCheckService`, `YouthProtectionTrainingService`
-Repos: `HrmRepo`
-Handlers (emit):
+  Repos: `HrmRepo`
+  Handlers (emit):
 - `hrm.member_joined`, `hrm.member_transferred`, `hrm.member_left`, `hrm.guardian_linked`
 
 Crons:
+
 - `checkAgeTransitions()` daily
 - `backgroundCheckRenewalReminders()` weekly
 - `yptTrainingExpiryReminders()` weekly
 
 #### (2) API Contract
+
 P0:
+
 - `POST/GET /api/hrm/members`
 - `GET/PUT /api/hrm/members/:id`
 - `GET /api/hrm/org-chart`
 - `POST /api/hrm/members/:id/transfer` (super_admin)
 - `GET /api/hrm/members/:id/timeline` (aggregated read)
-P1 (safety/compliance):
+  P1 (safety/compliance):
 - `GET/POST /api/hrm/compliance/background-check`
 - `GET/POST /api/hrm/compliance/ypt-training`
 - `GET/POST /api/hrm/availability`
 
 #### (3) Event catalog
+
 Produces:
+
 - `hrm.member_joined {member_id, branch_id, unit_id}`
 - `hrm.member_transferred {member_id, from_branch, to_branch}`
 - `hrm.member_left {member_id, reason}`
 - `hrm.guardian_linked {guardian_member_id, child_member_id}`
-Consumes:
+  Consumes:
 - `reward.badge_awarded` (for timeline)
 - `reward.exp_earned` (for profile summary)
 
 #### (4) DB Schema deltas (so với v7)
+
 Add tables/columns (P1) để đạt “HRM 14 phân hệ phụ + Scout adaptation”:
+
 - `hrm.volunteer_availability (member_id, weekday_slots_json, updated_at)`
 - `hrm.background_checks (member_id, status, issued_at, expires_at, provider, doc_file_id)`
 - `hrm.ypt_trainings (member_id, course_name, completed_at, expires_at, certificate_file_id)`
@@ -7027,14 +7352,17 @@ Add tables/columns (P1) để đạt “HRM 14 phân hệ phụ + Scout adaptati
 - `hrm.medical_profile (member_id, allergies, meds, conditions, diet, physician_contact_json)`
 
 Indexes:
+
 - `(org_id, member_id)` across all new tables
 
 #### (5) Test cases
+
 - Transfer: atomic update membership + publish event; Scout/Reward consume.
 - Under‑18 creation requires guardian_link.
 - Compliance expiry triggers notifications (dry-run test).
 
 #### (6) DoD
+
 - member lifecycle state machine tests pass
 - transfer generates audit diff + event
 - parent portal read-only verified
@@ -7044,46 +7372,56 @@ Indexes:
 ### MODULE 2 — PROJECT & PLANNING (BC‑02)
 
 #### (1) Service list
+
 Controllers:
+
 - `PlanController`, `ProjectController`, `WorkItemController`, `BoardController`, `GanttController`, `WikiController`
-Services:
+  Services:
 - `PlanTemplateService`, `PlanApprovalService`, `PlanToProjectGenerator`
 - `ProjectService`, `WorkItemService`, `TimeTrackingService` (P1), `CostTrackingService` (P1)
-Repos: `PmRepo`
-Handlers:
+  Repos: `PmRepo`
+  Handlers:
 - emits `pm.plan.approved`, `pm.task.completed`, `pm.project.completed`
-Crons:
+  Crons:
 - due date reminders daily
 
 #### (2) API Contract
+
 P0:
+
 - Plans: `POST/GET /api/pm/plans`, `POST /:id/submit`, `POST /:id/approve`, `POST /:id/reject`
 - Projects: `POST/GET /api/pm/projects`, `GET/PUT /:id`
 - Work items: `POST/GET /api/pm/projects/:id/items`, `PATCH /items/:id/status`
 - Views: `GET /api/pm/projects/:id/kanban`, `GET /:id/gantt`, `GET /:id/calendar`
-P1 (Plane/OpenProject parity):
+  P1 (Plane/OpenProject parity):
 - `GET/POST /api/pm/workspaces`, `GET/POST /api/pm/portfolios`, `GET/POST /api/pm/epics`
 - `GET/POST /api/pm/wiki/pages`
 
 #### (3) Event catalog
+
 Produces:
+
 - `pm.plan.approved {plan_id, project_id}`
 - `pm.task.completed {task_id, assignee_ids, points}`
 - `pm.project.completed {project_id}`
-Consumes:
+  Consumes:
 - `hrm.member_transferred` (reassign tasks if needed)
 
 #### (4) DB Schema (P0)
+
 Existing: `plans`, `projects`, `project_phases`, `project_sprints`, `work_packages`, `tasks`
 Add (P1):
+
 - `pm.workspaces`, `pm.portfolios`, `pm.epics`, `pm.wiki_pages`
 
 #### (5) Test cases
+
 - Plan→Project generator determinism: same input yields same tree (idempotent).
 - Kanban status transitions obey state machine.
 - Task completion emits event once.
 
 #### (6) DoD
+
 - Kanban + backlog + gantt endpoints stable
 - Generator covered by integration tests
 - Budget: no always-on gantt worker; compute on-demand
@@ -7093,43 +7431,53 @@ Add (P1):
 ### MODULE 3 — TICKET & APPROVAL (BC‑03)
 
 #### (1) Service list
+
 Controllers:
+
 - `TicketController`, `ApprovalFlowController`, `AttachmentController`
-Services:
+  Services:
 - `TicketService`, `TicketRoutingService`, `ApprovalFlowService`, `SlaService`
-Repos: `TicketRepo`
-Handlers:
+  Repos: `TicketRepo`
+  Handlers:
 - emits `ticket.submitted`, `ticket.approved`, `ticket.rejected`, `ticket.closed`
 
 #### (2) API Contract
+
 P0:
+
 - `POST/GET /api/tickets`
 - `GET/PUT /api/tickets/:id`
 - `POST /api/tickets/:id/comments`
 - `PATCH /api/tickets/:id/assign`
 - `POST /api/tickets/:id/approve`, `POST /api/tickets/:id/reject`
-P1:
+  P1:
 - approval templates: `GET/POST /api/approvals/templates`
 - conditional routing: `POST /api/approvals/evaluate`
 
 #### (3) Event catalog
+
 Produces:
+
 - `ticket.submitted {ticket_id, category, requester_id}`
 - `ticket.approved/rejected {ticket_id, approver_id, reason?}`
-Consumes:
+  Consumes:
 - `hrm.member_left` (close outstanding tickets)
 
 #### (4) DB Schema
+
 Existing: `tickets`, `ticket_comments`, `ticket_status_history`
 Add P1:
+
 - `ticket.approval_template`, `ticket.approval_step`, `ticket.approval_instance`
 
 #### (5) Test cases
+
 - Sequential vs parallel approvals
 - Conditional approval based on amount thresholds
 - Attachment scanning validation (mime/size)
 
 #### (6) DoD
+
 - Approval patterns covered
 - Audit for transitions
 - Zalo notify on state change (optional in low-cost mode)
@@ -7139,45 +7487,55 @@ Add P1:
 ### MODULE 4 — FINANCE (BC‑04)
 
 #### (1) Service list
+
 Controllers:
+
 - `AccountsController`, `TransactionsController`, `FeesController`, `SponsorsController`, `ReportsController`
-Services:
+  Services:
 - `LedgerService` (immutable), `TransactionApprovalService`, `FeeEngineService`, `BudgetService`, `CostCenterService`, `CampershipService`
-Crons:
+  Crons:
 - monthly fee generation
 - overdue reminders
-Handlers:
+  Handlers:
 - emits `fin.fee.paid`, `fin.fee.overdue`, `fin.txn.approved`
 
 #### (2) API Contract
+
 P0:
+
 - `GET/POST /api/fin/accounts`
 - `POST/GET /api/fin/transactions`, `POST /transactions/:id/approve`, `POST /transactions/:id/reverse`
 - `GET/POST /api/fin/fees`, `POST /fees/batch-create`, `PUT /fees/:id/pay`
 - `GET/POST /api/fin/sponsors`, `GET/POST /api/fin/in-kind`
 - `GET /api/fin/reports/summary` (+ export flag)
-P1:
+  P1:
 - `GET/POST /api/fin/cost-centers` (tree)
 - `GET/POST /api/fin/budgets` (plan vs actual)
 
 #### (3) Event catalog
+
 Produces:
+
 - `fin.fee.paid {member_id, amount, period}`
 - `fin.fee.overdue {member_id, period}`
-Consumes:
+  Consumes:
 - `hrm.member_left` (stop generating fees)
 
 #### (4) DB Schema
+
 Existing: `financial_accounts`, `financial_transactions`, `member_fees`, `sponsors`, `material_contributions`
 Add P1:
+
 - `fin.cost_centers (parent_id)`, `fin.budgets (cost_center_id, period, amount)`
 
 #### (5) Test cases
+
 - Ledger immutability (no update allowed)
 - Reverse transaction correctness
 - Fee overdue detection accuracy
 
 #### (6) DoD
+
 - Reports consistent & export guarded by budget kill-switch
 - Audit: all approvals
 
@@ -7186,41 +7544,51 @@ Add P1:
 ### MODULE 5 — ASSETS (BC‑05)
 
 #### (1) Service list
+
 Controllers:
+
 - `AssetsController`, `LoansController`, `MaintenanceController`, `QrController`
-Services:
+  Services:
 - `AssetInventoryService`, `LoanWorkflowService`, `MaintenanceService`, `UniformIssueService`, `KitService`
-Handlers:
+  Handlers:
 - emits `asset.loan.checked_out`, `asset.loan.returned`, `asset.damaged`
 
 #### (2) API Contract
+
 P0:
+
 - `POST/GET /api/assets`, `GET/PUT /api/assets/:id`
 - `POST /api/assets/:id/loan/request`
 - `POST /api/assets/loans/:id/approve`
 - `POST /api/assets/loans/:id/return`
-P1:
+  P1:
 - `POST /api/assets/kits` (camp kits)
 - `POST /api/assets/uniform/issue` (size/condition tracking)
 
 #### (3) Event catalog
+
 Produces:
+
 - `asset.loan.checked_out {asset_id, borrower_id, qty}`
 - `asset.loan.returned {asset_id, borrower_id, condition}`
-Consumes:
+  Consumes:
 - `scout.event.created` (reserve assets for camp kits)
 
 #### (4) DB Schema
+
 Existing: `asset_categories`, `assets`, `asset_loans`
 Add P1:
+
 - `asset.kits`, `asset.kit_items`, `asset.uniform_issue`
 
 #### (5) Test cases
+
 - Quantity cannot go negative
 - Overdue loan reminders
 - QR lookup resolves correct asset
 
 #### (6) DoD
+
 - Loan state machine tested
 - Asset history immutable
 
@@ -7229,36 +7597,46 @@ Add P1:
 ### MODULE 6 — PROCESS & SOP (BC‑06)
 
 #### (1) Service list
+
 Controllers:
+
 - `WorkflowController`, `WorkflowRunController`, `SopController`
-Services:
+  Services:
 - `WorkflowBuilderService`, `WorkflowExecutorService`, `SopVersioningService`
-Handlers:
+  Handlers:
 - consumes “all events” via event bus hooks
-Crons:
+  Crons:
 - scheduled workflows (nightly/weekly)
 
 #### (2) API Contract
+
 P0:
+
 - `POST/GET /api/proc/workflows`, `GET/PUT /workflows/:id`
 - `POST /api/proc/workflows/:id/execute`
 - `POST/GET /api/proc/sop`, `GET /api/proc/sop/:id/versions`
 
 #### (3) Event catalog
+
 Consumes:
+
 - any event matching workflow triggers
-Produces:
+  Produces:
 - `proc.workflow.executed {workflow_id, run_id, result}`
 
 #### (4) DB Schema
+
 Tables:
+
 - `proc.workflow_definitions (jsonb)`, `proc.workflow_runs`, `proc.sop_documents`, `proc.sop_versions`
 
 #### (5) Test cases
+
 - Deterministic executor for same inputs
 - Safeguards: max depth, max runtime, rate limits
 
 #### (6) DoD
+
 - Workflow JSON schema validated
 - Executor has timeout & retry policy
 
@@ -7267,41 +7645,51 @@ Tables:
 ### MODULE 7 — LMS (BC‑07)
 
 #### (1) Service list
+
 Controllers:
+
 - `CoursesController`, `LessonsController`, `QuizController`, `BattleController`, `AssignmentsController`
-Services:
+  Services:
 - `CourseService`, `LessonService`, `QuizService`, `AttemptService`, `BattleArenaService`, `ProgressService`, `OfflinePackService` (P1)
-Handlers:
+  Handlers:
 - emits `lms.lesson_completed`, `lms.quiz_passed`, `lms.battle_won`
 
 #### (2) API Contract
+
 P0:
+
 - Courses: `POST/GET /api/lms/courses`, `GET/PUT /:id`
 - Lessons: `GET /courses/:courseId/lessons/:id`, `POST /lessons/:id/complete`
 - Quiz: `GET /api/lms/quizzes/:id`, `POST /quizzes/:id/attempt`
 - Battle: `POST /api/lms/battles/create`, WS join/submit
-P1:
+  P1:
 - Offline: `GET /api/lms/offline/packs?branch=...` (downloadable packs with TTL)
 
 #### (3) Event catalog
+
 Produces:
+
 - `lms.lesson_completed {member_id, lesson_id}`
 - `lms.quiz_passed {member_id, quiz_id, score}`
 - `lms.battle_won {member_id, battle_id}`
-Consumes:
+  Consumes:
 - `scout.skill.unlocked` (optional mapping)
 
 #### (4) DB Schema
+
 Existing: `courses`, `lessons`, `quizzes`, `quiz_questions`, `quiz_battles`, `member_course_progress`
 Add P1:
+
 - `lms.offline_packs`, `lms.offline_pack_items`
 
 #### (5) Test cases
+
 - Quiz grading correctness
 - Battle room concurrency max 30
 - XP caps for quiz
 
 #### (6) DoD
+
 - Offline mode behind kill-switch (budget + safety)
 - WebSocket load tests
 
@@ -7312,42 +7700,50 @@ Add P1:
 > Module 8 đã có **PRD + schema + event catalog** rất sâu trong PHẦN III. Ở đây bổ sung “contract pack” để AI Agent code theo module boundary.
 
 #### (1) Service list (5 sub-modules)
+
 8A Skill/Rank:
+
 - `RankDefinitionService`, `SkillProgressService`, `SpecialtyBadgeService`, `HabitService`
-8B Sessions:
+  8B Sessions:
 - `SessionsService`, `AttendanceService`, `AnnualProgramService`
-8C Events/Camps:
+  8C Events/Camps:
 - `EventsService`, `RegistrationService`, `RiskAssessmentService`, `ConsentService`
-8D Spiritual/Evaluation:
+  8D Spiritual/Evaluation:
 - `SpiritualLogService`, `NguGioiService`, `EvaluationService`
-8E Mentoring:
+  8E Mentoring:
 - `MentoringService`
 
 #### (2) API Contract
-- Reuse endpoint list trong PHẦN III / Module 8E.  
+
+- Reuse endpoint list trong PHẦN III / Module 8E.
 - Quy tắc P0:
   - attendance bulk endpoint bắt buộc idempotency (double submit)
   - consent endpoints signed URL & audit
   - under‑18: enforce guardian consent gates
 
 #### (3) Event catalog (produces)
+
 - `scout.skill_level_completed`, `scout.rank_achieved`, `session.attendance_marked`, `events.event_completed`,
   `spiritual.meditation_logged`, `spiritual.ngu_gioi_assessed`, `scout.branch_transition` …
 
 Consumes:
+
 - `hrm.member_transferred` (handover)
 - `lms.quiz_passed` (optional unlock)
 
 #### (4) DB Schema
+
 Source tables: `rank_definitions`, `skills`, `member_skill_progress`, `sessions`, `events`, `event_registrations`, `spiritual_logs`, `evaluations`, `mentoring_*`
 Indexes: (org_id, member_id, date) for attendance/spiritual logs; (org_id, member_id, skill_id) unique.
 
 #### (5) Test cases
+
 - overnight event requires HIRARC + consent
 - spiritual privacy: leader cannot read content
 - rank eligibility cron deterministic
 
 #### (6) DoD
+
 - mega-module has internal package boundaries (`/scout/skill`, `/scout/session`, …)
 - RLS + scope enforced
 - emits events for reward engine
@@ -7357,12 +7753,15 @@ Indexes: (org_id, member_id, date) for attendance/spiritual logs; (org_id, membe
 ### MODULE 9 — REWARD ENGINE (BC‑09)
 
 #### (1) Service list
+
 - `EventSubscriberService` (subscribe to all events)
 - `ExpEngineService`, `BadgeEngineService`, `LeaderboardService`, `PenaltyService`, `ShopService`, `PeerRecognitionService`
 - Redis adapters: `CapCounterStore`, `LeaderboardStore`
 
 #### (2) API Contract
+
 P0:
+
 - `GET/POST /api/rewards/exp-configs`
 - `GET/POST /api/rewards/badges`
 - `GET /api/rewards/leaderboard`
@@ -7370,24 +7769,29 @@ P0:
 - `GET/POST /api/rewards/store`, `POST /store/:id/redeem`
 
 #### (3) Event catalog
+
 Consumes: **ALL domain events**
 Produces:
+
 - `reward.exp_earned`, `reward.badge_awarded`, `reward.penalty_applied`, `reward.redemption.requested`
 
 #### (4) DB Schema
+
 - `exp_configs`, `exp_transactions` (immutable), `member_exp_summary`
 - `badge_definitions`, `member_badges`
 - `reward_items`, `reward_redemptions`
-Redis keys:
+  Redis keys:
 - `cap:daily:{org}:{member}:{event}:{yyyy-mm-dd}`
 - `lb:{org}:{scope}:{scopeId}:{period}`
 
 #### (5) Test cases
+
 - cap enforcement (daily/weekly)
 - ledger immutability
 - dedupe: same event_id cannot generate 2 exp_txn
 
 #### (6) DoD
+
 - contract tests for all public endpoints
 - load test leaderboard retrieval
 - anti-abuse rules documented and tested
@@ -7395,29 +7799,36 @@ Redis keys:
 ---
 
 ### MODULE 11 (COMMS/NOTIFICATION) — HẠ TẦNG DÙNG CHUNG (Cross‑cutting)
+
 > Trong v7, phần Notification nằm rải rác. Engineering contract pack chốt luôn “shared service”.
 
 #### Service list
+
 - `NotificationService` (in-app, Zalo)
 - `TemplateService`, `DeliveryLogService`, `PreferenceService`
 - `BudgetGuardService` (kill-switch + low-cost mode)
 
 #### API
+
 - `GET /api/notifications/my`
 - `POST /api/notifications/read`
 - `GET/PUT /api/notifications/preferences`
 
 #### Events consumed
+
 - `*` (all events with notification rules)
 
 #### DoD
+
 - Night quiet hours enforcement (child safety)
 - opt-in/out per parent
 
 ---
 
 ### 13.4 Contract Pack Output Artifacts (để AI Agent “build right away”)
+
 Trong monorepo, tạo bộ artifacts sau (generated/hand-maintained):
+
 - `/contracts/openapi/ttnddops.yaml` (single consolidated; tags per module)
 - `/contracts/events/catalog.json` (event types + schema)
 - `/contracts/db/migrations/*.sql` (Flyway or Prisma migrations)
@@ -7427,20 +7838,24 @@ Trong monorepo, tạo bộ artifacts sau (generated/hand-maintained):
 ---
 
 ### 13.5 Definition of Done (DoD) — áp dụng toàn platform
+
 Một module / capability / release chỉ được xem là DONE khi đồng thời thỏa:
-1. **Product Done**: PRD, acceptance criteria, non-goals và business rules đã cập nhật đúng phiên bản.  
-2. **UI Done**: screen map, routes, loading/empty/error/success states, accessibility, reduced motion, mobile behavior đã có.  
-3. **API Done**: OpenAPI cập nhật, auth scope rõ, error schema rõ, idempotency đúng nơi cần, contract tests pass.  
-4. **State Done**: state machine/transition guards khớp FE + BE + DB enums + audit + events.  
-5. **DB Done**: migration review xong, RLS/policies pass, indexes/constraints đầy đủ, seed/demo data dùng được.  
-6. **Event Done**: producer/consumer contract rõ, idempotent, retry/poison/dead-letter behavior documented.  
-7. **Test Done**: unit + integration + contract + e2e smoke pass; failure cases có test.  
-8. **Ops Done**: log/metrics/budget flags/secrets/runbook/rollback notes có đủ.  
-9. **Evidence Done**: readiness manifest + screenshots + route list + API list + release evidence links có sẵn cho CTO review.  
+
+1. **Product Done**: PRD, acceptance criteria, non-goals và business rules đã cập nhật đúng phiên bản.
+2. **UI Done**: screen map, routes, loading/empty/error/success states, accessibility, reduced motion, mobile behavior đã có.
+3. **API Done**: OpenAPI cập nhật, auth scope rõ, error schema rõ, idempotency đúng nơi cần, contract tests pass.
+4. **State Done**: state machine/transition guards khớp FE + BE + DB enums + audit + events.
+5. **DB Done**: migration review xong, RLS/policies pass, indexes/constraints đầy đủ, seed/demo data dùng được.
+6. **Event Done**: producer/consumer contract rõ, idempotent, retry/poison/dead-letter behavior documented.
+7. **Test Done**: unit + integration + contract + e2e smoke pass; failure cases có test.
+8. **Ops Done**: log/metrics/budget flags/secrets/runbook/rollback notes có đủ.
+9. **Evidence Done**: readiness manifest + screenshots + route list + API list + release evidence links có sẵn cho CTO review.
 10. **Safety Done**: child-safety/privacy/compliance gates pass nếu module chạm dữ liệu trẻ em hoặc guardian.
 
 ### 13.6 Release Evidence Pack — artifacts bắt buộc trước pilot/staging/prod
+
 Mỗi release candidate phải sinh ra một gói bằng chứng tối thiểu:
+
 - `release-summary.md`: scope, stories/WPs đóng, known issues, rollback plan.
 - `readiness-manifest.json`: module status, required routes, APIs, DB migrations, feature flags, owners.
 - `openapi-diff.md`: thay đổi API so với release trước.
@@ -7452,20 +7867,22 @@ Mỗi release candidate phải sinh ra một gói bằng chứng tối thiểu:
 
 ### 13.7 Traceability Matrix — SSOT để truy vết từ Product → Code → Ops
 
-| Artifact | Source of truth | Bắt buộc map tới |
-|---|---|---|
-| PRD / Workflow | PHẦN I + III | Screen map, OpenAPI, state machines, test cases |
-| UI Contract | PHẦN V | Route/component IDs, API calls, loading/error states |
-| OpenAPI | `/contracts/openapi/*.yaml` | controllers, DTOs, auth scopes, e2e routes |
-| State Machine Registry | `contracts/state-machines/*` | DB enums, guards, events, UI transitions |
-| DB Schema / Migrations | `/contracts/db/migrations/*` + PHỤ LỤC A | repos/services, projections, seeds, rollback notes |
-| Event Catalog | `/contracts/events/catalog.json` | publishers, subscribers, reward/notification hooks |
-| Contract Pack | PHỤ LỤC B/C | roadmap row IDs, readiness manifest, review checklist |
-| Tests | `/contracts/tests/*` + app tests | release gates, dashboard evidence |
-| Release Evidence | `/contracts/release/*` + artifacts | CTO sign-off, pilot/prod approval |
+| Artifact               | Source of truth                          | Bắt buộc map tới                                      |
+| ---------------------- | ---------------------------------------- | ----------------------------------------------------- |
+| PRD / Workflow         | PHẦN I + III                             | Screen map, OpenAPI, state machines, test cases       |
+| UI Contract            | PHẦN V                                   | Route/component IDs, API calls, loading/error states  |
+| OpenAPI                | `/contracts/openapi/*.yaml`              | controllers, DTOs, auth scopes, e2e routes            |
+| State Machine Registry | `contracts/state-machines/*`             | DB enums, guards, events, UI transitions              |
+| DB Schema / Migrations | `/contracts/db/migrations/*` + PHỤ LỤC A | repos/services, projections, seeds, rollback notes    |
+| Event Catalog          | `/contracts/events/catalog.json`         | publishers, subscribers, reward/notification hooks    |
+| Contract Pack          | PHỤ LỤC B/C                              | roadmap row IDs, readiness manifest, review checklist |
+| Tests                  | `/contracts/tests/*` + app tests         | release gates, dashboard evidence                     |
+| Release Evidence       | `/contracts/release/*` + artifacts       | CTO sign-off, pilot/prod approval                     |
 
 ### 13.8 Module Readiness Manifest — mẫu JSON/MD cho từng module
+
 Trường bắt buộc:
+
 - `module_code`, `module_name`, `owner`, `status` (`DRAFT|IN_PROGRESS|PLAYABLE|ACTIVE|BLOCKED`)
 - `routes_required[]`, `apis_required[]`, `db_tables_required[]`, `events_required[]`
 - `state_machines_required[]`, `seed_data_pack`, `e2e_tags[]`, `feature_flags[]`
@@ -7473,6 +7890,7 @@ Trường bắt buộc:
 - `known_gaps[]`, `blocking_issues[]`, `last_verified_at`, `verified_by`
 
 ### 13.9 CTO / Product / QA Handoff Checklist
+
 - Đã có route list và screen list thực tế chưa?
 - Đã có OpenAPI endpoint list và sample payloads chưa?
 - Đã có migration file + seed data + rollback note chưa?
@@ -7483,6 +7901,7 @@ Trường bắt buộc:
 - Đã có known issues và release evidence links chưa?
 
 ### 13.10 Cutover, Hypercare & Final Closure Notes
+
 - **Cutover**: seed master data, import sạch, smoke test 10 journeys quan trọng, enable feature flags theo môi trường.
 - **Hypercare 2 tuần**: theo dõi incidents P0/P1/P2, ghi lỗi, patch nhanh, freeze scope mới.
 - **Closure**: chỉ đóng epic/story khi release evidence pack, manifests, checklists và sign-off đã được archive.

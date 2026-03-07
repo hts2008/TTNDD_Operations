@@ -11,9 +11,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Health"
-        ]
+        "tags": ["Health"]
       }
     },
     "/api/v1/organizations/{slug}": {
@@ -35,9 +33,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Organization Config"
-        ],
+        "tags": ["Organization Config"],
         "security": [
           {
             "bearer": []
@@ -64,9 +60,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Organization Config"
-        ],
+        "tags": ["Organization Config"],
         "security": [
           {
             "bearer": []
@@ -93,9 +87,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Organization Config"
-        ],
+        "tags": ["Organization Config"],
         "security": [
           {
             "bearer": []
@@ -130,9 +122,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Organization Config"
-        ],
+        "tags": ["Organization Config"],
         "security": [
           {
             "bearer": []
@@ -169,9 +159,7 @@
             }
           }
         },
-        "tags": [
-          "Organization Config"
-        ],
+        "tags": ["Organization Config"],
         "security": [
           {
             "bearer": []
@@ -196,9 +184,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Organization Config"
-        ],
+        "tags": ["Organization Config"],
         "security": [
           {
             "bearer": []
@@ -233,9 +219,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Organization Config"
-        ],
+        "tags": ["Organization Config"],
         "security": [
           {
             "bearer": []
@@ -280,9 +264,7 @@
             }
           }
         },
-        "tags": [
-          "Organization Config"
-        ],
+        "tags": ["Organization Config"],
         "security": [
           {
             "bearer": []
@@ -307,9 +289,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Organization Config"
-        ],
+        "tags": ["Organization Config"],
         "security": [
           {
             "bearer": []
@@ -344,9 +324,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Organization Config"
-        ],
+        "tags": ["Organization Config"],
         "security": [
           {
             "bearer": []
@@ -389,9 +367,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Organization Config"
-        ],
+        "tags": ["Organization Config"],
         "security": [
           {
             "bearer": []
@@ -466,9 +442,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Organization Config"
-        ],
+        "tags": ["Organization Config"],
         "security": [
           {
             "bearer": []
@@ -493,9 +467,7 @@
             }
           }
         },
-        "tags": [
-          "HRM"
-        ],
+        "tags": ["HRM"],
         "security": [
           {
             "bearer": []
@@ -560,9 +532,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "HRM"
-        ],
+        "tags": ["HRM"],
         "security": [
           {
             "bearer": []
@@ -596,9 +566,7 @@
             }
           }
         },
-        "tags": [
-          "HRM"
-        ],
+        "tags": ["HRM"],
         "security": [
           {
             "bearer": []
@@ -623,9 +591,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "HRM"
-        ],
+        "tags": ["HRM"],
         "security": [
           {
             "bearer": []
@@ -652,9 +618,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "HRM"
-        ],
+        "tags": ["HRM"],
         "security": [
           {
             "bearer": []
@@ -681,9 +645,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "HRM"
-        ],
+        "tags": ["HRM"],
         "security": [
           {
             "bearer": []
@@ -701,9 +663,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "HRM"
-        ],
+        "tags": ["HRM"],
         "security": [
           {
             "bearer": []
@@ -730,9 +690,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "HRM"
-        ],
+        "tags": ["HRM"],
         "security": [
           {
             "bearer": []
@@ -750,9 +708,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "HRM"
-        ],
+        "tags": ["HRM"],
         "security": [
           {
             "bearer": []
@@ -770,9 +726,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Rewards"
-        ],
+        "tags": ["Rewards"],
         "security": [
           {
             "bearer": []
@@ -788,9 +742,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Rewards"
-        ],
+        "tags": ["Rewards"],
         "security": [
           {
             "bearer": []
@@ -808,9 +760,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Rewards"
-        ],
+        "tags": ["Rewards"],
         "security": [
           {
             "bearer": []
@@ -828,9 +778,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Rewards"
-        ],
+        "tags": ["Rewards"],
         "security": [
           {
             "bearer": []
@@ -857,9 +805,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Rewards"
-        ],
+        "tags": ["Rewards"],
         "security": [
           {
             "bearer": []
@@ -902,9 +848,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Rewards"
-        ],
+        "tags": ["Rewards"],
         "security": [
           {
             "bearer": []
@@ -949,9 +893,7 @@
             }
           }
         },
-        "tags": [
-          "Rewards"
-        ],
+        "tags": ["Rewards"],
         "security": [
           {
             "bearer": []
@@ -969,9 +911,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Rewards"
-        ],
+        "tags": ["Rewards"],
         "security": [
           {
             "bearer": []
@@ -987,9 +927,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Rewards"
-        ],
+        "tags": ["Rewards"],
         "security": [
           {
             "bearer": []
@@ -1007,9 +945,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Rewards"
-        ],
+        "tags": ["Rewards"],
         "security": [
           {
             "bearer": []
@@ -1046,9 +982,7 @@
             }
           }
         },
-        "tags": [
-          "Rewards"
-        ],
+        "tags": ["Rewards"],
         "security": [
           {
             "bearer": []
@@ -1066,9 +1000,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Rewards"
-        ],
+        "tags": ["Rewards"],
         "security": [
           {
             "bearer": []
@@ -1084,9 +1016,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Rewards"
-        ],
+        "tags": ["Rewards"],
         "security": [
           {
             "bearer": []
@@ -1104,9 +1034,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Rewards"
-        ],
+        "tags": ["Rewards"],
         "security": [
           {
             "bearer": []
@@ -1133,9 +1061,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Rewards"
-        ],
+        "tags": ["Rewards"],
         "security": [
           {
             "bearer": []
@@ -1163,9 +1089,7 @@
             }
           }
         },
-        "tags": [
-          "Rewards"
-        ],
+        "tags": ["Rewards"],
         "security": [
           {
             "bearer": []
@@ -1192,9 +1116,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Scout"
-        ],
+        "tags": ["Scout"],
         "security": [
           {
             "bearer": []
@@ -1210,9 +1132,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Scout"
-        ],
+        "tags": ["Scout"],
         "security": [
           {
             "bearer": []
@@ -1249,9 +1169,7 @@
             }
           }
         },
-        "tags": [
-          "Scout"
-        ],
+        "tags": ["Scout"],
         "security": [
           {
             "bearer": []
@@ -1267,9 +1185,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Scout"
-        ],
+        "tags": ["Scout"],
         "security": [
           {
             "bearer": []
@@ -1287,9 +1203,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Scout"
-        ],
+        "tags": ["Scout"],
         "security": [
           {
             "bearer": []
@@ -1326,9 +1240,7 @@
             }
           }
         },
-        "tags": [
-          "Scout"
-        ],
+        "tags": ["Scout"],
         "security": [
           {
             "bearer": []
@@ -1355,9 +1267,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Scout"
-        ],
+        "tags": ["Scout"],
         "security": [
           {
             "bearer": []
@@ -1384,9 +1294,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Scout"
-        ],
+        "tags": ["Scout"],
         "security": [
           {
             "bearer": []
@@ -1423,9 +1331,7 @@
             }
           }
         },
-        "tags": [
-          "Scout"
-        ],
+        "tags": ["Scout"],
         "security": [
           {
             "bearer": []
@@ -1452,9 +1358,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Scout"
-        ],
+        "tags": ["Scout"],
         "security": [
           {
             "bearer": []
@@ -1481,9 +1385,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Scout"
-        ],
+        "tags": ["Scout"],
         "security": [
           {
             "bearer": []
@@ -1501,9 +1403,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Sessions"
-        ],
+        "tags": ["Sessions"],
         "security": [
           {
             "bearer": []
@@ -1568,9 +1468,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Sessions"
-        ],
+        "tags": ["Sessions"],
         "security": [
           {
             "bearer": []
@@ -1604,9 +1502,7 @@
             }
           }
         },
-        "tags": [
-          "Sessions"
-        ],
+        "tags": ["Sessions"],
         "security": [
           {
             "bearer": []
@@ -1631,9 +1527,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Sessions"
-        ],
+        "tags": ["Sessions"],
         "security": [
           {
             "bearer": []
@@ -1660,9 +1554,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Sessions"
-        ],
+        "tags": ["Sessions"],
         "security": [
           {
             "bearer": []
@@ -1689,9 +1581,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Sessions"
-        ],
+        "tags": ["Sessions"],
         "security": [
           {
             "bearer": []
@@ -1718,9 +1608,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Sessions"
-        ],
+        "tags": ["Sessions"],
         "security": [
           {
             "bearer": []
@@ -1738,9 +1626,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Events & Camps"
-        ],
+        "tags": ["Events & Camps"],
         "security": [
           {
             "bearer": []
@@ -1797,9 +1683,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Events & Camps"
-        ],
+        "tags": ["Events & Camps"],
         "security": [
           {
             "bearer": []
@@ -1833,9 +1717,7 @@
             }
           }
         },
-        "tags": [
-          "Events & Camps"
-        ],
+        "tags": ["Events & Camps"],
         "security": [
           {
             "bearer": []
@@ -1860,9 +1742,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Events & Camps"
-        ],
+        "tags": ["Events & Camps"],
         "security": [
           {
             "bearer": []
@@ -1889,9 +1769,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Events & Camps"
-        ],
+        "tags": ["Events & Camps"],
         "security": [
           {
             "bearer": []
@@ -1918,9 +1796,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Events & Camps"
-        ],
+        "tags": ["Events & Camps"],
         "security": [
           {
             "bearer": []
@@ -1947,9 +1823,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Events & Camps"
-        ],
+        "tags": ["Events & Camps"],
         "security": [
           {
             "bearer": []
@@ -1984,9 +1858,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Events & Camps"
-        ],
+        "tags": ["Events & Camps"],
         "security": [
           {
             "bearer": []
@@ -2004,9 +1876,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "LMS"
-        ],
+        "tags": ["LMS"],
         "security": [
           {
             "bearer": []
@@ -2063,9 +1933,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "LMS"
-        ],
+        "tags": ["LMS"],
         "security": [
           {
             "bearer": []
@@ -2099,9 +1967,7 @@
             }
           }
         },
-        "tags": [
-          "LMS"
-        ],
+        "tags": ["LMS"],
         "security": [
           {
             "bearer": []
@@ -2128,9 +1994,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "LMS"
-        ],
+        "tags": ["LMS"],
         "security": [
           {
             "bearer": []
@@ -2155,9 +2019,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "LMS"
-        ],
+        "tags": ["LMS"],
         "security": [
           {
             "bearer": []
@@ -2175,9 +2037,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "LMS"
-        ],
+        "tags": ["LMS"],
         "security": [
           {
             "bearer": []
@@ -2210,9 +2070,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "LMS"
-        ],
+        "tags": ["LMS"],
         "security": [
           {
             "bearer": []
@@ -2246,9 +2104,7 @@
             }
           }
         },
-        "tags": [
-          "LMS"
-        ],
+        "tags": ["LMS"],
         "security": [
           {
             "bearer": []
@@ -2275,9 +2131,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "LMS"
-        ],
+        "tags": ["LMS"],
         "security": [
           {
             "bearer": []
@@ -2304,9 +2158,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "LMS"
-        ],
+        "tags": ["LMS"],
         "security": [
           {
             "bearer": []
@@ -2324,9 +2176,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "LMS"
-        ],
+        "tags": ["LMS"],
         "security": [
           {
             "bearer": []
@@ -2360,9 +2210,7 @@
             }
           }
         },
-        "tags": [
-          "LMS"
-        ],
+        "tags": ["LMS"],
         "security": [
           {
             "bearer": []
@@ -2389,9 +2237,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "LMS"
-        ],
+        "tags": ["LMS"],
         "security": [
           {
             "bearer": []
@@ -2428,9 +2274,7 @@
             }
           }
         },
-        "tags": [
-          "LMS"
-        ],
+        "tags": ["LMS"],
         "security": [
           {
             "bearer": []
@@ -2448,9 +2292,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Enrichment"
-        ],
+        "tags": ["Enrichment"],
         "security": [
           {
             "bearer": []
@@ -2468,9 +2310,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Enrichment"
-        ],
+        "tags": ["Enrichment"],
         "security": [
           {
             "bearer": []
@@ -2488,9 +2328,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Enrichment"
-        ],
+        "tags": ["Enrichment"],
         "security": [
           {
             "bearer": []
@@ -2508,9 +2346,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Enrichment"
-        ],
+        "tags": ["Enrichment"],
         "security": [
           {
             "bearer": []
@@ -2528,9 +2364,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Enrichment"
-        ],
+        "tags": ["Enrichment"],
         "security": [
           {
             "bearer": []
@@ -2557,9 +2391,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Enrichment"
-        ],
+        "tags": ["Enrichment"],
         "security": [
           {
             "bearer": []
@@ -2577,9 +2409,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Enrichment"
-        ],
+        "tags": ["Enrichment"],
         "security": [
           {
             "bearer": []
@@ -2607,9 +2437,7 @@
             }
           }
         },
-        "tags": [
-          "Enrichment"
-        ],
+        "tags": ["Enrichment"],
         "security": [
           {
             "bearer": []
@@ -2637,9 +2465,7 @@
             }
           }
         },
-        "tags": [
-          "Enrichment"
-        ],
+        "tags": ["Enrichment"],
         "security": [
           {
             "bearer": []
@@ -2666,9 +2492,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Enrichment"
-        ],
+        "tags": ["Enrichment"],
         "security": [
           {
             "bearer": []
@@ -2693,9 +2517,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Enrichment"
-        ],
+        "tags": ["Enrichment"],
         "security": [
           {
             "bearer": []
@@ -2713,9 +2535,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Projects"
-        ],
+        "tags": ["Projects"],
         "security": [
           {
             "bearer": []
@@ -2764,9 +2584,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Projects"
-        ],
+        "tags": ["Projects"],
         "security": [
           {
             "bearer": []
@@ -2793,9 +2611,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Projects"
-        ],
+        "tags": ["Projects"],
         "security": [
           {
             "bearer": []
@@ -2822,9 +2638,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Projects"
-        ],
+        "tags": ["Projects"],
         "security": [
           {
             "bearer": []
@@ -2858,9 +2672,7 @@
             }
           }
         },
-        "tags": [
-          "Projects"
-        ],
+        "tags": ["Projects"],
         "security": [
           {
             "bearer": []
@@ -2878,9 +2690,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Projects"
-        ],
+        "tags": ["Projects"],
         "security": [
           {
             "bearer": []
@@ -2937,9 +2747,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Projects"
-        ],
+        "tags": ["Projects"],
         "security": [
           {
             "bearer": []
@@ -2973,9 +2781,7 @@
             }
           }
         },
-        "tags": [
-          "Projects"
-        ],
+        "tags": ["Projects"],
         "security": [
           {
             "bearer": []
@@ -3002,9 +2808,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Projects"
-        ],
+        "tags": ["Projects"],
         "security": [
           {
             "bearer": []
@@ -3031,9 +2835,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Projects"
-        ],
+        "tags": ["Projects"],
         "security": [
           {
             "bearer": []
@@ -3098,9 +2900,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Projects"
-        ],
+        "tags": ["Projects"],
         "security": [
           {
             "bearer": []
@@ -3134,9 +2934,7 @@
             }
           }
         },
-        "tags": [
-          "Projects"
-        ],
+        "tags": ["Projects"],
         "security": [
           {
             "bearer": []
@@ -3161,9 +2959,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Projects"
-        ],
+        "tags": ["Projects"],
         "security": [
           {
             "bearer": []
@@ -3190,9 +2986,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Projects"
-        ],
+        "tags": ["Projects"],
         "security": [
           {
             "bearer": []
@@ -3219,9 +3013,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Projects"
-        ],
+        "tags": ["Projects"],
         "security": [
           {
             "bearer": []
@@ -3239,9 +3031,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Tickets"
-        ],
+        "tags": ["Tickets"],
         "security": [
           {
             "bearer": []
@@ -3322,9 +3112,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Tickets"
-        ],
+        "tags": ["Tickets"],
         "security": [
           {
             "bearer": []
@@ -3358,9 +3146,7 @@
             }
           }
         },
-        "tags": [
-          "Tickets"
-        ],
+        "tags": ["Tickets"],
         "security": [
           {
             "bearer": []
@@ -3387,9 +3173,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Tickets"
-        ],
+        "tags": ["Tickets"],
         "security": [
           {
             "bearer": []
@@ -3416,9 +3200,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Tickets"
-        ],
+        "tags": ["Tickets"],
         "security": [
           {
             "bearer": []
@@ -3443,9 +3225,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Tickets"
-        ],
+        "tags": ["Tickets"],
         "security": [
           {
             "bearer": []
@@ -3463,9 +3243,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Finance"
-        ],
+        "tags": ["Finance"],
         "security": [
           {
             "bearer": []
@@ -3514,9 +3292,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Finance"
-        ],
+        "tags": ["Finance"],
         "security": [
           {
             "bearer": []
@@ -3550,9 +3326,7 @@
             }
           }
         },
-        "tags": [
-          "Finance"
-        ],
+        "tags": ["Finance"],
         "security": [
           {
             "bearer": []
@@ -3570,9 +3344,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Finance"
-        ],
+        "tags": ["Finance"],
         "security": [
           {
             "bearer": []
@@ -3599,9 +3371,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Finance"
-        ],
+        "tags": ["Finance"],
         "security": [
           {
             "bearer": []
@@ -3619,9 +3389,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Finance"
-        ],
+        "tags": ["Finance"],
         "security": [
           {
             "bearer": []
@@ -3678,9 +3446,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Finance"
-        ],
+        "tags": ["Finance"],
         "security": [
           {
             "bearer": []
@@ -3707,9 +3473,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Finance"
-        ],
+        "tags": ["Finance"],
         "security": [
           {
             "bearer": []
@@ -3736,9 +3500,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Finance"
-        ],
+        "tags": ["Finance"],
         "security": [
           {
             "bearer": []
@@ -3765,9 +3527,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Finance"
-        ],
+        "tags": ["Finance"],
         "security": [
           {
             "bearer": []
@@ -3785,9 +3545,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Assets"
-        ],
+        "tags": ["Assets"],
         "security": [
           {
             "bearer": []
@@ -3813,9 +3571,7 @@
             }
           }
         },
-        "tags": [
-          "Assets"
-        ],
+        "tags": ["Assets"],
         "security": [
           {
             "bearer": []
@@ -3833,9 +3589,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Assets"
-        ],
+        "tags": ["Assets"],
         "security": [
           {
             "bearer": []
@@ -3900,9 +3654,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Assets"
-        ],
+        "tags": ["Assets"],
         "security": [
           {
             "bearer": []
@@ -3920,9 +3672,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Assets"
-        ],
+        "tags": ["Assets"],
         "security": [
           {
             "bearer": []
@@ -3956,9 +3706,7 @@
             }
           }
         },
-        "tags": [
-          "Assets"
-        ],
+        "tags": ["Assets"],
         "security": [
           {
             "bearer": []
@@ -3985,9 +3733,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Assets"
-        ],
+        "tags": ["Assets"],
         "security": [
           {
             "bearer": []
@@ -4005,9 +3751,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Assets"
-        ],
+        "tags": ["Assets"],
         "security": [
           {
             "bearer": []
@@ -4034,9 +3778,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Assets"
-        ],
+        "tags": ["Assets"],
         "security": [
           {
             "bearer": []
@@ -4054,9 +3796,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Process"
-        ],
+        "tags": ["Process"],
         "security": [
           {
             "bearer": []
@@ -4097,9 +3837,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Process"
-        ],
+        "tags": ["Process"],
         "security": [
           {
             "bearer": []
@@ -4133,9 +3871,7 @@
             }
           }
         },
-        "tags": [
-          "Process"
-        ],
+        "tags": ["Process"],
         "security": [
           {
             "bearer": []
@@ -4153,9 +3889,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Process"
-        ],
+        "tags": ["Process"],
         "security": [
           {
             "bearer": []
@@ -4204,9 +3938,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Process"
-        ],
+        "tags": ["Process"],
         "security": [
           {
             "bearer": []
@@ -4240,9 +3972,7 @@
             }
           }
         },
-        "tags": [
-          "Process"
-        ],
+        "tags": ["Process"],
         "security": [
           {
             "bearer": []
@@ -4269,9 +3999,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Process"
-        ],
+        "tags": ["Process"],
         "security": [
           {
             "bearer": []
@@ -4298,9 +4026,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Process"
-        ],
+        "tags": ["Process"],
         "security": [
           {
             "bearer": []
@@ -4317,9 +4043,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Child Safety"
-        ],
+        "tags": ["Child Safety"],
         "security": [
           {
             "bearer": []
@@ -4351,9 +4075,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Child Safety"
-        ],
+        "tags": ["Child Safety"],
         "security": [
           {
             "bearer": []
@@ -4386,9 +4108,7 @@
             }
           }
         },
-        "tags": [
-          "Child Safety"
-        ],
+        "tags": ["Child Safety"],
         "security": [
           {
             "bearer": []
@@ -4414,9 +4134,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Child Safety"
-        ],
+        "tags": ["Child Safety"],
         "security": [
           {
             "bearer": []
@@ -4442,9 +4160,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Child Safety"
-        ],
+        "tags": ["Child Safety"],
         "security": [
           {
             "bearer": []
@@ -4470,9 +4186,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Child Safety"
-        ],
+        "tags": ["Child Safety"],
         "security": [
           {
             "bearer": []
@@ -4498,9 +4212,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Child Safety"
-        ],
+        "tags": ["Child Safety"],
         "security": [
           {
             "bearer": []
@@ -4517,9 +4229,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Child Safety"
-        ],
+        "tags": ["Child Safety"],
         "security": [
           {
             "bearer": []
@@ -4536,9 +4246,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Child Safety"
-        ],
+        "tags": ["Child Safety"],
         "security": [
           {
             "bearer": []
@@ -4581,9 +4289,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Notifications"
-        ],
+        "tags": ["Notifications"],
         "security": [
           {
             "bearer": []
@@ -4601,9 +4307,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Notifications"
-        ],
+        "tags": ["Notifications"],
         "security": [
           {
             "bearer": []
@@ -4630,9 +4334,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Notifications"
-        ],
+        "tags": ["Notifications"],
         "security": [
           {
             "bearer": []
@@ -4650,9 +4352,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Notifications"
-        ],
+        "tags": ["Notifications"],
         "security": [
           {
             "bearer": []
@@ -4670,9 +4370,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Notifications"
-        ],
+        "tags": ["Notifications"],
         "security": [
           {
             "bearer": []
@@ -4688,9 +4386,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Notifications"
-        ],
+        "tags": ["Notifications"],
         "security": [
           {
             "bearer": []
@@ -4708,9 +4404,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Notifications"
-        ],
+        "tags": ["Notifications"],
         "security": [
           {
             "bearer": []
@@ -4726,9 +4420,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Notifications"
-        ],
+        "tags": ["Notifications"],
         "security": [
           {
             "bearer": []
@@ -4746,9 +4438,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Dashboards"
-        ],
+        "tags": ["Dashboards"],
         "security": [
           {
             "bearer": []
@@ -4766,9 +4456,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Dashboards"
-        ],
+        "tags": ["Dashboards"],
         "security": [
           {
             "bearer": []
@@ -4786,9 +4474,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Dashboards"
-        ],
+        "tags": ["Dashboards"],
         "security": [
           {
             "bearer": []
@@ -4815,9 +4501,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Dashboards"
-        ],
+        "tags": ["Dashboards"],
         "security": [
           {
             "bearer": []
@@ -4852,9 +4536,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Dashboards"
-        ],
+        "tags": ["Dashboards"],
         "security": [
           {
             "bearer": []
@@ -4897,9 +4579,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Dashboards"
-        ],
+        "tags": ["Dashboards"],
         "security": [
           {
             "bearer": []
@@ -4917,12 +4597,7 @@
             "required": true,
             "in": "query",
             "schema": {
-              "enum": [
-                "members",
-                "attendance",
-                "finance",
-                "skills"
-              ],
+              "enum": ["members", "attendance", "finance", "skills"],
               "type": "string"
             }
           },
@@ -4948,9 +4623,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Dashboards"
-        ],
+        "tags": ["Dashboards"],
         "security": [
           {
             "bearer": []
@@ -4968,12 +4641,7 @@
             "required": true,
             "in": "query",
             "schema": {
-              "enum": [
-                "members",
-                "attendance",
-                "finance",
-                "skills"
-              ],
+              "enum": ["members", "attendance", "finance", "skills"],
               "type": "string"
             }
           },
@@ -4999,9 +4667,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Dashboards"
-        ],
+        "tags": ["Dashboards"],
         "security": [
           {
             "bearer": []
@@ -5029,9 +4695,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Dashboards"
-        ],
+        "tags": ["Dashboards"],
         "security": [
           {
             "bearer": []
@@ -5056,9 +4720,7 @@
             }
           }
         },
-        "tags": [
-          "FileStorage"
-        ],
+        "tags": ["FileStorage"],
         "security": [
           {
             "bearer": []
@@ -5092,9 +4754,7 @@
             }
           }
         },
-        "tags": [
-          "FileStorage"
-        ],
+        "tags": ["FileStorage"],
         "security": [
           {
             "bearer": []
@@ -5129,9 +4789,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "FileStorage"
-        ],
+        "tags": ["FileStorage"],
         "security": [
           {
             "bearer": []
@@ -5158,9 +4816,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "FileStorage"
-        ],
+        "tags": ["FileStorage"],
         "security": [
           {
             "bearer": []
@@ -5178,9 +4834,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "System"
-        ]
+        "tags": ["System"]
       }
     },
     "/api/v1/system/module-health": {
@@ -5200,9 +4854,7 @@
             }
           }
         },
-        "tags": [
-          "System"
-        ],
+        "tags": ["System"],
         "security": [
           {
             "bearer": []
@@ -5227,9 +4879,7 @@
             }
           }
         },
-        "tags": [
-          "System"
-        ],
+        "tags": ["System"],
         "security": [
           {
             "bearer": []
@@ -5254,9 +4904,7 @@
             }
           }
         },
-        "tags": [
-          "System"
-        ],
+        "tags": ["System"],
         "security": [
           {
             "bearer": []
@@ -5274,9 +4922,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "System"
-        ]
+        "tags": ["System"]
       }
     },
     "/api/v1/data-import/template/{importType}": {
@@ -5298,9 +4944,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "DataImport"
-        ],
+        "tags": ["DataImport"],
         "security": [
           {
             "bearer": []
@@ -5325,9 +4969,7 @@
             }
           }
         },
-        "tags": [
-          "DataImport"
-        ],
+        "tags": ["DataImport"],
         "security": [
           {
             "bearer": []
@@ -5354,9 +4996,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "DataImport"
-        ],
+        "tags": ["DataImport"],
         "security": [
           {
             "bearer": []

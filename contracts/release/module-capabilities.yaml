@@ -2,8 +2,8 @@
 # Each epic = 1 capability = workflow + screens + APIs + DB + events + tests.
 # This file records required capability coverage, not audited implementation truth.
 # Actual implementation truth is audited in PROJECT_CONTEXT.md and KANBAN.md.
-spec_version: "V10 FINAL"
-last_updated: "2026-03-07"
+spec_version: 'V10 FINAL'
+last_updated: '2026-03-07'
 
 modules:
   HRM:

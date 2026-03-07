@@ -4,8 +4,8 @@
 # This manifest defines required readiness expectations.
 # Actual implementation truth is audited in PROJECT_CONTEXT.md and KANBAN.md.
 release_profile: PROFILE_OPS
-spec_version: "V10 FINAL"
-last_updated: "2026-03-07"
+spec_version: 'V10 FINAL'
+last_updated: '2026-03-07'
 
 modules:
   HRM:
