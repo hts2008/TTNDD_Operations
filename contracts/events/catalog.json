@@ -1,6 +1,570 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "TTNDD_OPS Event Catalog",
-  "version": "0.1.0",
-  "events": {}
+  "version": "0.2.0",
+  "description": "Code-first event catalog extracted from packages/constants/src/events.ts (DOMAIN_EVENTS). Each event follows the naming convention: module.entity_action_past_tense.",
+  "envelope": {
+    "type": "object",
+    "required": [
+      "id",
+      "orgId",
+      "eventType",
+      "aggregateId",
+      "aggregateType",
+      "payload",
+      "actorUserId",
+      "createdAt"
+    ],
+    "properties": {
+      "id": { "type": "string", "format": "uuid", "description": "Auto-generated event ID" },
+      "orgId": { "type": "string", "format": "uuid", "description": "Tenant isolation key (RLS)" },
+      "eventType": { "type": "string", "description": "One of the event types listed below" },
+      "aggregateId": {
+        "type": "string",
+        "format": "uuid",
+        "description": "ID of the entity that changed"
+      },
+      "aggregateType": {
+        "type": "string",
+        "description": "Entity type name, e.g. Member, Session"
+      },
+      "payload": {
+        "type": "object",
+        "description": "Event-specific data (schema varies per event)"
+      },
+      "actorUserId": {
+        "type": "string",
+        "format": "uuid",
+        "description": "User who triggered the action"
+      },
+      "createdAt": { "type": "string", "format": "date-time" },
+      "processedAt": { "type": ["string", "null"], "format": "date-time" }
+    }
+  },
+  "events": {
+    "org": {
+      "module_id": 10,
+      "module_name": "Organization Config",
+      "events": {
+        "org.organization_created": {
+          "description": "A new organization (tenant) was created",
+          "aggregateType": "Organization",
+          "triggers": ["Seed default modules", "Create admin user"],
+          "consumers": ["notifications", "rewards"]
+        },
+        "org.organization_updated": {
+          "description": "Organization settings were updated",
+          "aggregateType": "Organization",
+          "triggers": ["Audit log"],
+          "consumers": ["notifications"]
+        },
+        "org.module_toggled": {
+          "description": "A feature module was enabled or disabled for the org",
+          "aggregateType": "Organization",
+          "triggers": ["UI feature flags refresh"],
+          "consumers": ["notifications"]
+        }
+      }
+    },
+    "hrm": {
+      "module_id": 1,
+      "module_name": "People & Organization (HRM)",
+      "events": {
+        "hrm.member_created": {
+          "description": "A new member (scout, leader, parent) was registered",
+          "aggregateType": "Member",
+          "triggers": ["Initialize EXP record", "Send welcome notification"],
+          "consumers": ["rewards", "notifications"]
+        },
+        "hrm.member_activated": {
+          "description": "Member status changed to active",
+          "aggregateType": "Member",
+          "triggers": ["Enable full access"],
+          "consumers": ["notifications"]
+        },
+        "hrm.member_suspended": {
+          "description": "Member was suspended (disciplinary or administrative)",
+          "aggregateType": "Member",
+          "triggers": ["Revoke access", "Notify guardians"],
+          "consumers": ["notifications"]
+        },
+        "hrm.member_reinstated": {
+          "description": "Suspended member was reinstated",
+          "aggregateType": "Member",
+          "triggers": ["Restore access"],
+          "consumers": ["notifications"]
+        },
+        "hrm.member_transferred": {
+          "description": "Member was transferred to a different unit/patrol",
+          "aggregateType": "Member",
+          "triggers": ["Update unit roster", "Recalculate patrol strength"],
+          "consumers": ["notifications"]
+        },
+        "hrm.member_left": {
+          "description": "Member departed the organization",
+          "aggregateType": "Member",
+          "triggers": ["Archive records", "Revoke access"],
+          "consumers": ["notifications", "cleanup"]
+        },
+        "hrm.guardian_linked": {
+          "description": "A parent/guardian was linked to a minor member",
+          "aggregateType": "Member",
+          "triggers": ["Enable guardian portal access"],
+          "consumers": ["notifications"]
+        }
+      }
+    },
+    "rewards": {
+      "module_id": 9,
+      "module_name": "Rewards & Gamification",
+      "events": {
+        "rewards.exp_awarded": {
+          "description": "Experience points were awarded to a member",
+          "aggregateType": "Member",
+          "triggers": ["Check level-up threshold", "Update leaderboard"],
+          "consumers": ["notifications", "rewards"]
+        },
+        "rewards.exp_deducted": {
+          "description": "Experience points were deducted (penalty)",
+          "aggregateType": "Member",
+          "triggers": ["Update leaderboard"],
+          "consumers": ["notifications"]
+        },
+        "rewards.badge_awarded": {
+          "description": "A badge was awarded to a member",
+          "aggregateType": "Member",
+          "triggers": ["Display badge notification"],
+          "consumers": ["notifications"]
+        },
+        "rewards.level_up": {
+          "description": "Member crossed a level threshold",
+          "aggregateType": "Member",
+          "triggers": ["Unlock new shop items", "Announcement"],
+          "consumers": ["notifications"]
+        },
+        "rewards.item_redeemed": {
+          "description": "Member redeemed a shop item using EXP",
+          "aggregateType": "Member",
+          "triggers": ["Deduct EXP", "Notify leader for approval"],
+          "consumers": ["notifications", "rewards"]
+        }
+      }
+    },
+    "scout": {
+      "module_id": 8,
+      "module_name": "Scout Core (Skills & Ranks)",
+      "events": {
+        "scout.skill_started": {
+          "description": "Member began working on a skill",
+          "aggregateType": "SkillProgress",
+          "triggers": ["Track progress"],
+          "consumers": ["notifications"]
+        },
+        "scout.evidence_submitted": {
+          "description": "Member submitted evidence for a skill assessment",
+          "aggregateType": "SkillProgress",
+          "triggers": ["Notify assessor"],
+          "consumers": ["notifications"]
+        },
+        "scout.skill_verified": {
+          "description": "A skill level was verified by an assessor",
+          "aggregateType": "SkillProgress",
+          "triggers": ["Award EXP", "Check rank eligibility"],
+          "consumers": ["rewards", "notifications"]
+        },
+        "scout.skill_awarded": {
+          "description": "A skill badge was officially awarded",
+          "aggregateType": "SkillProgress",
+          "triggers": ["Update member profile"],
+          "consumers": ["rewards", "notifications"]
+        },
+        "scout.rank_eligible": {
+          "description": "Member met all requirements for next rank",
+          "aggregateType": "RankProgress",
+          "triggers": ["Notify leader for proposal"],
+          "consumers": ["notifications"]
+        },
+        "scout.rank_proposed": {
+          "description": "A rank advancement was proposed for review",
+          "aggregateType": "RankProgress",
+          "triggers": ["Notify council/board"],
+          "consumers": ["notifications"]
+        },
+        "scout.rank_approved": {
+          "description": "Rank advancement was approved by council",
+          "aggregateType": "RankProgress",
+          "triggers": ["Schedule ceremony"],
+          "consumers": ["notifications", "rewards"]
+        },
+        "scout.rank_awarded": {
+          "description": "Rank was officially conferred at ceremony",
+          "aggregateType": "RankProgress",
+          "triggers": ["Award EXP", "Update profile", "Announce"],
+          "consumers": ["rewards", "notifications"]
+        }
+      }
+    },
+    "session": {
+      "module_id": 11,
+      "module_name": "Session Management",
+      "events": {
+        "session.session_created": {
+          "description": "A new training session was created",
+          "aggregateType": "Session",
+          "triggers": ["Notify assigned leaders"],
+          "consumers": ["notifications"]
+        },
+        "session.session_published": {
+          "description": "Session was published and visible to members",
+          "aggregateType": "Session",
+          "triggers": ["Notify members in scope"],
+          "consumers": ["notifications"]
+        },
+        "session.session_started": {
+          "description": "Session began (in-progress)",
+          "aggregateType": "Session",
+          "triggers": ["Enable check-in"],
+          "consumers": ["notifications"]
+        },
+        "session.attendance_marked": {
+          "description": "Attendance was recorded for one or more members",
+          "aggregateType": "Session",
+          "triggers": ["Award attendance EXP"],
+          "consumers": ["rewards", "notifications"]
+        },
+        "session.session_debriefed": {
+          "description": "Session debrief was completed by leader",
+          "aggregateType": "Session",
+          "triggers": ["Generate session report"],
+          "consumers": ["reports"]
+        }
+      }
+    },
+    "event": {
+      "module_id": 12,
+      "module_name": "Events & Camps",
+      "events": {
+        "event.event_created": {
+          "description": "A new event or camp was created",
+          "aggregateType": "Event",
+          "triggers": ["Notify event committee"],
+          "consumers": ["notifications"]
+        },
+        "event.event_published": {
+          "description": "Event was published for registration",
+          "aggregateType": "Event",
+          "triggers": ["Notify eligible members"],
+          "consumers": ["notifications"]
+        },
+        "event.registration_opened": {
+          "description": "Registration period opened for an event",
+          "aggregateType": "Event",
+          "triggers": ["Enable sign-up form"],
+          "consumers": ["notifications"]
+        },
+        "event.consent_received": {
+          "description": "Parental consent was received for a minor participant",
+          "aggregateType": "Event",
+          "triggers": ["Update registration status"],
+          "consumers": ["notifications"]
+        },
+        "event.participant_checked_in": {
+          "description": "Participant checked in at the event",
+          "aggregateType": "Event",
+          "triggers": ["Award attendance EXP"],
+          "consumers": ["rewards", "notifications"]
+        },
+        "event.event_completed": {
+          "description": "Event was completed",
+          "aggregateType": "Event",
+          "triggers": ["Generate event report", "Award participation badges"],
+          "consumers": ["rewards", "reports", "notifications"]
+        }
+      }
+    },
+    "lms": {
+      "module_id": 7,
+      "module_name": "Learning Management System",
+      "events": {
+        "lms.course_enrolled": {
+          "description": "Member enrolled in a course",
+          "aggregateType": "CourseEnrollment",
+          "triggers": ["Track progress", "Notify instructor"],
+          "consumers": ["notifications"]
+        },
+        "lms.lesson_completed": {
+          "description": "Member completed a lesson",
+          "aggregateType": "CourseEnrollment",
+          "triggers": ["Award EXP", "Check course completion"],
+          "consumers": ["rewards", "notifications"]
+        },
+        "lms.quiz_submitted": {
+          "description": "Member submitted a quiz attempt",
+          "aggregateType": "CourseEnrollment",
+          "triggers": ["Grade quiz"],
+          "consumers": ["notifications"]
+        },
+        "lms.quiz_passed": {
+          "description": "Member passed a quiz",
+          "aggregateType": "CourseEnrollment",
+          "triggers": ["Award EXP", "Unlock next lesson"],
+          "consumers": ["rewards", "notifications"]
+        },
+        "lms.quiz_failed": {
+          "description": "Member failed a quiz",
+          "aggregateType": "CourseEnrollment",
+          "triggers": ["Suggest retry"],
+          "consumers": ["notifications"]
+        }
+      }
+    },
+    "enrichment": {
+      "module_id": 13,
+      "module_name": "Enrichment & Spiritual (Đạo Đức)",
+      "events": {
+        "enrichment.spiritual_log_created": {
+          "description": "Member logged a spiritual practice entry",
+          "aggregateType": "SpiritualLog",
+          "triggers": ["Award EXP for consistency"],
+          "consumers": ["rewards", "notifications"]
+        },
+        "enrichment.ngu_gioi_assessed": {
+          "description": "Ngũ Giới Cấm assessment was completed for a member",
+          "aggregateType": "NguGioiAssessment",
+          "triggers": ["Update moral development profile"],
+          "consumers": ["notifications"]
+        },
+        "enrichment.evaluation_created": {
+          "description": "A peer or leader evaluation was created",
+          "aggregateType": "Evaluation",
+          "triggers": ["Notify evaluated member"],
+          "consumers": ["notifications"]
+        },
+        "enrichment.mentoring_started": {
+          "description": "A mentoring relationship was established",
+          "aggregateType": "MentoringRecord",
+          "triggers": ["Notify mentor and mentee"],
+          "consumers": ["notifications"]
+        }
+      }
+    },
+    "project": {
+      "module_id": 2,
+      "module_name": "Project & Service Learning",
+      "events": {
+        "project.plan_submitted": {
+          "description": "Project plan was submitted for review",
+          "aggregateType": "Project",
+          "triggers": ["Notify reviewers"],
+          "consumers": ["notifications"]
+        },
+        "project.plan_approved": {
+          "description": "Project plan was approved",
+          "aggregateType": "Project",
+          "triggers": ["Enable task creation", "Notify team"],
+          "consumers": ["notifications"]
+        },
+        "project.task_completed": {
+          "description": "A project task was completed",
+          "aggregateType": "ProjectTask",
+          "triggers": ["Award EXP", "Update project progress"],
+          "consumers": ["rewards", "notifications"]
+        },
+        "project.project_completed": {
+          "description": "Entire project was marked as completed",
+          "aggregateType": "Project",
+          "triggers": ["Award completion badge", "Generate report"],
+          "consumers": ["rewards", "reports", "notifications"]
+        }
+      }
+    },
+    "ticket": {
+      "module_id": 3,
+      "module_name": "Tickets & Support",
+      "events": {
+        "ticket.ticket_created": {
+          "description": "A support/issue ticket was created",
+          "aggregateType": "Ticket",
+          "triggers": ["Auto-assign based on rules"],
+          "consumers": ["notifications"]
+        },
+        "ticket.ticket_assigned": {
+          "description": "Ticket was assigned to an agent",
+          "aggregateType": "Ticket",
+          "triggers": ["Notify assignee"],
+          "consumers": ["notifications"]
+        },
+        "ticket.ticket_resolved": {
+          "description": "Ticket was resolved",
+          "aggregateType": "Ticket",
+          "triggers": ["Notify requester"],
+          "consumers": ["notifications"]
+        },
+        "ticket.ticket_closed": {
+          "description": "Ticket was closed (confirmed resolved)",
+          "aggregateType": "Ticket",
+          "triggers": ["Archive ticket"],
+          "consumers": ["cleanup"]
+        }
+      }
+    },
+    "finance": {
+      "module_id": 4,
+      "module_name": "Finance & Fee",
+      "events": {
+        "finance.fee_created": {
+          "description": "A fee was created (membership, activity, etc.)",
+          "aggregateType": "Fee",
+          "triggers": ["Notify affected members"],
+          "consumers": ["notifications"]
+        },
+        "finance.fee_paid": {
+          "description": "A fee payment was recorded",
+          "aggregateType": "Fee",
+          "triggers": ["Issue receipt", "Update balance"],
+          "consumers": ["notifications"]
+        },
+        "finance.fee_overdue": {
+          "description": "A fee payment became overdue",
+          "aggregateType": "Fee",
+          "triggers": ["Send reminder", "Notify guardian"],
+          "consumers": ["notifications"]
+        },
+        "finance.transaction_completed": {
+          "description": "A financial transaction was fully processed",
+          "aggregateType": "Transaction",
+          "triggers": ["Update org balance", "Record in ledger"],
+          "consumers": ["reports"]
+        }
+      }
+    },
+    "asset": {
+      "module_id": 5,
+      "module_name": "Assets & Inventory",
+      "events": {
+        "asset.asset_checked_out": {
+          "description": "An asset was checked out to a member",
+          "aggregateType": "Asset",
+          "triggers": ["Update inventory", "Set return reminder"],
+          "consumers": ["notifications"]
+        },
+        "asset.asset_returned": {
+          "description": "An asset was returned",
+          "aggregateType": "Asset",
+          "triggers": ["Update inventory", "Inspect condition"],
+          "consumers": ["notifications"]
+        },
+        "asset.asset_reported_lost": {
+          "description": "An asset was reported as lost or damaged",
+          "aggregateType": "Asset",
+          "triggers": ["Create incident ticket", "Notify asset manager"],
+          "consumers": ["notifications", "tickets"]
+        }
+      }
+    },
+    "process": {
+      "module_id": 6,
+      "module_name": "Process & Workflow",
+      "events": {
+        "process.workflow_started": {
+          "description": "An approval/workflow process was initiated",
+          "aggregateType": "Workflow",
+          "triggers": ["Notify first approver"],
+          "consumers": ["notifications"]
+        },
+        "process.step_completed": {
+          "description": "A workflow step was completed",
+          "aggregateType": "Workflow",
+          "triggers": ["Route to next step or complete"],
+          "consumers": ["notifications"]
+        },
+        "process.workflow_completed": {
+          "description": "Entire workflow was completed",
+          "aggregateType": "Workflow",
+          "triggers": ["Notify initiator", "Execute final action"],
+          "consumers": ["notifications"]
+        }
+      }
+    },
+    "notification": {
+      "module_id": 14,
+      "module_name": "Notifications",
+      "events": {
+        "notification.notification_sent": {
+          "description": "A notification was sent to a user",
+          "aggregateType": "Notification",
+          "triggers": ["Increment unread count"],
+          "consumers": []
+        },
+        "notification.notification_read": {
+          "description": "A notification was marked as read",
+          "aggregateType": "Notification",
+          "triggers": ["Decrement unread count"],
+          "consumers": []
+        },
+        "notification.bulk_sent": {
+          "description": "Bulk notifications were sent to a group",
+          "aggregateType": "Notification",
+          "triggers": ["Log delivery stats"],
+          "consumers": ["reports"]
+        }
+      }
+    }
+  },
+  "worker_queues": {
+    "notifications": {
+      "description": "Push notifications, in-app, email, SMS dispatch",
+      "subscribed_events": [
+        "org.*",
+        "hrm.*",
+        "rewards.*",
+        "scout.*",
+        "session.*",
+        "event.*",
+        "lms.*",
+        "enrichment.*",
+        "project.*",
+        "ticket.*",
+        "finance.*",
+        "asset.*",
+        "process.*"
+      ]
+    },
+    "rewards": {
+      "description": "EXP award/deduct, badge award, level-up check",
+      "subscribed_events": [
+        "scout.skill_verified",
+        "scout.rank_awarded",
+        "session.attendance_marked",
+        "event.participant_checked_in",
+        "lms.lesson_completed",
+        "lms.quiz_passed",
+        "enrichment.spiritual_log_created",
+        "project.task_completed",
+        "project.project_completed",
+        "event.event_completed"
+      ]
+    },
+    "reports": {
+      "description": "Async report generation, data export/import",
+      "subscribed_events": [
+        "session.session_debriefed",
+        "event.event_completed",
+        "finance.transaction_completed",
+        "notification.bulk_sent",
+        "project.project_completed"
+      ]
+    },
+    "cleanup": {
+      "description": "Data retention, archiving, soft-delete sweeps",
+      "subscribed_events": ["hrm.member_left", "ticket.ticket_closed"]
+    }
+  },
+  "_metadata": {
+    "total_events": 61,
+    "total_modules": 14,
+    "source_of_truth": "packages/constants/src/events.ts",
+    "generated_at": "2026-03-07T23:30:00+07:00",
+    "generated_by": "PM Orchestrator (Antigravity)"
+  }
 }

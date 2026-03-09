@@ -1,7 +1,9 @@
-# TTNDD_OPS Module Capabilities Map (V2 §8.11)
-# Each epic = 1 capability = workflow + screens + APIs + DB + events + tests
-spec_version: "17.0"
-last_updated: "2026-03-06"
+# TTNDD_OPS Module Capabilities Map (V3 release baseline)
+# Each epic = 1 capability = workflow + screens + APIs + DB + events + tests.
+# This file records required capability coverage, not audited implementation truth.
+# Actual implementation truth is audited in PROJECT_CONTEXT.md and KANBAN.md.
+spec_version: 'V10 FINAL'
+last_updated: '2026-03-07'
 
 modules:
   HRM:

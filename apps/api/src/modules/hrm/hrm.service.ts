@@ -5,6 +5,7 @@ import { DomainEventService } from '../../core/events';
 import { AuditService } from '../../core/audit';
 import { DOMAIN_EVENTS } from '@ttndd/constants';
 import { MemberLifecycleService } from './member-lifecycle.service';
+import { MemberValidationService } from './member-validation.service';
 
 interface CreateMemberDto {
   userId: string;
@@ -42,9 +43,25 @@ export class HrmService {
     private readonly domainEvents: DomainEventService,
     private readonly audit: AuditService,
     private readonly lifecycle: MemberLifecycleService,
+    private readonly validation: MemberValidationService,
   ) {}
 
   async createMember(orgId: string, dto: CreateMemberDto, actorUserId: string) {
+    // T-0043: Age→Branch validation
+    if (dto.profile.birthDate && dto.branchId) {
+      const branch = await this.prisma.branch.findUnique({
+        where: { id: dto.branchId },
+        select: { code: true },
+      });
+      const ageBranch = this.validation.validateAgeBranch(
+        new Date(dto.profile.birthDate),
+        branch?.code,
+      );
+      if (!ageBranch.valid) {
+        throw new BadRequestException(ageBranch.reason);
+      }
+    }
+
     const member = await this.prisma.orgMember.create({
       data: {
         orgId,
@@ -86,12 +103,24 @@ export class HrmService {
       actorUserId,
     });
 
-    await this.audit.log({ orgId, userId: actorUserId, action: 'hrm.member_created', resource: 'OrgMember', resourceId: member.id, newValue: { role: dto.role, fullName: dto.profile.fullName } });
+    await this.audit.log({
+      orgId,
+      userId: actorUserId,
+      action: 'hrm.member_created',
+      resource: 'OrgMember',
+      resourceId: member.id,
+      newValue: { role: dto.role, fullName: dto.profile.fullName },
+    });
 
     return member;
   }
 
-  async findMany(orgId: string, filters?: { status?: string; branchId?: string; role?: string; search?: string }, page = 1, limit = 20) {
+  async findMany(
+    orgId: string,
+    filters?: { status?: string; branchId?: string; role?: string; search?: string },
+    page = 1,
+    limit = 20,
+  ) {
     const where: Prisma.OrgMemberWhereInput = { orgId };
     if (filters?.status) where.status = filters.status;
     if (filters?.branchId) where.branchId = filters.branchId;
@@ -127,10 +156,13 @@ export class HrmService {
     const member = await this.prisma.orgMember.findFirst({
       where: { id: memberId, orgId },
       include: {
-        user: { select: { id: true, displayName: true, email: true, avatarUrl: true, phone: true } },
+        user: {
+          select: { id: true, displayName: true, email: true, avatarUrl: true, phone: true },
+        },
         branch: true,
         unit: true,
         profile: true,
+        guardianLinks: { orderBy: [{ isPrimary: 'desc' }, { createdAt: 'asc' }] },
         branchHistory: { orderBy: { transitionDate: 'desc' } },
       },
     });
@@ -138,7 +170,12 @@ export class HrmService {
     return member;
   }
 
-  async updateProfile(orgId: string, memberId: string, data: Partial<CreateMemberDto['profile']>, actorUserId: string) {
+  async updateProfile(
+    orgId: string,
+    memberId: string,
+    data: Partial<CreateMemberDto['profile']>,
+    actorUserId: string,
+  ) {
     const member = await this.findById(orgId, memberId);
     if (!member.profile) throw new NotFoundException('Member profile not found');
 
@@ -160,7 +197,14 @@ export class HrmService {
       data: updateData,
     });
 
-    await this.audit.log({ orgId, userId: actorUserId, action: 'hrm.profile_updated', resource: 'MemberProfile', resourceId: member.profile.id, newValue: data as Prisma.InputJsonValue });
+    await this.audit.log({
+      orgId,
+      userId: actorUserId,
+      action: 'hrm.profile_updated',
+      resource: 'MemberProfile',
+      resourceId: member.profile.id,
+      newValue: data as Prisma.InputJsonValue,
+    });
 
     return updated;
   }
@@ -190,12 +234,25 @@ export class HrmService {
       actorUserId,
     });
 
-    await this.audit.log({ orgId, userId: actorUserId, action: `hrm.member_${action}`, resource: 'OrgMember', resourceId: memberId, oldValue: { status: member.status }, newValue: { status: newStatus } });
+    await this.audit.log({
+      orgId,
+      userId: actorUserId,
+      action: `hrm.member_${action}`,
+      resource: 'OrgMember',
+      resourceId: memberId,
+      oldValue: { status: member.status },
+      newValue: { status: newStatus },
+    });
 
     return { ...updated, allowedActions: this.lifecycle.getAllowedActions(newStatus) };
   }
 
-  async transferMember(orgId: string, memberId: string, dto: TransferMemberDto, actorUserId: string) {
+  async transferMember(
+    orgId: string,
+    memberId: string,
+    dto: TransferMemberDto,
+    actorUserId: string,
+  ) {
     const member = await this.findById(orgId, memberId);
     if (member.status !== 'active') {
       throw new BadRequestException('Only active members can be transferred');
@@ -263,5 +320,66 @@ export class HrmService {
       this.prisma.orgMember.groupBy({ by: ['role'], where: { orgId }, _count: true }),
     ]);
     return { total, byStatus, byBranch, byRole };
+  }
+
+  /**
+   * T-0048: Cross-module character sheet aggregation.
+   * Combines: HRM profile + Rewards (EXP/Badges) + Scout (rank/skills) + attendance stats
+   */
+  async getCharacterSheet(orgId: string, memberId: string) {
+    const [member, expSummary, badges, ranks, attendance] = await Promise.all([
+      this.findById(orgId, memberId),
+      this.prisma.memberExpSummary.findFirst({ where: { orgMemberId: memberId } }),
+      this.prisma.memberBadge.findMany({
+        where: { orgMemberId: memberId },
+        include: { badge: { select: { name: true, imageUrl: true, badgeType: true } } },
+        orderBy: { earnedAt: 'desc' },
+        take: 20,
+      }),
+      this.prisma.memberRank.findMany({
+        where: { orgMemberId: memberId },
+        orderBy: { completedAt: 'desc' },
+        take: 5,
+      }),
+      this.prisma.sessionAttendance.groupBy({
+        by: ['status'],
+        where: { orgMemberId: memberId },
+        _count: true,
+      }),
+    ]);
+
+    // T-0050: Compliance check
+    const compliance = await this.validation.checkCompliance(orgId, memberId);
+
+    return {
+      member,
+      rewards: {
+        totalExp: expSummary?.totalExp ?? 0,
+        availableExp: expSummary?.availableExp ?? 0,
+        badges: badges.map((b) => ({
+          id: b.id,
+          name: b.badge.name,
+          imageUrl: b.badge.imageUrl,
+          badgeType: b.badge.badgeType,
+          earnedAt: b.earnedAt,
+        })),
+      },
+      ranks,
+      attendance: attendance.reduce(
+        (acc, a) => {
+          acc[a.status] = a._count;
+          return acc;
+        },
+        {} as Record<string, number>,
+      ),
+      compliance,
+    };
+  }
+
+  /**
+   * T-0050: Check compliance for a member.
+   */
+  async checkMemberCompliance(orgId: string, memberId: string) {
+    return this.validation.checkCompliance(orgId, memberId);
   }
 }

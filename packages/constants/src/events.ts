@@ -4,6 +4,9 @@ export const DOMAIN_EVENTS = {
     CREATED: 'org.organization_created',
     UPDATED: 'org.organization_updated',
     MODULE_TOGGLED: 'org.module_toggled',
+    MEMBER_JOINED: 'org.member_joined',
+    MEMBER_ROLE_CHANGED: 'org.member_role_changed',
+    MEMBER_LEFT: 'org.member_left',
   },
 
   // Module 1: HRM
@@ -15,6 +18,8 @@ export const DOMAIN_EVENTS = {
     MEMBER_TRANSFERRED: 'hrm.member_transferred',
     MEMBER_LEFT: 'hrm.member_left',
     GUARDIAN_LINKED: 'hrm.guardian_linked',
+    GUARDIAN_UPDATED: 'hrm.guardian_updated',
+    GUARDIAN_REMOVED: 'hrm.guardian_removed',
   },
 
   // Module 9: Rewards

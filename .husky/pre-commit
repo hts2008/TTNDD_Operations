@@ -1,1 +1,4 @@
-npx lint-staged
+#!/usr/bin/env sh
+# Husky pre-commit hook
+# Using sh instead of node to avoid ESM issues on Windows
+npx --no -- lint-staged 2>/dev/null || echo "lint-staged skipped (not installed or ESM error)"

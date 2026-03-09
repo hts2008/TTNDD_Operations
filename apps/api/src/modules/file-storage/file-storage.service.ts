@@ -1,10 +1,15 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, Inject, Logger } from '@nestjs/common';
 import { PrismaService } from '../../core/database';
+import { StorageAdapter, STORAGE_ADAPTER } from './storage-adapter.interface';
 
 const ALLOWED_MIME_TYPES = [
-  'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/webp',
   'application/pdf',
-  'video/mp4', 'video/webm',
+  'video/mp4',
+  'video/webm',
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   'application/vnd.ms-excel',
   'text/csv',
@@ -12,6 +17,15 @@ const ALLOWED_MIME_TYPES = [
 ];
 
 const MAX_SIZE_BYTES = 50 * 1024 * 1024; // 50MB
+
+/** Retention TTL in seconds per entity type (T-0034) */
+const RETENTION_TTL_MAP: Record<string, number> = {
+  avatar: 365 * 24 * 3600, // 1 year
+  evidence: 3 * 365 * 24 * 3600, // 3 years (compliance)
+  document: 365 * 24 * 3600, // 1 year
+  export: 7 * 24 * 3600, // 7 days (temporary)
+  general: 90 * 24 * 3600, // 90 days (default)
+};
 
 export interface SignedUploadUrlResult {
   fileRefId: string;
@@ -37,7 +51,14 @@ export interface CreateUploadRequestDto {
 
 @Injectable()
 export class FileStorageService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(FileStorageService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(STORAGE_ADAPTER) private readonly storageAdapter: StorageAdapter,
+  ) {
+    this.logger.log(`FileStorageService using adapter: ${this.storageAdapter.name}`);
+  }
 
   async createUploadRequest(
     orgId: string,
@@ -56,9 +77,15 @@ export class FileStorageService {
     const safeName = params.originalName.replace(/[^a-zA-Z0-9._-]/g, '_');
     const objectKey = `${orgId}/${params.entityType || 'general'}/${timestamp}-${safeName}`;
 
-    // In local dev: mock signed URL. In GCP: use @google-cloud/storage SignedUrl v4
-    const uploadUrl = `http://localhost:${process.env.PORT || 3001}/file-storage/local-upload/${Buffer.from(objectKey).toString('base64')}`;
-    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+    const retentionTtlSeconds =
+      RETENTION_TTL_MAP[params.entityType || 'general'] ?? RETENTION_TTL_MAP.general;
+
+    const { uploadUrl, expiresAt } = await this.storageAdapter.generateUploadUrl(
+      bucketName,
+      objectKey,
+      params.mimeType,
+      { retentionTtlSeconds },
+    );
 
     const fileRef = await this.prisma.fileObjectRef.create({
       data: {
@@ -84,8 +111,10 @@ export class FileStorageService {
     });
     if (!fileRef) throw new NotFoundException('File not found');
 
-    const downloadUrl = `http://localhost:${process.env.PORT || 3001}/file-storage/local-download/${fileRefId}`;
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+    const { downloadUrl, expiresAt } = await this.storageAdapter.generateDownloadUrl(
+      fileRef.bucketName,
+      fileRef.objectKey,
+    );
 
     return {
       downloadUrl,
@@ -113,6 +142,10 @@ export class FileStorageService {
       where: { id: fileRefId, orgId, deletedAt: null },
     });
     if (!fileRef) throw new NotFoundException('File not found');
+
+    // Optionally delete from storage backend
+    await this.storageAdapter.deleteObject(fileRef.bucketName, fileRef.objectKey);
+
     await this.prisma.fileObjectRef.update({
       where: { id: fileRefId },
       data: { deletedAt: new Date() },

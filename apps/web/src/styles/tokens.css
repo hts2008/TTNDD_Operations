@@ -1,0 +1,68 @@
+/**
+ * TTNDD Theme Tokens — CSS Custom Properties
+ * T-0014: Import tokens from @ttndd/tokens into the web application.
+ *
+ * This file generates CSS custom properties from the design token system
+ * in packages/tokens/src/tokens.json, making them available globally.
+ *
+ * Usage:
+ *   import '@/styles/tokens.css' in the root layout
+ *   Then use: var(--token-color-primary), var(--token-spacing-md), etc.
+ *
+ * Token categories:
+ *   --token-color-*       Core, branch (Đồng/Thiếu/Thanh), SPICES colors
+ *   --token-spacing-*     xs/sm/md/lg/xl spacing
+ *   --token-radius-*      Border radius scale
+ */
+
+/* ─── Core Colors ─────────────────────────────── */
+:root {
+  --token-color-primary: #1e40af;
+  --token-color-secondary: #7c3aed;
+  --token-color-accent: #f59e0b;
+  --token-color-background: #ffffff;
+  --token-color-foreground: #0a0a0a;
+  --token-color-muted: #f5f5f5;
+
+  /* Branch Colors (Ngành) */
+  --token-color-branch-dong: #22c55e;
+  --token-color-branch-thieu: #3b82f6;
+  --token-color-branch-thanh: #ef4444;
+
+  /* SPICES Development Areas */
+  --token-color-spices-social: #f97316;
+  --token-color-spices-physical: #22c55e;
+  --token-color-spices-intellectual: #3b82f6;
+  --token-color-spices-character: #a855f7;
+  --token-color-spices-emotional: #ec4899;
+  --token-color-spices-spiritual: #eab308;
+
+  /* Spacing Scale */
+  --token-spacing-xs: 0.25rem;
+  --token-spacing-sm: 0.5rem;
+  --token-spacing-md: 1rem;
+  --token-spacing-lg: 1.5rem;
+  --token-spacing-xl: 2rem;
+
+  /* Border Radius */
+  --token-radius-sm: 0.25rem;
+  --token-radius-md: 0.5rem;
+  --token-radius-lg: 1rem;
+  --token-radius-full: 9999px;
+
+  /* ─── MMORPG HUD specific tokens ─────────────── */
+  --hud-exp-gradient: linear-gradient(90deg, #f59e0b, #f97316, #ef4444);
+  --hud-rank-glow: 0 0 8px rgba(245, 158, 11, 0.4);
+  --hud-quest-bg: rgba(30, 64, 175, 0.05);
+  --hud-streak-glow: 0 0 12px rgba(249, 115, 22, 0.5);
+}
+
+/* ─── Dark Mode Overrides ──────────────────────── */
+.dark,
+[data-theme='dark'] {
+  --token-color-background: #0a0a0a;
+  --token-color-foreground: #fafafa;
+  --token-color-muted: #1a1a1a;
+
+  --hud-quest-bg: rgba(30, 64, 175, 0.15);
+}
