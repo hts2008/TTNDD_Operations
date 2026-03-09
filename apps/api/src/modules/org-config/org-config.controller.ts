@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { Prisma } from '@prisma/client';
 import { OrgConfigService } from './org-config.service';
@@ -11,6 +11,16 @@ export class OrgConfigController {
   constructor(private readonly orgConfigService: OrgConfigService) {}
 
   // ── Organization ──
+
+  @Post()
+  @Roles('super_admin')
+  @ApiOperation({ summary: 'Create a new organization' })
+  createOrganization(
+    @Body() body: { slug: string; name: string; fullName?: string },
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
+    return this.orgConfigService.createOrganization(body, user.userId);
+  }
 
   @Get(':slug')
   @ApiOperation({ summary: 'Get organization by slug' })
@@ -65,7 +75,15 @@ export class OrgConfigController {
   @ApiOperation({ summary: 'Create a new branch' })
   createBranch(
     @Param('id') id: string,
-    @Body() body: { code: string; name: string; minAge?: number; maxAge?: number; colorTheme?: string; narrativeName?: string },
+    @Body()
+    body: {
+      code: string;
+      name: string;
+      minAge?: number;
+      maxAge?: number;
+      colorTheme?: string;
+      narrativeName?: string;
+    },
     @CurrentUser() user: CurrentUserPayload,
   ) {
     return this.orgConfigService.createBranch(id, body, user.userId);
@@ -77,10 +95,28 @@ export class OrgConfigController {
   updateBranch(
     @Param('id') id: string,
     @Param('branchId') branchId: string,
-    @Body() body: { name?: string; minAge?: number; maxAge?: number; colorTheme?: string; narrativeName?: string },
+    @Body()
+    body: {
+      name?: string;
+      minAge?: number;
+      maxAge?: number;
+      colorTheme?: string;
+      narrativeName?: string;
+    },
     @CurrentUser() user: CurrentUserPayload,
   ) {
     return this.orgConfigService.updateBranch(id, branchId, body, user.userId);
+  }
+
+  @Delete(':id/branches/:branchId')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Delete a branch (must have no active members)' })
+  deleteBranch(
+    @Param('id') id: string,
+    @Param('branchId') branchId: string,
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
+    return this.orgConfigService.deleteBranch(id, branchId, user.userId);
   }
 
   // ── Units ──
@@ -96,7 +132,14 @@ export class OrgConfigController {
   @ApiOperation({ summary: 'Create a new unit' })
   createUnit(
     @Param('id') id: string,
-    @Body() body: { branchId: string; name: string; totemName?: string; unitType?: string; parentUnitId?: string },
+    @Body()
+    body: {
+      branchId: string;
+      name: string;
+      totemName?: string;
+      unitType?: string;
+      parentUnitId?: string;
+    },
     @CurrentUser() user: CurrentUserPayload,
   ) {
     return this.orgConfigService.createUnit(id, body, user.userId);
@@ -108,17 +151,39 @@ export class OrgConfigController {
   updateUnit(
     @Param('id') id: string,
     @Param('unitId') unitId: string,
-    @Body() body: { name?: string; totemName?: string; unitType?: string; parentUnitId?: string; leaderUserId?: string },
+    @Body()
+    body: {
+      name?: string;
+      totemName?: string;
+      unitType?: string;
+      parentUnitId?: string;
+      leaderUserId?: string;
+    },
     @CurrentUser() user: CurrentUserPayload,
   ) {
     return this.orgConfigService.updateUnit(id, unitId, body, user.userId);
+  }
+
+  @Delete(':id/units/:unitId')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Delete a unit (must have no active members or children)' })
+  deleteUnit(
+    @Param('id') id: string,
+    @Param('unitId') unitId: string,
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
+    return this.orgConfigService.deleteUnit(id, unitId, user.userId);
   }
 
   // ── Members ──
 
   @Get(':id/members')
   @ApiOperation({ summary: 'List members (paginated)' })
-  getMembers(@Param('id') id: string, @Query('page') page?: number, @Query('limit') limit?: number) {
+  getMembers(
+    @Param('id') id: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
     return this.orgConfigService.getMembers(id, page ?? 1, limit ?? 20);
   }
 
@@ -136,6 +201,11 @@ export class OrgConfigController {
     @Query('page') page?: number,
     @Query('limit') limit?: number,
   ) {
-    return this.orgConfigService.getAuditLog(id, { action, resource, from, to }, page ?? 1, limit ?? 50);
+    return this.orgConfigService.getAuditLog(
+      id,
+      { action, resource, from, to },
+      page ?? 1,
+      limit ?? 50,
+    );
   }
 }
