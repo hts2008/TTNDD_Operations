@@ -27,6 +27,11 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: '${{ env.NODE_VERSION }}', cache: 'pnpm' }
       - run: pnpm install --frozen-lockfile
+      - name: Generate Prisma Client
+        run: cd apps/api && npx prisma generate
+        env:
+          DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
+          DATABASE_MIGRATION_URL: postgresql://dummy:dummy@localhost:5432/dummy
       - run: pnpm build
 
   test:
@@ -50,9 +55,15 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: '${{ env.NODE_VERSION }}', cache: 'pnpm' }
       - run: pnpm install --frozen-lockfile
-      - run: pnpm test
+      - name: Generate Prisma Client
+        run: cd apps/api && npx prisma generate
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/ttndd_test
+          DATABASE_MIGRATION_URL: postgresql://test:test@localhost:5432/ttndd_test
+      - run: pnpm test -- --passWithNoTests
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/ttndd_test
+          DATABASE_MIGRATION_URL: postgresql://test:test@localhost:5432/ttndd_test
 
   migration-check:
     runs-on: ubuntu-latest
@@ -78,6 +89,7 @@ jobs:
       - run: cd apps/api && npx prisma migrate deploy
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/ttndd_migrate_test
+          DATABASE_MIGRATION_URL: postgresql://test:test@localhost:5432/ttndd_migrate_test
 
   contract-lint:
     name: Contract Lint & Drift Check
@@ -124,7 +136,8 @@ jobs:
       # Check contract drift (regenerate and diff)
       - name: Check OpenAPI drift
         run: |
-          cp contracts/openapi/ttndd-ops-api.json /tmp/openapi-before.json
+          cd apps/api && npx prisma generate
+          cd ../..
           pnpm --filter api build
           node apps/api/scripts/generate-openapi.js
           if ! diff -q contracts/openapi/ttndd-ops-api.json /tmp/openapi-before.json > /dev/null 2>&1; then
@@ -133,3 +146,6 @@ jobs:
             exit 1
           fi
           echo "✅ OpenAPI spec is in sync with code"
+        env:
+          DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
+          DATABASE_MIGRATION_URL: postgresql://dummy:dummy@localhost:5432/dummy
