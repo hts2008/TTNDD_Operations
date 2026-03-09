@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { OrgConfigService } from './org-config.service';
 import { PrismaService } from '../../core/database';
 import { DomainEventService } from '../../core/events';
@@ -25,6 +25,7 @@ describe('OrgConfigService', () => {
       },
       unit: {
         findFirst: jest.fn(),
+        count: jest.fn().mockResolvedValue(0),
         delete: jest.fn().mockResolvedValue({ id: 'u-1' }),
       },
       orgMember: {
@@ -63,7 +64,7 @@ describe('OrgConfigService', () => {
       prisma.organization.findUnique.mockResolvedValue({ id: 'existing' });
       await expect(
         service.createOrganization({ name: 'Test', slug: 'existing-slug' }, 'u-1'),
-      ).rejects.toThrow(ConflictException);
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
