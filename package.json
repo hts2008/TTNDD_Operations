@@ -14,7 +14,7 @@
     "db:seed": "pnpm --filter api run db:seed",
     "db:studio": "pnpm --filter api run db:studio",
     "clean": "turbo run clean && rm -rf node_modules",
-    "prepare": "node -e \"try{require.resolve('husky')}catch(e){process.exit(0)}\" && husky"
+    "prepare": "husky || true"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
