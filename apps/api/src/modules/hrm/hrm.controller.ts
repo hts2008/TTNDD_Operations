@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Param, Body, Query } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { HrmService } from './hrm.service';
 import { CurrentUser, type CurrentUserPayload, Roles } from '../../common/decorators';
@@ -116,6 +116,54 @@ export class HrmController {
   @ApiOperation({ summary: 'Get organization chart' })
   getOrgChart(@CurrentUser() user: CurrentUserPayload) {
     return this.hrmService.getOrgChart(user.orgId);
+  }
+
+  @Post('org-chart/nodes')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'T-0051: Create org chart node' })
+  createOrgChartNode(
+    @CurrentUser() user: CurrentUserPayload,
+    @Body()
+    body: {
+      name: string;
+      nodeType: string;
+      parentNodeId?: string;
+      orgMemberId?: string;
+      positionTitle?: string;
+      displayOrder?: number;
+      validFrom?: string;
+      validTo?: string;
+    },
+  ) {
+    return this.hrmService.createOrgChartNode(user.orgId, body, user.userId);
+  }
+
+  @Put('org-chart/nodes/:nodeId')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'T-0051: Update org chart node' })
+  updateOrgChartNode(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('nodeId') nodeId: string,
+    @Body()
+    body: {
+      name?: string;
+      nodeType?: string;
+      parentNodeId?: string | null;
+      orgMemberId?: string | null;
+      positionTitle?: string | null;
+      displayOrder?: number;
+      isActive?: boolean;
+      validTo?: string | null;
+    },
+  ) {
+    return this.hrmService.updateOrgChartNode(user.orgId, nodeId, body, user.userId);
+  }
+
+  @Delete('org-chart/nodes/:nodeId')
+  @Roles('super_admin')
+  @ApiOperation({ summary: 'T-0051: Delete org chart node (leaf only)' })
+  deleteOrgChartNode(@CurrentUser() user: CurrentUserPayload, @Param('nodeId') nodeId: string) {
+    return this.hrmService.deleteOrgChartNode(user.orgId, nodeId, user.userId);
   }
 
   @Get('members/:id/timeline')

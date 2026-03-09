@@ -291,10 +291,165 @@ export class HrmService {
   }
 
   async getOrgChart(orgId: string) {
-    return this.prisma.orgChartNode.findMany({
-      where: { orgId },
+    const nodes = await this.prisma.orgChartNode.findMany({
+      where: { orgId, isActive: true },
       orderBy: [{ displayOrder: 'asc' }, { name: 'asc' }],
+      include: {
+        headMember: {
+          select: {
+            id: true,
+            role: true,
+            scoutName: true,
+            heroName: true,
+            user: { select: { displayName: true, avatarUrl: true } },
+          },
+        },
+      },
     });
+
+    // Build tree from flat list
+    const nodeMap = new Map<string, (typeof nodes)[0] & { children: typeof nodes }>();
+    const roots: ((typeof nodes)[0] & { children: typeof nodes })[] = [];
+    for (const n of nodes) {
+      nodeMap.set(n.id, { ...n, children: [] });
+    }
+    for (const n of nodes) {
+      const item = nodeMap.get(n.id)!;
+      if (n.parentNodeId && nodeMap.has(n.parentNodeId)) {
+        nodeMap.get(n.parentNodeId)!.children.push(item);
+      } else {
+        roots.push(item);
+      }
+    }
+    return roots;
+  }
+
+  async createOrgChartNode(
+    orgId: string,
+    data: {
+      name: string;
+      nodeType: string;
+      parentNodeId?: string;
+      orgMemberId?: string;
+      positionTitle?: string;
+      displayOrder?: number;
+      validFrom?: string;
+      validTo?: string;
+    },
+    actorUserId: string,
+  ) {
+    // Validate parent belongs to same org
+    if (data.parentNodeId) {
+      const parent = await this.prisma.orgChartNode.findFirst({
+        where: { id: data.parentNodeId, orgId },
+      });
+      if (!parent) throw new NotFoundException('Parent node not found in this org');
+    }
+
+    const node = await this.prisma.orgChartNode.create({
+      data: {
+        orgId,
+        name: data.name,
+        nodeType: data.nodeType,
+        parentNodeId: data.parentNodeId ?? null,
+        orgMemberId: data.orgMemberId ?? null,
+        positionTitle: data.positionTitle ?? null,
+        displayOrder: data.displayOrder ?? 0,
+        validFrom: data.validFrom ? new Date(data.validFrom) : new Date(),
+        validTo: data.validTo ? new Date(data.validTo) : null,
+      },
+    });
+
+    await this.domainEvents.publish({
+      orgId,
+      eventType: DOMAIN_EVENTS.HRM.ORG_NODE_CREATED ?? 'hrm.org_node_created',
+      aggregateType: 'OrgChartNode',
+      aggregateId: node.id,
+      actorId: actorUserId,
+      payload: { name: data.name, nodeType: data.nodeType, parentNodeId: data.parentNodeId },
+    });
+
+    return node;
+  }
+
+  async updateOrgChartNode(
+    orgId: string,
+    nodeId: string,
+    data: {
+      name?: string;
+      nodeType?: string;
+      parentNodeId?: string | null;
+      orgMemberId?: string | null;
+      positionTitle?: string | null;
+      displayOrder?: number;
+      isActive?: boolean;
+      validTo?: string | null;
+    },
+    actorUserId: string,
+  ) {
+    const existing = await this.prisma.orgChartNode.findFirst({
+      where: { id: nodeId, orgId },
+    });
+    if (!existing) throw new NotFoundException('Org chart node not found');
+
+    // Prevent circular: cannot set parent to self or own descendant
+    if (data.parentNodeId && data.parentNodeId === nodeId) {
+      throw new BadRequestException('Cannot set node as its own parent');
+    }
+
+    const updated = await this.prisma.orgChartNode.update({
+      where: { id: nodeId },
+      data: {
+        ...(data.name !== undefined && { name: data.name }),
+        ...(data.nodeType !== undefined && { nodeType: data.nodeType }),
+        ...(data.parentNodeId !== undefined && { parentNodeId: data.parentNodeId }),
+        ...(data.orgMemberId !== undefined && { orgMemberId: data.orgMemberId }),
+        ...(data.positionTitle !== undefined && { positionTitle: data.positionTitle }),
+        ...(data.displayOrder !== undefined && { displayOrder: data.displayOrder }),
+        ...(data.isActive !== undefined && { isActive: data.isActive }),
+        ...(data.validTo !== undefined && {
+          validTo: data.validTo ? new Date(data.validTo) : null,
+        }),
+      },
+    });
+
+    await this.domainEvents.publish({
+      orgId,
+      eventType: DOMAIN_EVENTS.HRM.ORG_NODE_UPDATED ?? 'hrm.org_node_updated',
+      aggregateType: 'OrgChartNode',
+      aggregateId: nodeId,
+      actorId: actorUserId,
+      payload: data,
+    });
+
+    return updated;
+  }
+
+  async deleteOrgChartNode(orgId: string, nodeId: string, actorUserId: string) {
+    const existing = await this.prisma.orgChartNode.findFirst({
+      where: { id: nodeId, orgId },
+      include: { childNodes: { select: { id: true } } },
+    });
+    if (!existing) throw new NotFoundException('Org chart node not found');
+
+    if (existing.childNodes.length > 0) {
+      throw new BadRequestException(
+        `Cannot delete node with ${existing.childNodes.length} child node(s). Reassign or delete children first.`,
+      );
+    }
+
+    await this.prisma.orgChartNode.delete({ where: { id: nodeId } });
+
+    await this.domainEvents.publish({
+      orgId,
+      eventType: DOMAIN_EVENTS.HRM.ORG_NODE_DELETED ?? 'hrm.org_node_deleted',
+      aggregateType: 'OrgChartNode',
+      aggregateId: nodeId,
+      actorId: actorUserId,
+      payload: { name: existing.name, nodeType: existing.nodeType },
+    });
+
+    return { deleted: true, id: nodeId };
   }
 
   async getTimeline(orgId: string, memberId: string) {

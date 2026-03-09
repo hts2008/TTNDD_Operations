@@ -20,6 +20,9 @@ export const DOMAIN_EVENTS = {
     GUARDIAN_LINKED: 'hrm.guardian_linked',
     GUARDIAN_UPDATED: 'hrm.guardian_updated',
     GUARDIAN_REMOVED: 'hrm.guardian_removed',
+    ORG_NODE_CREATED: 'hrm.org_node_created',
+    ORG_NODE_UPDATED: 'hrm.org_node_updated',
+    ORG_NODE_DELETED: 'hrm.org_node_deleted',
   },
 
   // Module 9: Rewards

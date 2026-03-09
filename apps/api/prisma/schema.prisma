@@ -130,6 +130,7 @@ model OrgMember {
   evaluations         Evaluation[]
   memberFees          MemberFee[]
   guardianLinks       GuardianLink[]
+  orgChartNodes       OrgChartNode[]
 
   @@unique([orgId, userId])
   @@map("org_members")
@@ -252,21 +253,27 @@ model MemberBranchHistory {
 }
 
 model OrgChartNode {
-  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  orgId        String   @map("org_id") @db.Uuid
-  nodeType     String   @map("node_type") @db.VarChar(50)
-  name         String   @db.VarChar(255)
-  parentNodeId String?  @map("parent_node_id") @db.Uuid
-  orgMemberId  String?  @map("org_member_id") @db.Uuid
-  positionTitle String? @map("position_title") @db.VarChar(100)
-  displayOrder Int      @default(0) @map("display_order")
-  metadata     Json     @default("{}")
-  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId         String    @map("org_id") @db.Uuid
+  nodeType      String    @map("node_type") @db.VarChar(50)
+  name          String    @db.VarChar(255)
+  parentNodeId  String?   @map("parent_node_id") @db.Uuid
+  orgMemberId   String?   @map("org_member_id") @db.Uuid
+  positionTitle String?   @map("position_title") @db.VarChar(100)
+  displayOrder  Int       @default(0) @map("display_order")
+  isActive      Boolean   @default(true) @map("is_active")
+  validFrom     DateTime  @default(now()) @map("valid_from") @db.Timestamptz()
+  validTo       DateTime? @map("valid_to") @db.Timestamptz()
+  metadata      Json      @default("{}")
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt     DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
 
   parentNode  OrgChartNode?  @relation("OrgChartHierarchy", fields: [parentNodeId], references: [id])
   childNodes  OrgChartNode[] @relation("OrgChartHierarchy")
+  headMember  OrgMember?     @relation(fields: [orgMemberId], references: [id])
 
   @@index([orgId])
+  @@index([orgId, isActive])
   @@map("org_chart_nodes")
 }
 
