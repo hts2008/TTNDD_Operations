@@ -365,7 +365,7 @@ export class HrmService {
       eventType: DOMAIN_EVENTS.HRM.ORG_NODE_CREATED ?? 'hrm.org_node_created',
       aggregateType: 'OrgChartNode',
       aggregateId: node.id,
-      actorId: actorUserId,
+      actorUserId: actorUserId,
       payload: { name: data.name, nodeType: data.nodeType, parentNodeId: data.parentNodeId },
     });
 
@@ -418,7 +418,7 @@ export class HrmService {
       eventType: DOMAIN_EVENTS.HRM.ORG_NODE_UPDATED ?? 'hrm.org_node_updated',
       aggregateType: 'OrgChartNode',
       aggregateId: nodeId,
-      actorId: actorUserId,
+      actorUserId: actorUserId,
       payload: data,
     });
 
@@ -445,7 +445,7 @@ export class HrmService {
       eventType: DOMAIN_EVENTS.HRM.ORG_NODE_DELETED ?? 'hrm.org_node_deleted',
       aggregateType: 'OrgChartNode',
       aggregateId: nodeId,
-      actorId: actorUserId,
+      actorUserId: actorUserId,
       payload: { name: existing.name, nodeType: existing.nodeType },
     });
 
@@ -483,7 +483,7 @@ export class HrmService {
       eventType: DOMAIN_EVENTS.HRM.ORG_NODE_UPDATED ?? 'hrm.org_node_updated',
       aggregateType: 'OrgChartNode',
       aggregateId: orgId,
-      actorId: actorUserId,
+      actorUserId: actorUserId,
       payload: { action: 'reorder', count: items.length },
     });
 
@@ -537,7 +537,7 @@ export class HrmService {
       eventType: DOMAIN_EVENTS.HRM.ORG_NODE_UPDATED ?? 'hrm.org_node_updated',
       aggregateType: 'OrgChartNode',
       aggregateId: nodeId,
-      actorId: actorUserId,
+      actorUserId: actorUserId,
       payload: { action: 'reparent', newParentId, displayOrder },
     });
 
@@ -659,7 +659,7 @@ export class HrmService {
       eventType: 'hrm.member_unit_assigned',
       aggregateType: 'OrgMember',
       aggregateId: memberId,
-      actorId: actorUserId,
+      actorUserId: actorUserId ?? '',
       payload: { unitId, unitName: unit.name, roleInUnit },
     });
 
@@ -687,7 +687,7 @@ export class HrmService {
       eventType: 'hrm.member_unit_removed',
       aggregateType: 'OrgMember',
       aggregateId: memberId,
-      actorId: actorUserId,
+      actorUserId: actorUserId ?? '',
       payload: { unitId },
     });
 
