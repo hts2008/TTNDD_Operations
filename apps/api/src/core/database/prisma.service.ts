@@ -37,15 +37,12 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     fn: (tx: PrismaClient) => Promise<T>,
   ): Promise<T> {
     return this.$transaction(async (tx) => {
-      await tx.$executeRawUnsafe(
-        `SET LOCAL app.current_org_id = '${orgId}'`,
-      );
-      await tx.$executeRawUnsafe(
-        `SET LOCAL app.user_role = '${role}'`,
-      );
-      await tx.$executeRawUnsafe(
-        `SET LOCAL app.current_user_id = '${userId}'`,
-      );
+      // Use parameterized SET LOCAL to prevent SQL injection.
+      // PostgreSQL SET LOCAL does not support $1 placeholders directly,
+      // so we use format() on the server side for safety.
+      await tx.$executeRawUnsafe(`SELECT set_config('app.current_org_id', $1, true)`, orgId);
+      await tx.$executeRawUnsafe(`SELECT set_config('app.user_role', $1, true)`, role);
+      await tx.$executeRawUnsafe(`SELECT set_config('app.current_user_id', $1, true)`, userId);
       return fn(tx as PrismaClient);
     });
   }
