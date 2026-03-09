@@ -1,12 +1,18 @@
 import { Module } from '@nestjs/common';
-import { DatabaseModule } from '../../core/database';
-import { FileStorageService } from './file-storage.service';
 import { FileStorageController } from './file-storage.controller';
+import { FileStorageService } from './file-storage.service';
+import { LocalStorageAdapter } from './local-storage.adapter';
+import { STORAGE_ADAPTER } from './storage-adapter.interface';
 
 @Module({
-  imports: [DatabaseModule],
-  providers: [FileStorageService],
   controllers: [FileStorageController],
+  providers: [
+    FileStorageService,
+    {
+      provide: STORAGE_ADAPTER,
+      useClass: LocalStorageAdapter,
+    },
+  ],
   exports: [FileStorageService],
 })
 export class FileStorageModule {}
