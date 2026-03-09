@@ -18,6 +18,15 @@ const ALLOWED_MIME_TYPES = [
 
 const MAX_SIZE_BYTES = 50 * 1024 * 1024; // 50MB
 
+/** Retention TTL in seconds per entity type (T-0034) */
+const RETENTION_TTL_MAP: Record<string, number> = {
+  avatar: 365 * 24 * 3600, // 1 year
+  evidence: 3 * 365 * 24 * 3600, // 3 years (compliance)
+  document: 365 * 24 * 3600, // 1 year
+  export: 7 * 24 * 3600, // 7 days (temporary)
+  general: 90 * 24 * 3600, // 90 days (default)
+};
+
 export interface SignedUploadUrlResult {
   fileRefId: string;
   uploadUrl: string;
@@ -68,10 +77,14 @@ export class FileStorageService {
     const safeName = params.originalName.replace(/[^a-zA-Z0-9._-]/g, '_');
     const objectKey = `${orgId}/${params.entityType || 'general'}/${timestamp}-${safeName}`;
 
+    const retentionTtlSeconds =
+      RETENTION_TTL_MAP[params.entityType || 'general'] ?? RETENTION_TTL_MAP.general;
+
     const { uploadUrl, expiresAt } = await this.storageAdapter.generateUploadUrl(
       bucketName,
       objectKey,
       params.mimeType,
+      { retentionTtlSeconds },
     );
 
     const fileRef = await this.prisma.fileObjectRef.create({

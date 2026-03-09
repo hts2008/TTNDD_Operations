@@ -14,6 +14,7 @@ export interface StorageAdapter {
     bucketName: string,
     objectKey: string,
     mimeType: string,
+    options?: { retentionTtlSeconds?: number },
   ): Promise<{
     uploadUrl: string;
     expiresAt: Date;
@@ -25,6 +26,7 @@ export interface StorageAdapter {
   generateDownloadUrl(
     bucketName: string,
     objectKey: string,
+    options?: { ttlSeconds?: number },
   ): Promise<{
     downloadUrl: string;
     expiresAt: Date;

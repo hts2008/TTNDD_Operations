@@ -24,6 +24,7 @@
     "@casl/ability": "^6.0.0",
     "@casl/prisma": "^1.0.0",
     "@google-cloud/pubsub": "^5.3.0",
+    "@google-cloud/storage": "^7.19.0",
     "@nestjs/bull": "^10.0.0",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.0.0",

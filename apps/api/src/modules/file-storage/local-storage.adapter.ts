@@ -18,6 +18,7 @@ export class LocalStorageAdapter implements StorageAdapter {
     _bucketName: string,
     objectKey: string,
     _mimeType: string,
+    _options?: { retentionTtlSeconds?: number },
   ): Promise<{ uploadUrl: string; expiresAt: Date }> {
     const encodedKey = Buffer.from(objectKey).toString('base64');
     const uploadUrl = `http://localhost:${this.port}/file-storage/local-upload/${encodedKey}`;
@@ -30,6 +31,7 @@ export class LocalStorageAdapter implements StorageAdapter {
   async generateDownloadUrl(
     _bucketName: string,
     objectKey: string,
+    _options?: { ttlSeconds?: number },
   ): Promise<{ downloadUrl: string; expiresAt: Date }> {
     const encodedKey = Buffer.from(objectKey).toString('base64');
     const downloadUrl = `http://localhost:${this.port}/file-storage/local-download/${encodedKey}`;
