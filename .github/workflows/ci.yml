@@ -147,12 +147,18 @@ jobs:
       # Check contract drift (regenerate and diff)
       - name: Check OpenAPI drift
         run: |
+          # 1. Backup the committed spec
+          cp contracts/openapi/ttndd-ops-api.json /tmp/openapi-before.json
+
+          # 2. Rebuild the API to get fresh dist/
           cd apps/api && npx prisma generate
           cd ../..
-          pnpm --filter @ttndd/constants build
-          pnpm --filter @ttndd/shared build
           pnpm --filter api build
+
+          # 3. Regenerate OpenAPI from rebuilt dist/
           node apps/api/scripts/generate-openapi.js
+
+          # 4. Compare committed vs freshly generated
           if ! diff -q contracts/openapi/ttndd-ops-api.json /tmp/openapi-before.json > /dev/null 2>&1; then
             echo "⚠️  OpenAPI spec has drifted from code. Please regenerate and commit."
             diff contracts/openapi/ttndd-ops-api.json /tmp/openapi-before.json | head -50
