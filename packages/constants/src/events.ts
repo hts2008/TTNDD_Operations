@@ -18,6 +18,8 @@ export const DOMAIN_EVENTS = {
     MEMBER_TRANSFERRED: 'hrm.member_transferred',
     MEMBER_LEFT: 'hrm.member_left',
     GUARDIAN_LINKED: 'hrm.guardian_linked',
+    GUARDIAN_UPDATED: 'hrm.guardian_updated',
+    GUARDIAN_REMOVED: 'hrm.guardian_removed',
   },
 
   // Module 9: Rewards

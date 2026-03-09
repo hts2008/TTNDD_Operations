@@ -129,6 +129,7 @@ model OrgMember {
   nguGioiAssessments  NguGioiAssessment[]
   evaluations         Evaluation[]
   memberFees          MemberFee[]
+  guardianLinks       GuardianLink[]
 
   @@unique([orgId, userId])
   @@map("org_members")
@@ -174,6 +175,7 @@ model MemberProfile {
   personalPhone   String?   @map("personal_phone") @db.VarChar(20)
   personalEmail   String?   @map("personal_email") @db.VarChar(255)
   zaloId          String?   @map("zalo_id") @db.VarChar(100)
+  // Legacy guardian fields (kept for backward compat, prefer GuardianLink)
   guardianName    String?   @map("guardian_name") @db.VarChar(255)
   guardianPhone   String?   @map("guardian_phone") @db.VarChar(20)
   guardianRelation String?  @map("guardian_relation") @db.VarChar(50)
@@ -185,6 +187,13 @@ model MemberProfile {
   woodBadgeLevel  String?   @map("wood_badge_level") @db.VarChar(50)
   specializations String[]  @default([])
   joinReason      String?   @map("join_reason")
+  // T-0042: Custom fields JSONB
+  customFields    Json      @default("{}") @map("custom_fields")
+  // T-0045: Compliance flags
+  backgroundCheckExpiry   DateTime? @map("background_check_expiry") @db.Date
+  youthProtectionDate     DateTime? @map("youth_protection_date") @db.Date
+  medicalFormDate         DateTime? @map("medical_form_date") @db.Date
+  consentFormSigned       Boolean   @default(false) @map("consent_form_signed")
   createdBy       String?   @map("created_by") @db.Uuid
   createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
@@ -193,6 +202,34 @@ model MemberProfile {
 
   @@index([orgId])
   @@map("member_profiles")
+}
+
+// T-0041: Normalized guardian entity (replaces denormalized fields)
+model GuardianLink {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId           String   @map("org_id") @db.Uuid
+  orgMemberId     String   @map("org_member_id") @db.Uuid
+  fullName        String   @map("full_name") @db.VarChar(255)
+  relation        String   @db.VarChar(50) // mother, father, grandparent, sibling, other
+  phone           String?  @db.VarChar(20)
+  email           String?  @db.VarChar(255)
+  zaloId          String?  @map("zalo_id") @db.VarChar(100)
+  address         String?
+  idCard          String?  @map("id_card") @db.VarChar(50)
+  isPrimary       Boolean  @default(false) @map("is_primary")
+  canPickup       Boolean  @default(true) @map("can_pickup")
+  consentSigned   Boolean  @default(false) @map("consent_signed")
+  consentDate     DateTime? @map("consent_date") @db.Date
+  notes           String?
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  orgMember OrgMember @relation(fields: [orgMemberId], references: [id], onDelete: Cascade)
+
+  @@unique([orgMemberId, fullName, relation])
+  @@index([orgId])
+  @@index([orgMemberId])
+  @@map("guardian_links")
 }
 
 model MemberBranchHistory {
