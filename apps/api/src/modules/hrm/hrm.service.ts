@@ -321,4 +321,65 @@ export class HrmService {
     ]);
     return { total, byStatus, byBranch, byRole };
   }
+
+  /**
+   * T-0048: Cross-module character sheet aggregation.
+   * Combines: HRM profile + Rewards (EXP/Badges) + Scout (rank/skills) + attendance stats
+   */
+  async getCharacterSheet(orgId: string, memberId: string) {
+    const [member, expSummary, badges, ranks, attendance] = await Promise.all([
+      this.findById(orgId, memberId),
+      this.prisma.memberExpSummary.findFirst({ where: { orgMemberId: memberId } }),
+      this.prisma.memberBadge.findMany({
+        where: { orgMemberId: memberId },
+        include: { badge: { select: { name: true, imageUrl: true, badgeType: true } } },
+        orderBy: { earnedAt: 'desc' },
+        take: 20,
+      }),
+      this.prisma.memberRank.findMany({
+        where: { orgMemberId: memberId },
+        orderBy: { completedAt: 'desc' },
+        take: 5,
+      }),
+      this.prisma.sessionAttendance.groupBy({
+        by: ['status'],
+        where: { orgMemberId: memberId },
+        _count: true,
+      }),
+    ]);
+
+    // T-0050: Compliance check
+    const compliance = await this.validation.checkCompliance(orgId, memberId);
+
+    return {
+      member,
+      rewards: {
+        totalExp: expSummary?.totalExp ?? 0,
+        availableExp: expSummary?.availableExp ?? 0,
+        badges: badges.map((b) => ({
+          id: b.id,
+          name: b.badge.name,
+          imageUrl: b.badge.imageUrl,
+          badgeType: b.badge.badgeType,
+          earnedAt: b.earnedAt,
+        })),
+      },
+      ranks,
+      attendance: attendance.reduce(
+        (acc, a) => {
+          acc[a.status] = a._count;
+          return acc;
+        },
+        {} as Record<string, number>,
+      ),
+      compliance,
+    };
+  }
+
+  /**
+   * T-0050: Check compliance for a member.
+   */
+  async checkMemberCompliance(orgId: string, memberId: string) {
+    return this.validation.checkCompliance(orgId, memberId);
+  }
 }

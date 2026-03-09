@@ -114,7 +114,7 @@ describe('GuardianService', () => {
 
       const result = await service.findByMember('org-1', 'member-1');
       expect(result).toHaveLength(2);
-      expect(result[0].isPrimary).toBe(true);
+      expect(result[0]!.isPrimary).toBe(true);
     });
   });
 

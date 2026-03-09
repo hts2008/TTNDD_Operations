@@ -14,7 +14,8 @@ export class HrmController {
   @ApiOperation({ summary: 'Create a new member with profile' })
   createMember(
     @CurrentUser() user: CurrentUserPayload,
-    @Body() body: {
+    @Body()
+    body: {
       userId: string;
       role: string;
       branchId?: string;
@@ -51,7 +52,12 @@ export class HrmController {
     @Query('page') page?: number,
     @Query('limit') limit?: number,
   ) {
-    return this.hrmService.findMany(user.orgId, { status, branchId, role, search }, page ?? 1, limit ?? 20);
+    return this.hrmService.findMany(
+      user.orgId,
+      { status, branchId, role, search },
+      page ?? 1,
+      limit ?? 20,
+    );
   }
 
   @Get('members/:id')
@@ -66,7 +72,8 @@ export class HrmController {
   updateProfile(
     @CurrentUser() user: CurrentUserPayload,
     @Param('id') id: string,
-    @Body() body: {
+    @Body()
+    body: {
       fullName?: string;
       birthDate?: string;
       gender?: string;
@@ -122,5 +129,22 @@ export class HrmController {
   @ApiOperation({ summary: 'Get HRM statistics' })
   getStats(@CurrentUser() user: CurrentUserPayload) {
     return this.hrmService.getStats(user.orgId);
+  }
+
+  @Get('members/:id/character-sheet')
+  @ApiOperation({
+    summary: 'T-0048: Get cross-module character sheet (profile + rewards + rank + attendance)',
+  })
+  getCharacterSheet(@CurrentUser() user: CurrentUserPayload, @Param('id') id: string) {
+    return this.hrmService.getCharacterSheet(user.orgId, id);
+  }
+
+  @Get('members/:id/compliance')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({
+    summary: 'T-0050: Check member compliance (guardian, medical, background check)',
+  })
+  checkCompliance(@CurrentUser() user: CurrentUserPayload, @Param('id') id: string) {
+    return this.hrmService.checkMemberCompliance(user.orgId, id);
   }
 }
