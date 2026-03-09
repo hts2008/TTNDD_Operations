@@ -452,6 +452,98 @@ export class HrmService {
     return { deleted: true, id: nodeId };
   }
 
+  // T-0052: Batch reorder nodes (drag/drop)
+  async reorderOrgChartNodes(
+    orgId: string,
+    items: Array<{ id: string; displayOrder: number }>,
+    actorUserId: string,
+  ) {
+    // Verify all nodes belong to this org
+    const nodeIds = items.map((i) => i.id);
+    const existing = await this.prisma.orgChartNode.findMany({
+      where: { id: { in: nodeIds }, orgId },
+      select: { id: true },
+    });
+    if (existing.length !== nodeIds.length) {
+      throw new BadRequestException('Some nodes not found or belong to a different org');
+    }
+
+    // Batch update displayOrder in transaction
+    await this.prisma.$transaction(
+      items.map((item) =>
+        this.prisma.orgChartNode.update({
+          where: { id: item.id },
+          data: { displayOrder: item.displayOrder },
+        }),
+      ),
+    );
+
+    await this.domainEvents.publish({
+      orgId,
+      eventType: DOMAIN_EVENTS.HRM.ORG_NODE_UPDATED ?? 'hrm.org_node_updated',
+      aggregateType: 'OrgChartNode',
+      aggregateId: orgId,
+      actorId: actorUserId,
+      payload: { action: 'reorder', count: items.length },
+    });
+
+    return { reordered: true, count: items.length };
+  }
+
+  // T-0052: Move node to a new parent (drag/drop reparent)
+  async reparentOrgChartNode(
+    orgId: string,
+    nodeId: string,
+    newParentId: string | null,
+    displayOrder: number,
+    actorUserId: string,
+  ) {
+    const node = await this.prisma.orgChartNode.findFirst({
+      where: { id: nodeId, orgId },
+    });
+    if (!node) throw new NotFoundException('Org chart node not found');
+
+    // Prevent circular reference
+    if (newParentId) {
+      if (newParentId === nodeId) {
+        throw new BadRequestException('Cannot set node as its own parent');
+      }
+      const parent = await this.prisma.orgChartNode.findFirst({
+        where: { id: newParentId, orgId },
+      });
+      if (!parent) throw new NotFoundException('New parent node not found in this org');
+
+      // Walk up ancestry to detect cycles
+      let current = parent;
+      while (current.parentNodeId) {
+        if (current.parentNodeId === nodeId) {
+          throw new BadRequestException('Cannot move node under its own descendant (circular)');
+        }
+        const ancestor = await this.prisma.orgChartNode.findFirst({
+          where: { id: current.parentNodeId, orgId },
+        });
+        if (!ancestor) break;
+        current = ancestor;
+      }
+    }
+
+    const updated = await this.prisma.orgChartNode.update({
+      where: { id: nodeId },
+      data: { parentNodeId: newParentId, displayOrder },
+    });
+
+    await this.domainEvents.publish({
+      orgId,
+      eventType: DOMAIN_EVENTS.HRM.ORG_NODE_UPDATED ?? 'hrm.org_node_updated',
+      aggregateType: 'OrgChartNode',
+      aggregateId: nodeId,
+      actorId: actorUserId,
+      payload: { action: 'reparent', newParentId, displayOrder },
+    });
+
+    return updated;
+  }
+
   async getTimeline(orgId: string, memberId: string) {
     const [events, history] = await Promise.all([
       this.prisma.domainEvent.findMany({
@@ -536,5 +628,215 @@ export class HrmService {
    */
   async checkMemberCompliance(orgId: string, memberId: string) {
     return this.validation.checkCompliance(orgId, memberId);
+  }
+
+  // ─── T-0053: Unit Assignment Flows ───────────────────────────
+  async assignMemberToUnit(
+    orgId: string,
+    unitId: string,
+    memberId: string,
+    roleInUnit?: string,
+    actorUserId?: string,
+  ) {
+    // Verify unit + member belong to same org
+    const [unit, member] = await Promise.all([
+      this.prisma.unit.findFirst({ where: { id: unitId, orgId } }),
+      this.prisma.orgMember.findFirst({ where: { id: memberId, orgId } }),
+    ]);
+    if (!unit) throw new NotFoundException('Unit not found in this org');
+    if (!member) throw new NotFoundException('Member not found in this org');
+
+    const updated = await this.prisma.orgMember.update({
+      where: { id: memberId },
+      data: {
+        unitId,
+        ...(roleInUnit && { meta: { ...(member.meta as Record<string, unknown>), roleInUnit } }),
+      },
+    });
+
+    await this.domainEvents.publish({
+      orgId,
+      eventType: 'hrm.member_unit_assigned',
+      aggregateType: 'OrgMember',
+      aggregateId: memberId,
+      actorId: actorUserId,
+      payload: { unitId, unitName: unit.name, roleInUnit },
+    });
+
+    return updated;
+  }
+
+  async removeMemberFromUnit(
+    orgId: string,
+    unitId: string,
+    memberId: string,
+    actorUserId?: string,
+  ) {
+    const member = await this.prisma.orgMember.findFirst({
+      where: { id: memberId, orgId, unitId },
+    });
+    if (!member) throw new NotFoundException('Member not found in this unit');
+
+    const updated = await this.prisma.orgMember.update({
+      where: { id: memberId },
+      data: { unitId: null },
+    });
+
+    await this.domainEvents.publish({
+      orgId,
+      eventType: 'hrm.member_unit_removed',
+      aggregateType: 'OrgMember',
+      aggregateId: memberId,
+      actorId: actorUserId,
+      payload: { unitId },
+    });
+
+    return updated;
+  }
+
+  async getUnitMembers(orgId: string, unitId: string) {
+    const unit = await this.prisma.unit.findFirst({
+      where: { id: unitId, orgId },
+    });
+    if (!unit) throw new NotFoundException('Unit not found in this org');
+
+    const members = await this.prisma.orgMember.findMany({
+      where: { orgId, unitId },
+      include: {
+        user: { select: { displayName: true, avatarUrl: true, email: true } },
+        profile: { select: { fullName: true, birthDate: true, gender: true } },
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    return { unit, members, total: members.length };
+  }
+
+  // ─── T-0054: Volunteer Availability Calendar ─────────────────
+  async setVolunteerAvailability(
+    orgId: string,
+    userId: string,
+    slot: {
+      date: string;
+      startTime: string;
+      endTime: string;
+      status: string;
+      notes?: string;
+    },
+  ) {
+    // Find the orgMember for this user
+    const member = await this.prisma.orgMember.findFirst({
+      where: { orgId, userId },
+    });
+    if (!member) throw new NotFoundException('Member not found');
+
+    return this.prisma.volunteerAvailability.create({
+      data: {
+        orgId,
+        orgMemberId: member.id,
+        date: new Date(slot.date),
+        startTime: slot.startTime,
+        endTime: slot.endTime,
+        status: slot.status,
+        notes: slot.notes,
+      },
+    });
+  }
+
+  async getVolunteerAvailability(orgId: string, userId: string, from?: string, to?: string) {
+    const member = await this.prisma.orgMember.findFirst({
+      where: { orgId, userId },
+    });
+    if (!member) throw new NotFoundException('Member not found');
+
+    return this.prisma.volunteerAvailability.findMany({
+      where: {
+        orgId,
+        orgMemberId: member.id,
+        ...(from && { date: { gte: new Date(from) } }),
+        ...(to && { date: { lte: new Date(to) } }),
+      },
+      orderBy: { date: 'asc' },
+    });
+  }
+
+  async deleteVolunteerAvailability(orgId: string, slotId: string, userId: string) {
+    const slot = await this.prisma.volunteerAvailability.findFirst({
+      where: { id: slotId, orgId },
+    });
+    if (!slot) throw new NotFoundException('Availability slot not found');
+
+    await this.prisma.volunteerAvailability.delete({ where: { id: slotId } });
+    return { deleted: true, id: slotId };
+  }
+
+  // ─── T-0055: Role-Scope Enforcement ──────────────────────────
+  async checkRoleScope(orgId: string, userId: string) {
+    const member = await this.prisma.orgMember.findFirst({
+      where: { orgId, userId },
+      include: {
+        branch: { select: { id: true, name: true } },
+        unit: { select: { id: true, name: true } },
+      },
+    });
+    if (!member) throw new NotFoundException('Member not found');
+
+    const ROLE_SCOPES: Record<string, { level: string; permissions: string[] }> = {
+      super_admin: {
+        level: 'organization',
+        permissions: ['*'],
+      },
+      admin: {
+        level: 'organization',
+        permissions: [
+          'members.read',
+          'members.write',
+          'org_chart.read',
+          'org_chart.write',
+          'units.read',
+          'units.write',
+          'reports.read',
+        ],
+      },
+      truong: {
+        level: 'branch',
+        permissions: [
+          'members.read',
+          'members.write',
+          'org_chart.read',
+          'units.read',
+          'units.write',
+          'attendance.write',
+          'sessions.write',
+        ],
+      },
+      tnv: {
+        level: 'unit',
+        permissions: ['members.read', 'attendance.write', 'sessions.read'],
+      },
+      member: {
+        level: 'self',
+        permissions: ['profile.read', 'profile.write', 'availability.write'],
+      },
+      parent: {
+        level: 'linked_children',
+        permissions: ['profile.read', 'attendance.read', 'progress.read'],
+      },
+    };
+
+    const scope = ROLE_SCOPES[member.role] ?? ROLE_SCOPES['member']!;
+
+    return {
+      userId,
+      memberId: member.id,
+      role: member.role,
+      truongLevel: member.truongLevel,
+      scope: {
+        level: scope!.level,
+        permissions: scope!.permissions,
+        branch: member.branch,
+        unit: member.unit,
+      },
+    };
   }
 }

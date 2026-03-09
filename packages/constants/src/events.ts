@@ -23,6 +23,8 @@ export const DOMAIN_EVENTS = {
     ORG_NODE_CREATED: 'hrm.org_node_created',
     ORG_NODE_UPDATED: 'hrm.org_node_updated',
     ORG_NODE_DELETED: 'hrm.org_node_deleted',
+    MEMBER_UNIT_ASSIGNED: 'hrm.member_unit_assigned',
+    MEMBER_UNIT_REMOVED: 'hrm.member_unit_removed',
   },
 
   // Module 9: Rewards

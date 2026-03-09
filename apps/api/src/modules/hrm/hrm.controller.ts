@@ -195,4 +195,108 @@ export class HrmController {
   checkCompliance(@CurrentUser() user: CurrentUserPayload, @Param('id') id: string) {
     return this.hrmService.checkMemberCompliance(user.orgId, id);
   }
+
+  // ─── T-0052: Drag/Drop Reorder APIs ──────────────────────────
+  @Post('org-chart/reorder')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'T-0052: Batch reorder org chart nodes' })
+  reorderOrgChartNodes(
+    @CurrentUser() user: CurrentUserPayload,
+    @Body() body: { items: Array<{ id: string; displayOrder: number }> },
+  ) {
+    return this.hrmService.reorderOrgChartNodes(user.orgId, body.items, user.userId);
+  }
+
+  @Post('org-chart/nodes/:nodeId/reparent')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'T-0052: Move node to a new parent (drag/drop)' })
+  reparentOrgChartNode(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('nodeId') nodeId: string,
+    @Body() body: { newParentId: string | null; displayOrder: number },
+  ) {
+    return this.hrmService.reparentOrgChartNode(
+      user.orgId,
+      nodeId,
+      body.newParentId,
+      body.displayOrder,
+      user.userId,
+    );
+  }
+
+  // ─── T-0053: Unit Assignment Flows ───────────────────────────
+  @Post('units/:unitId/assign')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'T-0053: Assign member to unit' })
+  assignMemberToUnit(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('unitId') unitId: string,
+    @Body() body: { memberId: string; roleInUnit?: string },
+  ) {
+    return this.hrmService.assignMemberToUnit(
+      user.orgId,
+      unitId,
+      body.memberId,
+      body.roleInUnit,
+      user.userId,
+    );
+  }
+
+  @Post('units/:unitId/remove')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'T-0053: Remove member from unit' })
+  removeMemberFromUnit(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('unitId') unitId: string,
+    @Body() body: { memberId: string },
+  ) {
+    return this.hrmService.removeMemberFromUnit(user.orgId, unitId, body.memberId, user.userId);
+  }
+
+  @Get('units/:unitId/members')
+  @ApiOperation({ summary: 'T-0053: List members in a unit' })
+  getUnitMembers(@CurrentUser() user: CurrentUserPayload, @Param('unitId') unitId: string) {
+    return this.hrmService.getUnitMembers(user.orgId, unitId);
+  }
+
+  // ─── T-0054: Volunteer Availability Calendar ─────────────────
+  @Post('availability')
+  @ApiOperation({ summary: 'T-0054: Set volunteer availability slot' })
+  setAvailability(
+    @CurrentUser() user: CurrentUserPayload,
+    @Body()
+    body: {
+      date: string;
+      startTime: string;
+      endTime: string;
+      status: string;
+      notes?: string;
+    },
+  ) {
+    return this.hrmService.setVolunteerAvailability(user.orgId, user.userId, body);
+  }
+
+  @Get('availability')
+  @ApiOperation({ summary: 'T-0054: Get volunteer availability (for current user or query)' })
+  getAvailability(
+    @CurrentUser() user: CurrentUserPayload,
+    @Query('memberId') memberId?: string,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+  ) {
+    return this.hrmService.getVolunteerAvailability(user.orgId, memberId ?? user.userId, from, to);
+  }
+
+  @Delete('availability/:slotId')
+  @ApiOperation({ summary: 'T-0054: Delete availability slot' })
+  deleteAvailability(@CurrentUser() user: CurrentUserPayload, @Param('slotId') slotId: string) {
+    return this.hrmService.deleteVolunteerAvailability(user.orgId, slotId, user.userId);
+  }
+
+  // ─── T-0055: Role-Scope Enforcement ──────────────────────────
+  @Get('scope-check')
+  @ApiOperation({ summary: 'T-0055: Check current user role-scope permissions' })
+  checkRoleScope(@CurrentUser() user: CurrentUserPayload) {
+    return this.hrmService.checkRoleScope(user.orgId, user.userId);
+  }
 }

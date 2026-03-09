@@ -131,6 +131,7 @@ model OrgMember {
   memberFees          MemberFee[]
   guardianLinks       GuardianLink[]
   orgChartNodes       OrgChartNode[]
+  volunteerAvailability VolunteerAvailability[]
 
   @@unique([orgId, userId])
   @@map("org_members")
@@ -275,6 +276,28 @@ model OrgChartNode {
   @@index([orgId])
   @@index([orgId, isActive])
   @@map("org_chart_nodes")
+}
+
+// ============================================================
+// MODULE 1B: Volunteer Availability (T-0054)
+// ============================================================
+
+model VolunteerAvailability {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId        String   @map("org_id") @db.Uuid
+  orgMemberId  String   @map("org_member_id") @db.Uuid
+  date         DateTime @db.Date
+  startTime    String   @map("start_time") @db.VarChar(10)
+  endTime      String   @map("end_time") @db.VarChar(10)
+  status       String   @default("available") @db.VarChar(30)
+  notes        String?
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  orgMember OrgMember @relation(fields: [orgMemberId], references: [id])
+
+  @@index([orgId, orgMemberId])
+  @@index([orgId, date])
+  @@map("volunteer_availability")
 }
 
 // ============================================================
