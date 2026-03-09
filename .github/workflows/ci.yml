@@ -17,6 +17,8 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: '${{ env.NODE_VERSION }}', cache: 'pnpm' }
       - run: pnpm install --frozen-lockfile
+      - name: Build workspace packages
+        run: pnpm --filter @ttndd/constants build && pnpm --filter @ttndd/shared build
       - run: pnpm lint
 
   typecheck:
@@ -55,8 +57,15 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: '${{ env.NODE_VERSION }}', cache: 'pnpm' }
       - run: pnpm install --frozen-lockfile
+      - name: Build workspace packages
+        run: pnpm --filter @ttndd/constants build && pnpm --filter @ttndd/shared build
       - name: Generate Prisma Client
         run: cd apps/api && npx prisma generate
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/ttndd_test
+          DATABASE_MIGRATION_URL: postgresql://test:test@localhost:5432/ttndd_test
+      - name: Run database migrations
+        run: cd apps/api && npx prisma migrate deploy
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/ttndd_test
           DATABASE_MIGRATION_URL: postgresql://test:test@localhost:5432/ttndd_test
@@ -100,6 +109,8 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: '${{ env.NODE_VERSION }}', cache: 'pnpm' }
       - run: pnpm install --frozen-lockfile
+      - name: Build workspace packages
+        run: pnpm --filter @ttndd/constants build && pnpm --filter @ttndd/shared build
 
       # Validate OpenAPI spec exists and is valid JSON
       - name: Validate OpenAPI spec
@@ -138,6 +149,8 @@ jobs:
         run: |
           cd apps/api && npx prisma generate
           cd ../..
+          pnpm --filter @ttndd/constants build
+          pnpm --filter @ttndd/shared build
           pnpm --filter api build
           node apps/api/scripts/generate-openapi.js
           if ! diff -q contracts/openapi/ttndd-ops-api.json /tmp/openapi-before.json > /dev/null 2>&1; then
