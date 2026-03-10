@@ -8,9 +8,10 @@ import { GuardianService } from './guardian.service';
 import { MemberValidationService } from './member-validation.service';
 import { TransferCronService } from './transfer-cron.service';
 import { ComplianceCronService } from './compliance-cron.service';
+import { ParentPortalController } from './parent-portal.controller';
 
 @Module({
-  controllers: [HrmController, GuardianController],
+  controllers: [HrmController, GuardianController, ParentPortalController],
   imports: [EventsModule],
 
   providers: [

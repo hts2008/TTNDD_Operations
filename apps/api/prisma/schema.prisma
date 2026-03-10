@@ -1499,4 +1499,3 @@ model TrainingRecord {
   @@index([orgId, expiresAt])
   @@map("training_records")
 }
-
