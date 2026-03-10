@@ -1,0 +1,12 @@
+node_modules
+.git
+*.md
+.turbo
+dist
+coverage
+.env*
+apps/web
+apps/worker
+.shared
+.agent
+*.log
