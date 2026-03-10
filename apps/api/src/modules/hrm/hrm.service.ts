@@ -34,6 +34,22 @@ interface TransferMemberDto {
   toBranchId: string;
   toUnitId?: string;
   reason?: string;
+  triggerType?: 'manual' | 'age_threshold' | 'admin';
+}
+
+interface OnboardingTemplateDto {
+  name: string;
+  roleType: string;
+  items: Array<{ key: string; label: string; required: boolean; order: number }>;
+}
+
+interface TrainingRecordDto {
+  trainingType: string;
+  trainingName: string;
+  completedAt: string;
+  expiresAt?: string;
+  certificateUrl?: string;
+  notes?: string;
 }
 
 @Injectable()
@@ -247,6 +263,8 @@ export class HrmService {
     return { ...updated, allowedActions: this.lifecycle.getAllowedActions(newStatus) };
   }
 
+  // ── WP-2.5: T-0061 — Transfer Case Workflow ───────────
+
   async transferMember(
     orgId: string,
     memberId: string,
@@ -258,36 +276,147 @@ export class HrmService {
       throw new BadRequestException('Only active members can be transferred');
     }
 
-    const [updatedMember] = await this.prisma.$transaction([
-      this.prisma.orgMember.update({
-        where: { id: memberId },
-        data: { branchId: dto.toBranchId, unitId: dto.toUnitId, status: 'transferred' },
-      }),
-      this.prisma.memberBranchHistory.create({
-        data: {
-          orgId,
-          orgMemberId: memberId,
-          fromBranchId: member.branchId,
-          toBranchId: dto.toBranchId,
-          fromUnitId: member.unitId,
-          toUnitId: dto.toUnitId,
-          transitionDate: new Date(),
-          reason: dto.reason,
-          approvedBy: actorUserId,
-        },
-      }),
-    ]);
+    // Build summary snapshot (EXP, rank, attendance)
+    const summarySnapshot = await this.buildMemberSummary(orgId, memberId);
 
+    // Create TransferCase instead of directly changing status
+    const transferCase = await this.prisma.transferCase.create({
+      data: {
+        orgId,
+        orgMemberId: memberId,
+        fromBranchId: member.branchId ?? '',
+        toBranchId: dto.toBranchId,
+        fromUnitId: member.unitId,
+        toUnitId: dto.toUnitId,
+        status: 'initiated',
+        reason: dto.reason,
+        triggerType: dto.triggerType ?? 'manual',
+        summarySnapshot,
+        initiatedBy: actorUserId,
+      },
+    });
+
+    // T-0064: Publish domain event
     await this.domainEvents.publish({
       orgId,
       eventType: DOMAIN_EVENTS.HRM.MEMBER_TRANSFERRED,
       aggregateId: memberId,
       aggregateType: 'OrgMember',
-      payload: { fromBranch: member.branchId, toBranch: dto.toBranchId, reason: dto.reason },
+      payload: {
+        transferCaseId: transferCase.id,
+        fromBranch: member.branchId,
+        toBranch: dto.toBranchId,
+        reason: dto.reason,
+        triggerType: dto.triggerType ?? 'manual',
+      },
       actorUserId,
     });
 
-    return updatedMember;
+    return transferCase;
+  }
+
+  async getTransferCases(orgId: string, filters?: { status?: string; memberId?: string }) {
+    return this.prisma.transferCase.findMany({
+      where: {
+        orgId,
+        ...(filters?.status && { status: filters.status }),
+        ...(filters?.memberId && { orgMemberId: filters.memberId }),
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async getTransferCase(orgId: string, caseId: string) {
+    const tc = await this.prisma.transferCase.findFirst({ where: { id: caseId, orgId } });
+    if (!tc) throw new NotFoundException('Transfer case not found');
+    return tc;
+  }
+
+  async approveTransfer(orgId: string, caseId: string, actorUserId: string) {
+    const tc = await this.getTransferCase(orgId, caseId);
+    if (tc.status !== 'initiated') {
+      throw new BadRequestException(`Cannot approve case in status: ${tc.status}`);
+    }
+    return this.prisma.transferCase.update({
+      where: { id: caseId },
+      data: { status: 'pending_handover', approvedBy: actorUserId },
+    });
+  }
+
+  // T-0064: Complete handover — attach note + move to handover_complete
+  async completeHandover(orgId: string, caseId: string, note: string, actorUserId: string) {
+    const tc = await this.getTransferCase(orgId, caseId);
+    if (tc.status !== 'pending_handover') {
+      throw new BadRequestException(`Cannot complete handover in status: ${tc.status}`);
+    }
+    return this.prisma.transferCase.update({
+      where: { id: caseId },
+      data: { status: 'handover_complete', handoverNote: note },
+    });
+  }
+
+  // T-0065: Accept transfer — execute the actual branch move + close case
+  async acceptTransfer(orgId: string, caseId: string, actorUserId: string) {
+    const tc = await this.getTransferCase(orgId, caseId);
+    if (tc.status !== 'handover_complete') {
+      throw new BadRequestException(`Cannot accept transfer in status: ${tc.status}`);
+    }
+
+    // Execute the actual member move in a transaction
+    const [updatedCase] = await this.prisma.$transaction([
+      this.prisma.transferCase.update({
+        where: { id: caseId },
+        data: { status: 'closed', completedAt: new Date() },
+      }),
+      this.prisma.orgMember.update({
+        where: { id: tc.orgMemberId },
+        data: { branchId: tc.toBranchId, unitId: tc.toUnitId, status: 'active' },
+      }),
+      this.prisma.memberBranchHistory.create({
+        data: {
+          orgId,
+          orgMemberId: tc.orgMemberId,
+          fromBranchId: tc.fromBranchId,
+          toBranchId: tc.toBranchId,
+          fromUnitId: tc.fromUnitId,
+          toUnitId: tc.toUnitId,
+          transitionDate: new Date(),
+          reason: tc.reason,
+          approvedBy: actorUserId,
+        },
+      }),
+    ]);
+
+    return updatedCase;
+  }
+
+  async cancelTransfer(orgId: string, caseId: string, actorUserId: string) {
+    const tc = await this.getTransferCase(orgId, caseId);
+    if (['closed', 'cancelled'].includes(tc.status)) {
+      throw new BadRequestException(`Cannot cancel case in status: ${tc.status}`);
+    }
+    return this.prisma.transferCase.update({
+      where: { id: caseId },
+      data: { status: 'cancelled', cancelledAt: new Date() },
+    });
+  }
+
+  private async buildMemberSummary(orgId: string, memberId: string) {
+    const [expSummary, ranks, badges] = await Promise.all([
+      this.prisma.memberExpSummary.findUnique({ where: { orgMemberId: memberId } }),
+      this.prisma.memberRank.findMany({
+        where: { orgMemberId: memberId },
+        orderBy: { completedAt: 'desc' },
+        take: 1,
+      }),
+      this.prisma.memberBadge.findMany({ where: { orgMemberId: memberId } }),
+    ]);
+    return {
+      totalExp: expSummary?.totalExp ?? 0,
+      currentRank: ranks[0]?.rankId ?? null,
+      badgeCount: badges.length,
+      snapshotDate: new Date().toISOString(),
+    };
   }
 
   async getOrgChart(orgId: string) {
@@ -1028,5 +1157,148 @@ export class HrmService {
     }
 
     return masked;
+  }
+
+  // ── WP-2.6: T-0066 — Onboarding Templates & Progress ──
+
+  async getOnboardingTemplates(orgId: string) {
+    return this.prisma.onboardingTemplate.findMany({
+      where: { orgId, isActive: true },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async createOnboardingTemplate(orgId: string, dto: OnboardingTemplateDto) {
+    return this.prisma.onboardingTemplate.create({
+      data: { orgId, name: dto.name, roleType: dto.roleType, items: dto.items },
+    });
+  }
+
+  async assignOnboarding(orgId: string, memberId: string, templateId: string) {
+    return this.prisma.onboardingProgress.create({
+      data: { orgId, orgMemberId: memberId, templateId },
+    });
+  }
+
+  async updateOnboardingProgress(
+    orgId: string,
+    progressId: string,
+    itemKey: string,
+    completedBy: string,
+  ) {
+    const progress = await this.prisma.onboardingProgress.findFirst({
+      where: { id: progressId, orgId },
+      include: { template: true },
+    });
+    if (!progress) throw new NotFoundException('Onboarding progress not found');
+
+    const completed = (progress.itemsCompleted as any[]) || [];
+    if (completed.some((c: any) => c.key === itemKey)) {
+      throw new BadRequestException(`Item '${itemKey}' already completed`);
+    }
+
+    completed.push({ key: itemKey, completedAt: new Date().toISOString(), completedBy });
+    const templateItems = (progress.template.items as any[]) || [];
+    const requiredKeys = templateItems.filter((i: any) => i.required).map((i: any) => i.key);
+    const allDone = requiredKeys.every((k: string) => completed.some((c: any) => c.key === k));
+
+    return this.prisma.onboardingProgress.update({
+      where: { id: progressId },
+      data: {
+        itemsCompleted: completed,
+        ...(allDone && { completedAt: new Date() }),
+      },
+    });
+  }
+
+  async getMemberOnboarding(orgId: string, memberId: string) {
+    return this.prisma.onboardingProgress.findMany({
+      where: { orgId, orgMemberId: memberId },
+      include: { template: true },
+    });
+  }
+
+  // ── WP-2.6: T-0067 — Training Records ─────────────────
+
+  async getTrainingRecords(orgId: string, memberId: string) {
+    return this.prisma.trainingRecord.findMany({
+      where: { orgId, orgMemberId: memberId },
+      orderBy: { completedAt: 'desc' },
+    });
+  }
+
+  async recordTraining(
+    orgId: string,
+    memberId: string,
+    dto: TrainingRecordDto,
+    recordedBy: string,
+  ) {
+    return this.prisma.trainingRecord.create({
+      data: {
+        orgId,
+        orgMemberId: memberId,
+        trainingType: dto.trainingType,
+        trainingName: dto.trainingName,
+        completedAt: new Date(dto.completedAt),
+        expiresAt: dto.expiresAt ? new Date(dto.expiresAt) : undefined,
+        certificateUrl: dto.certificateUrl,
+        notes: dto.notes,
+        recordedBy,
+      },
+    });
+  }
+
+  // ── WP-2.6: T-0068 — Background-check & Training Expiry Queries ──
+
+  async getExpiringCompliance(orgId: string, daysAhead = 30) {
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() + daysAhead);
+
+    const [expiringChecks, expiringTraining] = await Promise.all([
+      this.prisma.memberProfile.findMany({
+        where: {
+          orgId,
+          backgroundCheckExpiry: { lte: cutoff, gte: new Date() },
+        },
+        select: { orgMemberId: true, backgroundCheckExpiry: true },
+      }),
+      this.prisma.trainingRecord.findMany({
+        where: {
+          orgId,
+          expiresAt: { lte: cutoff, gte: new Date() },
+        },
+        select: { orgMemberId: true, trainingType: true, expiresAt: true },
+      }),
+    ]);
+
+    return { expiringChecks, expiringTraining };
+  }
+
+  // ── WP-2.6: T-0069 — Offboarding Archive Flow ─────────
+
+  async offboardMember(orgId: string, memberId: string, reason: string, actorUserId: string) {
+    const member = await this.findById(orgId, memberId);
+    if (!['active', 'suspended'].includes(member.status)) {
+      throw new BadRequestException(`Cannot offboard member in status: ${member.status}`);
+    }
+
+    // Transition via lifecycle state machine
+    const newStatus = this.lifecycle.transition(member.status, 'offboarding');
+
+    const updated = await this.prisma.orgMember.update({
+      where: { id: memberId },
+      data: { status: newStatus },
+    });
+
+    await this.domainEvents.publish({
+      orgId,
+      eventType: DOMAIN_EVENTS.HRM.MEMBER_OFFBOARDED,
+      aggregateId: memberId,
+      aggregateType: 'OrgMember',
+      payload: { reason, previousStatus: member.status },
+      actorUserId,
+    });
+
+    return updated;
   }
 }

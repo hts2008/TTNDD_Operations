@@ -1415,4 +1415,88 @@ model ImportBatch {
   @@map("import_batches")
 }
 
+// ============================================================
+// WP-2.5: BRANCH TRANSITION & HANDOVER (T-0061)
+// ============================================================
+
+model TransferCase {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId             String    @map("org_id") @db.Uuid
+  orgMemberId       String    @map("org_member_id") @db.Uuid
+  fromBranchId      String    @map("from_branch_id") @db.Uuid
+  toBranchId        String    @map("to_branch_id") @db.Uuid
+  fromUnitId        String?   @map("from_unit_id") @db.Uuid
+  toUnitId          String?   @map("to_unit_id") @db.Uuid
+  // Status: initiated → pending_handover → handover_complete → accepted → closed | cancelled
+  status            String    @default("initiated") @db.VarChar(30)
+  reason            String?
+  triggerType       String    @default("manual") @map("trigger_type") @db.VarChar(30) // manual | age_threshold | admin
+  summarySnapshot   Json      @default("{}") @map("summary_snapshot") // EXP, rank, skills, attendance stats
+  initiatedBy       String    @map("initiated_by") @db.Uuid
+  approvedBy        String?   @map("approved_by") @db.Uuid
+  handoverNote      String?   @map("handover_note")
+  completedAt       DateTime? @map("completed_at") @db.Timestamptz()
+  cancelledAt       DateTime? @map("cancelled_at") @db.Timestamptz()
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  @@index([orgId, status])
+  @@index([orgId, orgMemberId])
+  @@map("transfer_cases")
+}
+
+// ============================================================
+// WP-2.6: ONBOARDING & TRAINING (T-0066, T-0067)
+// ============================================================
+
+model OnboardingTemplate {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId       String   @map("org_id") @db.Uuid
+  name        String   @db.VarChar(150)
+  roleType    String   @map("role_type") @db.VarChar(50) // scout | leader | volunteer | parent
+  items       Json     @default("[]") // [{key, label, required, order}]
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  progress    OnboardingProgress[]
+
+  @@unique([orgId, roleType, name])
+  @@map("onboarding_templates")
+}
+
+model OnboardingProgress {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId           String    @map("org_id") @db.Uuid
+  orgMemberId     String    @map("org_member_id") @db.Uuid
+  templateId      String    @map("template_id") @db.Uuid
+  itemsCompleted  Json      @default("[]") @map("items_completed") // [{key, completedAt, completedBy}]
+  completedAt     DateTime? @map("completed_at") @db.Timestamptz()
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  template  OnboardingTemplate @relation(fields: [templateId], references: [id])
+
+  @@unique([orgMemberId, templateId])
+  @@index([orgId, orgMemberId])
+  @@map("onboarding_progress")
+}
+
+model TrainingRecord {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId           String    @map("org_id") @db.Uuid
+  orgMemberId     String    @map("org_member_id") @db.Uuid
+  trainingType    String    @map("training_type") @db.VarChar(100)
+  trainingName    String    @map("training_name") @db.VarChar(200)
+  completedAt     DateTime  @map("completed_at") @db.Timestamptz()
+  expiresAt       DateTime? @map("expires_at") @db.Timestamptz()
+  certificateUrl  String?   @map("certificate_url")
+  notes           String?
+  recordedBy      String    @map("recorded_by") @db.Uuid
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+
+  @@index([orgId, orgMemberId])
+  @@index([orgId, expiresAt])
+  @@map("training_records")
+}
 

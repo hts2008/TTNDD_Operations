@@ -6,12 +6,21 @@ import { MemberLifecycleService } from './member-lifecycle.service';
 import { GuardianController } from './guardian.controller';
 import { GuardianService } from './guardian.service';
 import { MemberValidationService } from './member-validation.service';
+import { TransferCronService } from './transfer-cron.service';
+import { ComplianceCronService } from './compliance-cron.service';
 
 @Module({
   controllers: [HrmController, GuardianController],
   imports: [EventsModule],
 
-  providers: [HrmService, MemberLifecycleService, GuardianService, MemberValidationService],
+  providers: [
+    HrmService,
+    MemberLifecycleService,
+    GuardianService,
+    MemberValidationService,
+    TransferCronService,
+    ComplianceCronService,
+  ],
   exports: [HrmService, MemberLifecycleService, GuardianService, MemberValidationService],
 })
 export class HrmModule {}
