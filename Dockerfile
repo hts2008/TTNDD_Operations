@@ -22,10 +22,7 @@ RUN pnpm install --frozen-lockfile
 # Copy full source
 COPY . .
 
-# Generate Prisma client + build API
-WORKDIR /app/apps/api
-RUN sh ./node_modules/.bin/prisma generate
-WORKDIR /app
+# Build API (prebuild script runs prisma generate automatically)
 RUN pnpm build --filter=api
 
 # --- Production runner ---
