@@ -23,7 +23,7 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 
 # Generate Prisma client + build API
-RUN cd apps/api && pnpm exec prisma generate
+RUN chmod -R +x node_modules/.bin/ && cd apps/api && node ../../node_modules/.bin/prisma generate
 RUN pnpm build --filter=api
 
 # --- Production runner ---
