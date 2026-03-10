@@ -299,4 +299,74 @@ export class HrmController {
   checkRoleScope(@CurrentUser() user: CurrentUserPayload) {
     return this.hrmService.checkRoleScope(user.orgId, user.userId);
   }
+
+  // ═══════════════════════════════════════════════════════════════
+  // WP-2.4: PARENT PORTAL & CONSENT READ MODELS (T-0056 → T-0060)
+  // ═══════════════════════════════════════════════════════════════
+
+  // T-0056: Link guardian to Firebase user account
+  @Post('parent/link-account')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'T-0056: Link guardian record to user account for parent login' })
+  linkParentAccount(
+    @CurrentUser() user: CurrentUserPayload,
+    @Body() body: { guardianLinkId: string; userId: string },
+  ) {
+    return this.hrmService.linkParentAccount(user.orgId, body.guardianLinkId, body.userId);
+  }
+
+  // T-0056: Get children linked to current parent user
+  @Get('parent/children')
+  @ApiOperation({ summary: 'T-0056: Get all children linked to the current parent user' })
+  getMyChildren(@CurrentUser() user: CurrentUserPayload) {
+    return this.hrmService.getLinkedChildren(user.orgId, user.userId);
+  }
+
+  // T-0057: Parent dashboard (aggregated read model)
+  @Get('parent/dashboard')
+  @ApiOperation({
+    summary: 'T-0057: Get parent dashboard with attendance, fees, consent for linked children',
+  })
+  getParentDashboard(@CurrentUser() user: CurrentUserPayload) {
+    return this.hrmService.getParentDashboard(user.orgId, user.userId);
+  }
+
+  // T-0058: Get child data access logs (transparency for parents/admins)
+  @Get('parent/child-access-logs/:childMemberId')
+  @ApiOperation({ summary: 'T-0058: View who accessed child data (COPPA audit trail)' })
+  getChildAccessLogs(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('childMemberId') childMemberId: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.hrmService.getChildDataAccessLogs(
+      user.orgId,
+      childMemberId,
+      limit ? parseInt(limit) : 50,
+    );
+  }
+
+  // T-0059: Get notification preferences
+  @Get('notifications/preferences')
+  @ApiOperation({ summary: 'T-0059: Get notification preferences for current user' })
+  getNotificationPreferences(@CurrentUser() user: CurrentUserPayload) {
+    return this.hrmService.getNotificationPreferences(user.orgId, user.userId);
+  }
+
+  // T-0059: Update notification preference
+  @Put('notifications/preferences')
+  @ApiOperation({ summary: 'T-0059: Update a notification channel/event preference' })
+  updateNotificationPreference(
+    @CurrentUser() user: CurrentUserPayload,
+    @Body()
+    body: {
+      channel: string;
+      eventType: string;
+      enabled: boolean;
+      quietStart?: string;
+      quietEnd?: string;
+    },
+  ) {
+    return this.hrmService.updateNotificationPreference(user.orgId, user.userId, body);
+  }
 }

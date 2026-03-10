@@ -839,4 +839,194 @@ export class HrmService {
       },
     };
   }
+
+  // ============================================================
+  // WP-2.4: PARENT PORTAL & CONSENT READ MODELS (T-0056 → T-0060)
+  // ============================================================
+
+  // T-0056: Link parent user account to GuardianLink
+  async linkParentAccount(orgId: string, guardianLinkId: string, userId: string) {
+    return this.prisma.guardianLink.update({
+      where: { id: guardianLinkId, orgId },
+      data: { userId },
+    });
+  }
+
+  // T-0056: Get children linked to a parent user
+  async getLinkedChildren(orgId: string, parentUserId: string) {
+    const links = await this.prisma.guardianLink.findMany({
+      where: { orgId, userId: parentUserId },
+      include: {
+        orgMember: {
+          include: {
+            user: { select: { id: true, email: true, displayName: true } },
+            profile: { select: { fullName: true, photoUrl: true } },
+            branch: { select: { id: true, name: true } },
+            unit: { select: { id: true, name: true } },
+          },
+        },
+      },
+    });
+    return links;
+  }
+
+  // T-0057: Parent dashboard read model — aggregated child data
+  async getParentDashboard(orgId: string, parentUserId: string) {
+    const children = await this.getLinkedChildren(orgId, parentUserId);
+
+    // Log access for each child (T-0058)
+    for (const link of children) {
+      await this.logChildDataAccess(
+        orgId,
+        link.orgMemberId,
+        parentUserId,
+        'parent',
+        'view_profile',
+        'profile',
+      );
+    }
+
+    const childIds = children.map((c) => c.orgMemberId);
+
+    // Fetch attendance summary
+    const recentAttendance = await this.prisma.sessionAttendance.findMany({
+      where: { orgId, orgMemberId: { in: childIds } },
+      orderBy: { checkInTime: 'desc' },
+      take: 20,
+      include: { session: { select: { title: true, sessionDate: true } } },
+    });
+
+    // Fetch fee summary
+    const fees = await this.prisma.memberFee.findMany({
+      where: { orgId, orgMemberId: { in: childIds } },
+      orderBy: { dueDate: 'desc' },
+      take: 10,
+    });
+
+    // Fetch guardian consents
+    const consents = children.map((link) => ({
+      childId: link.orgMemberId,
+      childName: link.orgMember.profile?.fullName ?? link.orgMember.user?.displayName ?? 'Unknown',
+      consentSigned: link.consentSigned,
+      consentDate: link.consentDate,
+      relation: link.relation,
+      isPrimary: link.isPrimary,
+    }));
+
+    return {
+      children: children.map((link) =>
+        this.maskChildData(
+          {
+            id: link.orgMemberId,
+            fullName:
+              link.orgMember.profile?.fullName ?? link.orgMember.user?.displayName ?? 'Unknown',
+            photoUrl: link.orgMember.profile?.photoUrl,
+            branch: link.orgMember.branch?.name,
+            unit: link.orgMember.unit?.name,
+            relation: link.relation,
+          },
+          'parent',
+        ),
+      ),
+      attendance: recentAttendance.map((a: any) => ({
+        childId: a.orgMemberId,
+        sessionTitle: a.session?.title,
+        sessionDate: a.session?.sessionDate,
+        status: a.status,
+      })),
+      fees: fees.map((f: any) => ({
+        childId: f.orgMemberId,
+        feeType: f.feeType,
+        amount: f.amountDue,
+        status: f.status,
+        dueDate: f.dueDate,
+      })),
+      consents,
+    };
+  }
+
+  // T-0058: Log child data access (COPPA audit trail)
+  async logChildDataAccess(
+    orgId: string,
+    childMemberId: string,
+    accessorUserId: string,
+    accessorRole: string,
+    accessType: string,
+    resourceType: string,
+    resourceId?: string,
+    ipAddress?: string,
+    userAgent?: string,
+  ) {
+    return this.prisma.childDataAccessLog.create({
+      data: {
+        orgId,
+        childMemberId,
+        accessorUserId,
+        accessorRole,
+        accessType,
+        resourceType,
+        resourceId,
+        ipAddress,
+        userAgent,
+      },
+    });
+  }
+
+  // T-0058: Get child data access logs for transparency
+  async getChildDataAccessLogs(orgId: string, childMemberId: string, limit = 50) {
+    return this.prisma.childDataAccessLog.findMany({
+      where: { orgId, childMemberId },
+      orderBy: { accessedAt: 'desc' },
+      take: limit,
+    });
+  }
+
+  // T-0059: Get notification preferences for a user
+  async getNotificationPreferences(orgId: string, userId: string) {
+    return this.prisma.notificationPreference.findMany({
+      where: { orgId, userId },
+    });
+  }
+
+  // T-0059: Upsert notification preference
+  async updateNotificationPreference(
+    orgId: string,
+    userId: string,
+    data: {
+      channel: string;
+      eventType: string;
+      enabled: boolean;
+      quietStart?: string;
+      quietEnd?: string;
+    },
+  ) {
+    return this.prisma.notificationPreference.upsert({
+      where: {
+        userId_channel_eventType: {
+          userId,
+          channel: data.channel,
+          eventType: data.eventType,
+        },
+      },
+      update: { enabled: data.enabled, quietStart: data.quietStart, quietEnd: data.quietEnd },
+      create: { orgId, userId, ...data },
+    });
+  }
+
+  // T-0060: Privacy masking — filter sensitive fields based on accessor role
+  private maskChildData(data: Record<string, any>, accessorRole: string): Record<string, any> {
+    // Parents see basic info; sensitive fields masked for non-admin roles
+    const sensitiveFields = ['idCard', 'healthNotes', 'medicalHistory', 'emergencyContact'];
+    const masked = { ...data };
+
+    if (accessorRole === 'parent') {
+      for (const field of sensitiveFields) {
+        if (masked[field]) {
+          masked[field] = '***MASKED***';
+        }
+      }
+    }
+
+    return masked;
+  }
 }

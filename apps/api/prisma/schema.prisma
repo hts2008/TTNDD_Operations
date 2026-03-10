@@ -207,10 +207,12 @@ model MemberProfile {
 }
 
 // T-0041: Normalized guardian entity (replaces denormalized fields)
+// T-0056: userId added for parent auth mapping (guest → linked user)
 model GuardianLink {
   id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   orgId           String   @map("org_id") @db.Uuid
   orgMemberId     String   @map("org_member_id") @db.Uuid
+  userId          String?  @map("user_id") @db.Uuid // T-0056: linked Firebase user for parent login
   fullName        String   @map("full_name") @db.VarChar(255)
   relation        String   @db.VarChar(50) // mother, father, grandparent, sibling, other
   phone           String?  @db.VarChar(20)
@@ -231,8 +233,31 @@ model GuardianLink {
   @@unique([orgMemberId, fullName, relation])
   @@index([orgId])
   @@index([orgMemberId])
+  @@index([userId])
   @@map("guardian_links")
 }
+
+// T-0058: Child data access log — COPPA-compliant audit trail
+model ChildDataAccessLog {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId           String   @map("org_id") @db.Uuid
+  childMemberId   String   @map("child_member_id") @db.Uuid
+  accessorUserId  String   @map("accessor_user_id") @db.Uuid
+  accessorRole    String   @map("accessor_role") @db.VarChar(50) // parent, admin, truong
+  accessType      String   @map("access_type") @db.VarChar(50) // view_profile, view_attendance, view_grades, view_health, export
+  resourceType    String   @map("resource_type") @db.VarChar(50) // profile, attendance, fee, progress, health
+  resourceId      String?  @map("resource_id") @db.Uuid
+  ipAddress       String?  @map("ip_address") @db.VarChar(45)
+  userAgent       String?  @map("user_agent") @db.VarChar(500)
+  accessedAt      DateTime @default(now()) @map("accessed_at") @db.Timestamptz()
+
+  @@index([orgId, childMemberId])
+  @@index([orgId, accessorUserId])
+  @@index([accessedAt])
+  @@map("child_data_access_logs")
+}
+
+
 
 model MemberBranchHistory {
   id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -1258,15 +1283,19 @@ model Notification {
   @@map("notifications")
 }
 
+// T-0059: Enhanced with quiet hours
 model NotificationPreference {
-  id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  orgId     String  @map("org_id") @db.Uuid
-  userId    String  @map("user_id") @db.Uuid
-  channel   String  @db.VarChar(20)
-  eventType String  @map("event_type") @db.VarChar(100)
-  enabled   Boolean @default(true)
+  id         String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId      String  @map("org_id") @db.Uuid
+  userId     String  @map("user_id") @db.Uuid
+  channel    String  @db.VarChar(20)
+  eventType  String  @map("event_type") @db.VarChar(100)
+  enabled    Boolean @default(true)
+  quietStart String? @map("quiet_start") @db.VarChar(5)
+  quietEnd   String? @map("quiet_end") @db.VarChar(5)
 
   @@unique([userId, channel, eventType])
+  @@index([orgId, userId])
   @@map("notification_preferences")
 }
 
