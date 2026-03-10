@@ -23,13 +23,14 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 
 # Generate Prisma client + build API
-RUN cd apps/api && npx prisma generate
+RUN cd apps/api && pnpm exec prisma generate
 RUN pnpm build --filter=api
 
 # --- Production runner ---
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
+ENV DATABASE_URL="postgresql://ttndd_app:Ttndd2026Secure@35.240.183.230:5432/ttndd_ops?schema=public"
 
 # Install OpenSSL for Prisma runtime
 RUN apk add --no-cache openssl
