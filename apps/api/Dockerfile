@@ -16,5 +16,5 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/apps/api/dist ./dist
 COPY --from=builder /app/apps/api/prisma ./prisma
 COPY --from=builder /app/apps/api/package.json ./
-EXPOSE 3001
+EXPOSE 8080
 CMD ["node", "dist/main.js"]
