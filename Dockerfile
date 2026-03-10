@@ -1,5 +1,9 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
+
+# Install OpenSSL for Prisma
+RUN apk add --no-cache openssl
+
 RUN corepack enable && corepack prepare pnpm@10.27.0 --activate
 
 # Copy workspace config files first for layer caching
@@ -22,15 +26,15 @@ COPY . .
 RUN cd apps/api && npx prisma generate
 RUN pnpm build --filter=api
 
-# Prune dev dependencies
-RUN pnpm prune --prod
-
 # --- Production runner ---
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
-# Copy node_modules (contains all prod deps)
+# Install OpenSSL for Prisma runtime
+RUN apk add --no-cache openssl
+
+# Copy built app from builder (skip pnpm prune — just copy what we need)
 COPY --from=builder /app/node_modules ./node_modules
 
 # Copy workspace packages (required for @ttndd/* imports)
