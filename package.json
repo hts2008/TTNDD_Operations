@@ -4,7 +4,7 @@
   "private": true,
   "packageManager": "pnpm@10.27.0",
   "scripts": {
-    "start": "node apps/api/dist/main.js",
+    "start": "cd apps/api && node dist/main.js",
     "dev": "turbo run dev",
     "build": "turbo run build",
     "lint": "turbo run lint",
