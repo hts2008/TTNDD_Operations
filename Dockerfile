@@ -24,7 +24,7 @@ COPY . .
 
 # Generate Prisma client + build API
 WORKDIR /app/apps/api
-RUN chmod -R +x node_modules/.bin/ 2>/dev/null; node node_modules/.bin/prisma generate || node ../../node_modules/prisma/build/index.js generate
+RUN sh ./node_modules/.bin/prisma generate
 WORKDIR /app
 RUN pnpm build --filter=api
 
