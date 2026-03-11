@@ -87,4 +87,44 @@ export class SessionsController {
   getAttendanceReport(@CurrentUser() user: CurrentUserPayload, @Param('memberId') memberId: string) {
     return this.sessionsService.getAttendanceReport(user.orgId, memberId);
   }
+
+  // ── Annual Program (WP-3.4) ──
+
+  @Post('annual-programs')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Create annual program' })
+  createAnnualProgram(
+    @CurrentUser() user: CurrentUserPayload,
+    @Body() body: { branchId: string; year: number; title?: string; monthlyThemes?: Prisma.InputJsonValue; objectives?: Prisma.InputJsonValue },
+  ) {
+    return this.sessionsService.createAnnualProgram(user.orgId, body);
+  }
+
+  @Get('annual-programs')
+  @ApiOperation({ summary: 'List annual programs' })
+  getAnnualPrograms(
+    @CurrentUser() user: CurrentUserPayload,
+    @Query('branchId') branchId?: string,
+    @Query('year') year?: number,
+  ) {
+    return this.sessionsService.getAnnualPrograms(user.orgId, { branchId, year: year ? Number(year) : undefined });
+  }
+
+  @Patch('annual-programs/:id')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Update annual program' })
+  updateAnnualProgram(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id') id: string,
+    @Body() body: { title?: string; monthlyThemes?: Prisma.InputJsonValue; objectives?: Prisma.InputJsonValue },
+  ) {
+    return this.sessionsService.updateAnnualProgram(user.orgId, id, body, user.userId);
+  }
+
+  @Post('annual-programs/:id/approve')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Approve annual program' })
+  approveAnnualProgram(@CurrentUser() user: CurrentUserPayload, @Param('id') id: string) {
+    return this.sessionsService.approveAnnualProgram(user.orgId, id, user.userId);
+  }
 }

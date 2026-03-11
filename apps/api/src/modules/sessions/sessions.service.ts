@@ -154,4 +154,39 @@ export class SessionsService {
     ]);
     return { memberId, total, present, absent, excused, rate: total > 0 ? Math.round((present / total) * 100) : 0 };
   }
+
+  // ── Annual Program (T-0086) ──
+
+  async createAnnualProgram(orgId: string, data: {
+    branchId: string; year: number; title?: string;
+    monthlyThemes?: Prisma.InputJsonValue; objectives?: Prisma.InputJsonValue;
+  }) {
+    return this.prisma.annualProgram.create({ data: { orgId, ...data } });
+  }
+
+  async getAnnualPrograms(orgId: string, filters?: { branchId?: string; year?: number }) {
+    const where: Prisma.AnnualProgramWhereInput = { orgId };
+    if (filters?.branchId) where.branchId = filters.branchId;
+    if (filters?.year) where.year = filters.year;
+
+    return this.prisma.annualProgram.findMany({
+      where,
+      orderBy: [{ year: 'desc' }, { createdAt: 'desc' }],
+    });
+  }
+
+  async updateAnnualProgram(orgId: string, programId: string, data: Partial<{
+    title: string; monthlyThemes: Prisma.InputJsonValue; objectives: Prisma.InputJsonValue;
+  }>, actorUserId: string) {
+    const updated = await this.prisma.annualProgram.update({ where: { id: programId, orgId }, data });
+    await this.audit.log({ orgId, userId: actorUserId, action: 'annual_program.updated', resource: 'AnnualProgram', resourceId: programId, newValue: data as Prisma.InputJsonValue });
+    return updated;
+  }
+
+  async approveAnnualProgram(orgId: string, programId: string, actorUserId: string) {
+    return this.prisma.annualProgram.update({
+      where: { id: programId, orgId },
+      data: { status: 'approved', approvedBy: actorUserId },
+    });
+  }
 }
