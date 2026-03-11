@@ -75,6 +75,16 @@ export const Permission = {
   MEMBER_VIEW_LIST: 'member:view_list',
   MEMBER_REASSIGN: 'member:reassign',
 
+  // Org Chart (T-0055)
+  ORG_CHART_VIEW: 'org_chart:view',
+  ORG_CHART_MANAGE: 'org_chart:manage',
+  ORG_CHART_ASSIGN: 'org_chart:assign',
+
+  // Volunteer (T-0055)
+  VOLUNTEER_VIEW: 'volunteer:view',
+  VOLUNTEER_MANAGE: 'volunteer:manage',
+  VOLUNTEER_SELF: 'volunteer:self',
+
   // Modules
   MODULE_TOGGLE: 'module:toggle',
 
@@ -105,6 +115,11 @@ export const ROLE_PERMISSIONS: Record<OrgRoleType, PermissionType[]> = {
     Permission.MEMBER_REMOVE,
     Permission.MEMBER_VIEW_LIST,
     Permission.MEMBER_REASSIGN,
+    Permission.ORG_CHART_VIEW,
+    Permission.ORG_CHART_MANAGE,
+    Permission.ORG_CHART_ASSIGN,
+    Permission.VOLUNTEER_VIEW,
+    Permission.VOLUNTEER_MANAGE,
     Permission.MODULE_TOGGLE,
     Permission.AUDIT_VIEW,
   ],
@@ -114,13 +129,23 @@ export const ROLE_PERMISSIONS: Record<OrgRoleType, PermissionType[]> = {
     Permission.MEMBER_INVITE,
     Permission.MEMBER_VIEW_LIST,
     Permission.MEMBER_REASSIGN,
+    Permission.ORG_CHART_VIEW,
+    Permission.ORG_CHART_ASSIGN,
+    Permission.VOLUNTEER_VIEW,
+    Permission.VOLUNTEER_MANAGE,
     Permission.AUDIT_VIEW,
   ],
 
-  [OrgRole.SUB_LEADER]: [Permission.MEMBER_VIEW_LIST],
+  [OrgRole.SUB_LEADER]: [
+    Permission.MEMBER_VIEW_LIST,
+    Permission.ORG_CHART_VIEW,
+    Permission.VOLUNTEER_VIEW,
+    Permission.VOLUNTEER_SELF,
+  ],
 
   [OrgRole.MEMBER]: [
-    // Members can only view their own data (enforced at service level)
+    Permission.VOLUNTEER_SELF,
+    // Members can view own chart node & manage own availability
   ],
 };
 

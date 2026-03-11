@@ -104,12 +104,17 @@ describe('roles.constants', () => {
       expect(ROLE_PERMISSIONS[OrgRole.SUPER_ADMIN]).toHaveLength(totalPerms);
     });
 
-    it('sub_leader only has MEMBER_VIEW_LIST', () => {
-      expect(ROLE_PERMISSIONS[OrgRole.SUB_LEADER]).toEqual([Permission.MEMBER_VIEW_LIST]);
+    it('sub_leader has MEMBER_VIEW_LIST + chart/volunteer view', () => {
+      expect(ROLE_PERMISSIONS[OrgRole.SUB_LEADER]).toEqual([
+        Permission.MEMBER_VIEW_LIST,
+        Permission.ORG_CHART_VIEW,
+        Permission.VOLUNTEER_VIEW,
+        Permission.VOLUNTEER_SELF,
+      ]);
     });
 
-    it('member has empty permissions array', () => {
-      expect(ROLE_PERMISSIONS[OrgRole.MEMBER]).toEqual([]);
+    it('member has VOLUNTEER_SELF only', () => {
+      expect(ROLE_PERMISSIONS[OrgRole.MEMBER]).toEqual([Permission.VOLUNTEER_SELF]);
     });
   });
 });

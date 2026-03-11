@@ -1,11 +1,14 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { Prisma } from '@prisma/client';
 import { OrgConfigService } from './org-config.service';
-import { CurrentUser, type CurrentUserPayload, Roles } from '../../common/decorators';
+import { CurrentUser, type CurrentUserPayload, Roles, RequirePermission } from '../../common/decorators';
+import { PermissionsGuard } from '../../core/auth/guards/permissions.guard';
+import { Permission } from './roles.constants';
 
 @ApiTags('Organization Config')
 @ApiBearerAuth()
+@UseGuards(PermissionsGuard)
 @Controller('organizations')
 export class OrgConfigController {
   constructor(private readonly orgConfigService: OrgConfigService) {}
@@ -212,6 +215,7 @@ export class OrgConfigController {
   // ── Org Chart (T-0051/T-0052) ──
 
   @Get(':id/org-tree')
+  @RequirePermission(Permission.ORG_CHART_VIEW)
   @ApiOperation({ summary: 'Get org chart tree (nested hierarchy)' })
   getOrgTree(@Param('id') id: string) {
     return this.orgConfigService.getOrgTree(id);
@@ -219,6 +223,7 @@ export class OrgConfigController {
 
   @Post(':id/org-chart-nodes')
   @Roles('super_admin', 'admin')
+  @RequirePermission(Permission.ORG_CHART_MANAGE)
   @ApiOperation({ summary: 'Create an org chart node' })
   createOrgChartNode(
     @Param('id') id: string,
@@ -238,6 +243,7 @@ export class OrgConfigController {
 
   @Patch(':id/org-chart-nodes/:nodeId/move')
   @Roles('super_admin', 'admin')
+  @RequirePermission(Permission.ORG_CHART_MANAGE)
   @ApiOperation({ summary: 'Move/reparent an org chart node (cycle-safe)' })
   moveOrgChartNode(
     @Param('id') id: string,
@@ -251,7 +257,8 @@ export class OrgConfigController {
   // ── Member Assignment (T-0053) ──
 
   @Post(':id/members/:memberId/assign-unit')
-  @Roles('super_admin', 'admin')
+  @Roles('super_admin', 'admin', 'leader')
+  @RequirePermission(Permission.ORG_CHART_ASSIGN)
   @ApiOperation({ summary: 'Assign a member to a unit (creates org chart node)' })
   assignMemberToUnit(
     @Param('id') id: string,
@@ -271,6 +278,7 @@ export class OrgConfigController {
   // ── Volunteer Availability (T-0054) ──
 
   @Get(':id/volunteer-availability')
+  @RequirePermission(Permission.VOLUNTEER_VIEW)
   @ApiOperation({ summary: 'Get volunteer availability calendar' })
   getVolunteerAvailability(
     @Param('id') id: string,
@@ -282,7 +290,8 @@ export class OrgConfigController {
   }
 
   @Post(':id/members/:memberId/availability')
-  @Roles('super_admin', 'admin', 'truong')
+  @Roles('super_admin', 'admin', 'leader')
+  @RequirePermission(Permission.VOLUNTEER_MANAGE)
   @ApiOperation({ summary: 'Set volunteer availability for a member' })
   setVolunteerAvailability(
     @Param('id') id: string,
@@ -301,7 +310,8 @@ export class OrgConfigController {
   }
 
   @Delete(':id/volunteer-availability/:availabilityId')
-  @Roles('super_admin', 'admin', 'truong')
+  @Roles('super_admin', 'admin', 'leader')
+  @RequirePermission(Permission.VOLUNTEER_MANAGE)
   @ApiOperation({ summary: 'Delete a volunteer availability entry' })
   deleteVolunteerAvailability(
     @Param('id') id: string,
