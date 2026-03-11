@@ -4,6 +4,7 @@ import { PrismaService } from '../../core/database';
 import { DomainEventService } from '../../core/events';
 import { AuditService } from '../../core/audit';
 import { DOMAIN_EVENTS } from '@ttndd/constants';
+import { ALL_TICKET_CATEGORIES, HR_TICKET_CATEGORIES, GENERAL_TICKET_CATEGORIES } from './hr-ticket-categories';
 
 /**
  * SM-5: Ticket Lifecycle
@@ -195,5 +196,18 @@ export class TicketsService {
         notes,
       },
     });
+  }
+
+  // ── T-0070: HR Helpdesk Ticket Categories ──
+
+  getCategories(group?: 'hr' | 'general' | 'all') {
+    switch (group) {
+      case 'hr':
+        return HR_TICKET_CATEGORIES;
+      case 'general':
+        return GENERAL_TICKET_CATEGORIES;
+      default:
+        return ALL_TICKET_CATEGORIES;
+    }
   }
 }

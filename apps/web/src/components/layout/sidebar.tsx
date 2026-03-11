@@ -28,6 +28,7 @@ import {
   Sparkles,
   Castle,
   ScrollText,
+  ArrowRightLeft,
 } from 'lucide-react';
 
 /**
@@ -74,6 +75,7 @@ const NAV_ZONES: NavZone[] = [
     zoneColor: 'text-blue-400',
     items: [
       { label: 'Đoàn sinh', href: '/members', icon: <Users className="h-4 w-4" /> },
+      { label: 'Chuyển ngành', href: '/members/transfers', icon: <ArrowRightLeft className="h-4 w-4" />, minRole: 'leader' as const },
       { label: 'Sinh hoạt', href: '/sessions', icon: <Calendar className="h-4 w-4" /> },
       { label: 'Sự kiện', href: '/events', icon: <CalendarDays className="h-4 w-4" /> },
     ],

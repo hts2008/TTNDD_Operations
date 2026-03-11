@@ -1,0 +1,484 @@
+'use client';
+
+import { useState } from 'react';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { DataTable } from '@/components/ui/data-table';
+import { cn } from '@/lib/utils';
+import {
+  ArrowRightLeft,
+  Search,
+  Plus,
+  CheckCircle2,
+  Clock,
+  XCircle,
+  FileCheck,
+  ChevronRight,
+  User,
+  MapPin,
+  Star,
+  Trophy,
+} from 'lucide-react';
+
+// ── Types ──
+
+type TransferStatus = 'initiated' | 'pending_handover' | 'handover_complete' | 'closed' | 'cancelled';
+
+interface TransferCase {
+  id: string;
+  memberName: string;
+  memberCode: string;
+  fromBranch: string;
+  fromUnit: string;
+  toBranch: string;
+  toUnit?: string;
+  status: TransferStatus;
+  reason: string;
+  triggerType: 'manual' | 'age_threshold';
+  summarySnapshot: { totalExp: number; currentRank: string | null; badgeCount: number };
+  initiatedAt: string;
+  completedAt?: string;
+}
+
+// ── Status Configuration ──
+
+const STATUS_CONFIG: Record<
+  TransferStatus,
+  { label: string; variant: 'default' | 'warning' | 'success' | 'secondary' | 'destructive'; icon: React.ReactNode }
+> = {
+  initiated: {
+    label: 'Đã khởi tạo',
+    variant: 'default',
+    icon: <Clock className="h-3 w-3" />,
+  },
+  pending_handover: {
+    label: 'Chờ bàn giao',
+    variant: 'warning',
+    icon: <FileCheck className="h-3 w-3" />,
+  },
+  handover_complete: {
+    label: 'Đã bàn giao',
+    variant: 'success',
+    icon: <CheckCircle2 className="h-3 w-3" />,
+  },
+  closed: {
+    label: 'Đã hoàn tất',
+    variant: 'secondary',
+    icon: <CheckCircle2 className="h-3 w-3" />,
+  },
+  cancelled: {
+    label: 'Đã hủy',
+    variant: 'destructive',
+    icon: <XCircle className="h-3 w-3" />,
+  },
+};
+
+const TRIGGER_LABELS: Record<string, string> = {
+  manual: 'Thủ công',
+  age_threshold: 'Quá tuổi',
+};
+
+const FILTER_TABS = [
+  { key: 'all', label: 'Tất cả' },
+  { key: 'initiated', label: 'Khởi tạo' },
+  { key: 'pending_handover', label: 'Chờ bàn giao' },
+  { key: 'handover_complete', label: 'Đã bàn giao' },
+  { key: 'closed', label: 'Hoàn tất' },
+  { key: 'cancelled', label: 'Đã hủy' },
+];
+
+// ── Mock Data (matching SM: initiated → pending_handover → handover_complete → closed | cancelled) ──
+
+const MOCK_TRANSFERS: TransferCase[] = [
+  {
+    id: 'tc-001',
+    memberName: 'Nguyễn Văn An',
+    memberCode: 'DS-001',
+    fromBranch: 'Ngành Thiếu',
+    fromUnit: 'Đội Hướng Dương',
+    toBranch: 'Ngành Thanh',
+    toUnit: 'Toán Bạch Mã',
+    status: 'initiated',
+    reason: 'Quá tuổi ngành Thiếu (max: 16)',
+    triggerType: 'age_threshold',
+    summarySnapshot: { totalExp: 1250, currentRank: 'Hạng Nhì', badgeCount: 8 },
+    initiatedAt: '2026-03-10',
+  },
+  {
+    id: 'tc-002',
+    memberName: 'Trần Thị Bình',
+    memberCode: 'DS-002',
+    fromBranch: 'Ngành Đồng',
+    fromUnit: 'Đàn Sơn Ca',
+    toBranch: 'Ngành Thiếu',
+    toUnit: 'Đội Hải Âu',
+    status: 'pending_handover',
+    reason: 'Quá tuổi ngành Đồng (max: 11)',
+    triggerType: 'age_threshold',
+    summarySnapshot: { totalExp: 680, currentRank: 'Hạng Ba', badgeCount: 5 },
+    initiatedAt: '2026-03-08',
+  },
+  {
+    id: 'tc-003',
+    memberName: 'Lê Minh Châu',
+    memberCode: 'DS-003',
+    fromBranch: 'Ngành Thiếu',
+    fromUnit: 'Đội Hướng Dương',
+    toBranch: 'Ngành Thanh',
+    status: 'handover_complete',
+    reason: 'Yêu cầu chuyển của phụ huynh',
+    triggerType: 'manual',
+    summarySnapshot: { totalExp: 2100, currentRank: 'Hạng Nhất', badgeCount: 15 },
+    initiatedAt: '2026-03-01',
+  },
+  {
+    id: 'tc-004',
+    memberName: 'Phạm Đức Dũng',
+    memberCode: 'DS-004',
+    fromBranch: 'Ngành Thiếu',
+    fromUnit: 'Đội Sao Mai',
+    toBranch: 'Ngành Thanh',
+    toUnit: 'Toán Lam Sơn',
+    status: 'closed',
+    reason: 'Lên ngành theo quy trình chuẩn',
+    triggerType: 'manual',
+    summarySnapshot: { totalExp: 3200, currentRank: 'Hạng Nhất', badgeCount: 22 },
+    initiatedAt: '2026-02-15',
+    completedAt: '2026-02-28',
+  },
+  {
+    id: 'tc-005',
+    memberName: 'Hoàng Thị Lan',
+    memberCode: 'DS-005',
+    fromBranch: 'Ngành Đồng',
+    fromUnit: 'Đàn Én Nhỏ',
+    toBranch: 'Ngành Thiếu',
+    status: 'cancelled',
+    reason: 'Phụ huynh muốn con ở lại ngành Đồng thêm 1 kỳ',
+    triggerType: 'age_threshold',
+    summarySnapshot: { totalExp: 320, currentRank: 'Hạng Tư', badgeCount: 3 },
+    initiatedAt: '2026-02-20',
+  },
+];
+
+// ── Component ──
+
+export default function TransfersPage() {
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [selectedCase, setSelectedCase] = useState<TransferCase | null>(null);
+
+  const filtered = MOCK_TRANSFERS.filter((tc) => {
+    if (statusFilter !== 'all' && tc.status !== statusFilter) return false;
+    if (
+      search &&
+      !tc.memberName.toLowerCase().includes(search.toLowerCase()) &&
+      !tc.memberCode.toLowerCase().includes(search.toLowerCase())
+    )
+      return false;
+    return true;
+  });
+
+  const statusCounts = MOCK_TRANSFERS.reduce(
+    (acc, tc) => {
+      acc[tc.status] = (acc[tc.status] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
+
+  const columns = [
+    {
+      key: 'memberCode',
+      label: 'Mã',
+      render: (tc: TransferCase) => <span className="font-mono text-sm font-medium">{tc.memberCode}</span>,
+    },
+    {
+      key: 'memberName',
+      label: 'Đoàn sinh',
+      render: (tc: TransferCase) => (
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white text-xs font-bold shadow-sm">
+            {tc.memberName
+              .split(' ')
+              .slice(-1)[0]
+              ?.charAt(0)}
+          </div>
+          <span className="font-medium">{tc.memberName}</span>
+        </div>
+      ),
+    },
+    {
+      key: 'transfer',
+      label: 'Chuyển',
+      render: (tc: TransferCase) => (
+        <div className="flex items-center gap-1.5 text-sm">
+          <span className="text-[hsl(var(--muted-foreground))]">{tc.fromBranch}</span>
+          <ChevronRight className="h-3.5 w-3.5 text-[hsl(var(--primary))]" />
+          <span className="font-medium text-[hsl(var(--primary))]">{tc.toBranch}</span>
+        </div>
+      ),
+    },
+    {
+      key: 'triggerType',
+      label: 'Loại',
+      render: (tc: TransferCase) => (
+        <Badge variant="outline" className="text-xs">
+          {TRIGGER_LABELS[tc.triggerType] || tc.triggerType}
+        </Badge>
+      ),
+    },
+    {
+      key: 'status',
+      label: 'Trạng thái',
+      render: (tc: TransferCase) => {
+        const cfg = STATUS_CONFIG[tc.status];
+        return (
+          <Badge variant={cfg.variant} className="gap-1">
+            {cfg.icon}
+            {cfg.label}
+          </Badge>
+        );
+      },
+    },
+    {
+      key: 'initiatedAt',
+      label: 'Ngày tạo',
+      render: (tc: TransferCase) => (
+        <span className="text-sm text-[hsl(var(--muted-foreground))]">
+          {new Date(tc.initiatedAt).toLocaleDateString('vi-VN', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+          })}
+        </span>
+      ),
+    },
+  ];
+
+  return (
+    <div className="space-y-6 p-6">
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-[hsl(var(--foreground))] flex items-center gap-3">
+            <ArrowRightLeft className="h-7 w-7 text-indigo-500" />
+            Chuyển ngành
+          </h1>
+          <p className="text-sm text-[hsl(var(--muted-foreground))] mt-1">
+            Quản lý các trường hợp chuyển ngành, lên ngành cho đoàn sinh
+          </p>
+        </div>
+        <Button className="gap-2 self-start bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-md">
+          <Plus className="h-4 w-4" />
+          Tạo yêu cầu chuyển
+        </Button>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        {FILTER_TABS.filter((t) => t.key !== 'all').map((tab) => {
+          const cfg = STATUS_CONFIG[tab.key as TransferStatus];
+          const count = statusCounts[tab.key] || 0;
+          return (
+            <button
+              key={tab.key}
+              onClick={() => setStatusFilter(statusFilter === tab.key ? 'all' : tab.key)}
+              className={cn(
+                'rounded-xl border p-3 text-left transition-all hover:shadow-md',
+                statusFilter === tab.key
+                  ? 'border-[hsl(var(--primary))] bg-[hsl(var(--primary)_/_0.05)] ring-1 ring-[hsl(var(--primary)_/_0.2)]'
+                  : 'border-[hsl(var(--border))] bg-[hsl(var(--card))]',
+              )}
+            >
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs font-medium text-[hsl(var(--muted-foreground))]">{tab.label}</span>
+                {cfg?.icon}
+              </div>
+              <span className="text-2xl font-bold">{count}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Filter + Search Bar */}
+      <Card className="p-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[hsl(var(--muted-foreground))]" />
+            <Input
+              placeholder="Tìm theo tên hoặc mã đoàn sinh..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <div className="flex gap-1 flex-wrap">
+            {FILTER_TABS.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setStatusFilter(tab.key)}
+                className={cn(
+                  'rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
+                  statusFilter === tab.key
+                    ? 'bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]'
+                    : 'text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--muted))]',
+                )}
+              >
+                {tab.label}
+                {tab.key !== 'all' && statusCounts[tab.key] ? (
+                  <span className="ml-1 text-xs opacity-70">({statusCounts[tab.key]})</span>
+                ) : null}
+              </button>
+            ))}
+          </div>
+        </div>
+      </Card>
+
+      {/* Main Layout: Table + Detail */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Transfer Cases Table */}
+        <div className={cn('transition-all', selectedCase ? 'lg:col-span-2' : 'lg:col-span-3')}>
+          <DataTable
+            columns={columns}
+            data={filtered}
+            onRowClick={(tc) => setSelectedCase(tc as TransferCase)}
+            className="bg-[hsl(var(--card))]"
+          />
+        </div>
+
+        {/* Detail Panel */}
+        {selectedCase && (
+          <Card className="lg:col-span-1 overflow-hidden">
+            <CardHeader className="bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border-b border-[hsl(var(--border))]">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg">Chi tiết chuyển ngành</CardTitle>
+                <button
+                  onClick={() => setSelectedCase(null)}
+                  className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] text-sm"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="flex items-center gap-2 mt-2">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-bold shadow-md">
+                  {selectedCase.memberName
+                    .split(' ')
+                    .slice(-1)[0]
+                    ?.charAt(0)}
+                </div>
+                <div>
+                  <p className="font-semibold">{selectedCase.memberName}</p>
+                  <p className="text-xs text-[hsl(var(--muted-foreground))] font-mono">{selectedCase.memberCode}</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-4 space-y-4">
+              {/* Status */}
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-[hsl(var(--muted-foreground))]">Trạng thái</span>
+                <Badge variant={STATUS_CONFIG[selectedCase.status].variant} className="gap-1">
+                  {STATUS_CONFIG[selectedCase.status].icon}
+                  {STATUS_CONFIG[selectedCase.status].label}
+                </Badge>
+              </div>
+
+              {/* Transfer Direction */}
+              <div className="rounded-lg border border-[hsl(var(--border))] p-3 space-y-2">
+                <div className="flex items-center gap-2 text-sm">
+                  <MapPin className="h-4 w-4 text-red-400" />
+                  <span className="text-[hsl(var(--muted-foreground))]">Từ:</span>
+                  <span className="font-medium">
+                    {selectedCase.fromBranch} — {selectedCase.fromUnit}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <MapPin className="h-4 w-4 text-green-500" />
+                  <span className="text-[hsl(var(--muted-foreground))]">Đến:</span>
+                  <span className="font-medium text-[hsl(var(--primary))]">
+                    {selectedCase.toBranch}
+                    {selectedCase.toUnit && ` — ${selectedCase.toUnit}`}
+                  </span>
+                </div>
+              </div>
+
+              {/* Reason */}
+              <div>
+                <span className="text-sm text-[hsl(var(--muted-foreground))]">Lý do</span>
+                <p className="text-sm mt-1">{selectedCase.reason}</p>
+              </div>
+
+              {/* Summary Snapshot */}
+              <div>
+                <span className="text-sm font-medium text-[hsl(var(--muted-foreground))]">
+                  Snapshot tại thời điểm chuyển
+                </span>
+                <div className="grid grid-cols-3 gap-2 mt-2">
+                  <div className="rounded-lg bg-[hsl(var(--muted)_/_0.3)] p-2 text-center">
+                    <Star className="h-4 w-4 mx-auto text-amber-500 mb-1" />
+                    <p className="text-lg font-bold">{selectedCase.summarySnapshot.totalExp.toLocaleString()}</p>
+                    <p className="text-[10px] text-[hsl(var(--muted-foreground))]">EXP</p>
+                  </div>
+                  <div className="rounded-lg bg-[hsl(var(--muted)_/_0.3)] p-2 text-center">
+                    <Trophy className="h-4 w-4 mx-auto text-indigo-500 mb-1" />
+                    <p className="text-sm font-bold">{selectedCase.summarySnapshot.currentRank || '—'}</p>
+                    <p className="text-[10px] text-[hsl(var(--muted-foreground))]">Hạng</p>
+                  </div>
+                  <div className="rounded-lg bg-[hsl(var(--muted)_/_0.3)] p-2 text-center">
+                    <User className="h-4 w-4 mx-auto text-emerald-500 mb-1" />
+                    <p className="text-lg font-bold">{selectedCase.summarySnapshot.badgeCount}</p>
+                    <p className="text-[10px] text-[hsl(var(--muted-foreground))]">Huy hiệu</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons based on status */}
+              <div className="pt-2 border-t border-[hsl(var(--border))] space-y-2">
+                {selectedCase.status === 'initiated' && (
+                  <>
+                    <Button className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700">
+                      <CheckCircle2 className="h-4 w-4 mr-2" />
+                      Phê duyệt chuyển ngành
+                    </Button>
+                    <Button variant="outline" className="w-full text-red-500 border-red-200 hover:bg-red-50">
+                      <XCircle className="h-4 w-4 mr-2" />
+                      Hủy yêu cầu
+                    </Button>
+                  </>
+                )}
+                {selectedCase.status === 'pending_handover' && (
+                  <Button className="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700">
+                    <FileCheck className="h-4 w-4 mr-2" />
+                    Hoàn tất bàn giao
+                  </Button>
+                )}
+                {selectedCase.status === 'handover_complete' && (
+                  <Button className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700">
+                    <CheckCircle2 className="h-4 w-4 mr-2" />
+                    Tiếp nhận & đóng hồ sơ
+                  </Button>
+                )}
+                {selectedCase.status === 'closed' && (
+                  <div className="text-center text-sm text-[hsl(var(--muted-foreground))] py-2">
+                    ✅ Đã hoàn tất vào{' '}
+                    {selectedCase.completedAt &&
+                      new Date(selectedCase.completedAt).toLocaleDateString('vi-VN', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                      })}
+                  </div>
+                )}
+                {selectedCase.status === 'cancelled' && (
+                  <div className="text-center text-sm text-red-500 py-2">❌ Yêu cầu đã bị hủy</div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    </div>
+  );
+}

@@ -10,6 +10,13 @@ import { Prisma } from '@prisma/client';
 export class TicketsController {
   constructor(private readonly ticketsService: TicketsService) {}
 
+  // T-0070: HR Helpdesk Ticket Categories
+  @Get('categories')
+  @ApiOperation({ summary: 'T-0070: Get ticket categories (HR helpdesk + general)' })
+  getCategories(@Query('group') group?: 'hr' | 'general' | 'all') {
+    return this.ticketsService.getCategories(group);
+  }
+
   @Post()
   @ApiOperation({ summary: 'Create a new ticket (auto-generates ticketNumber)' })
   createTicket(
