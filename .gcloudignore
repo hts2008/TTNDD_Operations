@@ -1,0 +1,13 @@
+# Ignore node_modules — Docker installs fresh via pnpm install --frozen-lockfile
+node_modules/
+.git/
+.next/
+dist/
+*.log
+.env
+.env.*
+!.npmrc
+.turbo/
+coverage/
+.playwright/
+test-results/

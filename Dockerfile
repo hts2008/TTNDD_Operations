@@ -29,7 +29,7 @@ RUN pnpm build --filter=api
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
-ENV DATABASE_URL="postgresql://ttndd_app:Ttndd2026Secure@35.240.183.230:5432/ttndd_ops?schema=public"
+ENV DATABASE_URL="postgresql://ttndd_app:Ttndd2026Secure@localhost:5432/ttndd_ops?schema=public&host=/cloudsql/ttndd-platform-2026:asia-southeast1:ttndd-db"
 
 # Install OpenSSL for Prisma runtime
 RUN apk add --no-cache openssl
