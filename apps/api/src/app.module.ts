@@ -17,6 +17,7 @@ import { RewardsModule } from './modules/rewards';
 import { ScoutModule } from './modules/scout';
 import { SessionsModule } from './modules/sessions';
 import { EventsCampModule } from './modules/events';
+import { SpiritualModule } from './modules/spiritual';
 import { LmsModule } from './modules/lms';
 import { EnrichmentModule } from './modules/enrichment';
 import { ProjectsModule } from './modules/projects';
@@ -52,6 +53,7 @@ import { AppService } from './app.service';
     ScoutModule,
     SessionsModule,
     EventsCampModule,
+    SpiritualModule,
     LmsModule,
     EnrichmentModule,
     ProjectsModule,
