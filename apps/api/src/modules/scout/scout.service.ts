@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../core/database';
 import { DomainEventService } from '../../core/events';
@@ -106,7 +106,7 @@ export class ScoutService {
     if (existing) return existing;
 
     const progress = await this.prisma.memberSkillProgress.create({
-      data: { orgId, orgMemberId: memberId, skillId, currentLevel: 0 },
+      data: { orgId, orgMemberId: memberId, skillId, currentLevel: 0, status: 'in_progress', startedAt: new Date() },
     });
 
     await this.domainEvents.publish({
@@ -119,6 +119,95 @@ export class ScoutService {
     });
 
     return progress;
+  }
+
+  // ── Evidence Submission (T-0079) ──
+
+  async submitEvidence(orgId: string, progressId: string, data: { fileObjectId?: string; url?: string; note?: string }, actorUserId: string) {
+    const progress = await this.prisma.memberSkillProgress.findFirst({
+      where: { id: progressId, orgId },
+    });
+    if (!progress) throw new NotFoundException('Progress not found');
+    if (progress.status !== 'in_progress' && progress.status !== 'rejected') {
+      throw new BadRequestException(`Cannot submit evidence when status is "${progress.status}"`);
+    }
+
+    const [evidence] = await this.prisma.$transaction([
+      this.prisma.skillEvidence.create({
+        data: { orgId, progressId, ...data },
+      }),
+      this.prisma.memberSkillProgress.update({
+        where: { id: progressId },
+        data: { status: 'submitted', submittedAt: new Date() },
+      }),
+    ]);
+
+    await this.domainEvents.publish({
+      orgId,
+      eventType: 'scout.skill_submitted',
+      aggregateId: progress.orgMemberId,
+      aggregateType: 'OrgMember',
+      payload: { progressId, skillId: progress.skillId },
+      actorUserId,
+    });
+
+    return evidence;
+  }
+
+  // ── Verify Queue (T-0079) ──
+
+  async getVerifyQueue(orgId: string) {
+    return this.prisma.memberSkillProgress.findMany({
+      where: { orgId, status: 'submitted' },
+      include: {
+        skill: { select: { id: true, name: true, skillCode: true } },
+        orgMember: { select: { id: true, user: { select: { displayName: true } } } },
+        evidence: { orderBy: { capturedAt: 'desc' } },
+      },
+      orderBy: { submittedAt: 'asc' },
+    });
+  }
+
+  // ── Verify / Reject (T-0079) ──
+
+  async verifyProgress(orgId: string, progressId: string, verifierId: string, decision: 'approved' | 'rejected', comment?: string) {
+    const progress = await this.prisma.memberSkillProgress.findFirst({
+      where: { id: progressId, orgId },
+    });
+    if (!progress) throw new NotFoundException('Progress not found');
+    if (progress.status !== 'submitted') {
+      throw new BadRequestException(`Cannot verify when status is "${progress.status}"`);
+    }
+
+    const now = new Date();
+    const newStatus = decision === 'approved' ? 'verified' : 'rejected';
+    const updateData: Record<string, unknown> = { status: newStatus };
+    if (decision === 'approved') {
+      updateData.verifiedAt = now;
+    }
+
+    const [verification] = await this.prisma.$transaction([
+      this.prisma.skillVerification.create({
+        data: { orgId, progressId, verifierPersonId: verifierId, decision, comment },
+      }),
+      this.prisma.memberSkillProgress.update({
+        where: { id: progressId },
+        data: updateData,
+      }),
+    ]);
+
+    await this.domainEvents.publish({
+      orgId,
+      eventType: decision === 'approved'
+        ? DOMAIN_EVENTS.SCOUT.SKILL_VERIFIED
+        : 'scout.skill_rejected',
+      aggregateId: progress.orgMemberId,
+      aggregateType: 'OrgMember',
+      payload: { progressId, skillId: progress.skillId, decision, verifierId },
+      actorUserId: verifierId,
+    });
+
+    return verification;
   }
 
   async verifySkillLevel(orgId: string, memberId: string, skillId: string, level: number, verifiedBy: string) {

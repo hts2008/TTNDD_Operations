@@ -599,16 +599,51 @@ model MemberSkillProgress {
   orgId            String    @map("org_id") @db.Uuid
   orgMemberId      String    @map("org_member_id") @db.Uuid
   skillId          String    @map("skill_id") @db.Uuid
+  status           String    @default("not_started") @db.VarChar(30)
   currentLevel     Int       @default(0) @map("current_level")
   criteriaCompleted Json     @default("{}") @map("criteria_completed")
   verifiedLevels   Json      @default("{}") @map("verified_levels")
+  startedAt        DateTime? @map("started_at") @db.Timestamptz()
+  submittedAt      DateTime? @map("submitted_at") @db.Timestamptz()
+  verifiedAt       DateTime? @map("verified_at") @db.Timestamptz()
+  awardedAt        DateTime? @map("awarded_at") @db.Timestamptz()
   completedAt      DateTime? @map("completed_at") @db.Timestamptz()
 
-  orgMember OrgMember @relation(fields: [orgMemberId], references: [id])
-  skill     Skill     @relation(fields: [skillId], references: [id])
+  orgMember      OrgMember           @relation(fields: [orgMemberId], references: [id])
+  skill          Skill               @relation(fields: [skillId], references: [id])
+  evidence       SkillEvidence[]
+  verifications  SkillVerification[]
 
   @@unique([orgMemberId, skillId])
   @@map("member_skill_progress")
+}
+
+model SkillEvidence {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId        String   @map("org_id") @db.Uuid
+  progressId   String   @map("progress_id") @db.Uuid
+  fileObjectId String?  @map("file_object_id") @db.Uuid
+  url          String?
+  note         String?
+  capturedAt   DateTime @default(now()) @map("captured_at") @db.Timestamptz()
+
+  progress MemberSkillProgress @relation(fields: [progressId], references: [id])
+
+  @@map("skill_evidence")
+}
+
+model SkillVerification {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId            String   @map("org_id") @db.Uuid
+  progressId       String   @map("progress_id") @db.Uuid
+  verifierPersonId String   @map("verifier_person_id") @db.Uuid
+  decision         String   @db.VarChar(20)
+  comment          String?
+  decidedAt        DateTime @default(now()) @map("decided_at") @db.Timestamptz()
+
+  progress MemberSkillProgress @relation(fields: [progressId], references: [id])
+
+  @@map("skill_verifications")
 }
 
 model MemberRank {

@@ -131,13 +131,43 @@ export class ScoutController {
 
   @Post('progress/:memberId/verify')
   @Roles('super_admin', 'admin')
-  @ApiOperation({ summary: 'Verify a skill level for a member' })
+  @ApiOperation({ summary: 'Verify a skill level for a member (legacy)' })
   verifySkill(
     @CurrentUser() user: CurrentUserPayload,
     @Param('memberId') memberId: string,
     @Body() body: { skillId: string; level: number },
   ) {
     return this.scoutService.verifySkillLevel(user.orgId, memberId, body.skillId, body.level, user.userId);
+  }
+
+  // ── Evidence Submission & Verification (WP-3.2) ──
+
+  @Post('progress/:progressId/evidence')
+  @ApiOperation({ summary: 'Submit evidence for skill progress' })
+  submitEvidence(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('progressId') progressId: string,
+    @Body() body: { fileObjectId?: string; url?: string; note?: string },
+  ) {
+    return this.scoutService.submitEvidence(user.orgId, progressId, body, user.userId);
+  }
+
+  @Get('verify-queue')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Get pending verification queue' })
+  getVerifyQueue(@CurrentUser() user: CurrentUserPayload) {
+    return this.scoutService.getVerifyQueue(user.orgId);
+  }
+
+  @Post('progress/:progressId/verify-decision')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Approve or reject submitted evidence' })
+  verifyProgress(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('progressId') progressId: string,
+    @Body() body: { decision: 'approved' | 'rejected'; comment?: string },
+  ) {
+    return this.scoutService.verifyProgress(user.orgId, progressId, user.userId, body.decision, body.comment);
   }
 
   // ── Rank Progress ──
