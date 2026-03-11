@@ -1,5 +1,6 @@
 import { Injectable, BadRequestException, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../../core/database';
 import { DomainEventService } from '../../core/events';
 import { DOMAIN_EVENTS } from '@ttndd/constants';
@@ -152,5 +153,65 @@ export class ExpService {
       });
     }
     return summary;
+  }
+
+  // ── Leaderboard Snapshots (T-0101–T-0105) ──
+
+  async createSnapshot(orgId: string, scope: string, period: string, scopeId?: string) {
+    const rankings = await this.prisma.memberExpSummary.findMany({
+      where: { orgId },
+      include: {
+        orgMember: {
+          select: { scoutName: true, memberCode: true, user: { select: { displayName: true } }, branch: { select: { name: true } } },
+        },
+      },
+      orderBy: { totalExp: 'desc' },
+      take: 50,
+    });
+
+    return this.prisma.leaderboardSnapshot.create({
+      data: {
+        orgId,
+        scope,
+        scopeId,
+        period,
+        snapshotDate: new Date(),
+        rankings: rankings.map((r, i) => ({
+          rank: i + 1,
+          memberId: r.orgMemberId,
+          scoutName: r.orgMember.scoutName,
+          displayName: r.orgMember.user?.displayName,
+          branch: r.orgMember.branch?.name,
+          totalExp: r.totalExp,
+          availableExp: r.availableExp,
+        })) as unknown as Prisma.InputJsonValue,
+      },
+    });
+  }
+
+  async getSnapshots(orgId: string, opts?: { scope?: string; period?: string; limit?: number }) {
+    const where: Prisma.LeaderboardSnapshotWhereInput = { orgId };
+    if (opts?.scope) where.scope = opts.scope;
+    if (opts?.period) where.period = opts.period;
+
+    return this.prisma.leaderboardSnapshot.findMany({
+      where,
+      orderBy: { snapshotDate: 'desc' },
+      take: opts?.limit ?? 10,
+    });
+  }
+
+  @Cron(CronExpression.EVERY_WEEK)
+  async handleWeeklySnapshot() {
+    this.logger.log('Running weekly leaderboard snapshot...');
+    try {
+      const orgs = await this.prisma.organization.findMany({ select: { id: true } });
+      for (const org of orgs) {
+        await this.createSnapshot(org.id, 'org', 'weekly');
+      }
+      this.logger.log(`Weekly snapshot complete for ${orgs.length} org(s)`);
+    } catch (e) {
+      this.logger.error(`Weekly snapshot failed: ${(e as Error).message}`);
+    }
   }
 }

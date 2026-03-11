@@ -88,6 +88,27 @@ export class RewardsController {
     return this.expService.getLeaderboard(user.orgId, scope ?? 'org', limit ?? 20);
   }
 
+  @Post('leaderboard/snapshot')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Create leaderboard snapshot (manual)' })
+  createSnapshot(
+    @CurrentUser() user: CurrentUserPayload,
+    @Body() body: { scope?: string; period?: string; scopeId?: string },
+  ) {
+    return this.expService.createSnapshot(user.orgId, body.scope ?? 'org', body.period ?? 'manual', body.scopeId);
+  }
+
+  @Get('leaderboard/snapshots')
+  @ApiOperation({ summary: 'Get leaderboard snapshot history' })
+  getSnapshots(
+    @CurrentUser() user: CurrentUserPayload,
+    @Query('scope') scope?: string,
+    @Query('period') period?: string,
+    @Query('limit') limit?: number,
+  ) {
+    return this.expService.getSnapshots(user.orgId, { scope, period, limit: limit ? Number(limit) : undefined });
+  }
+
   // ── Badges ──
 
   @Get('badges/definitions')
