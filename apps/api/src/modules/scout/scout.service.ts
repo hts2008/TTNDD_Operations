@@ -15,6 +15,49 @@ export class ScoutService {
     private readonly progression: RankProgressionService,
   ) {}
 
+  // ── Program Versions ──
+
+  async getProgramVersions(orgId: string) {
+    return this.prisma.programVersion.findMany({
+      where: { orgId },
+      include: { _count: { select: { ranks: true, domains: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async createProgramVersion(orgId: string, data: { versionName: string; status?: string; effectiveFrom?: Date; effectiveTo?: Date; notes?: string }) {
+    return this.prisma.programVersion.create({ data: { orgId, ...data } });
+  }
+
+  // ── Domains ──
+
+  async getDomains(orgId: string, versionId?: string) {
+    const where: Prisma.DomainWhereInput = { orgId };
+    if (versionId) where.versionId = versionId;
+    return this.prisma.domain.findMany({
+      where,
+      include: { skills: { select: { id: true, name: true, skillCode: true } } },
+      orderBy: { orderIndex: 'asc' },
+    });
+  }
+
+  async createDomain(orgId: string, data: { code: string; name: string; versionId?: string; branchId?: string; description?: string; spicesTags?: string[]; orderIndex?: number }) {
+    return this.prisma.domain.create({ data: { orgId, ...data } });
+  }
+
+  // ── Skill Criteria ──
+
+  async getSkillCriteria(orgId: string, skillId: string) {
+    return this.prisma.skillCriteria.findMany({
+      where: { orgId, skillId },
+      orderBy: { orderIndex: 'asc' },
+    });
+  }
+
+  async createSkillCriteria(orgId: string, data: { skillId: string; metricType: string; text: string; targetValue?: string; unit?: string; orderIndex?: number }) {
+    return this.prisma.skillCriteria.create({ data: { orgId, ...data } });
+  }
+
   // ── Rank Definitions ──
 
   async getRankDefinitions(orgId: string, branchId?: string) {

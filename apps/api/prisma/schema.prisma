@@ -478,10 +478,61 @@ model LeaderboardSnapshot {
 // MODULE 8A: Scout Core (Đẳng thứ & Kỹ năng)
 // ============================================================
 
+model ProgramVersion {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId         String    @map("org_id") @db.Uuid
+  versionName   String    @map("version_name") @db.VarChar(100)
+  status        String    @default("draft") @db.VarChar(20)
+  effectiveFrom DateTime? @map("effective_from") @db.Date
+  effectiveTo   DateTime? @map("effective_to") @db.Date
+  notes         String?
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+
+  ranks   RankDefinition[]
+  domains Domain[]
+
+  @@unique([orgId, versionName])
+  @@map("program_versions")
+}
+
+model Domain {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId       String   @map("org_id") @db.Uuid
+  versionId   String?  @map("version_id") @db.Uuid
+  branchId    String?  @map("branch_id") @db.Uuid
+  code        String   @db.VarChar(50)
+  name        String   @db.VarChar(255)
+  description String?
+  spicesTags  String[] @map("spices_tags") @db.VarChar(20)
+  orderIndex  Int      @default(0) @map("order_index")
+
+  version ProgramVersion? @relation(fields: [versionId], references: [id])
+  skills  Skill[]
+
+  @@unique([orgId, code])
+  @@map("domains")
+}
+
+model SkillCriteria {
+  id          String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId       String @map("org_id") @db.Uuid
+  skillId     String @map("skill_id") @db.Uuid
+  metricType  String @map("metric_type") @db.VarChar(50)
+  targetValue String? @map("target_value") @db.VarChar(100)
+  unit        String? @db.VarChar(50)
+  text        String
+  orderIndex  Int    @default(0) @map("order_index")
+
+  skill Skill @relation(fields: [skillId], references: [id])
+
+  @@map("skill_criteria")
+}
+
 model RankDefinition {
   id            String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   orgId         String  @map("org_id") @db.Uuid
   branchId      String  @map("branch_id") @db.Uuid
+  versionId     String? @map("version_id") @db.Uuid
   rankCode      String  @map("rank_code") @db.VarChar(100)
   rankName      String  @map("rank_name") @db.VarChar(255)
   narrativeName String? @map("narrative_name") @db.VarChar(255)
@@ -491,7 +542,8 @@ model RankDefinition {
   badgeImageUrl String? @map("badge_image_url")
   minExp        Int     @default(0) @map("min_exp")
 
-  branch      Branch       @relation(fields: [branchId], references: [id])
+  branch      Branch          @relation(fields: [branchId], references: [id])
+  version     ProgramVersion? @relation(fields: [versionId], references: [id])
   memberRanks MemberRank[]
 
   @@unique([orgId, branchId, rankCode])
@@ -518,6 +570,7 @@ model Skill {
   id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   orgId           String   @map("org_id") @db.Uuid
   skillGroupId    String   @map("skill_group_id") @db.Uuid
+  domainId        String?  @map("domain_id") @db.Uuid
   branchId        String?  @map("branch_id") @db.Uuid
   rankId          String?  @map("rank_id") @db.Uuid
   skillCode       String   @map("skill_code") @db.VarChar(100)
@@ -534,7 +587,9 @@ model Skill {
   createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz()
 
   skillGroup      SkillGroup          @relation(fields: [skillGroupId], references: [id])
+  domain          Domain?             @relation(fields: [domainId], references: [id])
   memberProgress  MemberSkillProgress[]
+  criteria        SkillCriteria[]
 
   @@map("skills")
 }

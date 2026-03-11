@@ -116,6 +116,66 @@ async function main() {
     await prisma.skill.upsert({ where: { id: s.id }, update: {}, create: s });
   }
 
+  // 7b. Program Version (WP-3.1: T-0071)
+  const programVersion = await prisma.programVersion.upsert({
+    where: { orgId_versionName: { orgId: org.id, versionName: 'v1.0' } },
+    update: {},
+    create: {
+      id: 'a0100001-0000-0000-0000-000000000001',
+      orgId: org.id,
+      versionName: 'v1.0',
+      status: 'active',
+      effectiveFrom: new Date('2026-01-01'),
+      notes: 'Chương trình DTNDD khởi đầu — 3 ngành, 4 bậc, 3 lĩnh vực, 6 kỹ năng',
+    },
+  });
+
+  // Link existing ranks to version
+  await prisma.rankDefinition.updateMany({
+    where: { orgId: org.id, versionId: null },
+    data: { versionId: programVersion.id },
+  });
+
+  // 7c. Domains (WP-3.1: T-0072)
+  const domainDefs = [
+    { id: 'a0200001-0000-0000-0000-000000000001', orgId: org.id, versionId: programVersion.id, code: 'DAO_DUC', name: 'Đạo Đức', description: 'Giáo lý Cao Đài — Ngũ Giới, Ngũ Thường, Tứ Đại Điều Quy', spicesTags: ['SPIRITUAL', 'CHARACTER'], orderIndex: 1 },
+    { id: 'a0200001-0000-0000-0000-000000000002', orgId: org.id, versionId: programVersion.id, code: 'KY_NANG', name: 'Kỹ Năng Sống', description: 'Sơ cứu, định hướng, cắm trại, sinh tồn', spicesTags: ['PHYSICAL', 'INTELLECTUAL'], orderIndex: 2 },
+    { id: 'a0200001-0000-0000-0000-000000000003', orgId: org.id, versionId: programVersion.id, code: 'LANH_DAO', name: 'Lãnh Đạo & Phụng Sự', description: 'Dẫn dắt đội nhóm, phụng sự cộng đồng', spicesTags: ['SOCIAL', 'EMOTIONAL'], orderIndex: 3 },
+  ];
+  for (const d of domainDefs) {
+    await prisma.domain.upsert({ where: { orgId_code: { orgId: org.id, code: d.code } }, update: {}, create: d });
+  }
+
+  // Link existing skills to domains
+  await prisma.skill.updateMany({ where: { orgId: org.id, skillGroupId: sgDao.id, domainId: null }, data: { domainId: 'a0200001-0000-0000-0000-000000000001' } });
+  await prisma.skill.updateMany({ where: { orgId: org.id, skillGroupId: sgKynang.id, domainId: null }, data: { domainId: 'a0200001-0000-0000-0000-000000000002' } });
+  await prisma.skill.updateMany({ where: { orgId: org.id, skillGroupId: sgLanhDao.id, domainId: null }, data: { domainId: 'a0200001-0000-0000-0000-000000000003' } });
+
+  // 7d. Skill Criteria (WP-3.1: T-0072)
+  const criteriaDefs = [
+    // DAO-001 Ngũ Giới Cấm
+    { id: 'a0300001-0000-0000-0000-000000000001', orgId: org.id, skillId: 'b0000001-0000-0000-0000-000000000001', metricType: 'boolean', text: 'Kể đúng 5 giới cấm', orderIndex: 1 },
+    { id: 'a0300001-0000-0000-0000-000000000002', orgId: org.id, skillId: 'b0000001-0000-0000-0000-000000000001', metricType: 'count', targetValue: '4', unit: 'tuần', text: 'Tự đánh giá Ngũ Giới 4 tuần liên tiếp', orderIndex: 2 },
+    // DAO-002 Ngũ Thường
+    { id: 'a0300001-0000-0000-0000-000000000003', orgId: org.id, skillId: 'b0000001-0000-0000-0000-000000000002', metricType: 'boolean', text: 'Giải thích Nhân Nghĩa Lễ Trí Tín', orderIndex: 1 },
+    { id: 'a0300001-0000-0000-0000-000000000004', orgId: org.id, skillId: 'b0000001-0000-0000-0000-000000000002', metricType: 'boolean', text: 'Viết bài chia sẻ 1 đức tính đã áp dụng', orderIndex: 2 },
+    // DAO-003 Tứ Đại Điều Quy
+    { id: 'a0300001-0000-0000-0000-000000000005', orgId: org.id, skillId: 'b0000001-0000-0000-0000-000000000003', metricType: 'boolean', text: 'Thuộc lòng Tứ Đại Điều Quy', orderIndex: 1 },
+    { id: 'a0300001-0000-0000-0000-000000000006', orgId: org.id, skillId: 'b0000001-0000-0000-0000-000000000003', metricType: 'boolean', text: 'Thể hiện ít nhất 1 điều quy trong 2 tuần', orderIndex: 2 },
+    // KN-001 Sơ Cứu
+    { id: 'a0300001-0000-0000-0000-000000000007', orgId: org.id, skillId: 'b0000001-0000-0000-0000-000000000004', metricType: 'boolean', text: 'Thực hành cầm máu và băng bó đúng kỹ thuật', orderIndex: 1 },
+    { id: 'a0300001-0000-0000-0000-000000000008', orgId: org.id, skillId: 'b0000001-0000-0000-0000-000000000004', metricType: 'boolean', text: 'Thực hành hô hấp nhân tạo trên mô hình', orderIndex: 2 },
+    // KN-002 Định Hướng
+    { id: 'a0300001-0000-0000-0000-000000000009', orgId: org.id, skillId: 'b0000001-0000-0000-0000-000000000005', metricType: 'boolean', text: 'Sử dụng la bàn xác định 4 phương chính', orderIndex: 1 },
+    { id: 'a0300001-0000-0000-0000-000000000010', orgId: org.id, skillId: 'b0000001-0000-0000-0000-000000000005', metricType: 'boolean', text: 'Đọc bản đồ tìm 3 điểm tọa độ cho trước', orderIndex: 2 },
+    // LD-001 Họp Đội
+    { id: 'a0300001-0000-0000-0000-000000000011', orgId: org.id, skillId: 'b0000001-0000-0000-0000-000000000006', metricType: 'count', targetValue: '2', unit: 'buổi', text: 'Điều phối ít nhất 2 buổi họp đội', orderIndex: 1 },
+    { id: 'a0300001-0000-0000-0000-000000000012', orgId: org.id, skillId: 'b0000001-0000-0000-0000-000000000006', metricType: 'boolean', text: 'Soạn chương trình họp + ra nghị quyết', orderIndex: 2 },
+  ];
+  for (const c of criteriaDefs) {
+    await prisma.skillCriteria.upsert({ where: { id: c.id }, update: {}, create: c });
+  }
+
   // 8. EXP Configs (5 rules) — eventType is unique per org
   const expConfigs = [
     { id: 'c0000001-0000-0000-0000-000000000001', orgId: org.id, eventType: 'session.attendance_marked', sourceModule: 'SESSIONS', actionName: 'Tham dự sinh hoạt', expAmount: 10, maxPerDay: 50, maxPerWeek: 200, description: 'EXP khi tham dự buổi sinh hoạt' },

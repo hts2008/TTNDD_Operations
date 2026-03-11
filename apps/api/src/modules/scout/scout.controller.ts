@@ -10,6 +10,61 @@ import { CurrentUser, type CurrentUserPayload, Roles } from '../../common/decora
 export class ScoutController {
   constructor(private readonly scoutService: ScoutService) {}
 
+  // ── Program Versions ──
+
+  @Get('program-versions')
+  @ApiOperation({ summary: 'List program versions' })
+  getProgramVersions(@CurrentUser() user: CurrentUserPayload) {
+    return this.scoutService.getProgramVersions(user.orgId);
+  }
+
+  @Post('program-versions')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Create program version' })
+  createProgramVersion(
+    @CurrentUser() user: CurrentUserPayload,
+    @Body() body: { versionName: string; status?: string; effectiveFrom?: Date; effectiveTo?: Date; notes?: string },
+  ) {
+    return this.scoutService.createProgramVersion(user.orgId, body);
+  }
+
+  // ── Domains ──
+
+  @Get('domains')
+  @ApiOperation({ summary: 'List domains (SPICES-tagged)' })
+  getDomains(@CurrentUser() user: CurrentUserPayload, @Query('versionId') versionId?: string) {
+    return this.scoutService.getDomains(user.orgId, versionId);
+  }
+
+  @Post('domains')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Create domain' })
+  createDomain(
+    @CurrentUser() user: CurrentUserPayload,
+    @Body() body: { code: string; name: string; versionId?: string; branchId?: string; description?: string; spicesTags?: string[]; orderIndex?: number },
+  ) {
+    return this.scoutService.createDomain(user.orgId, body);
+  }
+
+  // ── Skill Criteria ──
+
+  @Get('skills/:skillId/criteria')
+  @ApiOperation({ summary: 'List criteria for a skill' })
+  getSkillCriteria(@CurrentUser() user: CurrentUserPayload, @Param('skillId') skillId: string) {
+    return this.scoutService.getSkillCriteria(user.orgId, skillId);
+  }
+
+  @Post('skills/:skillId/criteria')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Create skill criteria' })
+  createSkillCriteria(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('skillId') skillId: string,
+    @Body() body: { metricType: string; text: string; targetValue?: string; unit?: string; orderIndex?: number },
+  ) {
+    return this.scoutService.createSkillCriteria(user.orgId, { skillId, ...body });
+  }
+
   // ── Rank Definitions ──
 
   @Get('ranks')
