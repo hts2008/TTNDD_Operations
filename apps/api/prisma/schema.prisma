@@ -132,6 +132,8 @@ model OrgMember {
   guardianLinks       GuardianLink[]
   orgChartNodes       OrgChartNode[]
   volunteerAvailability VolunteerAvailability[]
+  courseAssignments     CourseAssignment[]
+  quizAttempts         QuizAttempt[]
 
   @@unique([orgId, userId])
   @@map("org_members")
@@ -898,9 +900,10 @@ model Course {
   spicesTags     String[] @map("spices_tags") @db.VarChar(20)
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz()
 
-  lessons  Lesson[]
-  quizzes  Quiz[]
-  progress MemberCourseProgress[]
+  lessons     Lesson[]
+  quizzes     Quiz[]
+  progress    MemberCourseProgress[]
+  assignments CourseAssignment[]
 
   @@index([orgId])
   @@map("courses")
@@ -944,6 +947,7 @@ model Quiz {
   course    Course?        @relation(fields: [courseId], references: [id])
   questions QuizQuestion[]
   battles   QuizBattle[]
+  attempts  QuizAttempt[]
 
   @@index([orgId])
   @@map("quizzes")
@@ -1005,6 +1009,56 @@ model MemberCourseProgress {
 
   @@unique([orgMemberId, courseId])
   @@map("member_course_progress")
+}
+
+model CourseAssignment {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId        String    @map("org_id") @db.Uuid
+  courseId     String    @map("course_id") @db.Uuid
+  orgMemberId  String    @map("org_member_id") @db.Uuid
+  assignedBy   String    @map("assigned_by") @db.Uuid
+  dueDate      DateTime? @map("due_date") @db.Timestamptz()
+  status       String    @default("assigned") @db.VarChar(50) // assigned → in_progress → submitted → graded
+  content      Json      @default("{}")
+  submittedAt  DateTime? @map("submitted_at") @db.Timestamptz()
+  grade        Decimal?  @db.Decimal(5, 2)
+  feedback     String?
+  gradedBy     String?   @map("graded_by") @db.Uuid
+  gradedAt     DateTime? @map("graded_at") @db.Timestamptz()
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+
+  course    Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  orgMember OrgMember @relation(fields: [orgMemberId], references: [id])
+
+  @@index([orgId])
+  @@index([orgMemberId])
+  @@map("course_assignments")
+}
+
+model QuizAttempt {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId        String    @map("org_id") @db.Uuid
+  quizId       String    @map("quiz_id") @db.Uuid
+  orgMemberId  String    @map("org_member_id") @db.Uuid
+  attemptNo    Int       @default(1) @map("attempt_no")
+  status       String    @default("started") @db.VarChar(50) // started → submitted → graded
+  answers      Json      @default("[]")
+  score        Decimal?  @db.Decimal(5, 2)
+  totalPoints  Int       @default(0) @map("total_points")
+  earnedPoints Int       @default(0) @map("earned_points")
+  passed       Boolean   @default(false)
+  startedAt    DateTime  @default(now()) @map("started_at") @db.Timestamptz()
+  submittedAt  DateTime? @map("submitted_at") @db.Timestamptz()
+  gradedBy     String?   @map("graded_by") @db.Uuid
+  gradedAt     DateTime? @map("graded_at") @db.Timestamptz()
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+
+  quiz      Quiz      @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  orgMember OrgMember @relation(fields: [orgMemberId], references: [id])
+
+  @@index([orgId])
+  @@index([orgMemberId, quizId])
+  @@map("quiz_attempts")
 }
 
 // ============================================================
@@ -1131,8 +1185,29 @@ model Plan {
   createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   updatedAt             DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
 
+  revisions PlanRevision[]
+
   @@index([orgId])
   @@map("plans")
+}
+
+model PlanRevision {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  planId          String   @map("plan_id") @db.Uuid
+  orgId           String   @map("org_id") @db.Uuid
+  revisionNumber  Int      @map("revision_number")
+  snapshotData    Json     @map("snapshot_data")
+  changeReason    String?  @map("change_reason")
+  changedBy       String   @map("changed_by") @db.Uuid
+  fromStatus      String?  @map("from_status") @db.VarChar(50)
+  toStatus        String?  @map("to_status") @db.VarChar(50)
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  plan Plan @relation(fields: [planId], references: [id])
+
+  @@index([planId])
+  @@index([orgId])
+  @@map("plan_revisions")
 }
 
 model Project {
@@ -1153,16 +1228,42 @@ model Project {
   createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   updatedAt    DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
 
-  projectTasks ProjectTask[]
+  projectTasks  ProjectTask[]
+  phases        ProjectPhase[]
+  comments      ProjectComment[]
 
   @@index([orgId])
   @@map("projects")
+}
+
+model ProjectPhase {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId        String    @map("org_id") @db.Uuid
+  projectId    String    @map("project_id") @db.Uuid
+  title        String    @db.VarChar(300)
+  phaseType    String    @default("phase") @map("phase_type") @db.VarChar(30) // phase | sprint | work_package
+  status       String    @default("planned") @db.VarChar(30) // planned | active | completed | cancelled
+  parentId     String?   @map("parent_id") @db.Uuid
+  startDate    DateTime? @map("start_date") @db.Date
+  endDate      DateTime? @map("end_date") @db.Date
+  position     Float     @default(0)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt    DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  project      Project        @relation(fields: [projectId], references: [id])
+  parentPhase  ProjectPhase?  @relation("PhaseHierarchy", fields: [parentId], references: [id])
+  subPhases    ProjectPhase[] @relation("PhaseHierarchy")
+  tasks        ProjectTask[]
+
+  @@index([orgId, projectId])
+  @@map("project_phases")
 }
 
 model ProjectTask {
   id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   orgId          String    @map("org_id") @db.Uuid
   projectId      String    @map("project_id") @db.Uuid
+  phaseId        String?   @map("phase_id") @db.Uuid
   title          String    @db.VarChar(500)
   description    String?
   status         String    @default("todo") @db.VarChar(50)
@@ -1181,12 +1282,103 @@ model ProjectTask {
   createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   updatedAt      DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
 
-  project    Project      @relation(fields: [projectId], references: [id])
-  parentTask ProjectTask? @relation("TaskHierarchy", fields: [parentTaskId], references: [id])
+  project    Project       @relation(fields: [projectId], references: [id])
+  phase      ProjectPhase? @relation(fields: [phaseId], references: [id])
+  parentTask ProjectTask?  @relation("TaskHierarchy", fields: [parentTaskId], references: [id])
   subTasks   ProjectTask[] @relation("TaskHierarchy")
+  comments   ProjectComment[]
 
   @@index([orgId, projectId])
   @@map("tasks")
+}
+
+model ProjectComment {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId      String   @map("org_id") @db.Uuid
+  projectId  String   @map("project_id") @db.Uuid
+  taskId     String?  @map("task_id") @db.Uuid
+  authorId   String   @map("author_id") @db.Uuid
+  content    String
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  project    Project      @relation(fields: [projectId], references: [id])
+  task       ProjectTask? @relation(fields: [taskId], references: [id])
+
+  @@index([orgId, projectId])
+  @@index([taskId])
+  @@map("project_comments")
+}
+
+// T-0141: Task Dependencies
+model TaskDependency {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId            String   @map("org_id") @db.Uuid
+  projectId        String   @map("project_id") @db.Uuid
+  sourceTaskId     String   @map("source_task_id") @db.Uuid
+  targetTaskId     String   @map("target_task_id") @db.Uuid
+  dependencyType   String   @default("finish_to_start") @map("dependency_type") @db.VarChar(30) // finish_to_start | start_to_start | finish_to_finish | start_to_finish
+  lagDays          Int      @default(0) @map("lag_days")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  @@unique([sourceTaskId, targetTaskId])
+  @@index([orgId, projectId])
+  @@map("task_dependencies")
+}
+
+// T-0143: Project Documents / Wiki
+model ProjectDocument {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId        String    @map("org_id") @db.Uuid
+  projectId    String    @map("project_id") @db.Uuid
+  title        String    @db.VarChar(500)
+  content      String    @default("")
+  docType      String    @default("wiki") @map("doc_type") @db.VarChar(30) // wiki | meeting_notes | sop | template
+  parentId     String?   @map("parent_id") @db.Uuid
+  authorId     String    @map("author_id") @db.Uuid
+  position     Float     @default(0)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt    DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  parentDoc    ProjectDocument?  @relation("DocHierarchy", fields: [parentId], references: [id])
+  subDocs      ProjectDocument[] @relation("DocHierarchy")
+
+  @@index([orgId, projectId])
+  @@map("project_documents")
+}
+
+// T-0144: Time & Cost Tracking
+model TimeEntry {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId       String   @map("org_id") @db.Uuid
+  projectId   String   @map("project_id") @db.Uuid
+  taskId      String?  @map("task_id") @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  hours       Float
+  description String?
+  logDate     DateTime @map("log_date") @db.Date
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  @@index([orgId, projectId])
+  @@index([taskId])
+  @@map("time_entries")
+}
+
+model CostEntry {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId       String   @map("org_id") @db.Uuid
+  projectId   String   @map("project_id") @db.Uuid
+  taskId      String?  @map("task_id") @db.Uuid
+  category    String   @db.VarChar(100) // material | labor | travel | other
+  amount      Float
+  currency    String   @default("VND") @db.VarChar(10)
+  description String?
+  logDate     DateTime @map("log_date") @db.Date
+  createdBy   String   @map("created_by") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  @@index([orgId, projectId])
+  @@map("cost_entries")
 }
 
 // ============================================================
@@ -1217,6 +1409,7 @@ model Ticket {
 
   comments      TicketComment[]
   statusHistory TicketStatusHistory[]
+  attachmentFiles TicketAttachment[]
 
   @@index([orgId, status])
   @@map("tickets")
@@ -1249,6 +1442,170 @@ model TicketStatusHistory {
   ticket Ticket @relation(fields: [ticketId], references: [id])
 
   @@map("ticket_status_history")
+}
+
+model TicketRoutingRule {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId         String   @map("org_id") @db.Uuid
+  name          String   @db.VarChar(255)
+  description   String?
+  isActive      Boolean  @default(true) @map("is_active")
+  priority      Int      @default(0)
+
+  // Conditions (match ANY or ALL)
+  matchMode     String   @default("any") @map("match_mode") @db.VarChar(10)  // any | all
+  conditions    Json     @default("[]")
+  // conditions schema: [{ field: "category"|"priority"|"tags"|"title", operator: "eq"|"contains"|"in", value: string|string[] }]
+
+  // Actions
+  assignToUserId  String?  @map("assign_to_user_id") @db.Uuid
+  assignToTeam    String?  @map("assign_to_team") @db.VarChar(100)
+  setPriority     String?  @map("set_priority") @db.VarChar(20)
+  addTags         String[] @default([]) @map("add_tags")
+  setCategory     String?  @map("set_category") @db.VarChar(100)
+
+  createdBy     String   @map("created_by") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  @@index([orgId, isActive])
+  @@map("ticket_routing_rules")
+}
+
+model TicketSlaConfig {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId             String   @map("org_id") @db.Uuid
+  name              String   @db.VarChar(255)
+  priority          String   @db.VarChar(20)  // critical, high, medium, low
+  responseTimeHours Int      @map("response_time_hours")
+  resolutionTimeHours Int    @map("resolution_time_hours")
+  escalateToUserId  String?  @map("escalate_to_user_id") @db.Uuid
+  escalateToTeam    String?  @map("escalate_to_team") @db.VarChar(100)
+  isActive          Boolean  @default(true) @map("is_active")
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  @@unique([orgId, priority])
+  @@map("ticket_sla_configs")
+}
+
+model TicketAttachment {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId       String   @map("org_id") @db.Uuid
+  ticketId    String   @map("ticket_id") @db.Uuid
+  fileName    String   @map("file_name") @db.VarChar(500)
+  fileUrl     String   @map("file_url")
+  fileSize    Int?     @map("file_size")
+  mimeType    String?  @map("mime_type") @db.VarChar(100)
+  uploadedBy  String   @map("uploaded_by") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, ticketId])
+  @@map("ticket_attachments")
+}
+
+// ============================================================
+// APPROVAL ENGINE (WP-5.5)
+// ============================================================
+
+model ApprovalDefinition {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId         String   @map("org_id") @db.Uuid
+  name          String   @db.VarChar(255)
+  description   String?
+  entityType    String   @map("entity_type") @db.VarChar(100)  // plan, budget, event, ticket, custom
+  isActive      Boolean  @default(true) @map("is_active")
+
+  // Step definitions stored as JSON array
+  // [{ name, type: "sequential"|"parallel"|"conditional", signerRole, signerUserId, autoApproveCondition? }]
+  steps         Json     @default("[]")
+
+  // Trigger conditions: when to automatically start this approval
+  // { field, operator, value } — e.g. { field: "amount", operator: "gte", value: 1000000 }
+  triggerConditions Json  @default("[]") @map("trigger_conditions")
+
+  // Threshold rules for finance/budget approvals
+  thresholds    Json     @default("[]")
+  // [{ minAmount, maxAmount, requiredRole, requiredLevel }]
+
+  createdBy     String   @map("created_by") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  requests      ApprovalRequest[]
+
+  @@index([orgId, entityType])
+  @@map("approval_definitions")
+}
+
+model ApprovalRequest {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId           String    @map("org_id") @db.Uuid
+  definitionId    String    @map("definition_id") @db.Uuid
+  entityType      String    @map("entity_type") @db.VarChar(100)
+  entityId        String    @map("entity_id") @db.Uuid
+  status          String    @default("pending") @db.VarChar(50)  // pending, in_progress, approved, rejected, cancelled
+  currentStep     Int       @default(0) @map("current_step")
+
+  // Step results: [{ stepIndex, status, decidedBy, decidedAt, notes }]
+  stepResults     Json      @default("[]") @map("step_results")
+
+  requestedBy     String    @map("requested_by") @db.Uuid
+  requestedAt     DateTime  @default(now()) @map("requested_at") @db.Timestamptz()
+  completedAt     DateTime? @map("completed_at") @db.Timestamptz()
+  finalDecision   String?   @map("final_decision") @db.VarChar(50)  // approved | rejected
+  finalNotes      String?   @map("final_notes")
+  metadata        Json      @default("{}") // extra context: amount, category, urgency, etc.
+
+  definition      ApprovalDefinition @relation(fields: [definitionId], references: [id])
+
+  @@index([orgId, status])
+  @@index([orgId, entityType, entityId])
+  @@map("approval_requests")
+}
+
+// ============================================================
+// WP-5.6 ADDITIONS: Triggers & SOP Library
+// ============================================================
+
+model WorkflowTrigger {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId         String   @map("org_id") @db.Uuid
+  name          String   @db.VarChar(255)
+  eventType     String   @map("event_type") @db.VarChar(200)
+  conditions    Json     @default("[]")
+  actions       Json     @default("[]")
+  definitionId  String?  @map("definition_id") @db.Uuid
+  isActive      Boolean  @default(true) @map("is_active")
+  createdBy     String   @map("created_by") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  @@index([orgId, eventType])
+  @@map("workflow_triggers")
+}
+
+model SopDocument {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId         String   @map("org_id") @db.Uuid
+  title         String   @db.VarChar(500)
+  content       String
+  category      String?  @db.VarChar(100)
+  tags          String[] @default([])
+  version       Int      @default(1)
+  status        String   @default("draft") @db.VarChar(50)
+  publishedAt   DateTime? @map("published_at") @db.Timestamptz()
+  archivedAt    DateTime? @map("archived_at") @db.Timestamptz()
+  relatedWorkflowId String? @map("related_workflow_id") @db.Uuid
+  createdBy     String   @map("created_by") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  @@index([orgId, status])
+  @@index([orgId, category])
+  @@map("sop_documents")
 }
 
 // ============================================================
@@ -1311,12 +1668,97 @@ model MemberFee {
   status        String    @default("unpaid") @db.VarChar(50)
   transactionId String?   @map("transaction_id") @db.Uuid
   notes         String?
+  waiverReason  String?   @map("waiver_reason")
+  waiverApprovedBy String? @map("waiver_approved_by") @db.Uuid
+  waiverDate    DateTime? @map("waiver_date") @db.Timestamptz()
+  campershapAmount Decimal? @map("campershap_amount") @db.Decimal(15, 2)
+  feePlanId     String?   @map("fee_plan_id") @db.Uuid
   createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz()
 
-  orgMember OrgMember @relation(fields: [orgMemberId], references: [id])
+  orgMember     OrgMember @relation(fields: [orgMemberId], references: [id])
+  feePlan       FeePlan?  @relation(fields: [feePlanId], references: [id])
+  installments  FeeInstallment[]
 
   @@index([orgId, orgMemberId])
   @@map("member_fees")
+}
+
+model FeePlan {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId         String   @map("org_id") @db.Uuid
+  name          String   @db.VarChar(255)
+  feeType       String   @map("fee_type") @db.VarChar(50)
+  amount        Decimal  @db.Decimal(15, 2)
+  frequency     String   @default("monthly") @db.VarChar(20) // monthly, quarterly, annual, one-time
+  isActive      Boolean  @default(true) @map("is_active")
+  effectiveDate DateTime @map("effective_date") @db.Date
+  endDate       DateTime? @map("end_date") @db.Date
+  description   String?
+  createdBy     String?  @map("created_by") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  fees MemberFee[]
+
+  @@index([orgId])
+  @@map("fee_plans")
+}
+
+model FeeInstallment {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId         String    @map("org_id") @db.Uuid
+  memberFeeId   String    @map("member_fee_id") @db.Uuid
+  installmentNo Int       @map("installment_no")
+  amountDue     Decimal   @map("amount_due") @db.Decimal(15, 2)
+  amountPaid    Decimal   @default(0) @map("amount_paid") @db.Decimal(15, 2)
+  dueDate       DateTime  @map("due_date") @db.Date
+  paidDate      DateTime? @map("paid_date") @db.Date
+  status        String    @default("unpaid") @db.VarChar(50) // unpaid, partial, paid, waived
+  transactionId String?   @map("transaction_id") @db.Uuid
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+
+  memberFee MemberFee @relation(fields: [memberFeeId], references: [id])
+
+  @@index([orgId, memberFeeId])
+  @@map("fee_installments")
+}
+
+model Sponsor {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId            String   @map("org_id") @db.Uuid
+  name             String   @db.VarChar(255)
+  contactEmail     String?  @map("contact_email") @db.VarChar(255)
+  contactPhone     String?  @map("contact_phone") @db.VarChar(50)
+  sponsorType      String   @default("cash") @map("sponsor_type") @db.VarChar(20) // cash, in-kind, mixed
+  description      String?
+  totalContributed Decimal  @default(0) @map("total_contributed") @db.Decimal(15, 2)
+  isActive         Boolean  @default(true) @map("is_active")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt        DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  contributions SponsorContribution[]
+
+  @@index([orgId])
+  @@map("sponsors")
+}
+
+model SponsorContribution {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId           String   @map("org_id") @db.Uuid
+  sponsorId       String   @map("sponsor_id") @db.Uuid
+  contributionType String  @map("contribution_type") @db.VarChar(20) // cash, in-kind
+  amount          Decimal? @db.Decimal(15, 2)
+  inKindDescription String? @map("in_kind_description")
+  inKindEstValue  Decimal? @map("in_kind_est_value") @db.Decimal(15, 2)
+  transactionId   String?  @map("transaction_id") @db.Uuid
+  receivedDate    DateTime @map("received_date") @db.Date
+  notes           String?
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  sponsor Sponsor @relation(fields: [sponsorId], references: [id])
+
+  @@index([orgId, sponsorId])
+  @@map("sponsor_contributions")
 }
 
 // ============================================================
@@ -1364,9 +1806,25 @@ model Asset {
 
   category AssetCategory @relation(fields: [categoryId], references: [id])
   loans    AssetLoan[]
+  customFields AssetCustomField[]
 
   @@index([orgId])
   @@map("assets")
+}
+
+model AssetCustomField {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId     String   @map("org_id") @db.Uuid
+  assetId   String   @map("asset_id") @db.Uuid
+  fieldName String   @map("field_name") @db.VarChar(100)
+  fieldValue String? @map("field_value")
+  fieldType String   @default("text") @map("field_type") @db.VarChar(20) // text, number, date, url
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  asset Asset @relation(fields: [assetId], references: [id])
+
+  @@index([orgId, assetId])
+  @@map("asset_custom_fields")
 }
 
 model AssetLoan {
@@ -1392,6 +1850,72 @@ model AssetLoan {
   @@map("asset_loans")
 }
 
+model KitTemplate {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId       String   @map("org_id") @db.Uuid
+  name        String   @db.VarChar(255)
+  description String?
+  kitType     String   @default("standard") @map("kit_type") @db.VarChar(50) // standard, camping, ceremony
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  createdBy   String?  @map("created_by") @db.Uuid
+
+  items KitItem[]
+
+  @@index([orgId])
+  @@map("kit_templates")
+}
+
+model KitItem {
+  id            String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId         String @map("org_id") @db.Uuid
+  kitTemplateId String @map("kit_template_id") @db.Uuid
+  itemName      String @map("item_name") @db.VarChar(255)
+  quantity      Int    @default(1)
+  isRequired    Boolean @default(true) @map("is_required")
+  notes         String?
+
+  kitTemplate KitTemplate @relation(fields: [kitTemplateId], references: [id])
+
+  @@index([orgId, kitTemplateId])
+  @@map("kit_items")
+}
+
+model UniformIssue {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId       String    @map("org_id") @db.Uuid
+  memberId    String    @map("member_id") @db.Uuid
+  uniformType String    @map("uniform_type") @db.VarChar(100) // shirt, pants, hat, scarf
+  size        String    @db.VarChar(20) // XS, S, M, L, XL, XXL
+  quantity    Int       @default(1)
+  issuedDate  DateTime  @map("issued_date") @db.Date
+  returnDate  DateTime? @map("return_date") @db.Date
+  status      String    @default("issued") @db.VarChar(50) // issued, returned, lost, damaged
+  notes       String?
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+
+  @@index([orgId, memberId])
+  @@map("uniform_issues")
+}
+
+model MaintenanceSchedule {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId           String    @map("org_id") @db.Uuid
+  assetId         String    @map("asset_id") @db.Uuid
+  maintenanceType String    @map("maintenance_type") @db.VarChar(100) // inspection, repair, cleaning
+  frequency       String    @default("monthly") @db.VarChar(50)
+  lastPerformed   DateTime? @map("last_performed") @db.Date
+  nextDue         DateTime  @map("next_due") @db.Date
+  assignedTo      String?   @map("assigned_to") @db.Uuid
+  status          String    @default("scheduled") @db.VarChar(50) // scheduled, overdue, completed
+  notes           String?
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+
+  @@index([orgId, assetId])
+  @@map("maintenance_schedules")
+}
+
 // ============================================================
 // MODULE 6: Process / SOP
 // ============================================================
@@ -1404,13 +1928,17 @@ model WorkflowDefinition {
   steps       Json
   version     Int      @default(1)
   isActive    Boolean  @default(true) @map("is_active")
+  isPublished Boolean  @default(false) @map("is_published")
+  publishedAt DateTime? @map("published_at") @db.Timestamptz()
+  retiredAt   DateTime? @map("retired_at") @db.Timestamptz()
+  triggers    Json     @default("[]")
   createdBy   String?  @map("created_by") @db.Uuid
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
   updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
 
   runs WorkflowRun[]
 
-  @@index([orgId])
+  @@index([orgId, isActive])
   @@map("workflow_definitions")
 }
 
@@ -1422,12 +1950,14 @@ model WorkflowRun {
   currentStep  Int       @default(0) @map("current_step")
   stepResults  Json      @default("[]") @map("step_results")
   initiatedBy  String    @map("initiated_by") @db.Uuid
+  entityType   String?   @map("entity_type") @db.VarChar(100)
+  entityId     String?   @map("entity_id") @db.Uuid
   completedAt  DateTime? @map("completed_at") @db.Timestamptz()
   createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz()
 
   definition WorkflowDefinition @relation(fields: [definitionId], references: [id])
 
-  @@index([orgId])
+  @@index([orgId, status])
   @@map("workflow_runs")
 }
 

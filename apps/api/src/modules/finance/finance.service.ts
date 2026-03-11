@@ -36,23 +36,38 @@ export class FinanceService {
 
   // ── Accounts ──
 
-  async createAccount(orgId: string, data: {
-    name: string; accountType?: string; branchId?: string;
-    currency?: string; description?: string;
-  }, actorUserId: string) {
+  async createAccount(
+    orgId: string,
+    data: {
+      name: string;
+      accountType?: string;
+      branchId?: string;
+      currency?: string;
+      description?: string;
+    },
+    actorUserId: string,
+  ) {
     const account = await this.prisma.financialAccount.create({
       data: { orgId, ...data },
     });
 
     await this.audit.log({
-      orgId, userId: actorUserId, action: 'finance.account_created',
-      resource: 'FinancialAccount', resourceId: account.id,
+      orgId,
+      userId: actorUserId,
+      action: 'finance.account_created',
+      resource: 'FinancialAccount',
+      resourceId: account.id,
     });
 
     return account;
   }
 
-  async getAccounts(orgId: string, filters?: { accountType?: string; isActive?: boolean }, page = 1, limit = 20) {
+  async getAccounts(
+    orgId: string,
+    filters?: { accountType?: string; isActive?: boolean },
+    page = 1,
+    limit = 20,
+  ) {
     const where: Prisma.FinancialAccountWhereInput = { orgId };
     if (filters?.accountType) where.accountType = filters.accountType;
     if (filters?.isActive !== undefined) where.isActive = filters.isActive;
@@ -82,12 +97,22 @@ export class FinanceService {
 
   // ── Transactions ──
 
-  async createTransaction(orgId: string, data: {
-    accountId: string; transactionType: string; category?: string;
-    amount: number; description: string; sourceType?: string;
-    sourceId?: string; referenceNo?: string; transactionDate: string;
-    receiptUrls?: string[];
-  }, actorUserId: string) {
+  async createTransaction(
+    orgId: string,
+    data: {
+      accountId: string;
+      transactionType: string;
+      category?: string;
+      amount: number;
+      description: string;
+      sourceType?: string;
+      sourceId?: string;
+      referenceNo?: string;
+      transactionDate: string;
+      receiptUrls?: string[];
+    },
+    actorUserId: string,
+  ) {
     const account = await this.getAccountById(orgId, data.accountId);
     if (!account.isActive) {
       throw new BadRequestException('Cannot create transaction on inactive account');
@@ -111,16 +136,29 @@ export class FinanceService {
     });
 
     await this.audit.log({
-      orgId, userId: actorUserId, action: 'finance.transaction_created',
-      resource: 'FinancialTransaction', resourceId: transaction.id,
-      newValue: { amount: data.amount, type: data.transactionType } as unknown as Prisma.InputJsonValue,
+      orgId,
+      userId: actorUserId,
+      action: 'finance.transaction_created',
+      resource: 'FinancialTransaction',
+      resourceId: transaction.id,
+      newValue: {
+        amount: data.amount,
+        type: data.transactionType,
+      } as unknown as Prisma.InputJsonValue,
     });
 
     return transaction;
   }
 
-  async transitionTransaction(orgId: string, transactionId: string, action: string, actorUserId: string) {
-    const tx = await this.prisma.financialTransaction.findFirst({ where: { id: transactionId, orgId } });
+  async transitionTransaction(
+    orgId: string,
+    transactionId: string,
+    action: string,
+    actorUserId: string,
+  ) {
+    const tx = await this.prisma.financialTransaction.findFirst({
+      where: { id: transactionId, orgId },
+    });
     if (!tx) throw new NotFoundException('Transaction not found');
 
     const allowed = TRANSACTION_TRANSITIONS[tx.status];
@@ -138,9 +176,7 @@ export class FinanceService {
     });
 
     if (newStatus === 'completed') {
-      const delta = tx.transactionType === 'income'
-        ? tx.amount
-        : tx.amount.negated();
+      const delta = tx.transactionType === 'income' ? tx.amount : tx.amount.negated();
 
       await this.prisma.financialAccount.update({
         where: { id: tx.accountId },
@@ -152,15 +188,17 @@ export class FinanceService {
         eventType: DOMAIN_EVENTS.FINANCE.TRANSACTION_COMPLETED,
         aggregateId: transactionId,
         aggregateType: 'FinancialTransaction',
-        payload: { amount: tx.amount.toString(), type: tx.transactionType, accountId: tx.accountId },
+        payload: {
+          amount: tx.amount.toString(),
+          type: tx.transactionType,
+          accountId: tx.accountId,
+        },
         actorUserId,
       });
     }
 
     if (newStatus === 'reversed' && tx.status === 'completed') {
-      const reverseDelta = tx.transactionType === 'income'
-        ? tx.amount.negated()
-        : tx.amount;
+      const reverseDelta = tx.transactionType === 'income' ? tx.amount.negated() : tx.amount;
 
       await this.prisma.financialAccount.update({
         where: { id: tx.accountId },
@@ -173,10 +211,18 @@ export class FinanceService {
 
   // ── Fees ──
 
-  async createFee(orgId: string, data: {
-    orgMemberId: string; feeType?: string; feePeriod?: string;
-    amountDue: number; dueDate?: string; notes?: string;
-  }, actorUserId: string) {
+  async createFee(
+    orgId: string,
+    data: {
+      orgMemberId: string;
+      feeType?: string;
+      feePeriod?: string;
+      amountDue: number;
+      dueDate?: string;
+      notes?: string;
+    },
+    actorUserId: string,
+  ) {
     const fee = await this.prisma.memberFee.create({
       data: {
         orgId,
@@ -201,7 +247,13 @@ export class FinanceService {
     return fee;
   }
 
-  async payFee(orgId: string, feeId: string, paymentAmount: number, transactionId: string | undefined, actorUserId: string) {
+  async payFee(
+    orgId: string,
+    feeId: string,
+    paymentAmount: number,
+    transactionId: string | undefined,
+    actorUserId: string,
+  ) {
     const fee = await this.prisma.memberFee.findFirst({ where: { id: feeId, orgId } });
     if (!fee) throw new NotFoundException('Fee not found');
 
@@ -241,9 +293,16 @@ export class FinanceService {
     return updated;
   }
 
-  async findFees(orgId: string, filters?: {
-    orgMemberId?: string; status?: string; feeType?: string;
-  }, page = 1, limit = 20) {
+  async findFees(
+    orgId: string,
+    filters?: {
+      orgMemberId?: string;
+      status?: string;
+      feeType?: string;
+    },
+    page = 1,
+    limit = 20,
+  ) {
     const where: Prisma.MemberFeeWhereInput = { orgId };
     if (filters?.orgMemberId) where.orgMemberId = filters.orgMemberId;
     if (filters?.status) where.status = filters.status;
@@ -280,14 +339,15 @@ export class FinanceService {
       if (!summary[cat]) summary[cat] = { income: 0, expense: 0, net: 0 };
 
       const amount = Number(tx.amount);
+      const entry = summary[cat]!;
       if (tx.transactionType === 'income') {
-        summary[cat].income += amount;
+        entry.income += amount;
         totalIncome += amount;
       } else {
-        summary[cat].expense += amount;
+        entry.expense += amount;
         totalExpense += amount;
       }
-      summary[cat].net = summary[cat].income - summary[cat].expense;
+      entry.net = entry.income - entry.expense;
     }
 
     return {
@@ -299,6 +359,7 @@ export class FinanceService {
   async getMemberFees(orgId: string, memberId: string) {
     const fees = await this.prisma.memberFee.findMany({
       where: { orgId, orgMemberId: memberId },
+      include: { installments: { orderBy: { installmentNo: 'asc' } } },
       orderBy: { createdAt: 'desc' },
     });
 
@@ -307,5 +368,298 @@ export class FinanceService {
     const outstanding = totalDue - totalPaid;
 
     return { fees, summary: { totalDue, totalPaid, outstanding } };
+  }
+
+  // ── Fee Plans ──
+
+  async createFeePlan(
+    orgId: string,
+    data: {
+      name: string;
+      feeType: string;
+      amount: number;
+      frequency?: string;
+      effectiveDate: string;
+      endDate?: string;
+      description?: string;
+    },
+    actorUserId: string,
+  ) {
+    const plan = await this.prisma.feePlan.create({
+      data: {
+        orgId,
+        name: data.name,
+        feeType: data.feeType,
+        amount: data.amount,
+        frequency: data.frequency ?? 'monthly',
+        effectiveDate: new Date(data.effectiveDate),
+        endDate: data.endDate ? new Date(data.endDate) : undefined,
+        description: data.description,
+        createdBy: actorUserId,
+      },
+    });
+
+    await this.audit.log({
+      orgId,
+      userId: actorUserId,
+      action: 'finance.fee_plan_created',
+      resource: 'FeePlan',
+      resourceId: plan.id,
+    });
+
+    return plan;
+  }
+
+  async getFeePlans(orgId: string, filters?: { isActive?: boolean }, page = 1, limit = 20) {
+    const where: Prisma.FeePlanWhereInput = { orgId };
+    if (filters?.isActive !== undefined) where.isActive = filters.isActive;
+
+    const [data, total] = await Promise.all([
+      this.prisma.feePlan.findMany({
+        where,
+        include: { _count: { select: { fees: true } } },
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.feePlan.count({ where }),
+    ]);
+
+    return { data, meta: { total, page, limit } };
+  }
+
+  async applyFeePlanToMembers(
+    orgId: string,
+    feePlanId: string,
+    memberIds: string[],
+    dueDate: string | undefined,
+    actorUserId: string,
+  ) {
+    const plan = await this.prisma.feePlan.findFirst({
+      where: { id: feePlanId, orgId, isActive: true },
+    });
+    if (!plan) throw new NotFoundException('Fee plan not found or inactive');
+
+    const fees = await this.prisma.$transaction(
+      memberIds.map((memberId) =>
+        this.prisma.memberFee.create({
+          data: {
+            orgId,
+            orgMemberId: memberId,
+            feeType: plan.feeType,
+            feePeriod: plan.frequency,
+            amountDue: plan.amount,
+            dueDate: dueDate ? new Date(dueDate) : undefined,
+            feePlanId: plan.id,
+          },
+        }),
+      ),
+    );
+
+    await this.audit.log({
+      orgId,
+      userId: actorUserId,
+      action: 'finance.fee_plan_applied',
+      resource: 'FeePlan',
+      resourceId: feePlanId,
+      newValue: { memberCount: memberIds.length } as unknown as Prisma.InputJsonValue,
+    });
+
+    return { applied: fees.length, feePlanId, fees };
+  }
+
+  // ── Installments ──
+
+  async createInstallments(orgId: string, feeId: string, count: number, actorUserId: string) {
+    const fee = await this.prisma.memberFee.findFirst({ where: { id: feeId, orgId } });
+    if (!fee) throw new NotFoundException('Fee not found');
+
+    const perInstallment = Number(fee.amountDue) / count;
+    const baseDate = fee.dueDate ?? new Date();
+
+    const installments = await this.prisma.$transaction(
+      Array.from({ length: count }, (_, i) => {
+        const dueDate = new Date(baseDate);
+        dueDate.setMonth(dueDate.getMonth() + i);
+        return this.prisma.feeInstallment.create({
+          data: {
+            orgId,
+            memberFeeId: feeId,
+            installmentNo: i + 1,
+            amountDue: perInstallment,
+            dueDate,
+          },
+        });
+      }),
+    );
+
+    return { installments, total: count, amountPerInstallment: perInstallment };
+  }
+
+  // ── Waivers / Campership ──
+
+  async requestWaiver(
+    orgId: string,
+    feeId: string,
+    reason: string,
+    campershapAmount: number | undefined,
+    actorUserId: string,
+  ) {
+    const fee = await this.prisma.memberFee.findFirst({ where: { id: feeId, orgId } });
+    if (!fee) throw new NotFoundException('Fee not found');
+    if (fee.status === 'paid' || fee.status === 'waived') {
+      throw new BadRequestException(`Cannot request waiver for fee in '${fee.status}' status`);
+    }
+
+    const updated = await this.prisma.memberFee.update({
+      where: { id: feeId },
+      data: {
+        waiverReason: reason,
+        campershapAmount: campershapAmount ?? undefined,
+      },
+    });
+
+    await this.domainEvents.publish({
+      orgId,
+      eventType: DOMAIN_EVENTS.FINANCE.FEE_CREATED, // waiver_requested — reuse event
+      aggregateId: feeId,
+      aggregateType: 'MemberFee',
+      payload: { action: 'waiver_requested', reason, memberId: fee.orgMemberId },
+      actorUserId,
+    });
+
+    return updated;
+  }
+
+  async approveWaiver(orgId: string, feeId: string, actorUserId: string) {
+    const fee = await this.prisma.memberFee.findFirst({ where: { id: feeId, orgId } });
+    if (!fee) throw new NotFoundException('Fee not found');
+    if (!fee.waiverReason) throw new BadRequestException('No waiver request found for this fee');
+
+    const allowed = FEE_TRANSITIONS[fee.status];
+    if (!allowed?.waive)
+      throw new BadRequestException(`Cannot waive fee in '${fee.status}' status`);
+
+    const updated = await this.prisma.memberFee.update({
+      where: { id: feeId },
+      data: {
+        status: 'waived',
+        waiverApprovedBy: actorUserId,
+        waiverDate: new Date(),
+        amountPaid: fee.campershapAmount ?? fee.amountDue,
+      },
+    });
+
+    await this.audit.log({
+      orgId,
+      userId: actorUserId,
+      action: 'finance.fee_waived',
+      resource: 'MemberFee',
+      resourceId: feeId,
+    });
+
+    return updated;
+  }
+
+  // ── Sponsors ──
+
+  async createSponsor(
+    orgId: string,
+    data: {
+      name: string;
+      contactEmail?: string;
+      contactPhone?: string;
+      sponsorType?: string;
+      description?: string;
+    },
+    actorUserId: string,
+  ) {
+    const sponsor = await this.prisma.sponsor.create({
+      data: { orgId, ...data },
+    });
+
+    await this.audit.log({
+      orgId,
+      userId: actorUserId,
+      action: 'finance.sponsor_created',
+      resource: 'Sponsor',
+      resourceId: sponsor.id,
+    });
+
+    return sponsor;
+  }
+
+  async getSponsors(
+    orgId: string,
+    filters?: { isActive?: boolean; sponsorType?: string },
+    page = 1,
+    limit = 20,
+  ) {
+    const where: Prisma.SponsorWhereInput = { orgId };
+    if (filters?.isActive !== undefined) where.isActive = filters.isActive;
+    if (filters?.sponsorType) where.sponsorType = filters.sponsorType;
+
+    const [data, total] = await Promise.all([
+      this.prisma.sponsor.findMany({
+        where,
+        include: { _count: { select: { contributions: true } } },
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.sponsor.count({ where }),
+    ]);
+
+    return { data, meta: { total, page, limit } };
+  }
+
+  async recordContribution(
+    orgId: string,
+    sponsorId: string,
+    data: {
+      contributionType: string;
+      amount?: number;
+      inKindDescription?: string;
+      inKindEstValue?: number;
+      transactionId?: string;
+      receivedDate: string;
+      notes?: string;
+    },
+    actorUserId: string,
+  ) {
+    const sponsor = await this.prisma.sponsor.findFirst({ where: { id: sponsorId, orgId } });
+    if (!sponsor) throw new NotFoundException('Sponsor not found');
+
+    const contribution = await this.prisma.sponsorContribution.create({
+      data: {
+        orgId,
+        sponsorId,
+        contributionType: data.contributionType,
+        amount: data.amount,
+        inKindDescription: data.inKindDescription,
+        inKindEstValue: data.inKindEstValue,
+        transactionId: data.transactionId,
+        receivedDate: new Date(data.receivedDate),
+        notes: data.notes,
+      },
+    });
+
+    // Update total contributed for cash donations
+    if (data.contributionType === 'cash' && data.amount) {
+      await this.prisma.sponsor.update({
+        where: { id: sponsorId },
+        data: { totalContributed: { increment: data.amount } },
+      });
+    }
+
+    await this.audit.log({
+      orgId,
+      userId: actorUserId,
+      action: 'finance.contribution_recorded',
+      resource: 'SponsorContribution',
+      resourceId: contribution.id,
+    });
+
+    return contribution;
   }
 }
