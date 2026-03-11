@@ -288,4 +288,161 @@ export class ScoutService {
       data: { orgId, orgMemberId: memberId, branchId, rankId, status: 'in_progress', startedAt: new Date() },
     });
   }
+
+  // ── Habit Tracking (T-0081) ──
+
+  async getHabits(orgId: string) {
+    return this.prisma.habitDef.findMany({ where: { orgId, isActive: true }, orderBy: { name: 'asc' } });
+  }
+
+  async createHabit(orgId: string, data: { key: string; name: string; cadence: string; scoringRule?: object }) {
+    return this.prisma.habitDef.create({ data: { orgId, ...data, scoringRule: (data.scoringRule ?? {}) as any } });
+  }
+
+  async logHabit(orgId: string, personId: string, habitDefId: string, logDate: string, status: string, note?: string) {
+    return this.prisma.habitLog.upsert({
+      where: { personId_habitDefId_logDate: { personId, habitDefId, logDate: new Date(logDate) } },
+      create: { orgId, personId, habitDefId, logDate: new Date(logDate), status, note },
+      update: { status, note },
+    });
+  }
+
+  async getHabitLogs(orgId: string, personId: string, habitDefId?: string) {
+    return this.prisma.habitLog.findMany({
+      where: { orgId, personId, ...(habitDefId ? { habitDefId } : {}) },
+      include: { habitDef: { select: { name: true, cadence: true } } },
+      orderBy: { logDate: 'desc' },
+      take: 90,
+    });
+  }
+
+  async getStreak(orgId: string, personId: string, habitDefId: string) {
+    const logs = await this.prisma.habitLog.findMany({
+      where: { orgId, personId, habitDefId, status: 'done' },
+      orderBy: { logDate: 'desc' },
+      take: 365,
+    });
+    let streak = 0;
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    for (const log of logs) {
+      const logDay = new Date(log.logDate); logDay.setHours(0, 0, 0, 0);
+      const diff = Math.round((today.getTime() - logDay.getTime()) / 86400000);
+      if (diff === streak || diff === streak + 1) { streak++; } else { break; }
+    }
+    return { habitDefId, personId, currentStreak: streak, totalDone: logs.length };
+  }
+
+  // ── Achievements (T-0082) ──
+
+  async getAchievements(orgId: string) {
+    return this.prisma.achievementDef.findMany({ where: { orgId }, orderBy: { name: 'asc' } });
+  }
+
+  async createAchievement(orgId: string, data: { key: string; name: string; description?: string; rarity?: string }) {
+    return this.prisma.achievementDef.create({ data: { orgId, ...data } });
+  }
+
+  async awardAchievement(orgId: string, personId: string, achievementDefId: string, awardedByPersonId?: string, sourceEventId?: string) {
+    const award = await this.prisma.achievementAward.create({
+      data: { orgId, personId, achievementDefId, awardedByPersonId, sourceEventId },
+    });
+    await this.domainEvents.publish({
+      orgId,
+      eventType: 'scout.achievement_awarded',
+      aggregateId: personId,
+      aggregateType: 'OrgMember',
+      payload: { achievementDefId, awardedByPersonId },
+      actorUserId: awardedByPersonId ?? personId,
+    });
+    return award;
+  }
+
+  async getMemberAwards(orgId: string, personId: string) {
+    return this.prisma.achievementAward.findMany({
+      where: { orgId, personId },
+      include: { achievementDef: { select: { name: true, rarity: true, description: true } } },
+      orderBy: { awardedAt: 'desc' },
+    });
+  }
+
+  // ── Activity & Service Log (T-0085) ──
+
+  async logActivity(orgId: string, data: { personId: string; activityType: string; hours?: number; projectId?: string; workItemId?: string; location?: string; note?: string; happenedAt?: string }) {
+    return this.prisma.activityLog.create({
+      data: { orgId, ...data, hours: data.hours as any, happenedAt: data.happenedAt ? new Date(data.happenedAt) : new Date() },
+    });
+  }
+
+  async getActivityLogs(orgId: string, personId: string) {
+    return this.prisma.activityLog.findMany({
+      where: { orgId, personId },
+      orderBy: { happenedAt: 'desc' },
+      take: 100,
+    });
+  }
+
+  async getServiceHours(orgId: string, personId: string) {
+    const result = await this.prisma.activityLog.aggregate({
+      where: { orgId, personId, activityType: 'service' },
+      _sum: { hours: true },
+      _count: true,
+    });
+    return { personId, totalHours: result._sum.hours ?? 0, totalEntries: result._count };
+  }
+
+  // ── Dashboards (T-0083, T-0084) ──
+
+  async getPersonalDashboard(orgId: string, memberId: string) {
+    const [skills, ranks, awards, serviceHours, habits] = await Promise.all([
+      this.prisma.memberSkillProgress.findMany({
+        where: { orgId, orgMemberId: memberId },
+        include: { skill: { select: { name: true, domainId: true } } },
+      }),
+      this.prisma.memberRank.findMany({
+        where: { orgId, orgMemberId: memberId },
+        include: { rank: { select: { rankName: true, rankCode: true } } },
+        orderBy: { startedAt: 'desc' },
+      }),
+      this.prisma.achievementAward.count({ where: { orgId, personId: memberId } }),
+      this.prisma.activityLog.aggregate({
+        where: { orgId, personId: memberId, activityType: 'service' },
+        _sum: { hours: true },
+      }),
+      this.prisma.habitLog.count({ where: { orgId, personId: memberId, status: 'done' } }),
+    ]);
+
+    const total = skills.length;
+    const verified = skills.filter(s => s.status === 'verified' || s.status === 'awarded').length;
+
+    return {
+      memberId,
+      skillProgress: { total, verified, pct: total ? Math.round((verified / total) * 100) : 0 },
+      currentRank: ranks[0] ?? null,
+      achievements: awards,
+      serviceHours: serviceHours._sum.hours ?? 0,
+      habitCheckIns: habits,
+    };
+  }
+
+  async getLeaderDashboard(orgId: string) {
+    const [memberCount, submitted, skillStats] = await Promise.all([
+      this.prisma.memberSkillProgress.groupBy({
+        by: ['orgMemberId'],
+        where: { orgId },
+        _count: true,
+      }),
+      this.prisma.memberSkillProgress.count({ where: { orgId, status: 'submitted' } }),
+      this.prisma.memberSkillProgress.groupBy({
+        by: ['status'],
+        where: { orgId },
+        _count: true,
+      }),
+    ]);
+
+    return {
+      totalMembers: memberCount.length,
+      pendingVerifications: submitted,
+      statusBreakdown: skillStats.map(s => ({ status: s.status, count: s._count })),
+    };
+  }
 }

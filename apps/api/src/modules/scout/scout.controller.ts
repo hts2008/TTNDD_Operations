@@ -198,4 +198,108 @@ export class ScoutController {
   ) {
     return this.scoutService.transitionRank(user.orgId, memberId, body.rankId, body.action, user.userId);
   }
+
+  // ── Habit Tracking (WP-3.3, T-0081) ──
+
+  @Get('habits')
+  @ApiOperation({ summary: 'List active habits' })
+  getHabits(@CurrentUser() user: CurrentUserPayload) {
+    return this.scoutService.getHabits(user.orgId);
+  }
+
+  @Post('habits')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Create habit definition' })
+  createHabit(@CurrentUser() user: CurrentUserPayload, @Body() body: { key: string; name: string; cadence: string }) {
+    return this.scoutService.createHabit(user.orgId, body);
+  }
+
+  @Post('habits/:habitDefId/log')
+  @ApiOperation({ summary: 'Log a habit check-in' })
+  logHabit(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('habitDefId') habitDefId: string,
+    @Body() body: { personId: string; logDate: string; status: string; note?: string },
+  ) {
+    return this.scoutService.logHabit(user.orgId, body.personId, habitDefId, body.logDate, body.status, body.note);
+  }
+
+  @Get('habits/:personId/logs')
+  @ApiOperation({ summary: 'Get habit logs for a person' })
+  getHabitLogs(@CurrentUser() user: CurrentUserPayload, @Param('personId') personId: string, @Query('habitDefId') habitDefId?: string) {
+    return this.scoutService.getHabitLogs(user.orgId, personId, habitDefId);
+  }
+
+  @Get('habits/:personId/streak/:habitDefId')
+  @ApiOperation({ summary: 'Get current streak for a habit' })
+  getStreak(@CurrentUser() user: CurrentUserPayload, @Param('personId') personId: string, @Param('habitDefId') habitDefId: string) {
+    return this.scoutService.getStreak(user.orgId, personId, habitDefId);
+  }
+
+  // ── Achievements (WP-3.3, T-0082) ──
+
+  @Get('achievements')
+  @ApiOperation({ summary: 'List achievement definitions' })
+  getAchievements(@CurrentUser() user: CurrentUserPayload) {
+    return this.scoutService.getAchievements(user.orgId);
+  }
+
+  @Post('achievements')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Create achievement' })
+  createAchievement(@CurrentUser() user: CurrentUserPayload, @Body() body: { key: string; name: string; description?: string; rarity?: string }) {
+    return this.scoutService.createAchievement(user.orgId, body);
+  }
+
+  @Post('achievements/:achievementDefId/award')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Award achievement to a member' })
+  awardAchievement(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('achievementDefId') achievementDefId: string,
+    @Body() body: { personId: string; sourceEventId?: string },
+  ) {
+    return this.scoutService.awardAchievement(user.orgId, body.personId, achievementDefId, user.userId, body.sourceEventId);
+  }
+
+  @Get('achievements/:personId/awards')
+  @ApiOperation({ summary: 'Get member achievements' })
+  getMemberAwards(@CurrentUser() user: CurrentUserPayload, @Param('personId') personId: string) {
+    return this.scoutService.getMemberAwards(user.orgId, personId);
+  }
+
+  // ── Activity & Service Log (WP-3.3, T-0085) ──
+
+  @Post('activities')
+  @ApiOperation({ summary: 'Log an activity' })
+  logActivity(@CurrentUser() user: CurrentUserPayload, @Body() body: { personId: string; activityType: string; hours?: number; location?: string; note?: string }) {
+    return this.scoutService.logActivity(user.orgId, body);
+  }
+
+  @Get('activities/:personId')
+  @ApiOperation({ summary: 'Get activity logs for a person' })
+  getActivityLogs(@CurrentUser() user: CurrentUserPayload, @Param('personId') personId: string) {
+    return this.scoutService.getActivityLogs(user.orgId, personId);
+  }
+
+  @Get('activities/:personId/service-hours')
+  @ApiOperation({ summary: 'Get total service hours' })
+  getServiceHours(@CurrentUser() user: CurrentUserPayload, @Param('personId') personId: string) {
+    return this.scoutService.getServiceHours(user.orgId, personId);
+  }
+
+  // ── Dashboards (WP-3.3, T-0083/T-0084) ──
+
+  @Get('dashboard/:memberId')
+  @ApiOperation({ summary: 'Personal progress dashboard' })
+  getPersonalDashboard(@CurrentUser() user: CurrentUserPayload, @Param('memberId') memberId: string) {
+    return this.scoutService.getPersonalDashboard(user.orgId, memberId);
+  }
+
+  @Get('leader-dashboard')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Leader aggregate dashboard' })
+  getLeaderDashboard(@CurrentUser() user: CurrentUserPayload) {
+    return this.scoutService.getLeaderDashboard(user.orgId);
+  }
 }

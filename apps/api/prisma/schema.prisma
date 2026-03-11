@@ -646,6 +646,87 @@ model SkillVerification {
   @@map("skill_verifications")
 }
 
+// ── Habit Tracking (V3 §6.4, Epic E5) ──
+
+model HabitDef {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId       String   @map("org_id") @db.Uuid
+  key         String   @db.VarChar(100)
+  name        String   @db.VarChar(255)
+  cadence     String   @db.VarChar(20)
+  scoringRule Json     @default("{}") @map("scoring_rule")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  logs HabitLog[]
+
+  @@unique([orgId, key])
+  @@map("habit_defs")
+}
+
+model HabitLog {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId      String   @map("org_id") @db.Uuid
+  personId   String   @map("person_id") @db.Uuid
+  habitDefId String   @map("habit_def_id") @db.Uuid
+  logDate    DateTime @map("log_date") @db.Date
+  status     String   @db.VarChar(30)
+  note       String?
+
+  habitDef HabitDef @relation(fields: [habitDefId], references: [id])
+
+  @@unique([personId, habitDefId, logDate])
+  @@map("habit_logs")
+}
+
+// ── Achievements (V3 §6.3, Epic E4) ──
+
+model AchievementDef {
+  id               String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId            String  @map("org_id") @db.Uuid
+  key              String  @db.VarChar(100)
+  name             String  @db.VarChar(255)
+  description      String?
+  rarity           String  @default("common") @db.VarChar(30)
+  iconFileObjectId String? @map("icon_file_object_id") @db.Uuid
+
+  awards AchievementAward[]
+
+  @@unique([orgId, key])
+  @@map("achievement_defs")
+}
+
+model AchievementAward {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId             String   @map("org_id") @db.Uuid
+  personId          String   @map("person_id") @db.Uuid
+  achievementDefId  String   @map("achievement_def_id") @db.Uuid
+  awardedByPersonId String?  @map("awarded_by_person_id") @db.Uuid
+  awardedAt         DateTime @default(now()) @map("awarded_at") @db.Timestamptz()
+  sourceEventId     String?  @map("source_event_id") @db.Uuid
+
+  achievementDef AchievementDef @relation(fields: [achievementDefId], references: [id])
+
+  @@map("achievement_awards")
+}
+
+// ── Activity & Service Log (V3 §6.5, Epic E6) ──
+
+model ActivityLog {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId        String    @map("org_id") @db.Uuid
+  personId     String    @map("person_id") @db.Uuid
+  activityType String    @map("activity_type") @db.VarChar(50)
+  projectId    String?   @map("project_id") @db.Uuid
+  workItemId   String?   @map("work_item_id") @db.Uuid
+  hours        Decimal?  @db.Decimal(5, 2)
+  location     String?
+  note         String?
+  happenedAt   DateTime  @default(now()) @map("happened_at") @db.Timestamptz()
+
+  @@map("activity_logs")
+}
+
 model MemberRank {
   id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   orgId       String    @map("org_id") @db.Uuid
