@@ -208,4 +208,107 @@ export class OrgConfigController {
       limit ?? 50,
     );
   }
+
+  // ── Org Chart (T-0051/T-0052) ──
+
+  @Get(':id/org-tree')
+  @ApiOperation({ summary: 'Get org chart tree (nested hierarchy)' })
+  getOrgTree(@Param('id') id: string) {
+    return this.orgConfigService.getOrgTree(id);
+  }
+
+  @Post(':id/org-chart-nodes')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Create an org chart node' })
+  createOrgChartNode(
+    @Param('id') id: string,
+    @Body()
+    body: {
+      nodeType: string;
+      name: string;
+      parentNodeId?: string;
+      orgMemberId?: string;
+      positionTitle?: string;
+      displayOrder?: number;
+    },
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
+    return this.orgConfigService.createOrgChartNode(id, body, user.userId);
+  }
+
+  @Patch(':id/org-chart-nodes/:nodeId/move')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Move/reparent an org chart node (cycle-safe)' })
+  moveOrgChartNode(
+    @Param('id') id: string,
+    @Param('nodeId') nodeId: string,
+    @Body('newParentId') newParentId: string | null,
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
+    return this.orgConfigService.moveOrgChartNode(id, nodeId, newParentId, user.userId);
+  }
+
+  // ── Member Assignment (T-0053) ──
+
+  @Post(':id/members/:memberId/assign-unit')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Assign a member to a unit (creates org chart node)' })
+  assignMemberToUnit(
+    @Param('id') id: string,
+    @Param('memberId') memberId: string,
+    @Body()
+    body: {
+      unitId: string;
+      positionTitle?: string;
+      validFrom?: string;
+      validTo?: string;
+    },
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
+    return this.orgConfigService.assignMemberToUnit(id, memberId, body, user.userId);
+  }
+
+  // ── Volunteer Availability (T-0054) ──
+
+  @Get(':id/volunteer-availability')
+  @ApiOperation({ summary: 'Get volunteer availability calendar' })
+  getVolunteerAvailability(
+    @Param('id') id: string,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+    @Query('memberId') memberId?: string,
+  ) {
+    return this.orgConfigService.getVolunteerAvailability(id, { from, to, memberId });
+  }
+
+  @Post(':id/members/:memberId/availability')
+  @Roles('super_admin', 'admin', 'truong')
+  @ApiOperation({ summary: 'Set volunteer availability for a member' })
+  setVolunteerAvailability(
+    @Param('id') id: string,
+    @Param('memberId') memberId: string,
+    @Body()
+    body: {
+      date: string;
+      startTime: string;
+      endTime: string;
+      status?: string;
+      notes?: string;
+    },
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
+    return this.orgConfigService.upsertVolunteerAvailability(id, memberId, body, user.userId);
+  }
+
+  @Delete(':id/volunteer-availability/:availabilityId')
+  @Roles('super_admin', 'admin', 'truong')
+  @ApiOperation({ summary: 'Delete a volunteer availability entry' })
+  deleteVolunteerAvailability(
+    @Param('id') id: string,
+    @Param('availabilityId') availabilityId: string,
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
+    return this.orgConfigService.deleteVolunteerAvailability(id, availabilityId, user.userId);
+  }
 }
+

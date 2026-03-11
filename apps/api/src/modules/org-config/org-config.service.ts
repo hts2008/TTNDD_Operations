@@ -356,4 +356,281 @@ export class OrgConfigService {
       limit,
     );
   }
+
+  // ── T-0051: Org Chart Tree ──
+
+  async getOrgTree(orgId: string) {
+    const nodes = await this.prisma.orgChartNode.findMany({
+      where: { orgId, isActive: true },
+      include: {
+        headMember: {
+          include: {
+            user: { select: { id: true, displayName: true, avatarUrl: true } },
+          },
+        },
+      },
+      orderBy: [{ displayOrder: 'asc' }, { name: 'asc' }],
+    });
+
+    // Build tree from flat list
+    const nodeMap = new Map<string, any>();
+    const roots: any[] = [];
+
+    for (const node of nodes) {
+      nodeMap.set(node.id, { ...node, children: [] });
+    }
+    for (const node of nodes) {
+      const mapped = nodeMap.get(node.id)!;
+      if (node.parentNodeId && nodeMap.has(node.parentNodeId)) {
+        nodeMap.get(node.parentNodeId)!.children.push(mapped);
+      } else {
+        roots.push(mapped);
+      }
+    }
+
+    return roots;
+  }
+
+  async createOrgChartNode(
+    orgId: string,
+    data: {
+      nodeType: string;
+      name: string;
+      parentNodeId?: string;
+      orgMemberId?: string;
+      positionTitle?: string;
+      displayOrder?: number;
+    },
+    actorUserId: string,
+  ) {
+    const node = await this.prisma.orgChartNode.create({
+      data: { orgId, ...data },
+    });
+    await this.audit.log({
+      orgId,
+      userId: actorUserId,
+      action: 'org_chart.node_created',
+      resource: 'OrgChartNode',
+      resourceId: node.id,
+      newValue: node as unknown as Prisma.InputJsonValue,
+    });
+    return node;
+  }
+
+  // ── T-0052: Move/Reparent Org Chart Node (cycle detection) ──
+
+  async moveOrgChartNode(
+    orgId: string,
+    nodeId: string,
+    newParentId: string | null,
+    actorUserId: string,
+  ) {
+    const node = await this.prisma.orgChartNode.findFirst({
+      where: { id: nodeId, orgId },
+    });
+    if (!node) throw new NotFoundException(`OrgChartNode '${nodeId}' not found`);
+
+    // Cycle detection: walk up from newParentId to root
+    if (newParentId) {
+      let current = newParentId;
+      const visited = new Set<string>();
+      while (current) {
+        if (current === nodeId) {
+          throw new BadRequestException('Cannot move node: would create a cycle');
+        }
+        if (visited.has(current)) break;
+        visited.add(current);
+        const parent = await this.prisma.orgChartNode.findUnique({
+          where: { id: current },
+          select: { parentNodeId: true },
+        });
+        if (!parent?.parentNodeId) break;
+        current = parent.parentNodeId;
+      }
+    }
+
+    const updated = await this.prisma.orgChartNode.update({
+      where: { id: nodeId },
+      data: { parentNodeId: newParentId },
+    });
+
+    await this.audit.log({
+      orgId,
+      userId: actorUserId,
+      action: 'org_chart.node_moved',
+      resource: 'OrgChartNode',
+      resourceId: nodeId,
+      oldValue: { parentNodeId: node.parentNodeId } as Prisma.InputJsonValue,
+      newValue: { parentNodeId: newParentId } as Prisma.InputJsonValue,
+    });
+
+    await this.domainEvents.publish({
+      orgId,
+      eventType: DOMAIN_EVENTS.ORG.UPDATED,
+      aggregateId: nodeId,
+      aggregateType: 'OrgChartNode',
+      payload: { action: 'moved', newParentId } as Prisma.InputJsonValue,
+      actorUserId,
+    });
+
+    return updated;
+  }
+
+  // ── T-0053: Assign Member to Unit ──
+
+  async assignMemberToUnit(
+    orgId: string,
+    memberId: string,
+    data: {
+      unitId: string;
+      positionTitle?: string;
+      validFrom?: string;
+      validTo?: string;
+    },
+    actorUserId: string,
+  ) {
+    const member = await this.prisma.orgMember.findFirst({
+      where: { id: memberId, orgId },
+    });
+    if (!member) throw new NotFoundException(`OrgMember '${memberId}' not found`);
+
+    const unit = await this.prisma.unit.findFirst({
+      where: { id: data.unitId, orgId },
+    });
+    if (!unit) throw new NotFoundException(`Unit '${data.unitId}' not found`);
+
+    // Update member's unit assignment
+    const updated = await this.prisma.orgMember.update({
+      where: { id: memberId },
+      data: { unitId: data.unitId },
+    });
+
+    // Create/update OrgChartNode for this assignment
+    const existingNode = await this.prisma.orgChartNode.findFirst({
+      where: { orgId, orgMemberId: memberId, isActive: true },
+    });
+
+    if (existingNode) {
+      // Deactivate old assignment
+      await this.prisma.orgChartNode.update({
+        where: { id: existingNode.id },
+        data: { isActive: false, validTo: new Date() },
+      });
+    }
+
+    // Find the unit's parent node in org chart (if exists)
+    const unitNode = await this.prisma.orgChartNode.findFirst({
+      where: { orgId, name: unit.name, nodeType: 'unit', isActive: true },
+    });
+
+    await this.prisma.orgChartNode.create({
+      data: {
+        orgId,
+        nodeType: 'member',
+        name: member.scoutName || member.heroName || memberId,
+        parentNodeId: unitNode?.id,
+        orgMemberId: memberId,
+        positionTitle: data.positionTitle,
+        validFrom: data.validFrom ? new Date(data.validFrom) : new Date(),
+        validTo: data.validTo ? new Date(data.validTo) : undefined,
+      },
+    });
+
+    await this.audit.log({
+      orgId,
+      userId: actorUserId,
+      action: 'member.unit_assigned',
+      resource: 'OrgMember',
+      resourceId: memberId,
+      newValue: { unitId: data.unitId, positionTitle: data.positionTitle } as Prisma.InputJsonValue,
+    });
+
+    return updated;
+  }
+
+  // ── T-0054: Volunteer Availability ──
+
+  async getVolunteerAvailability(
+    orgId: string,
+    filters?: { from?: string; to?: string; memberId?: string },
+  ) {
+    const where: Prisma.VolunteerAvailabilityWhereInput = { orgId };
+    if (filters?.memberId) where.orgMemberId = filters.memberId;
+    if (filters?.from || filters?.to) {
+      where.date = {};
+      if (filters.from) where.date.gte = new Date(filters.from);
+      if (filters.to) where.date.lte = new Date(filters.to);
+    }
+    return this.prisma.volunteerAvailability.findMany({
+      where,
+      include: {
+        orgMember: {
+          include: {
+            user: { select: { id: true, displayName: true, avatarUrl: true } },
+          },
+        },
+      },
+      orderBy: [{ date: 'asc' }, { startTime: 'asc' }],
+    });
+  }
+
+  async upsertVolunteerAvailability(
+    orgId: string,
+    memberId: string,
+    data: {
+      date: string;
+      startTime: string;
+      endTime: string;
+      status?: string;
+      notes?: string;
+    },
+    actorUserId: string,
+  ) {
+    const member = await this.prisma.orgMember.findFirst({
+      where: { id: memberId, orgId },
+    });
+    if (!member) throw new NotFoundException(`OrgMember '${memberId}' not found`);
+
+    const result = await this.prisma.volunteerAvailability.create({
+      data: {
+        orgId,
+        orgMemberId: memberId,
+        date: new Date(data.date),
+        startTime: data.startTime,
+        endTime: data.endTime,
+        status: data.status || 'available',
+        notes: data.notes,
+      },
+    });
+
+    await this.audit.log({
+      orgId,
+      userId: actorUserId,
+      action: 'volunteer.availability_set',
+      resource: 'VolunteerAvailability',
+      resourceId: result.id,
+      newValue: data as Prisma.InputJsonValue,
+    });
+
+    return result;
+  }
+
+  async deleteVolunteerAvailability(orgId: string, availabilityId: string, actorUserId: string) {
+    const record = await this.prisma.volunteerAvailability.findFirst({
+      where: { id: availabilityId, orgId },
+    });
+    if (!record) throw new NotFoundException(`VolunteerAvailability '${availabilityId}' not found`);
+
+    await this.prisma.volunteerAvailability.delete({ where: { id: availabilityId } });
+    await this.audit.log({
+      orgId,
+      userId: actorUserId,
+      action: 'volunteer.availability_deleted',
+      resource: 'VolunteerAvailability',
+      resourceId: availabilityId,
+      oldValue: record as unknown as Prisma.InputJsonValue,
+    });
+    return { deleted: true };
+  }
 }
+
