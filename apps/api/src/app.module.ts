@@ -22,6 +22,7 @@ import { LmsModule } from './modules/lms';
 import { EnrichmentModule } from './modules/enrichment';
 import { ProjectsModule } from './modules/projects';
 import { TicketsModule } from './modules/tickets';
+import { ApprovalsModule } from './modules/approvals';
 import { FinanceModule } from './modules/finance';
 import { AssetsModule } from './modules/assets';
 import { ProcessModule } from './modules/process';
@@ -58,6 +59,7 @@ import { AppService } from './app.service';
     EnrichmentModule,
     ProjectsModule,
     TicketsModule,
+    ApprovalsModule,
     FinanceModule,
     AssetsModule,
     ProcessModule,

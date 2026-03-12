@@ -93,6 +93,74 @@ export class ProjectsService {
     return plan;
   }
 
+  // ── Plan Revision History (T-0134) ──
+
+  private async createRevisionSnapshot(plan: {
+    id: string; orgId: string; title: string; planType: string | null;
+    sectionIDescription: string | null; sectionIIObjectives: unknown;
+    sectionIIIOutcomes: unknown; sectionIVActivities: unknown;
+    sectionVPersonnel: unknown; sectionVIContent: unknown;
+    sectionVIITimeline: unknown; sectionVIIIProposal: string | null;
+    sectionIXBudget: unknown; status: string;
+  }, changedBy: string, fromStatus?: string, toStatus?: string, changeReason?: string) {
+    const lastRevision = await this.prisma.planRevision.findFirst({
+      where: { planId: plan.id },
+      orderBy: { revisionNumber: 'desc' },
+      select: { revisionNumber: true },
+    });
+    const nextNumber = (lastRevision?.revisionNumber ?? 0) + 1;
+
+    return this.prisma.planRevision.create({
+      data: {
+        planId: plan.id,
+        orgId: plan.orgId,
+        revisionNumber: nextNumber,
+        snapshotData: {
+          title: plan.title,
+          planType: plan.planType,
+          sectionIDescription: plan.sectionIDescription,
+          sectionIIObjectives: plan.sectionIIObjectives ?? null,
+          sectionIIIOutcomes: plan.sectionIIIOutcomes ?? null,
+          sectionIVActivities: plan.sectionIVActivities ?? null,
+          sectionVPersonnel: plan.sectionVPersonnel ?? null,
+          sectionVIContent: plan.sectionVIContent ?? null,
+          sectionVIITimeline: plan.sectionVIITimeline ?? null,
+          sectionVIIIProposal: plan.sectionVIIIProposal,
+          sectionIXBudget: plan.sectionIXBudget ?? null,
+          status: plan.status,
+        } as Prisma.InputJsonValue,
+        changedBy,
+        fromStatus: fromStatus ?? null,
+        toStatus: toStatus ?? null,
+        changeReason: changeReason ?? null,
+      },
+    });
+  }
+
+  async getPlanRevisions(orgId: string, planId: string, page = 1, limit = 20) {
+    await this.findPlanById(orgId, planId);
+    const [data, total] = await Promise.all([
+      this.prisma.planRevision.findMany({
+        where: { planId, orgId },
+        orderBy: { revisionNumber: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      this.prisma.planRevision.count({ where: { planId, orgId } }),
+    ]);
+    return { data, meta: { total, page, limit } };
+  }
+
+  async createManualRevision(orgId: string, planId: string, actorUserId: string, changeReason?: string) {
+    const plan = await this.findPlanById(orgId, planId);
+    const revision = await this.createRevisionSnapshot(plan, actorUserId, undefined, undefined, changeReason ?? 'Manual snapshot');
+    await this.audit.log({
+      orgId, userId: actorUserId, action: 'project.plan_revision_created',
+      resource: 'PlanRevision', resourceId: revision.id,
+    });
+    return revision;
+  }
+
   async transitionPlan(orgId: string, planId: string, action: string, actorUserId: string, rejectionReason?: string) {
     const plan = await this.findPlanById(orgId, planId);
     const allowed = PLAN_TRANSITIONS[plan.status];
@@ -113,6 +181,9 @@ export class ProjectsService {
     if (action === 'reject' && rejectionReason) {
       updateData.rejectionReason = rejectionReason;
     }
+
+    // T-0134: Auto-snapshot before transition
+    await this.createRevisionSnapshot(plan, actorUserId, plan.status, newStatus, `State transition: ${action}`);
 
     const updated = await this.prisma.plan.update({ where: { id: planId }, data: updateData });
 
@@ -372,5 +443,272 @@ export class ProjectsService {
     });
 
     return this.findProjectById(orgId, project.id);
+  }
+
+  // ── Tree View (T-0138) ──
+
+  async getProjectTree(orgId: string, projectId: string) {
+    await this.findProjectById(orgId, projectId);
+
+    const [phases, tasks] = await Promise.all([
+      this.prisma.projectPhase.findMany({
+        where: { orgId, projectId },
+        orderBy: { position: 'asc' },
+      }),
+      this.prisma.projectTask.findMany({
+        where: { orgId, projectId },
+        orderBy: { position: 'asc' },
+      }),
+    ]);
+
+    // Build phase tree
+    const phaseMap = new Map(phases.map(p => [p.id, { ...p, subPhases: [] as typeof phases, tasks: [] as typeof tasks }]));
+    const rootPhases: Array<(typeof phaseMap extends Map<string, infer V> ? V : never)> = [];
+
+    for (const phase of phaseMap.values()) {
+      if (phase.parentId && phaseMap.has(phase.parentId)) {
+        phaseMap.get(phase.parentId)!.subPhases.push(phase as any);
+      } else {
+        rootPhases.push(phase);
+      }
+    }
+
+    // Attach tasks to phases
+    const unassignedTasks: typeof tasks = [];
+    for (const task of tasks) {
+      if (task.phaseId && phaseMap.has(task.phaseId)) {
+        phaseMap.get(task.phaseId)!.tasks.push(task);
+      } else {
+        unassignedTasks.push(task);
+      }
+    }
+
+    return { projectId, phases: rootPhases, unassignedTasks };
+  }
+
+  // ── Phase CRUD (T-0136 API) ──
+
+  async createPhase(orgId: string, projectId: string, data: {
+    title: string; phaseType?: string; parentId?: string;
+    startDate?: string; endDate?: string; position?: number;
+  }) {
+    await this.findProjectById(orgId, projectId);
+    return this.prisma.projectPhase.create({
+      data: {
+        orgId,
+        projectId,
+        title: data.title,
+        phaseType: data.phaseType ?? 'phase',
+        parentId: data.parentId ?? undefined,
+        startDate: data.startDate ? new Date(data.startDate) : undefined,
+        endDate: data.endDate ? new Date(data.endDate) : undefined,
+        position: data.position ?? 0,
+      },
+    });
+  }
+
+  async findPhases(orgId: string, projectId: string) {
+    await this.findProjectById(orgId, projectId);
+    return this.prisma.projectPhase.findMany({
+      where: { orgId, projectId },
+      orderBy: { position: 'asc' },
+      include: { tasks: { orderBy: { position: 'asc' } } },
+    });
+  }
+
+  // ── Comments (T-0140) ──
+
+  async addComment(orgId: string, projectId: string, authorId: string, content: string, taskId?: string) {
+    await this.findProjectById(orgId, projectId);
+    if (taskId) await this.findTaskById(orgId, taskId);
+    return this.prisma.projectComment.create({
+      data: { orgId, projectId, taskId: taskId ?? undefined, authorId, content },
+    });
+  }
+
+  async findComments(orgId: string, projectId: string, taskId?: string, page = 1, limit = 20) {
+    const where = { orgId, projectId, ...(taskId ? { taskId } : {}) };
+    const [data, total] = await Promise.all([
+      this.prisma.projectComment.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      this.prisma.projectComment.count({ where }),
+    ]);
+    return { data, meta: { total, page, limit } };
+  }
+
+  // ── Task Dependencies (T-0141) ──
+
+  async addDependency(
+    orgId: string,
+    projectId: string,
+    data: { sourceTaskId: string; targetTaskId: string; dependencyType?: string; lagDays?: number },
+  ) {
+    await this.findProjectById(orgId, projectId);
+    if (data.sourceTaskId === data.targetTaskId) {
+      throw new BadRequestException('A task cannot depend on itself');
+    }
+    // Simple cycle check: ensure target doesn't already depend on source
+    const reverse = await this.prisma.taskDependency.findFirst({
+      where: { orgId, sourceTaskId: data.targetTaskId, targetTaskId: data.sourceTaskId },
+    });
+    if (reverse) {
+      throw new BadRequestException('Circular dependency detected');
+    }
+
+    return this.prisma.taskDependency.create({
+      data: {
+        orgId,
+        projectId,
+        sourceTaskId: data.sourceTaskId,
+        targetTaskId: data.targetTaskId,
+        dependencyType: data.dependencyType ?? 'finish_to_start',
+        lagDays: data.lagDays ?? 0,
+      },
+    });
+  }
+
+  async findDependencies(orgId: string, projectId: string) {
+    return this.prisma.taskDependency.findMany({
+      where: { orgId, projectId },
+      orderBy: { createdAt: 'asc' },
+    });
+  }
+
+  async removeDependency(orgId: string, depId: string) {
+    return this.prisma.taskDependency.delete({ where: { id: depId } });
+  }
+
+  // ── Gantt / Timeline (T-0142) ──
+
+  async getGanttData(orgId: string, projectId: string) {
+    await this.findProjectById(orgId, projectId);
+
+    const [phases, tasks, dependencies] = await Promise.all([
+      this.prisma.projectPhase.findMany({
+        where: { orgId, projectId },
+        orderBy: { position: 'asc' },
+      }),
+      this.prisma.projectTask.findMany({
+        where: { orgId, projectId },
+        orderBy: { position: 'asc' },
+        select: {
+          id: true, title: true, status: true, startDate: true, dueDate: true,
+          phaseId: true, parentTaskId: true, assigneeIds: true, storyPoints: true, position: true,
+        },
+      }),
+      this.prisma.taskDependency.findMany({
+        where: { orgId, projectId },
+      }),
+    ]);
+
+    return {
+      projectId,
+      phases: phases.map(p => ({
+        id: p.id, title: p.title, type: p.phaseType,
+        start: p.startDate, end: p.endDate, status: p.status,
+      })),
+      tasks: tasks.map(t => ({
+        id: t.id, title: t.title, status: t.status,
+        start: t.startDate, end: t.dueDate,
+        phaseId: t.phaseId, parentTaskId: t.parentTaskId,
+        assignees: t.assigneeIds, points: t.storyPoints,
+      })),
+      dependencies: dependencies.map(d => ({
+        id: d.id, source: d.sourceTaskId, target: d.targetTaskId,
+        type: d.dependencyType, lag: d.lagDays,
+      })),
+    };
+  }
+
+  // ── Documents / Wiki (T-0143) ──
+
+  async createDocument(orgId: string, projectId: string, authorId: string, data: {
+    title: string; content?: string; docType?: string; parentId?: string;
+  }) {
+    await this.findProjectById(orgId, projectId);
+    return this.prisma.projectDocument.create({
+      data: {
+        orgId,
+        projectId,
+        title: data.title,
+        content: data.content ?? '',
+        docType: data.docType ?? 'wiki',
+        parentId: data.parentId ?? undefined,
+        authorId,
+      },
+    });
+  }
+
+  async findDocuments(orgId: string, projectId: string) {
+    return this.prisma.projectDocument.findMany({
+      where: { orgId, projectId },
+      orderBy: { position: 'asc' },
+    });
+  }
+
+  async updateDocument(orgId: string, docId: string, data: { title?: string; content?: string }) {
+    return this.prisma.projectDocument.update({
+      where: { id: docId },
+      data,
+    });
+  }
+
+  // ── Time Tracking (T-0144) ──
+
+  async logTime(orgId: string, projectId: string, userId: string, data: {
+    hours: number; description?: string; logDate: string; taskId?: string;
+  }) {
+    await this.findProjectById(orgId, projectId);
+    return this.prisma.timeEntry.create({
+      data: {
+        orgId,
+        projectId,
+        taskId: data.taskId ?? undefined,
+        userId,
+        hours: data.hours,
+        description: data.description ?? undefined,
+        logDate: new Date(data.logDate),
+      },
+    });
+  }
+
+  async findTimeEntries(orgId: string, projectId: string, taskId?: string) {
+    return this.prisma.timeEntry.findMany({
+      where: { orgId, projectId, ...(taskId ? { taskId } : {}) },
+      orderBy: { logDate: 'desc' },
+    });
+  }
+
+  // ── Cost Tracking (T-0144) ──
+
+  async logCost(orgId: string, projectId: string, createdBy: string, data: {
+    category: string; amount: number; currency?: string;
+    description?: string; logDate: string; taskId?: string;
+  }) {
+    await this.findProjectById(orgId, projectId);
+    return this.prisma.costEntry.create({
+      data: {
+        orgId,
+        projectId,
+        taskId: data.taskId ?? undefined,
+        category: data.category,
+        amount: data.amount,
+        currency: data.currency ?? 'VND',
+        description: data.description ?? undefined,
+        logDate: new Date(data.logDate),
+        createdBy,
+      },
+    });
+  }
+
+  async findCostEntries(orgId: string, projectId: string, taskId?: string) {
+    return this.prisma.costEntry.findMany({
+      where: { orgId, projectId, ...(taskId ? { taskId } : {}) },
+      orderBy: { logDate: 'desc' },
+    });
   }
 }

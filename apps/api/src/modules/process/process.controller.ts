@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Param, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ProcessService } from './process.service';
 import { CurrentUser, type CurrentUserPayload, Roles } from '../../common/decorators';
@@ -45,6 +45,31 @@ export class ProcessController {
     return this.processService.findDefinitionById(user.orgId, id);
   }
 
+  @Patch('definitions/:id')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Update workflow definition (increments version)' })
+  updateDefinition(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id') id: string,
+    @Body() body: { name?: string; description?: string; steps?: unknown[]; triggers?: unknown[]; isActive?: boolean },
+  ) {
+    return this.processService.updateDefinition(user.orgId, id, body, user.userId);
+  }
+
+  @Post('definitions/:id/publish')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Publish a workflow definition' })
+  publishDefinition(@CurrentUser() user: CurrentUserPayload, @Param('id') id: string) {
+    return this.processService.publishDefinition(user.orgId, id, user.userId);
+  }
+
+  @Post('definitions/:id/retire')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Retire a workflow definition' })
+  retireDefinition(@CurrentUser() user: CurrentUserPayload, @Param('id') id: string) {
+    return this.processService.retireDefinition(user.orgId, id, user.userId);
+  }
+
   // ── Runs ──
 
   @Post('runs')
@@ -89,5 +114,101 @@ export class ProcessController {
   @ApiOperation({ summary: 'Force-complete a workflow run' })
   completeRun(@CurrentUser() user: CurrentUserPayload, @Param('id') id: string) {
     return this.processService.completeRun(user.orgId, id, user.userId);
+  }
+
+  // ── T-0158: Triggers ──
+
+  @Post('triggers')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Create a workflow trigger' })
+  createTrigger(
+    @CurrentUser() user: CurrentUserPayload,
+    @Body() body: {
+      name: string; eventType: string;
+      conditions: { field: string; operator: string; value: unknown }[];
+      actions: { type: string; config: Record<string, unknown> }[];
+      definitionId?: string;
+    },
+  ) {
+    return this.processService.createTrigger(user.orgId, body, user.userId);
+  }
+
+  @Get('triggers')
+  @ApiOperation({ summary: 'List workflow triggers' })
+  findTriggers(
+    @CurrentUser() user: CurrentUserPayload,
+    @Query('eventType') eventType?: string,
+    @Query('isActive') isActive?: string,
+  ) {
+    return this.processService.findTriggers(user.orgId, {
+      eventType,
+      isActive: isActive !== undefined ? isActive === 'true' : undefined,
+    });
+  }
+
+  @Post('triggers/fire')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Evaluate and fire triggers for an event' })
+  fireTriggersForEvent(
+    @CurrentUser() user: CurrentUserPayload,
+    @Body() body: { eventType: string; context: Record<string, unknown> },
+  ) {
+    return this.processService.evaluateAndFireTriggers(user.orgId, body.eventType, body.context, user.userId);
+  }
+
+  // ── T-0159: SOP Documents ──
+
+  @Post('sop-documents')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Create SOP document' })
+  createSopDocument(
+    @CurrentUser() user: CurrentUserPayload,
+    @Body() body: { title: string; content: string; category?: string; tags?: string[]; relatedWorkflowId?: string },
+  ) {
+    return this.processService.createSopDocument(user.orgId, body, user.userId);
+  }
+
+  @Get('sop-documents')
+  @ApiOperation({ summary: 'List/search SOP documents' })
+  findSopDocuments(
+    @CurrentUser() user: CurrentUserPayload,
+    @Query('category') category?: string,
+    @Query('status') status?: string,
+    @Query('search') search?: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    return this.processService.findSopDocuments(user.orgId, { category, status, search }, page ?? 1, limit ?? 20);
+  }
+
+  @Get('sop-documents/:id')
+  @ApiOperation({ summary: 'Get SOP document detail' })
+  findSopDocumentById(@CurrentUser() user: CurrentUserPayload, @Param('id') id: string) {
+    return this.processService.findSopDocumentById(user.orgId, id);
+  }
+
+  @Patch('sop-documents/:id')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Update SOP document (increments version)' })
+  updateSopDocument(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id') id: string,
+    @Body() body: { title?: string; content?: string; category?: string; tags?: string[] },
+  ) {
+    return this.processService.updateSopDocument(user.orgId, id, body, user.userId);
+  }
+
+  @Post('sop-documents/:id/publish')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Publish SOP document' })
+  publishSopDocument(@CurrentUser() user: CurrentUserPayload, @Param('id') id: string) {
+    return this.processService.publishSopDocument(user.orgId, id, user.userId);
+  }
+
+  @Post('sop-documents/:id/archive')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Archive SOP document' })
+  archiveSopDocument(@CurrentUser() user: CurrentUserPayload, @Param('id') id: string) {
+    return this.processService.archiveSopDocument(user.orgId, id);
   }
 }

@@ -72,10 +72,16 @@ export const DOMAIN_EVENTS = {
   // Module 7: LMS
   LMS: {
     COURSE_ENROLLED: 'lms.course_enrolled',
+    COURSE_COMPLETED: 'lms.course_completed',
     LESSON_COMPLETED: 'lms.lesson_completed',
     QUIZ_SUBMITTED: 'lms.quiz_submitted',
     QUIZ_PASSED: 'lms.quiz_passed',
     QUIZ_FAILED: 'lms.quiz_failed',
+    PARENT_LEARNING_VIEWED: 'lms.parent_learning_viewed',
+    MENTOR_SCOPE_ACCESSED: 'lms.mentor_scope_accessed',
+    BATTLE_STARTED: 'lms.battle_started',
+    BATTLE_ENDED: 'lms.battle_ended',
+    BATTLE_ANSWER_SUBMITTED: 'lms.battle_answer_submitted',
   },
 
   // Module 8D: Enrichment

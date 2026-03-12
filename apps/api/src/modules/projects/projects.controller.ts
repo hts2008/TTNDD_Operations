@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ProjectsService } from './projects.service';
 import { CurrentUser, type CurrentUserPayload, Roles } from '../../common/decorators';
@@ -62,6 +62,30 @@ export class ProjectsController {
   @ApiOperation({ summary: 'Generate project + tasks from approved plan' })
   generateFromPlan(@CurrentUser() user: CurrentUserPayload, @Param('id') id: string) {
     return this.projectsService.generateProjectFromPlan(user.orgId, id, user.userId);
+  }
+
+  // ── Plan Revisions (T-0134) ──
+
+  @Get('plans/:id/revisions')
+  @ApiOperation({ summary: 'List plan revision history' })
+  getPlanRevisions(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id') id: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    return this.projectsService.getPlanRevisions(user.orgId, id, page ?? 1, limit ?? 20);
+  }
+
+  @Post('plans/:id/revisions')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Create manual plan revision snapshot' })
+  createManualRevision(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id') id: string,
+    @Body() body: { changeReason?: string },
+  ) {
+    return this.projectsService.createManualRevision(user.orgId, id, user.userId, body.changeReason);
   }
 
   // ── Projects ──
@@ -181,5 +205,169 @@ export class ProjectsController {
   @ApiOperation({ summary: 'Get kanban board (tasks grouped by status)' })
   getKanban(@CurrentUser() user: CurrentUserPayload, @Param('id') projectId: string) {
     return this.projectsService.getKanban(user.orgId, projectId);
+  }
+
+  // ── Tree View (T-0138) ──
+
+  @Get(':id/tree')
+  @ApiOperation({ summary: 'Get project tree (phases → tasks hierarchy)' })
+  getProjectTree(@CurrentUser() user: CurrentUserPayload, @Param('id') projectId: string) {
+    return this.projectsService.getProjectTree(user.orgId, projectId);
+  }
+
+  // ── Phases (T-0136) ──
+
+  @Post(':id/phases')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Create a phase/sprint/work_package in project' })
+  createPhase(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id') projectId: string,
+    @Body() body: {
+      title: string; phaseType?: string; parentId?: string;
+      startDate?: string; endDate?: string; position?: number;
+    },
+  ) {
+    return this.projectsService.createPhase(user.orgId, projectId, body);
+  }
+
+  @Get(':id/phases')
+  @ApiOperation({ summary: 'List phases for a project' })
+  findPhases(@CurrentUser() user: CurrentUserPayload, @Param('id') projectId: string) {
+    return this.projectsService.findPhases(user.orgId, projectId);
+  }
+
+  // ── Comments (T-0140) ──
+
+  @Post(':id/comments')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Add comment to project or task' })
+  addComment(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id') projectId: string,
+    @Body() body: { content: string; taskId?: string },
+  ) {
+    return this.projectsService.addComment(user.orgId, projectId, user.userId, body.content, body.taskId);
+  }
+
+  @Get(':id/comments')
+  @ApiOperation({ summary: 'List project/task comments' })
+  findComments(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id') projectId: string,
+    @Query('taskId') taskId?: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    return this.projectsService.findComments(user.orgId, projectId, taskId, page ?? 1, limit ?? 20);
+  }
+
+  // ── Dependencies (T-0141) ──
+
+  @Post(':id/dependencies')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Add task dependency' })
+  addDependency(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id') projectId: string,
+    @Body() body: { sourceTaskId: string; targetTaskId: string; dependencyType?: string; lagDays?: number },
+  ) {
+    return this.projectsService.addDependency(user.orgId, projectId, body);
+  }
+
+  @Get(':id/dependencies')
+  @ApiOperation({ summary: 'List task dependencies' })
+  findDependencies(@CurrentUser() user: CurrentUserPayload, @Param('id') projectId: string) {
+    return this.projectsService.findDependencies(user.orgId, projectId);
+  }
+
+  @Delete(':id/dependencies/:depId')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Remove a task dependency' })
+  removeDependency(@CurrentUser() user: CurrentUserPayload, @Param('depId') depId: string) {
+    return this.projectsService.removeDependency(user.orgId, depId);
+  }
+
+  // ── Gantt / Timeline (T-0142) ──
+
+  @Get(':id/gantt')
+  @ApiOperation({ summary: 'Get Gantt/timeline data (phases + tasks + dependencies)' })
+  getGanttData(@CurrentUser() user: CurrentUserPayload, @Param('id') projectId: string) {
+    return this.projectsService.getGanttData(user.orgId, projectId);
+  }
+
+  // ── Documents / Wiki (T-0143) ──
+
+  @Post(':id/documents')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Create project document (wiki/SOP/notes)' })
+  createDocument(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id') projectId: string,
+    @Body() body: { title: string; content?: string; docType?: string; parentId?: string },
+  ) {
+    return this.projectsService.createDocument(user.orgId, projectId, user.userId, body);
+  }
+
+  @Get(':id/documents')
+  @ApiOperation({ summary: 'List project documents' })
+  findDocuments(@CurrentUser() user: CurrentUserPayload, @Param('id') projectId: string) {
+    return this.projectsService.findDocuments(user.orgId, projectId);
+  }
+
+  @Patch(':id/documents/:docId')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Update a document' })
+  updateDocument(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('docId') docId: string,
+    @Body() body: { title?: string; content?: string },
+  ) {
+    return this.projectsService.updateDocument(user.orgId, docId, body);
+  }
+
+  // ── Time Tracking (T-0144) ──
+
+  @Post(':id/time-entries')
+  @ApiOperation({ summary: 'Log time to project/task' })
+  logTime(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id') projectId: string,
+    @Body() body: { hours: number; description?: string; logDate: string; taskId?: string },
+  ) {
+    return this.projectsService.logTime(user.orgId, projectId, user.userId, body);
+  }
+
+  @Get(':id/time-entries')
+  @ApiOperation({ summary: 'List time entries' })
+  findTimeEntries(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id') projectId: string,
+    @Query('taskId') taskId?: string,
+  ) {
+    return this.projectsService.findTimeEntries(user.orgId, projectId, taskId);
+  }
+
+  // ── Cost Tracking (T-0144) ──
+
+  @Post(':id/cost-entries')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Log cost to project/task' })
+  logCost(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id') projectId: string,
+    @Body() body: { category: string; amount: number; currency?: string; description?: string; logDate: string; taskId?: string },
+  ) {
+    return this.projectsService.logCost(user.orgId, projectId, user.userId, body);
+  }
+
+  @Get(':id/cost-entries')
+  @ApiOperation({ summary: 'List cost entries' })
+  findCostEntries(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id') projectId: string,
+    @Query('taskId') taskId?: string,
+  ) {
+    return this.projectsService.findCostEntries(user.orgId, projectId, taskId);
   }
 }

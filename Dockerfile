@@ -7,7 +7,7 @@ RUN apk add --no-cache openssl
 RUN corepack enable && corepack prepare pnpm@10.27.0 --activate
 
 # Copy workspace config files first for layer caching
-COPY pnpm-lock.yaml pnpm-workspace.yaml turbo.json package.json ./
+COPY pnpm-lock.yaml pnpm-workspace.yaml turbo.json package.json .npmrc ./
 
 # Copy all workspace package.json files
 COPY apps/api/package.json apps/api/

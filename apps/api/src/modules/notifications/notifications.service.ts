@@ -220,4 +220,57 @@ export class NotificationsService {
   renderTemplate(template: string, variables: Record<string, string>): string {
     return template.replace(/\{\{(\w+)\}\}/g, (_, key) => variables[key] ?? '');
   }
+
+  // ── Plan / Project Reminder Hooks (T-0135) ──
+
+  async notifyPlanSubmitted(orgId: string, planTitle: string, planId: string, reviewerIds: string[]) {
+    return this.sendBulk(orgId, reviewerIds, {
+      title: 'Kế hoạch cần duyệt',
+      body: `Kế hoạch "${planTitle}" đã được gửi để duyệt.`,
+      type: 'plan_submitted',
+      actionUrl: `/projects/plans/${planId}`,
+      metadata: { planId, planTitle } as Prisma.InputJsonValue,
+    });
+  }
+
+  async notifyPlanApproved(orgId: string, planTitle: string, planId: string, authorId: string) {
+    return this.send(orgId, authorId, {
+      title: 'Kế hoạch đã được duyệt ✅',
+      body: `Kế hoạch "${planTitle}" đã được phê duyệt thành công.`,
+      type: 'plan_approved',
+      actionUrl: `/projects/plans/${planId}`,
+      metadata: { planId, planTitle } as Prisma.InputJsonValue,
+    });
+  }
+
+  async notifyPlanRejected(orgId: string, planTitle: string, planId: string, authorId: string, reason?: string) {
+    return this.send(orgId, authorId, {
+      title: 'Kế hoạch bị từ chối ❌',
+      body: `Kế hoạch "${planTitle}" bị từ chối.${reason ? ` Lý do: ${reason}` : ''}`,
+      type: 'plan_rejected',
+      actionUrl: `/projects/plans/${planId}`,
+      metadata: { planId, planTitle, reason: reason ?? '' } as Prisma.InputJsonValue,
+    });
+  }
+
+  async notifyTaskDueSoon(orgId: string, taskTitle: string, taskId: string, assigneeIds: string[], dueDate: string) {
+    return this.sendBulk(orgId, assigneeIds, {
+      title: 'Công việc sắp đến hạn ⏰',
+      body: `"${taskTitle}" đến hạn ngày ${dueDate}.`,
+      type: 'task_due_reminder',
+      actionUrl: `/projects/tasks/${taskId}`,
+      metadata: { taskId, taskTitle, dueDate } as Prisma.InputJsonValue,
+    });
+  }
+
+  async notifyTaskAssigned(orgId: string, taskTitle: string, taskId: string, assigneeId: string) {
+    return this.send(orgId, assigneeId, {
+      title: 'Bạn được phân công công việc mới',
+      body: `Công việc "${taskTitle}" đã được giao cho bạn.`,
+      type: 'task_assigned',
+      actionUrl: `/projects/tasks/${taskId}`,
+      metadata: { taskId, taskTitle } as Prisma.InputJsonValue,
+    });
+  }
 }
+
