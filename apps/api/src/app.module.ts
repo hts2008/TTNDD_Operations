@@ -10,6 +10,7 @@ import { CacheModule } from './core/cache';
 import { AuditModule } from './core/audit';
 import { AllExceptionsFilter } from './common/filters';
 import { LoggingInterceptor, TransformInterceptor } from './common/interceptors';
+import { TimeoutInterceptor } from './common/interceptors/timeout.interceptor';
 import { SecurityHeadersMiddleware, RateLimiterMiddleware } from './common/middleware';
 import { OrgConfigModule } from './modules/org-config';
 import { HrmModule } from './modules/hrm';
@@ -32,7 +33,10 @@ import { DashboardsModule } from './modules/dashboards';
 import { FileStorageModule } from './modules/file-storage';
 import { SystemModule } from './modules/system';
 import { DataImportModule } from './modules/data-import';
+import { WarehouseModule } from './modules/warehouse/warehouse.module';
 import { AppController } from './app.controller';
+import { HealthController } from './core/health/health.controller';
+import { SyntheticProbeService } from './core/health/synthetic-probe.service';
 import { AppService } from './app.service';
 
 @Module({
@@ -69,15 +73,18 @@ import { AppService } from './app.service';
     FileStorageModule,
     SystemModule,
     DataImportModule,
+    WarehouseModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, HealthController],
   providers: [
     AppService,
+    SyntheticProbeService,
     { provide: APP_GUARD, useClass: AuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
     { provide: APP_INTERCEPTOR, useClass: LoggingInterceptor },
     { provide: APP_INTERCEPTOR, useClass: TransformInterceptor },
+    { provide: APP_INTERCEPTOR, useClass: TimeoutInterceptor },
   ],
 })
 export class AppModule implements NestModule {

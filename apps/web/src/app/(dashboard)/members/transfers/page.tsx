@@ -200,7 +200,7 @@ export default function TransfersPage() {
       label: 'Đoàn sinh',
       render: (tc: TransferCase) => (
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white text-xs font-bold shadow-sm">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-indigo-600 text-white text-xs font-bold shadow-sm">
             {tc.memberName
               .split(' ')
               .slice(-1)[0]
@@ -271,7 +271,7 @@ export default function TransfersPage() {
             Quản lý các trường hợp chuyển ngành, lên ngành cho đoàn sinh
           </p>
         </div>
-        <Button className="gap-2 self-start bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-md">
+        <Button className="gap-2 self-start bg-linear-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-md">
           <Plus className="h-4 w-4" />
           Tạo yêu cầu chuyển
         </Button>
@@ -352,7 +352,7 @@ export default function TransfersPage() {
         {/* Detail Panel */}
         {selectedCase && (
           <Card className="lg:col-span-1 overflow-hidden">
-            <CardHeader className="bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border-b border-[hsl(var(--border))]">
+            <CardHeader className="bg-linear-to-br from-indigo-500/10 to-purple-500/10 border-b border-[hsl(var(--border))]">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg">Chi tiết chuyển ngành</CardTitle>
                 <button
@@ -363,7 +363,7 @@ export default function TransfersPage() {
                 </button>
               </div>
               <div className="flex items-center gap-2 mt-2">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-bold shadow-md">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-indigo-600 text-white font-bold shadow-md">
                   {selectedCase.memberName
                     .split(' ')
                     .slice(-1)[0]
@@ -438,7 +438,7 @@ export default function TransfersPage() {
               <div className="pt-2 border-t border-[hsl(var(--border))] space-y-2">
                 {selectedCase.status === 'initiated' && (
                   <>
-                    <Button className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700">
+                    <Button className="w-full bg-linear-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700">
                       <CheckCircle2 className="h-4 w-4 mr-2" />
                       Phê duyệt chuyển ngành
                     </Button>
@@ -449,13 +449,13 @@ export default function TransfersPage() {
                   </>
                 )}
                 {selectedCase.status === 'pending_handover' && (
-                  <Button className="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700">
+                  <Button className="w-full bg-linear-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700">
                     <FileCheck className="h-4 w-4 mr-2" />
                     Hoàn tất bàn giao
                   </Button>
                 )}
                 {selectedCase.status === 'handover_complete' && (
-                  <Button className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700">
+                  <Button className="w-full bg-linear-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700">
                     <CheckCircle2 className="h-4 w-4 mr-2" />
                     Tiếp nhận & đóng hồ sơ
                   </Button>

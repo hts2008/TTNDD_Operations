@@ -36,12 +36,14 @@ interface VerifyQueueItem {
   evidence?: Array<{ id: string; note?: string; url?: string; createdAt?: string }>;
 }
 
-type TabKey = 'tree' | 'verify' | 'ranks';
+type TabKey = 'tree' | 'verify' | 'ranks' | 'achievements' | 'leader';
 
 const TABS: { key: TabKey; label: string; emoji: string }[] = [
   { key: 'tree', label: 'Cây Kỹ Năng', emoji: '🌳' },
   { key: 'verify', label: 'Hàng đợi duyệt', emoji: '✅' },
   { key: 'ranks', label: 'Đẳng thứ', emoji: '🏅' },
+  { key: 'achievements', label: 'Thành tích', emoji: '🏆' },
+  { key: 'leader', label: 'Bảng tổng hợp', emoji: '📊' },
 ];
 
 interface RankDef {
@@ -217,7 +219,7 @@ function VerifyQueueTab({
           {queue.map((item) => (
             <div key={item.id} className="bg-zinc-800/50 border border-zinc-700/50 rounded-xl p-4">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-600 to-cyan-600 flex items-center justify-center text-white font-bold">
+                <div className="w-10 h-10 rounded-full bg-linear-to-br from-emerald-600 to-cyan-600 flex items-center justify-center text-white font-bold">
                   {(item.member?.user?.displayName || item.member?.scoutName || '?')[0]}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -343,6 +345,168 @@ function RanksTab() {
 }
 
 // ═══════════════════════════════════════════════════════════
+// Achievements Tab (T-0082 leader view)
+// ═══════════════════════════════════════════════════════════
+
+interface AchievementDef {
+  id: string;
+  key: string;
+  name: string;
+  description?: string;
+  rarity?: string;
+}
+
+function AchievementsTab({
+  showToast,
+}: {
+  showToast: (msg: string, type: 'success' | 'error') => void;
+}) {
+  const [defs, setDefs] = useState<AchievementDef[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await api.get<AchievementDef[]>('/scout/achievements');
+        setDefs(data);
+      } catch {
+        setDefs([]);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  if (loading)
+    return <div className="text-zinc-400 text-center py-12">Đang tải thành tích...</div>;
+
+  const rarityColors: Record<string, string> = {
+    legendary: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+    epic: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
+    rare: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+    common: 'bg-zinc-700 text-zinc-300 border-zinc-600',
+  };
+
+  return (
+    <div>
+      <h2 className="text-lg font-bold text-white mb-4">🏆 Danh sách Thành tích</h2>
+      {defs.length === 0 ? (
+        <p className="text-zinc-500 text-center py-8">Chưa có thành tích nào được cấu hình.</p>
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {defs.map((d) => {
+            const rc = rarityColors[d.rarity ?? 'common'] ?? rarityColors.common;
+            return (
+              <div
+                key={d.id}
+                className="bg-zinc-800/50 border border-zinc-700/50 rounded-xl p-4 hover:border-amber-600/40 transition-colors"
+              >
+                <div className="flex items-start justify-between mb-2">
+                  <h3 className="text-white font-bold text-sm">{d.name}</h3>
+                  <span
+                    className={`text-[10px] uppercase tracking-wider font-medium px-2 py-0.5 rounded-full border ${rc}`}
+                  >
+                    {d.rarity ?? 'common'}
+                  </span>
+                </div>
+                {d.description && (
+                  <p className="text-xs text-zinc-400 mb-2">{d.description}</p>
+                )}
+                <p className="text-[10px] text-zinc-500 font-mono">{d.key}</p>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// Leader Dashboard Tab (T-0083/T-0084)
+// ═══════════════════════════════════════════════════════════
+
+interface LeaderDashboardData {
+  totalMembers: number;
+  avgSkillPct: number;
+  topAchievers: { memberId: string; memberName: string; verified: number; pct: number }[];
+  rankDistribution: Record<string, number>;
+  totalServiceHours: number;
+}
+
+function LeaderDashboardTab() {
+  const [data, setData] = useState<LeaderDashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const d = await api.get<LeaderDashboardData>('/scout/leader-dashboard');
+        setData(d);
+      } catch {
+        setData(null);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  if (loading)
+    return <div className="text-zinc-400 text-center py-12">Đang tải bảng tổng hợp...</div>;
+
+  if (!data)
+    return <p className="text-zinc-500 text-center py-8">Không tải được dữ liệu tổng hợp.</p>;
+
+  return (
+    <div className="space-y-6">
+      <h2 className="text-lg font-bold text-white">📊 Bảng tổng hợp Huynh trưởng</h2>
+
+      {/* Stats */}
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-xl p-4">
+          <p className="text-xs text-zinc-500">Tổng đoàn sinh</p>
+          <p className="text-2xl font-bold text-white">{data.totalMembers}</p>
+        </div>
+        <div className="bg-emerald-500/5 border border-emerald-700/30 rounded-xl p-4">
+          <p className="text-xs text-zinc-500">TB kỹ năng đạt</p>
+          <p className="text-2xl font-bold text-emerald-400">{data.avgSkillPct}%</p>
+        </div>
+        <div className="bg-blue-500/5 border border-blue-700/30 rounded-xl p-4">
+          <p className="text-xs text-zinc-500">Tổng giờ phục vụ</p>
+          <p className="text-2xl font-bold text-blue-400">{data.totalServiceHours}h</p>
+        </div>
+        <div className="bg-amber-500/5 border border-amber-700/30 rounded-xl p-4">
+          <p className="text-xs text-zinc-500">Phân bổ Đẳng thứ</p>
+          <p className="text-sm font-medium text-white mt-1">
+            {Object.entries(data.rankDistribution).map(([k, v]) => `${k}: ${v}`).join(' · ')}
+          </p>
+        </div>
+      </div>
+
+      {/* Top achievers */}
+      {data.topAchievers && data.topAchievers.length > 0 && (
+        <div className="bg-zinc-800/40 border border-zinc-700/50 rounded-xl overflow-hidden">
+          <div className="px-5 py-3 border-b border-zinc-700/50">
+            <h3 className="text-white font-bold text-sm">🌟 Top Đoàn sinh</h3>
+          </div>
+          <div className="divide-y divide-zinc-700/30">
+            {data.topAchievers.slice(0, 10).map((t, i) => (
+              <div key={t.memberId} className="flex items-center gap-3 px-5 py-2.5 text-sm">
+                <span className="text-zinc-500 w-6 text-right">#{i + 1}</span>
+                <p className="text-white flex-1">{t.memberName}</p>
+                <span className="text-xs bg-emerald-500/15 text-emerald-300 px-2 py-0.5 rounded">
+                  {t.verified} kỹ năng · {t.pct}%
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
 // Main Skills Page
 // ═══════════════════════════════════════════════════════════
 
@@ -385,6 +549,8 @@ export default function SkillsPage() {
       {activeTab === 'tree' && <SkillTreeTab />}
       {activeTab === 'verify' && <VerifyQueueTab showToast={showToast} />}
       {activeTab === 'ranks' && <RanksTab />}
+      {activeTab === 'achievements' && <AchievementsTab showToast={showToast} />}
+      {activeTab === 'leader' && <LeaderDashboardTab />}
 
       {toast && (
         <div

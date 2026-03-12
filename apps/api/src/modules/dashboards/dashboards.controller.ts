@@ -1,8 +1,11 @@
-import { Controller, Get, Param, Query, Res } from '@nestjs/common';
+import { Controller, Get, Param, Query, Res, ForbiddenException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { Response } from 'express';
 import { DashboardsService } from './dashboards.service';
 import { ExportService } from './export.service';
+import { ActivityTimelineService } from './activity-timeline.service';
+import { PdfExportService } from './pdf-export.service';
+import { GlobalSearchService } from './global-search.service';
 import { CurrentUser, type CurrentUserPayload, Roles } from '../../common/decorators';
 
 type ExportResource = 'members' | 'attendance' | 'finance' | 'skills';
@@ -43,7 +46,29 @@ export class DashboardsController {
   constructor(
     private readonly dashboardsService: DashboardsService,
     private readonly exportService: ExportService,
+    private readonly timelineService: ActivityTimelineService,
+    private readonly pdfService: PdfExportService,
+    private readonly searchService: GlobalSearchService,
   ) {}
+
+  // ── Global Search (T-0186) ──
+
+  @Get('search')
+  @ApiOperation({ summary: 'Global search across all entity types' })
+  @ApiQuery({ name: 'q', description: 'Search query' })
+  @ApiQuery({ name: 'types', required: false, description: 'Comma-separated entity types' })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  globalSearch(
+    @CurrentUser() user: CurrentUserPayload,
+    @Query('q') q: string,
+    @Query('types') types?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.searchService.search(user.orgId, q, {
+      types: types ? types.split(',') : undefined,
+      limit: limit ? parseInt(limit, 10) : undefined,
+    });
+  }
 
   @Get('org')
   @Roles('super_admin', 'admin')
@@ -147,14 +172,75 @@ export class DashboardsController {
     res!.send(buffer);
   }
 
-  @Get('search')
-  @ApiOperation({ summary: 'Global search across all modules' })
-  @ApiQuery({ name: 'q', description: 'Search query (min 2 chars)' })
-  globalSearch(
+  @Get('timeline')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Activity timeline (aggregated audit + domain events)' })
+  @ApiQuery({ name: 'module', required: false })
+  @ApiQuery({ name: 'actorId', required: false })
+  @ApiQuery({ name: 'from', required: false })
+  @ApiQuery({ name: 'to', required: false })
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  getTimeline(
     @CurrentUser() user: CurrentUserPayload,
-    @Query('q') query: string,
+    @Query('module') module?: string,
+    @Query('actorId') actorId?: string,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
   ) {
-    return this.dashboardsService.globalSearch(user.orgId, query);
+    return this.timelineService.getTimeline({
+      orgId: user.orgId,
+      module,
+      actorId,
+      from: from ? new Date(from) : undefined,
+      to: to ? new Date(to) : undefined,
+      page: page ? parseInt(page, 10) : 1,
+      limit: limit ? parseInt(limit, 10) : 20,
+    });
+  }
+
+  @Get('export/pdf')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Export data as PDF report' })
+  @ApiQuery({ name: 'resource', enum: ['members', 'attendance', 'finance', 'skills'] })
+  @ApiQuery({ name: 'from', required: false })
+  @ApiQuery({ name: 'to', required: false })
+  async exportPdf(
+    @CurrentUser() user: CurrentUserPayload,
+    @Query('resource') resource: ExportResource,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+    @Res() res?: Response,
+  ) {
+    const data = await this.getExportData(user.orgId, resource, { from, to });
+    const columns = EXPORT_COLUMNS[resource] ?? EXPORT_COLUMNS.members;
+    const buffer = await this.pdfService.generateReport({
+      orgName: user.orgId,
+      reportTitle: `${resource} Report`,
+      generatedAt: new Date(),
+      data,
+      columns: columns.map((c) => c.key),
+    });
+
+    res!.setHeader('Content-Type', 'application/pdf');
+    res!.setHeader('Content-Disposition', `attachment; filename="${resource}_report.pdf"`);
+    res!.send(buffer);
+  }
+
+  @Get('reports/:reportId/download')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Download report with TTL-signed token' })
+  downloadReport(
+    @Param('reportId') reportId: string,
+    @Query('token') token: string,
+  ) {
+    const { valid } = this.pdfService.validateToken(token);
+    if (!valid) {
+      throw new ForbiddenException('Download link has expired or is invalid');
+    }
+    return { reportId, status: 'ready', message: 'Report download validated' };
   }
 
   private async getExportData(

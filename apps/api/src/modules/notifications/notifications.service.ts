@@ -11,6 +11,8 @@ interface SendNotificationData {
   channel?: string;
   actionUrl?: string;
   metadata?: Prisma.InputJsonValue;
+  /** Birth date of recipient — used for quiet hours enforcement */
+  recipientBirthDate?: Date;
 }
 
 @Injectable()
@@ -24,6 +26,35 @@ export class NotificationsService {
 
   async send(orgId: string, recipientId: string, data: SendNotificationData) {
     const channel = data.channel ?? 'in_app';
+
+    // ── Quiet Hours enforcement (T-0183) ──
+    if (channel !== 'in_app' && this.isQuietHours(data.recipientBirthDate)) {
+      this.logger.debug(
+        `Notification deferred (quiet hours) for minor ${recipientId}: ${data.type} / ${channel}`,
+      );
+      // Still create the notification but mark delivery as pending for retry at 07:00
+      const notification = await this.prisma.notification.create({
+        data: {
+          orgId,
+          recipientId,
+          title: data.title,
+          body: data.body,
+          type: data.type,
+          channel,
+          actionUrl: data.actionUrl,
+          metadata: data.metadata ?? {},
+        },
+      });
+      await this.prisma.notificationDeliveryLog.create({
+        data: {
+          notificationId: notification.id,
+          channel,
+          status: 'pending',
+          failureReason: 'Deferred: quiet hours for minor',
+        },
+      });
+      return notification;
+    }
 
     const prefDisabled = await this.prisma.notificationPreference.findFirst({
       where: { userId: recipientId, channel, eventType: data.type, enabled: false },
@@ -63,8 +94,32 @@ export class NotificationsService {
         channel,
         status: channel === 'in_app' ? 'delivered' : 'pending',
         sentAt: channel === 'in_app' ? new Date() : null,
+        deliveredAt: channel === 'in_app' ? new Date() : null,
       },
     });
+
+    // ── Parental routing (T-0183): notify guardians when recipient is minor ──
+    if (data.recipientBirthDate && this.isMinor(data.recipientBirthDate)) {
+      try {
+        const guardians = await this.prisma.guardianLink.findMany({
+          where: { orgMemberId: recipientId, userId: { not: null } },
+          select: { userId: true },
+        });
+        for (const g of guardians) {
+          if (!g.userId) continue;
+          await this.send(orgId, g.userId, {
+            title: `[Phụ huynh] ${data.title}`,
+            body: data.body,
+            type: data.type,
+            channel: 'in_app',
+            actionUrl: data.actionUrl,
+            metadata: data.metadata,
+          });
+        }
+      } catch (e) {
+        this.logger.warn(`Parental routing failed: ${(e as Error).message}`);
+      }
+    }
 
     this.logger.debug(`Notification sent: ${data.type} → ${recipientId} (${channel})`);
     return notification;
@@ -211,8 +266,12 @@ export class NotificationsService {
     if (!isQuietTime) return false;
     if (!memberBirthDate) return false;
 
+    return this.isMinor(memberBirthDate);
+  }
+
+  isMinor(birthDate: Date): boolean {
     const age = Math.floor(
-      (now.getTime() - memberBirthDate.getTime()) / (365.25 * 24 * 60 * 60 * 1000),
+      (Date.now() - birthDate.getTime()) / (365.25 * 24 * 60 * 60 * 1000),
     );
     return age < 18;
   }

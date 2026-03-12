@@ -104,7 +104,7 @@ export default function CharacterSheetPage() {
       </Button>
 
       {/* ── Hero Card ───────────────────────────────────────── */}
-      <Card className="overflow-hidden bg-gradient-to-br from-[hsl(var(--primary)/0.1)] to-[hsl(var(--card))]">
+      <Card className="overflow-hidden bg-linear-to-br from-[hsl(var(--primary)/0.1)] to-[hsl(var(--card))]">
         <CardContent className="p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
             <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-[hsl(var(--primary))] text-2xl font-bold text-[hsl(var(--primary-foreground))] shrink-0 shadow-lg">

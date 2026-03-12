@@ -113,7 +113,7 @@ export default function LmsPage() {
           const diff = DIFFICULTY_CONFIG[course.difficulty];
           return (
             <Card key={course.id} className="overflow-hidden hover:shadow-lg transition-shadow group">
-              <div className={cn('h-36 bg-gradient-to-br flex items-center justify-center', course.gradient)}>
+              <div className={cn('h-36 bg-linear-to-br flex items-center justify-center', course.gradient)}>
                 <BookOpen className="h-16 w-16 text-white/80 group-hover:scale-110 transition-transform" />
               </div>
               <CardContent className="p-5 space-y-3">

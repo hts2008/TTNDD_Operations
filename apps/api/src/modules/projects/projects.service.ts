@@ -93,6 +93,97 @@ export class ProjectsService {
     return plan;
   }
 
+  async updatePlan(orgId: string, planId: string, data: Partial<{
+    title: string; planType: string;
+    sectionIDescription: string; sectionIIObjectives: Prisma.InputJsonValue;
+    sectionIIIOutcomes: Prisma.InputJsonValue; sectionIVActivities: Prisma.InputJsonValue;
+    sectionVPersonnel: Prisma.InputJsonValue; sectionVIContent: Prisma.InputJsonValue;
+    sectionVIITimeline: Prisma.InputJsonValue; sectionVIIIProposal: string;
+    sectionIXBudget: Prisma.InputJsonValue;
+  }>, actorUserId: string) {
+    const plan = await this.findPlanById(orgId, planId);
+    if (!['draft', 'rejected'].includes(plan.status)) {
+      throw new BadRequestException(`Cannot edit plan in '${plan.status}' status. Only draft or rejected plans can be edited.`);
+    }
+
+    // T-0134: Auto-snapshot before update
+    await this.createRevisionSnapshot(plan, actorUserId, undefined, undefined, 'Content update');
+
+    const updated = await this.prisma.plan.update({ where: { id: planId }, data });
+
+    await this.audit.log({
+      orgId, userId: actorUserId, action: 'project.plan_updated',
+      resource: 'Plan', resourceId: planId, newValue: data as Prisma.InputJsonValue,
+    });
+
+    return updated;
+  }
+
+  // ── Plan Templates (T-1022) ──
+
+  async createTemplate(orgId: string, data: {
+    name: string; description?: string; category?: string; tags?: string[];
+    templateData: Prisma.InputJsonValue;
+  }, actorUserId: string) {
+    const template = await this.prisma.planTemplate.create({
+      data: { orgId, ...data, createdBy: actorUserId },
+    });
+    await this.audit.log({
+      orgId, userId: actorUserId, action: 'project.template_created',
+      resource: 'PlanTemplate', resourceId: template.id,
+    });
+    return template;
+  }
+
+  async findTemplates(orgId: string, filters?: { category?: string; isActive?: boolean }, page = 1, limit = 20) {
+    const where: Prisma.PlanTemplateWhereInput = { orgId };
+    if (filters?.category) where.category = filters.category;
+    if (filters?.isActive !== undefined) where.isActive = filters.isActive;
+
+    const [data, total] = await Promise.all([
+      this.prisma.planTemplate.findMany({
+        where, skip: (page - 1) * limit, take: limit,
+        orderBy: { usageCount: 'desc' },
+      }),
+      this.prisma.planTemplate.count({ where }),
+    ]);
+    return { data, meta: { total, page, limit } };
+  }
+
+  async createPlanFromTemplate(orgId: string, templateId: string, data: { title: string }, actorUserId: string) {
+    const template = await this.prisma.planTemplate.findFirst({ where: { id: templateId, orgId, isActive: true } });
+    if (!template) throw new NotFoundException('Template not found or inactive');
+
+    const sections = template.templateData as Record<string, unknown>;
+    const plan = await this.prisma.plan.create({
+      data: {
+        orgId,
+        title: data.title,
+        sectionIDescription: (sections.sectionIDescription as string) ?? undefined,
+        sectionIIObjectives: (sections.sectionIIObjectives as Prisma.InputJsonValue) ?? undefined,
+        sectionIIIOutcomes: (sections.sectionIIIOutcomes as Prisma.InputJsonValue) ?? undefined,
+        sectionIVActivities: (sections.sectionIVActivities as Prisma.InputJsonValue) ?? undefined,
+        sectionVPersonnel: (sections.sectionVPersonnel as Prisma.InputJsonValue) ?? undefined,
+        sectionVIContent: (sections.sectionVIContent as Prisma.InputJsonValue) ?? undefined,
+        sectionVIITimeline: (sections.sectionVIITimeline as Prisma.InputJsonValue) ?? undefined,
+        sectionVIIIProposal: (sections.sectionVIIIProposal as string) ?? undefined,
+        sectionIXBudget: (sections.sectionIXBudget as Prisma.InputJsonValue) ?? undefined,
+      },
+    });
+
+    await this.prisma.planTemplate.update({
+      where: { id: templateId },
+      data: { usageCount: { increment: 1 } },
+    });
+
+    await this.audit.log({
+      orgId, userId: actorUserId, action: 'project.plan_created_from_template',
+      resource: 'Plan', resourceId: plan.id, newValue: { templateId } as Prisma.InputJsonValue,
+    });
+
+    return plan;
+  }
+
   // ── Plan Revision History (T-0134) ──
 
   private async createRevisionSnapshot(plan: {
@@ -521,9 +612,19 @@ export class ProjectsService {
   async addComment(orgId: string, projectId: string, authorId: string, content: string, taskId?: string) {
     await this.findProjectById(orgId, projectId);
     if (taskId) await this.findTaskById(orgId, taskId);
-    return this.prisma.projectComment.create({
+    // T-1034: Extract @mentions from content
+    const mentions = (content.match(/@[\w-]+/g) ?? []).map(m => m.slice(1));
+    const comment = await this.prisma.projectComment.create({
       data: { orgId, projectId, taskId: taskId ?? undefined, authorId, content },
     });
+    if (mentions.length > 0) {
+      await this.domainEvents.publish({
+        orgId, eventType: DOMAIN_EVENTS.PROJECT.TASK_COMPLETED,
+        aggregateId: comment.id, aggregateType: 'ProjectComment',
+        payload: { mentions, projectId, taskId }, actorUserId: authorId,
+      });
+    }
+    return comment;
   }
 
   async findComments(orgId: string, projectId: string, taskId?: string, page = 1, limit = 20) {
@@ -710,5 +811,266 @@ export class ProjectsService {
       where: { orgId, projectId, ...(taskId ? { taskId } : {}) },
       orderBy: { logDate: 'desc' },
     });
+  }
+
+  // ── Autosave (T-1023) ──
+
+  async autosavePlan(orgId: string, planId: string, data: Partial<{
+    title: string; planType: string;
+    sectionIDescription: string; sectionIIObjectives: Prisma.InputJsonValue;
+    sectionIIIOutcomes: Prisma.InputJsonValue; sectionIVActivities: Prisma.InputJsonValue;
+    sectionVPersonnel: Prisma.InputJsonValue; sectionVIContent: Prisma.InputJsonValue;
+    sectionVIITimeline: Prisma.InputJsonValue; sectionVIIIProposal: string;
+    sectionIXBudget: Prisma.InputJsonValue;
+  }>) {
+    const plan = await this.findPlanById(orgId, planId);
+    if (!['draft', 'rejected'].includes(plan.status)) {
+      throw new BadRequestException(`Cannot autosave plan in '${plan.status}' status`);
+    }
+
+    // Throttle snapshots: only create revision if last save > 5 minutes ago
+    const lastRevision = await this.prisma.planRevision.findFirst({
+      where: { planId },
+      orderBy: { createdAt: 'desc' },
+      select: { createdAt: true },
+    });
+    const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000);
+    if (!lastRevision || lastRevision.createdAt < fiveMinAgo) {
+      await this.createRevisionSnapshot(plan, 'system', undefined, undefined, 'Autosave');
+    }
+
+    return this.prisma.plan.update({ where: { id: planId }, data });
+  }
+
+  // ── RACI / Personnel Parsing (T-1027) ──
+
+  parsePersonnel(sectionVPersonnel: unknown): Array<{
+    userId: string; role: string; raciType: string; notes?: string;
+  }> {
+    if (!sectionVPersonnel || !Array.isArray(sectionVPersonnel)) return [];
+    return (sectionVPersonnel as Array<Record<string, unknown>>)
+      .filter(entry => entry.userId && entry.role && entry.raciType)
+      .map(entry => ({
+        userId: String(entry.userId),
+        role: String(entry.role),
+        raciType: String(entry.raciType),
+        notes: entry.notes ? String(entry.notes) : undefined,
+      }));
+  }
+
+  async getPlanPersonnel(orgId: string, planId: string) {
+    const plan = await this.findPlanById(orgId, planId);
+    const personnel = this.parsePersonnel(plan.sectionVPersonnel);
+
+    const raciMatrix: Record<string, typeof personnel> = { R: [], A: [], C: [], I: [] };
+    for (const p of personnel) {
+      const bucket = raciMatrix[p.raciType];
+      if (bucket) bucket.push(p);
+    }
+
+    return {
+      planId,
+      totalPersonnel: personnel.length,
+      raciMatrix,
+      allPersonnel: personnel,
+    };
+  }
+
+  // ── Budget Summary & Propagation (T-1029) ──
+
+  async getPlanBudgetSummary(orgId: string, planId: string) {
+    const plan = await this.findPlanById(orgId, planId);
+    const budgetLines = this.parseBudgetLines(plan.sectionIXBudget);
+
+    const byCategory: Record<string, number> = {};
+    let grandTotal = 0;
+    for (const line of budgetLines) {
+      byCategory[line.category] = (byCategory[line.category] ?? 0) + line.amount;
+      grandTotal += line.amount;
+    }
+
+    return {
+      planId,
+      grandTotal,
+      currency: budgetLines[0]?.currency ?? 'VND',
+      lineCount: budgetLines.length,
+      byCategory,
+      lines: budgetLines,
+    };
+  }
+
+  private parseBudgetLines(sectionIXBudget: unknown): Array<{
+    category: string; amount: number; currency: string; description?: string;
+  }> {
+    if (!sectionIXBudget || !Array.isArray(sectionIXBudget)) return [];
+    return (sectionIXBudget as Array<Record<string, unknown>>)
+      .filter(line => line.category && typeof line.amount === 'number')
+      .map(line => ({
+        category: String(line.category),
+        amount: Number(line.amount),
+        currency: line.currency ? String(line.currency) : 'VND',
+        description: line.description ? String(line.description) : undefined,
+      }));
+  }
+
+  // ── Comment Delete (T-1034) ──
+
+  async deleteComment(orgId: string, commentId: string, actorUserId: string) {
+    const comment = await this.prisma.projectComment.findFirst({
+      where: { id: commentId, orgId },
+    });
+    if (!comment) throw new NotFoundException('Comment not found');
+    if (comment.authorId !== actorUserId) {
+      throw new BadRequestException('Only the author can delete their comment');
+    }
+    return this.prisma.projectComment.delete({ where: { id: commentId } });
+  }
+
+  // ── Kanban DnD Persistence (T-1032) ──
+
+  async moveTask(orgId: string, projectId: string, taskId: string, data: {
+    targetStatus: string; targetPosition: number;
+  }, actorUserId: string) {
+    await this.findProjectById(orgId, projectId);
+    const task = await this.findTaskById(orgId, taskId);
+
+    const updated = await this.prisma.projectTask.update({
+      where: { id: taskId },
+      data: { status: data.targetStatus, position: data.targetPosition },
+    });
+
+    await this.audit.log({
+      orgId, userId: actorUserId, action: 'project.task_moved',
+      resource: 'ProjectTask', resourceId: taskId,
+      newValue: { from: task.status, to: data.targetStatus, position: data.targetPosition } as Prisma.InputJsonValue,
+    });
+
+    // If moved to 'done', publish completion event with EXP payload (T-1037)
+    if (data.targetStatus === 'done' && task.status !== 'done') {
+      await this.domainEvents.publish({
+        orgId, eventType: DOMAIN_EVENTS.PROJECT.TASK_COMPLETED,
+        aggregateId: taskId, aggregateType: 'ProjectTask',
+        payload: {
+          title: task.title, projectId, assigneeIds: task.assigneeIds,
+          storyPoints: task.storyPoints ?? 0,
+          expAwarded: (task.storyPoints ?? 1) * 10, // T-1037: 10 EXP per story point
+        },
+        actorUserId,
+      });
+    }
+
+    return updated;
+  }
+
+  // ── Risk Register (T-1035) ──
+
+  async createRisk(orgId: string, projectId: string, createdBy: string, data: {
+    title: string; description?: string; severity: string;
+    probability?: string; mitigation?: string; ownerId?: string;
+  }) {
+    await this.findProjectById(orgId, projectId);
+    return this.prisma.projectRisk.create({
+      data: { orgId, projectId, createdBy, ...data },
+    });
+  }
+
+  async findRisks(orgId: string, projectId: string, status?: string) {
+    return this.prisma.projectRisk.findMany({
+      where: { orgId, projectId, ...(status ? { status } : {}) },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async updateRisk(orgId: string, riskId: string, data: {
+    title?: string; description?: string; severity?: string;
+    probability?: string; mitigation?: string; status?: string; ownerId?: string;
+  }) {
+    const risk = await this.prisma.projectRisk.findFirst({ where: { id: riskId, orgId } });
+    if (!risk) throw new NotFoundException('Risk not found');
+    return this.prisma.projectRisk.update({ where: { id: riskId }, data });
+  }
+
+  // ── Checklists (T-1035) ──
+
+  async createChecklist(orgId: string, projectId: string, createdBy: string, data: {
+    title: string; taskId?: string; items?: string[];
+  }) {
+    await this.findProjectById(orgId, projectId);
+    const itemsJson = (data.items ?? []).map(text => ({ text, checked: false }));
+    return this.prisma.projectChecklist.create({
+      data: {
+        orgId, projectId, createdBy,
+        title: data.title,
+        taskId: data.taskId ?? undefined,
+        items: itemsJson as Prisma.InputJsonValue,
+        completedCount: 0,
+      },
+    });
+  }
+
+  async findChecklists(orgId: string, projectId: string, taskId?: string) {
+    return this.prisma.projectChecklist.findMany({
+      where: { orgId, projectId, ...(taskId ? { taskId } : {}) },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async toggleChecklistItem(orgId: string, checklistId: string, itemIndex: number) {
+    const checklist = await this.prisma.projectChecklist.findFirst({
+      where: { id: checklistId, orgId },
+    });
+    if (!checklist) throw new NotFoundException('Checklist not found');
+
+    const items = checklist.items as Array<{ text: string; checked: boolean }>;
+    if (itemIndex < 0 || itemIndex >= items.length) {
+      throw new BadRequestException(`Item index ${itemIndex} out of range`);
+    }
+
+    items[itemIndex]!.checked = !items[itemIndex]!.checked;
+    const completedCount = items.filter(i => i.checked).length;
+
+    return this.prisma.projectChecklist.update({
+      where: { id: checklistId },
+      data: { items: items as Prisma.InputJsonValue, completedCount },
+    });
+  }
+
+  // ── Due Alerts (T-1036) ──
+
+  async findOverdueTasks(orgId: string, projectId: string) {
+    await this.findProjectById(orgId, projectId);
+    return this.prisma.projectTask.findMany({
+      where: {
+        orgId, projectId,
+        status: { notIn: ['done', 'cancelled'] },
+        dueDate: { lt: new Date() },
+      },
+      orderBy: { dueDate: 'asc' },
+    });
+  }
+
+  async getProjectDueAlerts(orgId: string, projectId: string) {
+    await this.findProjectById(orgId, projectId);
+    const now = new Date();
+    const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
+
+    const [overdue, upcoming] = await Promise.all([
+      this.prisma.projectTask.findMany({
+        where: { orgId, projectId, status: { notIn: ['done', 'cancelled'] }, dueDate: { lt: now } },
+        orderBy: { dueDate: 'asc' },
+      }),
+      this.prisma.projectTask.findMany({
+        where: { orgId, projectId, status: { notIn: ['done', 'cancelled'] }, dueDate: { gte: now, lte: threeDaysFromNow } },
+        orderBy: { dueDate: 'asc' },
+      }),
+    ]);
+
+    return {
+      projectId,
+      overdueCount: overdue.length,
+      upcomingCount: upcoming.length,
+      overdue,
+      upcoming,
+    };
   }
 }

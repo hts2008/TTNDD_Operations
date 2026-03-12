@@ -1,0 +1,98 @@
+# T-0906: Prisma Schema → Module Coverage Matrix
+
+> **Source:** `apps/api/prisma/schema.prisma` (2211 lines, 60 models)
+> **Generated:** 2026-03-12 | **STORY-009 / WP-9.2 / M9.2**
+
+---
+
+## Module → Model Mapping
+
+| # | Module | Schema Section | Models | DB Tables | Status Fields |
+|---|--------|----------------|--------|-----------|---------------|
+| **10** | Core / Multi-Tenant | L11–141 | Organization, Branch, Unit, User, OrgMember | organizations, branches, units, users, org_members | OrgMember.status |
+| **10** | Audit Log | L142–163 | AuditLog | audit_logs | — |
+| **1** | HRM | L166–328 | MemberProfile, GuardianLink, ChildDataAccessLog, MemberBranchHistory, OrgChartNode, VolunteerAvailability | member_profiles, guardian_links, child_data_access_logs, member_branch_history, org_chart_nodes, volunteer_availability | VolunteerAvailability.status |
+| **9** | Reward Engine | L330–477 | ExpConfig, ExpTransaction, MemberExpSummary, BadgeDefinition, MemberBadge, RewardItem, RewardRedemption, LeaderboardSnapshot | exp_configs, exp_transactions, member_exp_summary, badge_definitions, member_badges, reward_items, reward_redemptions, leaderboard_snapshots | RewardRedemption.status |
+| **8A** | Scout Core | L479–750 | ProgramVersion, Domain, SkillCriteria, RankDefinition, SkillGroup, Skill, MemberSkillProgress, SkillEvidence, SkillVerification, HabitDef, HabitLog, AchievementDef, AchievementAward, ActivityLog, MemberRank | program_versions, domains, skill_criteria, rank_definitions, skill_groups, skills, member_skill_progress, skill_evidence, skill_verifications, habit_defs, habit_logs, achievement_defs, achievement_awards, activity_logs, member_ranks | ProgramVersion.status, MemberSkillProgress.status, HabitLog.status, MemberRank.status |
+| **8B** | Sessions & Attendance | L752–821 | Session, SessionAttendance, AnnualProgram | sessions, session_attendance, annual_programs | Session.status, SessionAttendance.status, AnnualProgram.status |
+| **8C** | Events & Camps | L823–880 | Event, EventRegistration | events, event_registrations | Event.status, EventRegistration.status |
+| **7** | LMS | L882–1062 | Course, Lesson, Quiz, QuizQuestion, QuizBattle, MemberCourseProgress, CourseAssignment, QuizAttempt | courses, lessons, quizzes, quiz_questions, quiz_battles, member_course_progress, course_assignments, quiz_attempts | Course.status, QuizBattle.status, MemberCourseProgress.status, CourseAssignment.status, QuizAttempt.status |
+| **8D** | Enrichment | L1064–1158 | SpiritualLog, NguGioiAssessment, Evaluation, MentoringRelationship, MentoringLog | spiritual_logs, ngu_gioi_assessments, evaluations, mentoring_relationships, mentoring_logs | Evaluation.status, MentoringRelationship.status |
+| **2** | Projects | L1160–1382 | Plan, PlanRevision, Project, ProjectPhase, ProjectTask, ProjectComment, TaskDependency, ProjectDocument, TimeEntry, CostEntry | plans, plan_revisions, projects, project_phases, tasks, project_comments, task_dependencies, project_documents, time_entries, cost_entries | Plan.status, Project.status, ProjectPhase.status, ProjectTask.status |
+| **3** | Tickets | L1384–1507 | Ticket, TicketComment, TicketStatusHistory, TicketRoutingRule, TicketSlaConfig, TicketAttachment | tickets, ticket_comments, ticket_status_history, ticket_routing_rules, ticket_sla_configs, ticket_attachments | Ticket.status |
+| **—** | Approval Engine | L1509–1567 | ApprovalDefinition, ApprovalRequest | approval_definitions, approval_requests | ApprovalRequest.status |
+| **—** | Workflow Triggers & SOP | L1569–1609 | WorkflowTrigger, SopDocument | workflow_triggers, sop_documents | SopDocument.status |
+| **4** | Finance | L1611–1762 | FinancialAccount, FinancialTransaction, MemberFee, FeePlan, FeeInstallment, Sponsor, SponsorContribution | financial_accounts, financial_transactions, member_fees, fee_plans, fee_installments, sponsors, sponsor_contributions | FinancialTransaction.status, MemberFee.status, FeeInstallment.status |
+| **5** | Assets | L1764–1917 | AssetCategory, Asset, AssetCustomField, AssetLoan, KitTemplate, KitItem, UniformIssue, MaintenanceSchedule | asset_categories, assets, asset_custom_fields, asset_loans, kit_templates, kit_items, uniform_issues, maintenance_schedules | Asset.status, AssetLoan.status, UniformIssue.status, MaintenanceSchedule.status |
+| **6** | Process / SOP | L1919–1962 | WorkflowDefinition, WorkflowRun | workflow_definitions, workflow_runs | WorkflowRun.status |
+| **—** | Notifications | L1964–2036 | Notification, NotificationPreference, NotificationTemplate, NotificationDeliveryLog | notifications, notification_preferences, notification_templates, notification_delivery_logs | NotificationDeliveryLog.status |
+| **—** | Domain Events | L2038–2060 | DomainEvent | domain_events | — (uses `processed` Boolean) |
+| **—** | File Storage | L2062–2084 | FileObjectRef | file_object_refs | — |
+| **—** | System / Ops | L2086–2103 | ReleaseGateReport | release_gate_reports | ReleaseGateReport.status |
+| **—** | Data Import | L2106–2125 | ImportBatch | import_batches | ImportBatch.status |
+| **—** | Branch Transition | L2127–2155 | TransferCase | transfer_cases | TransferCase.status |
+| **—** | Onboarding & Training | L2157–2210 | OnboardingTemplate, OnboardingProgress, TrainingRecord | onboarding_templates, onboarding_progress, training_records | — |
+
+---
+
+## Summary Statistics
+
+| Metric | Count |
+|--------|-------|
+| **Total Prisma models** | 60 |
+| **Total DB tables** | 60 |
+| **Models with `status` field** | 27 |
+| **Models with `orgId` field** (RLS-relevant) | 57 |
+| **Models WITHOUT `orgId`** | 3 (Organization, User, ReleaseGateReport) |
+| **Self-referencing models** | 5 (Unit, OrgChartNode, ProjectPhase, ProjectTask, ProjectDocument) |
+| **Migration files** | 7 |
+
+---
+
+## State Machine Coverage Cross-Reference
+
+| State Machine (WP-9.1) | Prisma Model | Status Field | Match? |
+|------------------------|--------------|-------------|--------|
+| member-lifecycle | OrgMember | `.status` | ✅ |
+| session-lifecycle | Session | `.status` | ✅ |
+| event-lifecycle | Event | `.status` | ✅ |
+| skill-progress | MemberSkillProgress | `.status` | ✅ |
+| course-progress | MemberCourseProgress | `.status` | ✅ |
+| rank-progression | MemberRank | `.status` | ✅ |
+| reward-redemption | RewardRedemption | `.status` | ✅ |
+| quiz-battle | QuizBattle | `.status` | ✅ |
+| program-version | ProgramVersion | `.status` | ✅ |
+
+### Models with `status` but NO state machine
+
+> These are candidates for future state machine formalization:
+
+| Model | Status Field | Default | Notes |
+|-------|-------------|---------|-------|
+| VolunteerAvailability | status | `available` | Simple enum, may not need SM |
+| AnnualProgram | status | `draft` | Lifecycle: draft→planned→active→archived |
+| EventRegistration | status | `registered` | May piggyback on event-lifecycle |
+| Course | status | `draft` | Similar to course-progress but for definition |
+| CourseAssignment | status | `assigned` | assigned→in_progress→submitted→graded |
+| QuizAttempt | status | `started` | started→submitted→graded |
+| Evaluation | status | `draft` | draft→submitted→reviewed |
+| MentoringRelationship | status | `active` | Simple: active→paused→ended |
+| Plan | status | `draft` | draft→submitted→approved→rejected |
+| Project | status | `planning` | planning→active→completed→cancelled |
+| ProjectPhase | status | `planned` | planned→active→completed→cancelled |
+| ProjectTask | status | `todo` | Full kanban: todo→in_progress→done |
+| Ticket | status | `open` | open→in_progress→resolved→closed |
+| ApprovalRequest | status | `pending` | pending→in_progress→approved→rejected |
+| SopDocument | status | `draft` | draft→published→archived |
+| FinancialTransaction | status | `pending` | pending→approved→rejected |
+| MemberFee | status | `unpaid` | unpaid→partial→paid→waived |
+| FeeInstallment | status | `unpaid` | unpaid→partial→paid→waived |
+| Asset | status | `available` | available→in_use→maintenance→retired |
+| AssetLoan | status | `pending` | pending→approved→active→returned |
+| UniformIssue | status | `issued` | issued→returned→lost→damaged |
+| MaintenanceSchedule | status | `scheduled` | scheduled→overdue→completed |
+| WorkflowRun | status | `pending` | pending→running→completed→failed |
+| NotificationDeliveryLog | status | `pending` | pending→delivered→failed→dead_letter |
+| ReleaseGateReport | status | `pending` | pending→passed→failed |
+| ImportBatch | status | `pending` | pending→processing→completed→failed |
+| TransferCase | status | `initiated` | initiated→pending_handover→accepted→closed |

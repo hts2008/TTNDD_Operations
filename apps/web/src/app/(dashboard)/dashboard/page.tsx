@@ -84,7 +84,7 @@ export default function DashboardPage() {
         {stats.map((s) => (
           <div
             key={s.label}
-            className={`bg-gradient-to-br from-${s.color}-950/50 to-${s.color}-900/20 border border-${s.color}-800/40 rounded-xl p-5 transition-all hover:border-${s.color}-600/60`}
+            className={`bg-linear-to-br from-${s.color}-950/50 to-${s.color}-900/20 border border-${s.color}-800/40 rounded-xl p-5 transition-all hover:border-${s.color}-600/60`}
           >
             <div className="flex items-center gap-2 mb-2">
               <span className="text-xl">{s.emoji}</span>

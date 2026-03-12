@@ -253,6 +253,7 @@ export default function MemberDetailPage() {
 
   const [member, setMember] = useState<MemberProfile>(MOCK_MEMBER);
   const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     api
@@ -261,7 +262,10 @@ export default function MemberDetailPage() {
         setMember(data);
         setLoaded(true);
       })
-      .catch(() => setLoaded(true)); // fall back to mock
+      .catch(() => {
+        setError(true);
+        setLoaded(true);
+      });
   }, [memberId]);
 
   const m = member;
@@ -293,6 +297,26 @@ export default function MemberDetailPage() {
           Bảng nhân vật
         </Button>
       </div>
+
+      {/* Error State */}
+      {error && (
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3 text-red-400">
+              <XCircle className="h-6 w-6 shrink-0" />
+              <div className="flex-1">
+                <p className="font-medium">Không tìm thấy thành viên</p>
+                <p className="text-sm text-[hsl(var(--muted-foreground))] mt-0.5">
+                  Dữ liệu hiển thị bên dưới là mẫu. Kiểm tra lại ID hoặc kết nối API.
+                </p>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+                Thử lại
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Hero Card */}
       <Card>

@@ -15,19 +15,23 @@
     "db:seed": "pnpm --filter api run db:seed",
     "db:studio": "pnpm --filter api run db:studio",
     "clean": "turbo run clean && rm -rf node_modules",
-    "prepare": "husky || true"
+    "prepare": "husky || true",
+    "check:readiness": "ts-node scripts/check-readiness.ts",
+    "release:sign": "ts-node scripts/sign-release.ts",
+    "test:e2e:gate": "npx playwright test --grep @gate"
   },
   "devDependencies": {
-    "@eslint/js": "^9.0.0",
     "@commitlint/cli": "^19.0.0",
     "@commitlint/config-conventional": "^19.0.0",
+    "@eslint/js": "^9.0.0",
+    "@playwright/test": "^1.58.2",
     "eslint": "^9.0.0",
-    "typescript-eslint": "^8.0.0",
     "husky": "^9.0.0",
     "lint-staged": "^15.0.0",
     "prettier": "^3.0.0",
     "turbo": "^2.0.0",
-    "typescript": "^5.5.0"
+    "typescript": "^5.5.0",
+    "typescript-eslint": "^8.0.0"
   },
   "lint-staged": {
     "*.{ts,tsx}": [

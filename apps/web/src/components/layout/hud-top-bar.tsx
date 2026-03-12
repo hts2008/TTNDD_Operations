@@ -54,10 +54,10 @@ export function HudTopBar({
   const rankGradient = RANK_COLORS[rankTier] || RANK_COLORS[1];
 
   return (
-    <div className="flex items-center gap-4 rounded-xl bg-gradient-to-r from-[hsl(var(--card))] to-[hsl(var(--card)_/_0.8)] border border-[hsl(var(--border)_/_0.5)] p-2 px-4 shadow-sm backdrop-blur-sm">
+    <div className="flex items-center gap-4 rounded-xl bg-linear-to-r from-[hsl(var(--card))] to-[hsl(var(--card)_/_0.8)] border border-[hsl(var(--border)_/_0.5)] p-2 px-4 shadow-sm backdrop-blur-sm">
       {/* Rank Badge */}
       <div
-        className={`flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br ${rankGradient} shadow-md`}
+        className={`flex h-10 w-10 items-center justify-center rounded-lg bg-linear-to-br ${rankGradient} shadow-md`}
       >
         <Shield className="h-5 w-5 text-white drop-shadow" />
       </div>
@@ -85,7 +85,7 @@ export function HudTopBar({
         </div>
         <div className="h-2 w-full rounded-full bg-[hsl(var(--muted))] overflow-hidden">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 transition-all duration-700 ease-out"
+            className="h-full rounded-full bg-linear-to-r from-amber-400 via-amber-500 to-orange-500 transition-all duration-700 ease-out"
             style={{ width: `${expPercent}%` }}
           />
         </div>

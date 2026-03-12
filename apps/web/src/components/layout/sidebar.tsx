@@ -165,7 +165,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
     <div className="flex h-full flex-col">
       {/* App branding */}
       <div className="flex h-16 items-center gap-3 px-6 border-b border-[hsl(var(--border))]">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-md">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-amber-500 to-orange-600 text-white shadow-md">
           <Hexagon className="h-4 w-4" />
         </div>
         <div className="flex flex-col">
@@ -198,7 +198,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                 <p className="text-[10px] font-bold uppercase tracking-widest text-[hsl(var(--muted-foreground))]">
                   {zone.zoneName}
                 </p>
-                <div className="flex-1 h-px bg-[hsl(var(--border)_/_0.5)]" />
+                <div className="flex-1 h-px bg-[hsl(var(--border)/0.5)]" />
               </div>
 
               {/* Zone Items */}
@@ -213,8 +213,8 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                       className={cn(
                         'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200',
                         active
-                          ? 'bg-gradient-to-r from-[hsl(var(--primary)_/_0.15)] to-[hsl(var(--primary)_/_0.05)] text-[hsl(var(--primary))] font-medium border-l-2 border-[hsl(var(--primary))]'
-                          : 'text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--muted)_/_0.5)] hover:text-[hsl(var(--foreground))] hover:translate-x-0.5',
+                          ? 'bg-linear-to-r from-[hsl(var(--primary)/0.15)] to-[hsl(var(--primary)/0.05)] text-[hsl(var(--primary))] font-medium border-l-2 border-[hsl(var(--primary))]'
+                          : 'text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--muted)/0.5)] hover:text-[hsl(var(--foreground))] hover:translate-x-0.5',
                       )}
                     >
                       {item.icon}

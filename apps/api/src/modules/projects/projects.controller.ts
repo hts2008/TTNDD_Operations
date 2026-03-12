@@ -3,6 +3,7 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ProjectsService } from './projects.service';
 import { CurrentUser, type CurrentUserPayload, Roles } from '../../common/decorators';
 import { Prisma } from '@prisma/client';
+import { CreateCommentDto, MoveTaskDto, CreateRiskDto, UpdateRiskDto, CreateChecklistDto, ToggleChecklistItemDto } from './projects.dto';
 
 @ApiTags('Projects')
 @ApiBearerAuth()
@@ -369,5 +370,108 @@ export class ProjectsController {
     @Query('taskId') taskId?: string,
   ) {
     return this.projectsService.findCostEntries(user.orgId, projectId, taskId);
+  }
+
+  // ── Comment Delete (T-1034) ──
+
+  @Delete('comments/:commentId')
+  @ApiOperation({ summary: 'Delete own comment' })
+  deleteComment(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('commentId') commentId: string,
+  ) {
+    return this.projectsService.deleteComment(user.orgId, commentId, user.userId);
+  }
+
+  // ── Kanban DnD (T-1032) ──
+
+  @Patch(':id/tasks/:taskId/move')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Move task (status + position)' })
+  moveTask(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id') projectId: string,
+    @Param('taskId') taskId: string,
+    @Body() body: MoveTaskDto,
+  ) {
+    return this.projectsService.moveTask(user.orgId, projectId, taskId, body, user.userId);
+  }
+
+  // ── Risk Register (T-1035) ──
+
+  @Post(':id/risks')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Create a project risk' })
+  createRisk(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id') projectId: string,
+    @Body() body: CreateRiskDto,
+  ) {
+    return this.projectsService.createRisk(user.orgId, projectId, user.userId, body);
+  }
+
+  @Get(':id/risks')
+  @ApiOperation({ summary: 'List project risks' })
+  findRisks(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id') projectId: string,
+    @Query('status') status?: string,
+  ) {
+    return this.projectsService.findRisks(user.orgId, projectId, status);
+  }
+
+  @Patch('risks/:riskId')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Update a risk' })
+  updateRisk(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('riskId') riskId: string,
+    @Body() body: UpdateRiskDto,
+  ) {
+    return this.projectsService.updateRisk(user.orgId, riskId, body as any);
+  }
+
+  // ── Checklists (T-1035) ──
+
+  @Post(':id/checklists')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Create a checklist' })
+  createChecklist(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id') projectId: string,
+    @Body() body: CreateChecklistDto,
+  ) {
+    return this.projectsService.createChecklist(user.orgId, projectId, user.userId, body);
+  }
+
+  @Get(':id/checklists')
+  @ApiOperation({ summary: 'List checklists' })
+  findChecklists(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id') projectId: string,
+    @Query('taskId') taskId?: string,
+  ) {
+    return this.projectsService.findChecklists(user.orgId, projectId, taskId);
+  }
+
+  @Patch('checklists/:checklistId/toggle')
+  @ApiOperation({ summary: 'Toggle checklist item' })
+  toggleChecklistItem(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('checklistId') checklistId: string,
+    @Body() body: ToggleChecklistItemDto,
+  ) {
+    return this.projectsService.toggleChecklistItem(user.orgId, checklistId, body.itemIndex);
+  }
+
+  // ── Due Alerts (T-1036) ──
+
+  @Get(':id/alerts')
+  @ApiOperation({ summary: 'Get overdue + upcoming task alerts' })
+  getProjectDueAlerts(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id') projectId: string,
+  ) {
+    return this.projectsService.getProjectDueAlerts(user.orgId, projectId);
   }
 }

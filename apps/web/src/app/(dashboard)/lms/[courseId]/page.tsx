@@ -60,7 +60,7 @@ export default function CourseDetailPage() {
         <ArrowLeft className="h-4 w-4" /> Quay lại
       </Button>
 
-      <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+      <Card className="bg-linear-to-r from-green-50 to-emerald-50 border-green-200">
         <CardHeader>
           <div className="flex items-start justify-between">
             <div className="space-y-1">
@@ -81,7 +81,7 @@ export default function CourseDetailPage() {
             <div className="flex-1">
               <div className="w-full bg-green-200 rounded-full h-3 overflow-hidden">
                 <div
-                  className="bg-gradient-to-r from-green-500 to-emerald-500 h-3 rounded-full transition-all duration-500"
+                  className="bg-linear-to-r from-green-500 to-emerald-500 h-3 rounded-full transition-all duration-500"
                   style={{ width: `${progress}%` }}
                 />
               </div>

@@ -93,11 +93,11 @@ function DashboardTab() {
       {/* Summary cards */}
       {data.summary && (
         <div className="grid gap-4 sm:grid-cols-3">
-          <div className="bg-gradient-to-br from-blue-950/50 to-blue-900/30 border border-blue-800/50 rounded-xl p-4">
+          <div className="bg-linear-to-br from-blue-950/50 to-blue-900/30 border border-blue-800/50 rounded-xl p-4">
             <p className="text-xs text-blue-400 uppercase tracking-wider font-bold">Con em</p>
             <p className="text-3xl font-bold text-white mt-1">{data.summary.totalChildren}</p>
           </div>
-          <div className="bg-gradient-to-br from-emerald-950/50 to-emerald-900/30 border border-emerald-800/50 rounded-xl p-4">
+          <div className="bg-linear-to-br from-emerald-950/50 to-emerald-900/30 border border-emerald-800/50 rounded-xl p-4">
             <p className="text-xs text-emerald-400 uppercase tracking-wider font-bold">
               Điểm danh TB
             </p>
@@ -105,7 +105,7 @@ function DashboardTab() {
               {data.summary.avgAttendance ?? '—'}%
             </p>
           </div>
-          <div className="bg-gradient-to-br from-amber-950/50 to-amber-900/30 border border-amber-800/50 rounded-xl p-4">
+          <div className="bg-linear-to-br from-amber-950/50 to-amber-900/30 border border-amber-800/50 rounded-xl p-4">
             <p className="text-xs text-amber-400 uppercase tracking-wider font-bold">Tổng EXP</p>
             <p className="text-3xl font-bold text-white mt-1">
               {data.summary.totalExp?.toLocaleString() ?? '—'}
@@ -202,7 +202,7 @@ function ChildrenTab() {
               key={c.id}
               className="flex items-center gap-4 bg-zinc-800/50 border border-zinc-700/50 rounded-xl p-4"
             >
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-violet-600 flex items-center justify-center text-white font-bold">
+              <div className="w-10 h-10 rounded-full bg-linear-to-br from-blue-600 to-violet-600 flex items-center justify-center text-white font-bold">
                 {(c.member?.user?.displayName || c.member?.scoutName || '?')[0]}
               </div>
               <div className="flex-1">

@@ -100,7 +100,7 @@ export function QuestPanel({ quests, maxDisplay = 5 }: QuestPanelProps) {
                 {quest.progress > 0 && quest.progress < 100 && (
                   <div className="mt-1.5 h-1 w-full rounded-full bg-[hsl(var(--muted))] overflow-hidden">
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-blue-400 to-blue-600 transition-all"
+                      className="h-full rounded-full bg-linear-to-r from-blue-400 to-blue-600 transition-all"
                       style={{ width: `${quest.progress}%` }}
                     />
                   </div>

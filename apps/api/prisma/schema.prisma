@@ -1210,6 +1210,24 @@ model PlanRevision {
   @@map("plan_revisions")
 }
 
+model PlanTemplate {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId         String   @map("org_id") @db.Uuid
+  name          String   @db.VarChar(255)
+  description   String?
+  category      String?  @db.VarChar(100) // camp | annual | training | event | custom
+  tags          String[] @default([])
+  templateData  Json     @map("template_data") // snapshot of 9 sections
+  isActive      Boolean  @default(true) @map("is_active")
+  usageCount    Int      @default(0) @map("usage_count")
+  createdBy     String   @map("created_by") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  @@index([orgId, category])
+  @@map("plan_templates")
+}
+
 model Project {
   id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   orgId        String    @map("org_id") @db.Uuid
@@ -1231,6 +1249,8 @@ model Project {
   projectTasks  ProjectTask[]
   phases        ProjectPhase[]
   comments      ProjectComment[]
+  risks         ProjectRisk[]
+  checklists    ProjectChecklist[]
 
   @@index([orgId])
   @@map("projects")
@@ -1287,6 +1307,7 @@ model ProjectTask {
   parentTask ProjectTask?  @relation("TaskHierarchy", fields: [parentTaskId], references: [id])
   subTasks   ProjectTask[] @relation("TaskHierarchy")
   comments   ProjectComment[]
+  checklists ProjectChecklist[]
 
   @@index([orgId, projectId])
   @@map("tasks")
@@ -1308,6 +1329,49 @@ model ProjectComment {
   @@index([orgId, projectId])
   @@index([taskId])
   @@map("project_comments")
+}
+
+// T-1035: Risk Register
+model ProjectRisk {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId         String   @map("org_id") @db.Uuid
+  projectId     String   @map("project_id") @db.Uuid
+  title         String   @db.VarChar(500)
+  description   String?
+  severity      String   @default("medium") @db.VarChar(20) // low | medium | high | critical
+  probability   String   @default("medium") @db.VarChar(20) // low | medium | high
+  status        String   @default("open") @db.VarChar(20) // open | mitigated | closed | accepted
+  mitigation    String?
+  ownerId       String?  @map("owner_id") @db.Uuid
+  createdBy     String   @map("created_by") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  project       Project  @relation(fields: [projectId], references: [id])
+
+  @@index([orgId, projectId])
+  @@map("project_risks")
+}
+
+// T-1035: Checklists
+model ProjectChecklist {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId           String   @map("org_id") @db.Uuid
+  projectId       String   @map("project_id") @db.Uuid
+  taskId          String?  @map("task_id") @db.Uuid
+  title           String   @db.VarChar(500)
+  items           Json     @default("[]") // Array<{ text: string; checked: boolean }>
+  completedCount  Int      @default(0) @map("completed_count")
+  createdBy       String   @map("created_by") @db.Uuid
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  project         Project      @relation(fields: [projectId], references: [id])
+  task            ProjectTask? @relation(fields: [taskId], references: [id])
+
+  @@index([orgId, projectId])
+  @@index([taskId])
+  @@map("project_checklists")
 }
 
 // T-0141: Task Dependencies
@@ -1979,6 +2043,8 @@ model Notification {
   metadata    Json      @default("{}")
   createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz()
 
+  deliveryLogs NotificationDeliveryLog[]
+
   @@index([orgId, recipientId, isRead])
   @@index([orgId, createdAt])
   @@map("notifications")
@@ -2018,12 +2084,18 @@ model NotificationDeliveryLog {
   id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   notificationId String    @map("notification_id") @db.Uuid
   channel        String    @db.VarChar(20)
-  status         String    @default("pending") @db.VarChar(20)
-  attempts       Int       @default(0)
-  lastError      String?   @map("last_error")
+  status         String    @default("pending") @db.VarChar(20) // pending, delivered, failed, dead_letter
+  retryCount     Int       @default(0) @map("retry_count")
+  externalId     String?   @map("external_id") @db.VarChar(500)
+  failureReason  String?   @map("failure_reason")
   sentAt         DateTime? @map("sent_at") @db.Timestamptz()
+  deliveredAt    DateTime? @map("delivered_at") @db.Timestamptz()
+  lastAttemptAt  DateTime? @map("last_attempt_at") @db.Timestamptz()
   createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz()
 
+  notification Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+
+  @@index([status, retryCount])
   @@map("notification_delivery_logs")
 }
 

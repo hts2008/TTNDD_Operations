@@ -117,8 +117,21 @@ export default function MembersPage() {
       </div>
 
       {loading && (
-        <div className="text-zinc-400 text-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500 mx-auto" />
+        <div className="space-y-2">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div
+              key={i}
+              className="flex items-center gap-4 bg-zinc-800/50 border border-zinc-700/50 rounded-xl p-4 animate-pulse"
+            >
+              <div className="w-10 h-10 rounded-full bg-zinc-700" />
+              <div className="flex-1 space-y-2">
+                <div className="h-4 bg-zinc-700 rounded w-1/3" />
+                <div className="h-3 bg-zinc-700/60 rounded w-1/4" />
+              </div>
+              <div className="h-6 bg-zinc-700 rounded-lg w-16" />
+              <div className="h-6 bg-zinc-700 rounded-lg w-14" />
+            </div>
+          ))}
         </div>
       )}
 
@@ -141,7 +154,7 @@ export default function MembersPage() {
                   className="w-10 h-10 rounded-full ring-1 ring-zinc-600"
                 />
               ) : (
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-600 to-amber-700 flex items-center justify-center text-white font-bold">
+                <div className="w-10 h-10 rounded-full bg-linear-to-br from-amber-600 to-amber-700 flex items-center justify-center text-white font-bold">
                   {(m.user?.displayName || m.scoutName || '?')[0]}
                 </div>
               )}

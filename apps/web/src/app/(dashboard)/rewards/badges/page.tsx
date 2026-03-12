@@ -53,7 +53,7 @@ export default function BadgesPage() {
               <div className={cn(
                 'text-5xl mx-auto w-20 h-20 rounded-full flex items-center justify-center',
                 badge.earned
-                  ? 'bg-gradient-to-br from-yellow-100 to-amber-100'
+                  ? 'bg-linear-to-br from-yellow-100 to-amber-100'
                   : 'bg-gray-100',
               )}>
                 {badge.icon}

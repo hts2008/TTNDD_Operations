@@ -231,7 +231,7 @@ function NodeCard({
                 className="w-6 h-6 rounded-full ring-1 ring-zinc-600"
               />
             ) : (
-              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-zinc-600 to-zinc-700 flex items-center justify-center text-[10px] text-white font-bold ring-1 ring-zinc-600">
+              <div className="w-6 h-6 rounded-full bg-linear-to-br from-zinc-600 to-zinc-700 flex items-center justify-center text-[10px] text-white font-bold ring-1 ring-zinc-600">
                 {(node.headMember.user.displayName || node.headMember.scoutName || '?')[0]}
               </div>
             )}
@@ -634,7 +634,7 @@ function UnitMembersPanel({
               key={m.id}
               className="flex items-center gap-3 bg-zinc-800/50 border border-zinc-700/50 rounded-xl px-4 py-3"
             >
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-600 to-violet-700 flex items-center justify-center text-white text-xs font-bold">
+              <div className="w-8 h-8 rounded-full bg-linear-to-br from-violet-600 to-violet-700 flex items-center justify-center text-white text-xs font-bold">
                 {(m.member?.user?.displayName || m.member?.scoutName || '?')[0]}
               </div>
               <div className="flex-1 min-w-0">

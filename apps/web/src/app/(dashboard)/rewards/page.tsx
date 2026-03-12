@@ -91,7 +91,7 @@ export default function RewardsPage() {
         Điểm thưởng & Bảng xếp hạng
       </h1>
 
-      <Card className="bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-200">
+      <Card className="bg-linear-to-r from-amber-50 to-yellow-50 border-amber-200">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-amber-800">
             <Star className="h-6 w-6" />
@@ -116,7 +116,7 @@ export default function RewardsPage() {
               <p className="text-sm text-amber-600 font-medium mb-2">Tiến trình lên cấp</p>
               <div className="w-full bg-amber-200 rounded-full h-4 overflow-hidden">
                 <div
-                  className="bg-gradient-to-r from-amber-400 to-yellow-500 h-4 rounded-full transition-all duration-500"
+                  className="bg-linear-to-r from-amber-400 to-yellow-500 h-4 rounded-full transition-all duration-500"
                   style={{ width: `${progressPercent}%` }}
                 />
               </div>

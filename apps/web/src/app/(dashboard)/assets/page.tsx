@@ -233,7 +233,7 @@ function StatCard({
   };
   return (
     <div
-      className={`rounded-xl border border-zinc-700/50 bg-gradient-to-br ${colorMap[color]} p-4`}
+      className={`rounded-xl border border-zinc-700/50 bg-linear-to-br ${colorMap[color]} p-4`}
     >
       <div className="flex items-center justify-between">
         <span className="text-sm text-zinc-400">{label}</span>

@@ -208,4 +208,83 @@ export class SystemService {
   }) {
     return this.prisma.releaseGateReport.create({ data });
   }
+
+  /**
+   * T-0195: Get activation blockers for the org.
+   * Checks each module for missing prerequisites (templates, seed data, workflows, etc.)
+   */
+  async getActivationBlockers(orgId: string) {
+    const health = await this.getModuleHealth(orgId);
+    const seed = await this.getSeedHealth(orgId);
+    
+    const blockers: Array<{ module: string; severity: 'critical' | 'warning'; message: string }> = [];
+
+    // Module readiness blockers
+    for (const mod of health.modules) {
+      if (!mod.ready) {
+        for (const reason of mod.reasons) {
+          blockers.push({
+            module: mod.key,
+            severity: 'critical',
+            message: reason,
+          });
+        }
+      }
+    }
+
+    // Seed data blockers
+    for (const msg of seed.missingSeeds) {
+      blockers.push({
+        module: 'SEED',
+        severity: 'warning',
+        message: msg,
+      });
+    }
+
+    // Check notification channel adapters
+    const zaloConfigured = !!(process.env.ZALO_OA_ID && process.env.ZALO_OA_SECRET);
+    const fcmConfigured = !!process.env.FCM_PROJECT_ID;
+    const smtpConfigured = !!process.env.SMTP_HOST;
+
+    if (!zaloConfigured) {
+      blockers.push({ module: 'NOTIFICATIONS', severity: 'warning', message: 'Zalo OA not configured (ZALO_OA_ID/ZALO_OA_SECRET missing)' });
+    }
+    if (!fcmConfigured) {
+      blockers.push({ module: 'NOTIFICATIONS', severity: 'warning', message: 'FCM not configured (FCM_PROJECT_ID missing)' });
+    }
+    if (!smtpConfigured) {
+      blockers.push({ module: 'NOTIFICATIONS', severity: 'warning', message: 'Email SMTP not configured (SMTP_HOST missing)' });
+    }
+
+    return {
+      orgId,
+      totalBlockers: blockers.length,
+      criticalCount: blockers.filter(b => b.severity === 'critical').length,
+      warningCount: blockers.filter(b => b.severity === 'warning').length,
+      blockers,
+      canActivate: blockers.filter(b => b.severity === 'critical').length === 0,
+      checkedAt: new Date().toISOString(),
+    };
+  }
+
+  /**
+   * T-0193: Ingest CI coverage report artifact.
+   * Stores as a ReleaseGateReport with profile='COVERAGE'.
+   */
+  async ingestCoverageReport(data: {
+    buildId: string;
+    commitSha?: string;
+    reportJson: object;
+  }) {
+    return this.prisma.releaseGateReport.create({
+      data: {
+        environment: 'ci',
+        buildId: data.buildId,
+        commitSha: data.commitSha,
+        profile: 'COVERAGE',
+        status: 'ingested',
+        reportJson: data.reportJson as any,
+      },
+    });
+  }
 }

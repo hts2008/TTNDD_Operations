@@ -13,12 +13,17 @@ modules:
     required_routes:
       - /members
       - /members/:id
+      - /org-chart
+      - /parent
     required_openapi_tags: [HRM, Org]
     required_seed:
       - org_demo_structure
       - members_minimal
     required_e2e:
       - tests/e2e/hrm/onboard-member.spec.ts
+      - tests/e2e/hrm/org-chart.spec.ts
+      - tests/e2e/hrm/parent-portal.spec.ts
+      - tests/e2e/hrm/hrm-journey.spec.ts
 
   SCOUT:
     active: true

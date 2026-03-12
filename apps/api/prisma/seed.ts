@@ -330,6 +330,236 @@ async function main() {
     await prisma.notificationTemplate.upsert({ where: { orgId_eventType_channel: { orgId: org.id, eventType: t.eventType, channel: t.channel } }, update: {}, create: t });
   }
 
+  // 17. Member Profiles (T-0216)
+  const memberIds = Array.from({ length: 12 }, (_, i) => `eeeeeee1-0000-0000-0000-${String(i + 3).padStart(12, '0')}`);
+  const adminMemberIds = ['eeeeeee1-0000-0000-0000-000000000001', 'eeeeeee1-0000-0000-0000-000000000002'];
+  const allMemberIds = [...adminMemberIds, ...memberIds];
+  const profileDefs = [
+    { id: 'a9000001-0000-0000-0000-000000000001', orgId: org.id, orgMemberId: adminMemberIds[0]!, fullName: 'Nguyễn Văn An', birthDate: new Date('1990-03-15'), gender: 'male', address: '123 Đường Hoà Bình, Q.Tân Phú, TP.HCM', personalPhone: '0901111001', woodBadgeLevel: 'bead_2', specializations: ['camping', 'first_aid'], consentFormSigned: true },
+    { id: 'a9000001-0000-0000-0000-000000000002', orgId: org.id, orgMemberId: adminMemberIds[1]!, fullName: 'Trần Thị Bình', birthDate: new Date('1992-07-22'), gender: 'female', address: '456 Đường Lý Thường Kiệt, Q.10, TP.HCM', personalPhone: '0901111002', woodBadgeLevel: 'bead_1', specializations: ['education', 'music'], consentFormSigned: true },
+    { id: 'a9000001-0000-0000-0000-000000000003', orgId: org.id, orgMemberId: memberIds[0]!, fullName: 'Lê Văn Cường', birthDate: new Date('2016-01-10'), gender: 'male', guardianName: 'Lê Văn Hùng', guardianPhone: '0903001001', guardianRelation: 'father', healthNotes: 'Không dị ứng', consentFormSigned: true },
+    { id: 'a9000001-0000-0000-0000-000000000004', orgId: org.id, orgMemberId: memberIds[1]!, fullName: 'Phạm Thị Dung', birthDate: new Date('2015-05-20'), gender: 'female', guardianName: 'Phạm Thị Lan', guardianPhone: '0903001002', guardianRelation: 'mother', healthNotes: 'Dị ứng hải sản', consentFormSigned: true },
+    { id: 'a9000001-0000-0000-0000-000000000005', orgId: org.id, orgMemberId: memberIds[2]!, fullName: 'Hoàng Văn Em', birthDate: new Date('2015-11-08'), gender: 'male', guardianName: 'Hoàng Văn Tâm', guardianPhone: '0903001003', guardianRelation: 'father', consentFormSigned: true },
+    { id: 'a9000001-0000-0000-0000-000000000006', orgId: org.id, orgMemberId: memberIds[3]!, fullName: 'Vũ Thị Phương', birthDate: new Date('2012-04-14'), gender: 'female', guardianName: 'Vũ Văn Đức', guardianPhone: '0903001004', guardianRelation: 'father', consentFormSigned: true },
+    { id: 'a9000001-0000-0000-0000-000000000007', orgId: org.id, orgMemberId: memberIds[4]!, fullName: 'Đinh Văn Giang', birthDate: new Date('2011-09-30'), gender: 'male', guardianName: 'Đinh Thị Hoa', guardianPhone: '0903001005', guardianRelation: 'mother', consentFormSigned: true },
+    { id: 'a9000001-0000-0000-0000-000000000008', orgId: org.id, orgMemberId: memberIds[5]!, fullName: 'Bùi Thị Hoa', birthDate: new Date('2012-02-18'), gender: 'female', guardianName: 'Bùi Văn Khoa', guardianPhone: '0903001006', guardianRelation: 'father', healthNotes: 'Hen suyễn nhẹ', consentFormSigned: true },
+    { id: 'a9000001-0000-0000-0000-000000000009', orgId: org.id, orgMemberId: memberIds[6]!, fullName: 'Đỗ Văn Khánh', birthDate: new Date('2011-06-25'), gender: 'male', consentFormSigned: true },
+    { id: 'a9000001-0000-0000-0000-000000000010', orgId: org.id, orgMemberId: memberIds[7]!, fullName: 'Ngô Thị Lan', birthDate: new Date('2012-08-12'), gender: 'female', consentFormSigned: true },
+    { id: 'a9000001-0000-0000-0000-000000000011', orgId: org.id, orgMemberId: memberIds[8]!, fullName: 'Lý Văn Minh', birthDate: new Date('2006-03-02'), gender: 'male', consentFormSigned: true },
+    { id: 'a9000001-0000-0000-0000-000000000012', orgId: org.id, orgMemberId: memberIds[9]!, fullName: 'Dương Thị Nam', birthDate: new Date('2005-12-18'), gender: 'female', consentFormSigned: true },
+    { id: 'a9000001-0000-0000-0000-000000000013', orgId: org.id, orgMemberId: memberIds[10]!, fullName: 'Tôn Văn Oanh', birthDate: new Date('2007-07-07'), gender: 'male', consentFormSigned: true },
+    { id: 'a9000001-0000-0000-0000-000000000014', orgId: org.id, orgMemberId: memberIds[11]!, fullName: 'Hà Thị Phúc', birthDate: new Date('2006-10-30'), gender: 'female', consentFormSigned: true },
+  ];
+  for (const p of profileDefs) {
+    await prisma.memberProfile.upsert({ where: { orgMemberId: p.orgMemberId }, update: {}, create: p });
+  }
+
+  // 18. Guardian Links (T-0216) — 6 child members in Đồng/Thiếu branches
+  const guardianDefs = [
+    { id: 'aa000001-0000-0000-0000-000000000001', orgId: org.id, orgMemberId: memberIds[0]!, fullName: 'Lê Văn Hùng', relation: 'father', phone: '0903001001', isPrimary: true, canPickup: true, consentSigned: true, consentDate: new Date('2024-01-01') },
+    { id: 'aa000001-0000-0000-0000-000000000002', orgId: org.id, orgMemberId: memberIds[1]!, fullName: 'Phạm Thị Lan', relation: 'mother', phone: '0903001002', isPrimary: true, canPickup: true, consentSigned: true, consentDate: new Date('2024-01-05') },
+    { id: 'aa000001-0000-0000-0000-000000000003', orgId: org.id, orgMemberId: memberIds[2]!, fullName: 'Hoàng Văn Tâm', relation: 'father', phone: '0903001003', isPrimary: true, canPickup: true, consentSigned: true, consentDate: new Date('2024-01-10') },
+    { id: 'aa000001-0000-0000-0000-000000000004', orgId: org.id, orgMemberId: memberIds[3]!, fullName: 'Vũ Văn Đức', relation: 'father', phone: '0903001004', isPrimary: true, canPickup: true, consentSigned: true, consentDate: new Date('2024-02-01') },
+    { id: 'aa000001-0000-0000-0000-000000000005', orgId: org.id, orgMemberId: memberIds[4]!, fullName: 'Đinh Thị Hoa', relation: 'mother', phone: '0903001005', isPrimary: true, canPickup: true, consentSigned: true, consentDate: new Date('2024-02-01') },
+    { id: 'aa000001-0000-0000-0000-000000000006', orgId: org.id, orgMemberId: memberIds[5]!, fullName: 'Bùi Văn Khoa', relation: 'father', phone: '0903001006', isPrimary: true, canPickup: true, consentSigned: true, consentDate: new Date('2024-02-15') },
+  ];
+  for (const g of guardianDefs) {
+    await prisma.guardianLink.upsert({ where: { orgMemberId_fullName_relation: { orgMemberId: g.orgMemberId, fullName: g.fullName, relation: g.relation } }, update: {}, create: g });
+  }
+
+  // 19. Org Chart Nodes (T-0216) — 5 nodes: root + 3 branches + 1 deputy
+  const rootNode = await prisma.orgChartNode.upsert({
+    where: { id: 'ab000001-0000-0000-0000-000000000001' }, update: {},
+    create: { id: 'ab000001-0000-0000-0000-000000000001', orgId: org.id, nodeType: 'leader', name: 'Liên Đoàn Trưởng', orgMemberId: adminMemberIds[0]!, positionTitle: 'Liên Đoàn Trưởng', displayOrder: 1, isActive: true },
+  });
+  await prisma.orgChartNode.upsert({
+    where: { id: 'ab000001-0000-0000-0000-000000000002' }, update: {},
+    create: { id: 'ab000001-0000-0000-0000-000000000002', orgId: org.id, nodeType: 'leader', name: 'Phó Liên Đoàn Trưởng', parentNodeId: rootNode.id, orgMemberId: adminMemberIds[1]!, positionTitle: 'Phó LĐT', displayOrder: 2, isActive: true },
+  });
+  await prisma.orgChartNode.upsert({
+    where: { id: 'ab000001-0000-0000-0000-000000000003' }, update: {},
+    create: { id: 'ab000001-0000-0000-0000-000000000003', orgId: org.id, nodeType: 'branch', name: 'Ngành Đồng', parentNodeId: rootNode.id, positionTitle: 'Trưởng Ngành Đồng', displayOrder: 3, isActive: true },
+  });
+  await prisma.orgChartNode.upsert({
+    where: { id: 'ab000001-0000-0000-0000-000000000004' }, update: {},
+    create: { id: 'ab000001-0000-0000-0000-000000000004', orgId: org.id, nodeType: 'branch', name: 'Ngành Thiếu', parentNodeId: rootNode.id, positionTitle: 'Trưởng Ngành Thiếu', displayOrder: 4, isActive: true },
+  });
+  await prisma.orgChartNode.upsert({
+    where: { id: 'ab000001-0000-0000-0000-000000000005' }, update: {},
+    create: { id: 'ab000001-0000-0000-0000-000000000005', orgId: org.id, nodeType: 'branch', name: 'Ngành Thanh', parentNodeId: rootNode.id, positionTitle: 'Trưởng Ngành Thanh', displayOrder: 5, isActive: true },
+  });
+
+  // 20. Volunteer Availability (T-0216) — 2 Trưởng × 2 slots each
+  const volDefs = [
+    { id: 'ac000001-0000-0000-0000-000000000001', orgId: org.id, orgMemberId: adminMemberIds[0]!, date: new Date('2026-03-15'), startTime: '08:00', endTime: '12:00', status: 'available', notes: 'Sáng thứ bảy' },
+    { id: 'ac000001-0000-0000-0000-000000000002', orgId: org.id, orgMemberId: adminMemberIds[0]!, date: new Date('2026-03-22'), startTime: '08:00', endTime: '12:00', status: 'available', notes: 'Sáng thứ bảy' },
+    { id: 'ac000001-0000-0000-0000-000000000003', orgId: org.id, orgMemberId: adminMemberIds[1]!, date: new Date('2026-03-15'), startTime: '14:00', endTime: '17:00', status: 'available', notes: 'Chiều thứ bảy' },
+    { id: 'ac000001-0000-0000-0000-000000000004', orgId: org.id, orgMemberId: adminMemberIds[1]!, date: new Date('2026-03-22'), startTime: '08:00', endTime: '17:00', status: 'available', notes: 'Cả ngày thứ bảy' },
+  ];
+  for (const v of volDefs) {
+    await prisma.volunteerAvailability.upsert({ where: { id: v.id }, update: {}, create: v });
+  }
+
+  // 21. EXP Transactions (T-0217) — 15 ledger entries across 5 members
+  const expTxDefs = [
+    { id: 'ad000001-0000-0000-0000-000000000001', orgId: org.id, orgMemberId: memberIds[0]!, transactionType: 'earn', expAmount: 10, eventType: 'session.attendance_marked', sourceModule: 'SESSIONS', balanceAfter: 10, notes: 'Tham dự sinh hoạt Sơ Cứu' },
+    { id: 'ad000001-0000-0000-0000-000000000002', orgId: org.id, orgMemberId: memberIds[0]!, transactionType: 'earn', expAmount: 25, eventType: 'scout.skill_verified', sourceModule: 'SCOUT', balanceAfter: 35, notes: 'Kỹ năng Ngũ Giới Cấm lv.1' },
+    { id: 'ad000001-0000-0000-0000-000000000003', orgId: org.id, orgMemberId: memberIds[1]!, transactionType: 'earn', expAmount: 10, eventType: 'session.attendance_marked', sourceModule: 'SESSIONS', balanceAfter: 10, notes: 'Tham dự sinh hoạt Sơ Cứu' },
+    { id: 'ad000001-0000-0000-0000-000000000004', orgId: org.id, orgMemberId: memberIds[1]!, transactionType: 'earn', expAmount: 10, eventType: 'session.attendance_marked', sourceModule: 'SESSIONS', balanceAfter: 20, notes: 'Tham dự sinh hoạt Đạo Đức' },
+    { id: 'ad000001-0000-0000-0000-000000000005', orgId: org.id, orgMemberId: memberIds[3]!, transactionType: 'earn', expAmount: 10, eventType: 'session.attendance_marked', sourceModule: 'SESSIONS', balanceAfter: 10, notes: 'Tham dự sinh hoạt Sơ Cứu' },
+    { id: 'ad000001-0000-0000-0000-000000000006', orgId: org.id, orgMemberId: memberIds[3]!, transactionType: 'earn', expAmount: 25, eventType: 'scout.skill_verified', sourceModule: 'SCOUT', balanceAfter: 35, notes: 'Kỹ năng Sơ Cứu lv.1' },
+    { id: 'ad000001-0000-0000-0000-000000000007', orgId: org.id, orgMemberId: memberIds[3]!, transactionType: 'earn', expAmount: 25, eventType: 'scout.skill_verified', sourceModule: 'SCOUT', balanceAfter: 60, notes: 'Kỹ năng Sơ Cứu lv.2' },
+    { id: 'ad000001-0000-0000-0000-000000000008', orgId: org.id, orgMemberId: memberIds[3]!, transactionType: 'earn', expAmount: 50, eventType: 'lms.course_completed', sourceModule: 'LMS', balanceAfter: 110, notes: 'Hoàn thành Giáo Lý Nhập Môn' },
+    { id: 'ad000001-0000-0000-0000-000000000009', orgId: org.id, orgMemberId: memberIds[4]!, transactionType: 'earn', expAmount: 10, eventType: 'session.attendance_marked', sourceModule: 'SESSIONS', balanceAfter: 10, notes: 'Tham dự sinh hoạt Sơ Cứu' },
+    { id: 'ad000001-0000-0000-0000-000000000010', orgId: org.id, orgMemberId: memberIds[4]!, transactionType: 'earn', expAmount: 10, eventType: 'session.attendance_marked', sourceModule: 'SESSIONS', balanceAfter: 20, notes: 'Tham dự sinh hoạt Đạo Đức' },
+    { id: 'ad000001-0000-0000-0000-000000000011', orgId: org.id, orgMemberId: memberIds[4]!, transactionType: 'earn', expAmount: 25, eventType: 'scout.skill_verified', sourceModule: 'SCOUT', balanceAfter: 45, notes: 'Kỹ năng Ngũ Giới Cấm lv.1' },
+    { id: 'ad000001-0000-0000-0000-000000000012', orgId: org.id, orgMemberId: memberIds[5]!, transactionType: 'earn', expAmount: 10, eventType: 'session.attendance_marked', sourceModule: 'SESSIONS', balanceAfter: 10, notes: 'Tham dự sinh hoạt Sơ Cứu' },
+    { id: 'ad000001-0000-0000-0000-000000000013', orgId: org.id, orgMemberId: memberIds[5]!, transactionType: 'earn', expAmount: 15, eventType: 'project.task_completed', sourceModule: 'PROJECTS', balanceAfter: 25, notes: 'Hoàn thành nhiệm vụ chuẩn bị trại' },
+    { id: 'ad000001-0000-0000-0000-000000000014', orgId: org.id, orgMemberId: memberIds[8]!, transactionType: 'earn', expAmount: 30, eventType: 'event.checked_in', sourceModule: 'EVENTS', balanceAfter: 30, notes: 'Check-in Ngày Hội Kỹ Năng' },
+    { id: 'ad000001-0000-0000-0000-000000000015', orgId: org.id, orgMemberId: memberIds[8]!, transactionType: 'earn', expAmount: 10, eventType: 'session.attendance_marked', sourceModule: 'SESSIONS', balanceAfter: 40, notes: 'Tham dự sinh hoạt Sơ Cứu' },
+  ];
+  for (const tx of expTxDefs) {
+    await prisma.expTransaction.upsert({ where: { id: tx.id }, update: {}, create: tx });
+  }
+
+  // 22. Member EXP Summaries (T-0217)
+  const expSummaryDefs = [
+    { id: 'ae000001-0000-0000-0000-000000000001', orgId: org.id, orgMemberId: memberIds[0]!, totalExp: 35, availableExp: 35, tier1Count: 2 },
+    { id: 'ae000001-0000-0000-0000-000000000002', orgId: org.id, orgMemberId: memberIds[1]!, totalExp: 20, availableExp: 20, tier1Count: 2 },
+    { id: 'ae000001-0000-0000-0000-000000000003', orgId: org.id, orgMemberId: memberIds[3]!, totalExp: 110, availableExp: 110, tier1Count: 2, tier2Count: 2 },
+    { id: 'ae000001-0000-0000-0000-000000000004', orgId: org.id, orgMemberId: memberIds[4]!, totalExp: 45, availableExp: 45, tier1Count: 3 },
+    { id: 'ae000001-0000-0000-0000-000000000005', orgId: org.id, orgMemberId: memberIds[5]!, totalExp: 25, availableExp: 25, tier1Count: 2 },
+    { id: 'ae000001-0000-0000-0000-000000000006', orgId: org.id, orgMemberId: memberIds[8]!, totalExp: 40, availableExp: 40, tier1Count: 1, tier2Count: 1 },
+  ];
+  for (const es of expSummaryDefs) {
+    await prisma.memberExpSummary.upsert({ where: { orgMemberId: es.orgMemberId }, update: {}, create: es });
+  }
+
+  // 23. Member Ranks (T-0217) — 5 members with current rank
+  const memberRankDefs = [
+    { id: 'af000001-0000-0000-0000-000000000001', orgId: org.id, orgMemberId: memberIds[0]!, branchId: branchDong.id, rankId: 'ffffffff-0000-0000-0000-000000000001', status: 'completed', startedAt: new Date('2024-02-01'), completedAt: new Date('2024-06-15') },
+    { id: 'af000001-0000-0000-0000-000000000002', orgId: org.id, orgMemberId: memberIds[1]!, branchId: branchDong.id, rankId: 'ffffffff-0000-0000-0000-000000000001', status: 'in_progress', startedAt: new Date('2024-03-01') },
+    { id: 'af000001-0000-0000-0000-000000000003', orgId: org.id, orgMemberId: memberIds[3]!, branchId: branchThieu.id, rankId: 'ffffffff-0000-0000-0000-000000000002', status: 'completed', startedAt: new Date('2024-01-15'), completedAt: new Date('2024-09-30') },
+    { id: 'af000001-0000-0000-0000-000000000004', orgId: org.id, orgMemberId: memberIds[4]!, branchId: branchThieu.id, rankId: 'ffffffff-0000-0000-0000-000000000002', status: 'in_progress', startedAt: new Date('2024-04-01') },
+    { id: 'af000001-0000-0000-0000-000000000005', orgId: org.id, orgMemberId: memberIds[8]!, branchId: branchThanh.id, rankId: 'ffffffff-0000-0000-0000-000000000004', status: 'in_progress', startedAt: new Date('2025-01-10') },
+  ];
+  for (const mr of memberRankDefs) {
+    await prisma.memberRank.upsert({ where: { orgMemberId_branchId_rankId: { orgMemberId: mr.orgMemberId, branchId: mr.branchId, rankId: mr.rankId } }, update: {}, create: mr });
+  }
+
+  // 24. Member Badges (T-0217) — award 5 badges
+  const memberBadgeDefs = [
+    { id: 'b1000001-0000-0000-0000-000000000001', orgId: org.id, orgMemberId: memberIds[0]!, badgeId: 'd0000001-0000-0000-0000-000000000001', earnedAt: new Date('2024-03-01'), notes: 'Buổi sinh hoạt đầu tiên' },
+    { id: 'b1000001-0000-0000-0000-000000000002', orgId: org.id, orgMemberId: memberIds[3]!, badgeId: 'd0000001-0000-0000-0000-000000000001', earnedAt: new Date('2024-02-01'), notes: 'Buổi sinh hoạt đầu tiên' },
+    { id: 'b1000001-0000-0000-0000-000000000003', orgId: org.id, orgMemberId: memberIds[3]!, badgeId: 'd0000001-0000-0000-0000-000000000003', earnedAt: new Date('2026-02-28'), notes: 'Hoàn thành khóa Giáo Lý Nhập Môn' },
+    { id: 'b1000001-0000-0000-0000-000000000004', orgId: org.id, orgMemberId: memberIds[3]!, badgeId: 'd0000001-0000-0000-0000-000000000005', earnedAt: new Date('2024-06-15'), notes: 'Hoàn thành kỹ năng đầu tiên' },
+    { id: 'b1000001-0000-0000-0000-000000000005', orgId: org.id, orgMemberId: memberIds[4]!, badgeId: 'd0000001-0000-0000-0000-000000000001', earnedAt: new Date('2024-04-01'), notes: 'Buổi sinh hoạt đầu tiên' },
+  ];
+  for (const mb of memberBadgeDefs) {
+    await prisma.memberBadge.upsert({ where: { orgMemberId_badgeId: { orgMemberId: mb.orgMemberId, badgeId: mb.badgeId } }, update: {}, create: mb });
+  }
+
+  // 25. Session Attendance (T-0218) — 20 records across 3 sessions
+  const attendanceDefs = [
+    // Session 1: Sơ Cứu (branchThieu) — 8 attendees
+    { id: 'b2000001-0000-0000-0000-000000000001', orgId: org.id, sessionId: 'e0000001-0000-0000-0000-000000000001', orgMemberId: memberIds[3]!, status: 'present', checkInTime: new Date('2026-03-01T08:05:00') },
+    { id: 'b2000001-0000-0000-0000-000000000002', orgId: org.id, sessionId: 'e0000001-0000-0000-0000-000000000001', orgMemberId: memberIds[4]!, status: 'present', checkInTime: new Date('2026-03-01T07:55:00') },
+    { id: 'b2000001-0000-0000-0000-000000000003', orgId: org.id, sessionId: 'e0000001-0000-0000-0000-000000000001', orgMemberId: memberIds[5]!, status: 'present', checkInTime: new Date('2026-03-01T08:10:00') },
+    { id: 'b2000001-0000-0000-0000-000000000004', orgId: org.id, sessionId: 'e0000001-0000-0000-0000-000000000001', orgMemberId: memberIds[6]!, status: 'present', checkInTime: new Date('2026-03-01T08:00:00') },
+    { id: 'b2000001-0000-0000-0000-000000000005', orgId: org.id, sessionId: 'e0000001-0000-0000-0000-000000000001', orgMemberId: memberIds[7]!, status: 'absent' },
+    { id: 'b2000001-0000-0000-0000-000000000006', orgId: org.id, sessionId: 'e0000001-0000-0000-0000-000000000001', orgMemberId: memberIds[0]!, status: 'present', checkInTime: new Date('2026-03-01T08:02:00') },
+    { id: 'b2000001-0000-0000-0000-000000000007', orgId: org.id, sessionId: 'e0000001-0000-0000-0000-000000000001', orgMemberId: memberIds[1]!, status: 'present', checkInTime: new Date('2026-03-01T08:08:00') },
+    { id: 'b2000001-0000-0000-0000-000000000008', orgId: org.id, sessionId: 'e0000001-0000-0000-0000-000000000001', orgMemberId: memberIds[8]!, status: 'present', checkInTime: new Date('2026-03-01T08:15:00') },
+    // Session 2: Đạo Đức (branchDong) — 5 attendees
+    { id: 'b2000001-0000-0000-0000-000000000009', orgId: org.id, sessionId: 'e0000001-0000-0000-0000-000000000002', orgMemberId: memberIds[0]!, status: 'present', checkInTime: new Date('2026-03-08T08:00:00') },
+    { id: 'b2000001-0000-0000-0000-000000000010', orgId: org.id, sessionId: 'e0000001-0000-0000-0000-000000000002', orgMemberId: memberIds[1]!, status: 'present', checkInTime: new Date('2026-03-08T08:05:00') },
+    { id: 'b2000001-0000-0000-0000-000000000011', orgId: org.id, sessionId: 'e0000001-0000-0000-0000-000000000002', orgMemberId: memberIds[2]!, status: 'excused', excusedReason: 'Bệnh' },
+    { id: 'b2000001-0000-0000-0000-000000000012', orgId: org.id, sessionId: 'e0000001-0000-0000-0000-000000000002', orgMemberId: memberIds[4]!, status: 'present', checkInTime: new Date('2026-03-08T08:10:00') },
+    // Session 3: Kế Hoạch Trại (branchThieu) — future, no attendance yet
+    // (planned session — no attendance records)
+    // Extra: cross-branch attendance for member in both sessions
+    { id: 'b2000001-0000-0000-0000-000000000013', orgId: org.id, sessionId: 'e0000001-0000-0000-0000-000000000002', orgMemberId: memberIds[5]!, status: 'present', checkInTime: new Date('2026-03-08T08:12:00') },
+  ];
+  for (const a of attendanceDefs) {
+    await prisma.sessionAttendance.upsert({ where: { sessionId_orgMemberId: { sessionId: a.sessionId, orgMemberId: a.orgMemberId } }, update: {}, create: a });
+  }
+
+  // 26. Event Registrations (T-0218) — 8 registrations for 2 events
+  const eventRegDefs = [
+    { id: 'b3000001-0000-0000-0000-000000000001', orgId: org.id, eventId: 'f0000001-0000-0000-0000-000000000001', orgMemberId: memberIds[3]!, status: 'registered', consentSigned: true, consentDate: new Date('2026-03-05'), consentBy: 'Vũ Văn Đức (Phụ huynh)' },
+    { id: 'b3000001-0000-0000-0000-000000000002', orgId: org.id, eventId: 'f0000001-0000-0000-0000-000000000001', orgMemberId: memberIds[4]!, status: 'registered', consentSigned: true, consentDate: new Date('2026-03-06'), consentBy: 'Đinh Thị Hoa (Phụ huynh)' },
+    { id: 'b3000001-0000-0000-0000-000000000003', orgId: org.id, eventId: 'f0000001-0000-0000-0000-000000000001', orgMemberId: memberIds[5]!, status: 'registered', consentSigned: false },
+    { id: 'b3000001-0000-0000-0000-000000000004', orgId: org.id, eventId: 'f0000001-0000-0000-0000-000000000001', orgMemberId: memberIds[8]!, status: 'registered', consentSigned: true, consentDate: new Date('2026-03-07') },
+    { id: 'b3000001-0000-0000-0000-000000000005', orgId: org.id, eventId: 'f0000001-0000-0000-0000-000000000002', orgMemberId: memberIds[0]!, status: 'registered', consentSigned: true, consentDate: new Date('2026-03-20') },
+    { id: 'b3000001-0000-0000-0000-000000000006', orgId: org.id, eventId: 'f0000001-0000-0000-0000-000000000002', orgMemberId: memberIds[3]!, status: 'registered', consentSigned: true, consentDate: new Date('2026-03-20') },
+    { id: 'b3000001-0000-0000-0000-000000000007', orgId: org.id, eventId: 'f0000001-0000-0000-0000-000000000002', orgMemberId: memberIds[8]!, status: 'checked_in', consentSigned: true, consentDate: new Date('2026-03-20'), checkInTime: new Date('2026-04-12T08:30:00') },
+    { id: 'b3000001-0000-0000-0000-000000000008', orgId: org.id, eventId: 'f0000001-0000-0000-0000-000000000002', orgMemberId: memberIds[10]!, status: 'registered', consentSigned: true, consentDate: new Date('2026-03-25') },
+  ];
+  for (const er of eventRegDefs) {
+    await prisma.eventRegistration.upsert({ where: { eventId_orgMemberId: { eventId: er.eventId, orgMemberId: er.orgMemberId } }, update: {}, create: er });
+  }
+
+  // 27. Member Course Progress (T-0218) — 5 progress records
+  const courseProgressDefs = [
+    { id: 'b4000001-0000-0000-0000-000000000001', orgId: org.id, orgMemberId: memberIds[0]!, courseId: 'a1000001-0000-0000-0000-000000000001', status: 'in_progress', progressPct: 33, startedAt: new Date('2026-02-15'), expEarned: 10 },
+    { id: 'b4000001-0000-0000-0000-000000000002', orgId: org.id, orgMemberId: memberIds[1]!, courseId: 'a1000001-0000-0000-0000-000000000001', status: 'in_progress', progressPct: 66, startedAt: new Date('2026-02-10'), expEarned: 25 },
+    { id: 'b4000001-0000-0000-0000-000000000003', orgId: org.id, orgMemberId: memberIds[3]!, courseId: 'a1000001-0000-0000-0000-000000000001', status: 'completed', progressPct: 100, startedAt: new Date('2026-01-20'), completedAt: new Date('2026-02-28'), expEarned: 80 },
+    { id: 'b4000001-0000-0000-0000-000000000004', orgId: org.id, orgMemberId: memberIds[4]!, courseId: 'a1000001-0000-0000-0000-000000000001', status: 'not_started', progressPct: 0 },
+    { id: 'b4000001-0000-0000-0000-000000000005', orgId: org.id, orgMemberId: memberIds[8]!, courseId: 'a1000001-0000-0000-0000-000000000001', status: 'in_progress', progressPct: 33, startedAt: new Date('2026-03-01'), expEarned: 10 },
+  ];
+  for (const cp of courseProgressDefs) {
+    await prisma.memberCourseProgress.upsert({ where: { orgMemberId_courseId: { orgMemberId: cp.orgMemberId, courseId: cp.courseId } }, update: {}, create: cp });
+  }
+
+  // 28. Member Skill Progress (T-0219) — 8 progress records
+  const skillProgressDefs = [
+    { id: 'b5000001-0000-0000-0000-000000000001', orgId: org.id, orgMemberId: memberIds[0]!, skillId: 'b0000001-0000-0000-0000-000000000001', status: 'verified', currentLevel: 1, startedAt: new Date('2024-03-01'), verifiedAt: new Date('2024-06-15') },
+    { id: 'b5000001-0000-0000-0000-000000000002', orgId: org.id, orgMemberId: memberIds[1]!, skillId: 'b0000001-0000-0000-0000-000000000001', status: 'in_progress', currentLevel: 0, startedAt: new Date('2024-05-01') },
+    { id: 'b5000001-0000-0000-0000-000000000003', orgId: org.id, orgMemberId: memberIds[3]!, skillId: 'b0000001-0000-0000-0000-000000000004', status: 'verified', currentLevel: 2, startedAt: new Date('2024-02-01'), verifiedAt: new Date('2024-08-30') },
+    { id: 'b5000001-0000-0000-0000-000000000004', orgId: org.id, orgMemberId: memberIds[3]!, skillId: 'b0000001-0000-0000-0000-000000000001', status: 'verified', currentLevel: 1, startedAt: new Date('2024-03-15'), verifiedAt: new Date('2024-07-20') },
+    { id: 'b5000001-0000-0000-0000-000000000005', orgId: org.id, orgMemberId: memberIds[4]!, skillId: 'b0000001-0000-0000-0000-000000000001', status: 'verified', currentLevel: 1, startedAt: new Date('2024-04-01'), verifiedAt: new Date('2024-09-15') },
+    { id: 'b5000001-0000-0000-0000-000000000006', orgId: org.id, orgMemberId: memberIds[4]!, skillId: 'b0000001-0000-0000-0000-000000000005', status: 'in_progress', currentLevel: 1, startedAt: new Date('2025-01-10') },
+    { id: 'b5000001-0000-0000-0000-000000000007', orgId: org.id, orgMemberId: memberIds[5]!, skillId: 'b0000001-0000-0000-0000-000000000004', status: 'in_progress', currentLevel: 1, startedAt: new Date('2025-02-01') },
+    { id: 'b5000001-0000-0000-0000-000000000008', orgId: org.id, orgMemberId: memberIds[8]!, skillId: 'b0000001-0000-0000-0000-000000000006', status: 'in_progress', currentLevel: 1, startedAt: new Date('2025-03-01') },
+  ];
+  for (const sp of skillProgressDefs) {
+    await prisma.memberSkillProgress.upsert({ where: { orgMemberId_skillId: { orgMemberId: sp.orgMemberId, skillId: sp.skillId } }, update: {}, create: sp });
+  }
+
+  // 29. Skill Verifications (T-0219) — 5 verification records
+  const verificationDefs = [
+    { id: 'b6000001-0000-0000-0000-000000000001', orgId: org.id, progressId: 'b5000001-0000-0000-0000-000000000001', verifierPersonId: adminMemberIds[0]!, decision: 'approved', comment: 'Thuộc Ngũ Giới Cấm tốt', decidedAt: new Date('2024-06-15') },
+    { id: 'b6000001-0000-0000-0000-000000000002', orgId: org.id, progressId: 'b5000001-0000-0000-0000-000000000003', verifierPersonId: adminMemberIds[0]!, decision: 'approved', comment: 'Thực hành cầm máu + băng bó đúng kỹ thuật', decidedAt: new Date('2024-08-30') },
+    { id: 'b6000001-0000-0000-0000-000000000003', orgId: org.id, progressId: 'b5000001-0000-0000-0000-000000000004', verifierPersonId: adminMemberIds[1]!, decision: 'approved', comment: 'Nhận biết Ngũ Giới tốt', decidedAt: new Date('2024-07-20') },
+    { id: 'b6000001-0000-0000-0000-000000000004', orgId: org.id, progressId: 'b5000001-0000-0000-0000-000000000005', verifierPersonId: adminMemberIds[0]!, decision: 'approved', comment: 'Ngũ Giới Cấm lv.1 đạt', decidedAt: new Date('2024-09-15') },
+    { id: 'b6000001-0000-0000-0000-000000000005', orgId: org.id, progressId: 'b5000001-0000-0000-0000-000000000003', verifierPersonId: adminMemberIds[1]!, decision: 'approved', comment: 'Sơ Cứu lv.2 — hô hấp nhân tạo đạt chuẩn', decidedAt: new Date('2024-08-30') },
+  ];
+  for (const sv of verificationDefs) {
+    await prisma.skillVerification.upsert({ where: { id: sv.id }, update: {}, create: sv });
+  }
+
+  // 30. Habit Definitions & Logs (T-0219)
+  const habitDefDefs = [
+    { id: 'b7000001-0000-0000-0000-000000000001', orgId: org.id, key: 'ngu_gioi_daily', name: 'Tự đánh giá Ngũ Giới hàng ngày', cadence: 'daily', scoringRule: { type: 'streak', pointsPerDay: 5 }, isActive: true },
+    { id: 'b7000001-0000-0000-0000-000000000002', orgId: org.id, key: 'morning_prayer', name: 'Cúng thời Tý (sáng)', cadence: 'daily', scoringRule: { type: 'streak', pointsPerDay: 3 }, isActive: true },
+    { id: 'b7000001-0000-0000-0000-000000000003', orgId: org.id, key: 'weekly_reflection', name: 'Tự kiểm tuần', cadence: 'weekly', scoringRule: { type: 'completion', pointsPerWeek: 10 }, isActive: true },
+  ];
+  for (const hd of habitDefDefs) {
+    await prisma.habitDef.upsert({ where: { orgId_key: { orgId: org.id, key: hd.key } }, update: {}, create: hd });
+  }
+
+  const habitLogDefs = [
+    { id: 'b8000001-0000-0000-0000-000000000001', orgId: org.id, personId: memberIds[3]!, habitDefId: 'b7000001-0000-0000-0000-000000000001', logDate: new Date('2026-03-01'), status: 'completed', note: 'Không phạm giới' },
+    { id: 'b8000001-0000-0000-0000-000000000002', orgId: org.id, personId: memberIds[3]!, habitDefId: 'b7000001-0000-0000-0000-000000000001', logDate: new Date('2026-03-02'), status: 'completed' },
+    { id: 'b8000001-0000-0000-0000-000000000003', orgId: org.id, personId: memberIds[3]!, habitDefId: 'b7000001-0000-0000-0000-000000000001', logDate: new Date('2026-03-03'), status: 'missed' },
+    { id: 'b8000001-0000-0000-0000-000000000004', orgId: org.id, personId: memberIds[4]!, habitDefId: 'b7000001-0000-0000-0000-000000000002', logDate: new Date('2026-03-01'), status: 'completed', note: 'Cúng đầy đủ' },
+    { id: 'b8000001-0000-0000-0000-000000000005', orgId: org.id, personId: memberIds[4]!, habitDefId: 'b7000001-0000-0000-0000-000000000002', logDate: new Date('2026-03-02'), status: 'completed' },
+    { id: 'b8000001-0000-0000-0000-000000000006', orgId: org.id, personId: memberIds[8]!, habitDefId: 'b7000001-0000-0000-0000-000000000003', logDate: new Date('2026-03-07'), status: 'completed', note: 'Tuần tốt, hoàn thành mục tiêu sinh hoạt' },
+  ];
+  for (const hl of habitLogDefs) {
+    await prisma.habitLog.upsert({ where: { personId_habitDefId_logDate: { personId: hl.personId, habitDefId: hl.habitDefId, logDate: hl.logDate } }, update: {}, create: hl });
+  }
+
   // Summary
   console.log('');
   console.log('✅ SEED COMPLETED SUCCESSFULLY!');
@@ -349,6 +579,20 @@ async function main() {
   console.log(`  Assets: ${assetDefs.length} in 2 categories`);
   console.log(`  Plan + Project: 1 each`);
   console.log(`  Notification Templates: ${notifTemplates.length}`);
+  console.log(`  Member Profiles: ${profileDefs.length}`);
+  console.log(`  Guardian Links: ${guardianDefs.length}`);
+  console.log(`  Org Chart Nodes: 5`);
+  console.log(`  Volunteer Availability: ${volDefs.length}`);
+  console.log(`  EXP Transactions: ${expTxDefs.length}`);
+  console.log(`  Member EXP Summaries: ${expSummaryDefs.length}`);
+  console.log(`  Member Ranks: ${memberRankDefs.length}`);
+  console.log(`  Member Badges: ${memberBadgeDefs.length}`);
+  console.log(`  Session Attendance: ${attendanceDefs.length}`);
+  console.log(`  Event Registrations: ${eventRegDefs.length}`);
+  console.log(`  Course Progress: ${courseProgressDefs.length}`);
+  console.log(`  Skill Progress: ${skillProgressDefs.length}`);
+  console.log(`  Skill Verifications: ${verificationDefs.length}`);
+  console.log(`  Habit Defs: ${habitDefDefs.length} | Habit Logs: ${habitLogDefs.length}`);
   console.log('──────────────────────────────────');
 }
 
