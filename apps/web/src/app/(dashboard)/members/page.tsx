@@ -1,130 +1,195 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { DataTable } from '@/components/ui/data-table';
-import { cn } from '@/lib/utils';
-import { Search, UserPlus, Users } from 'lucide-react';
+import { api } from '@/lib/api';
 
 interface Member {
   id: string;
-  code: string;
-  name: string;
-  branch: string;
-  unit: string;
+  memberCode?: string;
+  scoutName?: string;
+  heroName?: string;
+  role: string;
   status: string;
-  exp: number;
-  [key: string]: unknown;
+  branchId?: string;
+  joinedDate?: string;
+  user?: { displayName?: string; email?: string; avatarUrl?: string };
 }
 
-const MOCK_MEMBERS: Member[] = [
-  { id: '1', code: 'DS-001', name: 'Nguyễn Văn An', branch: 'Ngành Thiếu', unit: 'Đội Hướng Dương', status: 'active', exp: 1250 },
-  { id: '2', code: 'DS-002', name: 'Trần Thị Bình', branch: 'Ngành Thiếu', unit: 'Đội Hải Âu', status: 'active', exp: 980 },
-  { id: '3', code: 'DS-003', name: 'Lê Minh Châu', branch: 'Ngành Đồng', unit: 'Đàn Sơn Ca', status: 'active', exp: 450 },
-  { id: '4', code: 'DS-004', name: 'Phạm Đức Dũng', branch: 'Ngành Thanh', unit: 'Toán Bạch Mã', status: 'inactive', exp: 2100 },
-  { id: '5', code: 'DS-005', name: 'Hoàng Thị Lan', branch: 'Ngành Thiếu', unit: 'Đội Hướng Dương', status: 'suspended', exp: 320 },
-];
+interface MembersResponse {
+  data: Member[];
+  total: number;
+  page: number;
+  limit: number;
+}
 
-const STATUS_MAP: Record<string, { label: string; variant: 'success' | 'secondary' | 'destructive' }> = {
-  active: { label: 'Hoạt động', variant: 'success' },
-  inactive: { label: 'Ngưng', variant: 'secondary' },
-  suspended: { label: 'Đình chỉ', variant: 'destructive' },
+const ROLE_COLORS: Record<string, string> = {
+  super_admin: 'bg-red-500/20 text-red-300',
+  admin: 'bg-amber-500/20 text-amber-300',
+  leader: 'bg-blue-500/20 text-blue-300',
+  volunteer: 'bg-emerald-500/20 text-emerald-300',
+  member: 'bg-zinc-500/20 text-zinc-300',
+  parent: 'bg-violet-500/20 text-violet-300',
 };
 
-const FILTER_TABS = [
-  { key: 'all', label: 'Tất cả' },
-  { key: 'active', label: 'Hoạt động' },
-  { key: 'inactive', label: 'Ngưng' },
-  { key: 'suspended', label: 'Đình chỉ' },
-];
+const ROLE_LABELS: Record<string, string> = {
+  super_admin: 'Super Admin',
+  admin: 'Quản trị',
+  leader: 'Huynh trưởng',
+  volunteer: 'Tình nguyện',
+  member: 'Đoàn sinh',
+  parent: 'Phụ huynh',
+};
+
+const STATUS_COLORS: Record<string, string> = {
+  active: 'bg-emerald-500/20 text-emerald-300',
+  inactive: 'bg-zinc-500/20 text-zinc-300',
+  suspended: 'bg-red-500/20 text-red-300',
+  pending: 'bg-amber-500/20 text-amber-300',
+};
 
 export default function MembersPage() {
   const router = useRouter();
+  const [members, setMembers] = useState<Member[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState('all');
+  const [roleFilter, setRoleFilter] = useState('');
 
-  const filtered = MOCK_MEMBERS.filter((m) => {
-    if (filter !== 'all' && m.status !== filter) return false;
-    if (search && !m.name.toLowerCase().includes(search.toLowerCase()) && !m.code.toLowerCase().includes(search.toLowerCase())) return false;
-    return true;
-  });
+  const loadMembers = useCallback(async () => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams({ page: String(page), limit: '20' });
+      if (roleFilter) params.set('role', roleFilter);
+      if (search) params.set('search', search);
+      const res = await api.get<MembersResponse>(`/hrm/members?${params}`);
+      setMembers(res.data || []);
+      setTotal(res.total || 0);
+    } catch {
+      setMembers([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, roleFilter, search]);
 
-  const columns = [
-    { key: 'code', label: 'Mã' },
-    { key: 'name', label: 'Họ tên', render: (m: Member) => <span className="font-medium">{m.name}</span> },
-    { key: 'branch', label: 'Ngành' },
-    { key: 'unit', label: 'Đơn vị' },
-    {
-      key: 'status',
-      label: 'Trạng thái',
-      render: (m: Member) => {
-        const s = STATUS_MAP[m.status];
-        return s ? <Badge variant={s.variant}>{s.label}</Badge> : m.status;
-      },
-    },
-    {
-      key: 'exp',
-      label: 'EXP',
-      render: (m: Member) => <span className="font-mono text-sm font-medium text-amber-600">{m.exp.toLocaleString()}</span>,
-    },
-  ];
+  useEffect(() => {
+    loadMembers();
+  }, [loadMembers]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-[hsl(var(--foreground))] flex items-center gap-2">
-            <Users className="h-6 w-6 text-[hsl(var(--primary))]" />
-            Đoàn sinh
-          </h1>
-          <p className="text-sm text-[hsl(var(--muted-foreground))]">Quản lý danh sách đoàn sinh</p>
-        </div>
-        <Button className="gap-2 self-start">
-          <UserPlus className="h-4 w-4" />
-          Thêm đoàn sinh
-        </Button>
+    <div className="p-6 min-h-screen">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-white flex items-center gap-3">
+          <span className="text-3xl">👥</span> Thành Viên
+        </h1>
+        <p className="text-zinc-400 mt-1">
+          Quản lý đoàn sinh, huynh trưởng, tình nguyện viên — {total} thành viên
+        </p>
       </div>
 
-      <Card className="p-4">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[hsl(var(--muted-foreground))]" />
-            <Input
-              placeholder="Tìm theo tên hoặc mã..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <div className="flex gap-1">
-            {FILTER_TABS.map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setFilter(tab.key)}
-                className={cn(
-                  'rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
-                  filter === tab.key
-                    ? 'bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]'
-                    : 'text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--muted))]',
-                )}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+      {/* Search & Filters */}
+      <div className="mb-4 flex gap-3 flex-wrap">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
+          placeholder="🔍 Tìm kiếm theo tên, mã..."
+          className="flex-1 min-w-[200px] max-w-md bg-zinc-800/60 border border-zinc-700 rounded-xl px-4 py-2.5 text-white placeholder-zinc-500 focus:border-amber-500 outline-none"
+        />
+        <div className="flex gap-1 flex-wrap">
+          {['', 'member', 'leader', 'volunteer', 'admin', 'parent'].map((r) => (
+            <button
+              key={r}
+              onClick={() => {
+                setRoleFilter(r);
+                setPage(1);
+              }}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${roleFilter === r ? 'bg-amber-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 border border-zinc-700'}`}
+            >
+              {r === '' ? 'Tất cả' : ROLE_LABELS[r] || r}
+            </button>
+          ))}
         </div>
-      </Card>
+      </div>
 
-      <DataTable
-        columns={columns}
-        data={filtered}
-        onRowClick={(m) => router.push(`/members/${m.id}`)}
-        className="bg-[hsl(var(--card))]"
-      />
+      {loading && (
+        <div className="text-zinc-400 text-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500 mx-auto" />
+        </div>
+      )}
+
+      {!loading && (
+        <div className="space-y-2">
+          {members.length === 0 && (
+            <p className="text-zinc-500 text-center py-12">Không tìm thấy thành viên nào.</p>
+          )}
+          {members.map((m) => (
+            <div
+              key={m.id}
+              onClick={() => router.push(`/members/${m.id}`)}
+              className="flex items-center gap-4 bg-zinc-800/50 border border-zinc-700/50 rounded-xl p-4 hover:border-zinc-600 cursor-pointer transition-colors"
+            >
+              {/* Avatar */}
+              {m.user?.avatarUrl ? (
+                <img
+                  src={m.user.avatarUrl}
+                  alt=""
+                  className="w-10 h-10 rounded-full ring-1 ring-zinc-600"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-600 to-amber-700 flex items-center justify-center text-white font-bold">
+                  {(m.user?.displayName || m.scoutName || '?')[0]}
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-white font-medium truncate">
+                  {m.user?.displayName || m.scoutName || m.memberCode || 'Unnamed'}
+                </p>
+                <div className="flex items-center gap-2 text-xs text-zinc-400 mt-0.5">
+                  {m.memberCode && <span className="font-mono">{m.memberCode}</span>}
+                  {m.scoutName && <span>· {m.scoutName}</span>}
+                  {m.branchId && <span>· {m.branchId}</span>}
+                </div>
+              </div>
+              <span
+                className={`text-xs px-2 py-1 rounded-lg font-medium ${ROLE_COLORS[m.role] || 'bg-zinc-700 text-zinc-300'}`}
+              >
+                {ROLE_LABELS[m.role] || m.role}
+              </span>
+              <span
+                className={`text-xs px-2 py-1 rounded-lg ${STATUS_COLORS[m.status] || 'bg-zinc-700 text-zinc-300'}`}
+              >
+                {m.status}
+              </span>
+            </div>
+          ))}
+          {total > 20 && (
+            <div className="flex items-center justify-center gap-2 pt-4">
+              <button
+                onClick={() => setPage(Math.max(1, page - 1))}
+                disabled={page <= 1}
+                className="px-3 py-1 rounded bg-zinc-700 text-zinc-300 disabled:opacity-30 text-sm"
+              >
+                ← Trước
+              </button>
+              <span className="text-zinc-400 text-sm">
+                Trang {page} / {Math.ceil(total / 20)}
+              </span>
+              <button
+                onClick={() => setPage(page + 1)}
+                disabled={members.length < 20}
+                className="px-3 py-1 rounded bg-zinc-700 text-zinc-300 disabled:opacity-30 text-sm"
+              >
+                Sau →
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -1,177 +1,402 @@
 'use client';
 
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Award, ChevronRight, BookOpen, CheckCircle2, Clock, Lock } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { api } from '@/lib/api';
 
-type SkillStatus = 'not_started' | 'in_progress' | 'verified' | 'awarded';
-
-interface Skill {
-  id: string;
-  name: string;
-  status: SkillStatus;
-  description: string;
-}
+// ═══════════════════════════════════════════════════════════
+// Types
+// ═══════════════════════════════════════════════════════════
 
 interface SkillGroup {
   id: string;
   name: string;
-  icon: string;
+  narrativeName?: string;
+  description?: string;
+  icon?: string;
+  color?: string;
   skills: Skill[];
 }
 
-const STATUS_CONFIG: Record<SkillStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' | 'success' | 'warning'; icon: typeof Lock }> = {
-  not_started: { label: 'Chưa bắt đầu', variant: 'outline', icon: Lock },
-  in_progress: { label: 'Đang học', variant: 'warning', icon: Clock },
-  verified: { label: 'Đã xác nhận', variant: 'default', icon: CheckCircle2 },
-  awarded: { label: 'Đã đạt', variant: 'success', icon: Award },
-};
+interface Skill {
+  id: string;
+  skillCode: string;
+  name: string;
+  maxLevel: number;
+  isRequired: boolean;
+  expPerLevel: number;
+}
 
-const CURRENT_RANK = {
-  name: 'Hướng Thiện',
-  level: 3,
-  progress: 65,
-  nextRank: 'Sơ Thiện',
-  requirements: [
-    'Hoàn thành 8/10 kỹ năng bắt buộc',
-    'Tham gia 3 trại huấn luyện',
-    'Đạt 3000 EXP',
-  ],
-};
+interface VerifyQueueItem {
+  id: string;
+  member?: { scoutName?: string; user?: { displayName?: string } };
+  skill?: { name: string; skillCode: string };
+  currentLevel: number;
+  targetLevel?: number;
+  status: string;
+  evidence?: Array<{ id: string; note?: string; url?: string; createdAt?: string }>;
+}
 
-const SKILL_GROUPS: SkillGroup[] = [
-  {
-    id: 'g1',
-    name: 'Kỹ năng Hướng Đạo',
-    icon: '🏕️',
-    skills: [
-      { id: 's1', name: 'Dựng lều trại', status: 'awarded', description: 'Biết cách dựng và tháo lều đúng kỹ thuật' },
-      { id: 's2', name: 'Nút dây', status: 'verified', description: 'Thực hiện 10 loại nút dây cơ bản' },
-      { id: 's3', name: 'Đọc bản đồ', status: 'in_progress', description: 'Sử dụng la bàn và bản đồ địa hình' },
-      { id: 's4', name: 'Sơ cấp cứu', status: 'not_started', description: 'Xử lý vết thương, băng bó cơ bản' },
-    ],
-  },
-  {
-    id: 'g2',
-    name: 'Giáo lý Cao Đài',
-    icon: '📖',
-    skills: [
-      { id: 's5', name: 'Thánh ngôn', status: 'awarded', description: 'Thuộc và hiểu các bài Thánh ngôn' },
-      { id: 's6', name: 'Nghi lễ', status: 'in_progress', description: 'Thực hành nghi lễ cúng kính' },
-      { id: 's7', name: 'Kinh nhật tụng', status: 'in_progress', description: 'Đọc và hiểu kinh nhật tụng' },
-      { id: 's8', name: 'Lịch sử đạo', status: 'not_started', description: 'Tìm hiểu lịch sử Đại Đạo Tam Kỳ' },
-    ],
-  },
-  {
-    id: 'g3',
-    name: 'Kỹ năng sống',
-    icon: '🌱',
-    skills: [
-      { id: 's9', name: 'Giao tiếp', status: 'awarded', description: 'Kỹ năng thuyết trình và lắng nghe' },
-      { id: 's10', name: 'Lãnh đạo', status: 'verified', description: 'Dẫn dắt nhóm và tổ chức hoạt động' },
-      { id: 's11', name: 'Làm việc nhóm', status: 'in_progress', description: 'Hợp tác hiệu quả trong đội nhóm' },
-      { id: 's12', name: 'Tự lập', status: 'not_started', description: 'Quản lý thời gian và tự chăm sóc bản thân' },
-    ],
-  },
+type TabKey = 'tree' | 'verify' | 'ranks';
+
+const TABS: { key: TabKey; label: string; emoji: string }[] = [
+  { key: 'tree', label: 'Cây Kỹ Năng', emoji: '🌳' },
+  { key: 'verify', label: 'Hàng đợi duyệt', emoji: '✅' },
+  { key: 'ranks', label: 'Đẳng thứ', emoji: '🏅' },
 ];
 
-export default function SkillsPage() {
-  return (
-    <div className="space-y-6 p-6">
-      <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-        <Award className="h-8 w-8 text-indigo-500" />
-        Kỹ năng & Đẳng thứ
-      </h1>
+interface RankDef {
+  id: string;
+  rankCode: string;
+  rankName: string;
+  narrativeName?: string;
+  rankOrder: number;
+  minExp?: number;
+  iconUrl?: string;
+  description?: string;
+}
 
-      <Card className="bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200">
-        <CardHeader>
-          <CardTitle className="text-indigo-800">Tiến trình Đẳng thứ</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <p className="text-sm text-indigo-600 font-medium">Đẳng thứ hiện tại</p>
-              <p className="text-2xl font-bold text-indigo-800">{CURRENT_RANK.name}</p>
-              <p className="text-sm text-indigo-500">Bậc {CURRENT_RANK.level}</p>
-            </div>
-            <div>
-              <p className="text-sm text-indigo-600 font-medium mb-2">Tiến trình</p>
-              <div className="w-full bg-indigo-200 rounded-full h-4 overflow-hidden">
-                <div
-                  className="bg-gradient-to-r from-indigo-500 to-purple-500 h-4 rounded-full transition-all duration-500"
-                  style={{ width: `${CURRENT_RANK.progress}%` }}
-                />
-              </div>
-              <p className="text-xs text-indigo-600 mt-1 flex justify-between">
-                <span>{CURRENT_RANK.name}</span>
-                <span>{CURRENT_RANK.progress}%</span>
-                <span>{CURRENT_RANK.nextRank}</span>
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-indigo-600 font-medium mb-1">Yêu cầu lên bậc tiếp</p>
-              <ul className="space-y-1">
-                {CURRENT_RANK.requirements.map((req, i) => (
-                  <li key={i} className="text-sm text-indigo-700 flex items-start gap-1.5">
-                    <ChevronRight className="h-4 w-4 mt-0.5 shrink-0" />
-                    {req}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+// ═══════════════════════════════════════════════════════════
+// Skill Tree Tab
+// ═══════════════════════════════════════════════════════════
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {SKILL_GROUPS.map((group) => {
-          const completed = group.skills.filter((s) => s.status === 'awarded' || s.status === 'verified').length;
-          return (
-            <Card key={group.id} className="hover:shadow-md transition-shadow">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <span className="text-2xl">{group.icon}</span>
-                  {group.name}
-                </CardTitle>
-                <p className="text-sm text-[hsl(var(--muted-foreground))]">
-                  {completed}/{group.skills.length} hoàn thành
-                </p>
-                <div className="w-full bg-[hsl(var(--muted))] rounded-full h-2 overflow-hidden">
-                  <div
-                    className="bg-indigo-500 h-2 rounded-full transition-all"
-                    style={{ width: `${(completed / group.skills.length) * 100}%` }}
-                  />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3">
-                  {group.skills.map((skill) => {
-                    const cfg = STATUS_CONFIG[skill.status];
-                    const Icon = cfg.icon;
-                    return (
-                      <li key={skill.id} className="flex items-start justify-between gap-2">
-                        <div className="flex items-start gap-2 min-w-0">
-                          <Icon className="h-4 w-4 mt-0.5 shrink-0 text-[hsl(var(--muted-foreground))]" />
-                          <div className="min-w-0">
-                            <p className="text-sm font-medium truncate">{skill.name}</p>
-                            <p className="text-xs text-[hsl(var(--muted-foreground))] truncate">{skill.description}</p>
-                          </div>
-                        </div>
-                        <Badge variant={cfg.variant} className="shrink-0 text-[10px]">{cfg.label}</Badge>
-                      </li>
-                    );
-                  })}
-                </ul>
-                <Button variant="outline" size="sm" className="w-full mt-4">
-                  <BookOpen className="h-4 w-4 mr-1" />
-                  Xem chi tiết
-                </Button>
-              </CardContent>
-            </Card>
-          );
-        })}
+function SkillTreeTab() {
+  const [groups, setGroups] = useState<SkillGroup[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await api.get<SkillGroup[]>('/scout/skill-groups');
+        setGroups(data);
+        if (data.length > 0) setExpandedGroups(new Set([data[0].id]));
+      } catch {
+        setGroups([]);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  const toggleGroup = (id: string) => {
+    setExpandedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  if (loading)
+    return <div className="text-zinc-400 text-center py-12">Đang tải cây kỹ năng...</div>;
+
+  if (groups.length === 0)
+    return (
+      <div className="bg-zinc-800/30 border border-zinc-700 border-dashed rounded-xl p-8 text-center">
+        <div className="text-4xl mb-3">🌳</div>
+        <p className="text-zinc-400">
+          Chưa có nhóm kỹ năng nào. Cấu hình Scout Program trong Admin.
+        </p>
       </div>
+    );
+
+  return (
+    <div className="space-y-3">
+      {groups.map((g) => {
+        const isOpen = expandedGroups.has(g.id);
+        return (
+          <div
+            key={g.id}
+            className="bg-zinc-800/40 border border-zinc-700/50 rounded-xl overflow-hidden"
+          >
+            <button
+              onClick={() => toggleGroup(g.id)}
+              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-zinc-800/60 transition-colors text-left"
+            >
+              <span className="text-xl">{g.icon || '📦'}</span>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-white font-bold text-sm">{g.name}</h3>
+                {g.narrativeName && <p className="text-xs text-zinc-500">{g.narrativeName}</p>}
+              </div>
+              <span className="text-xs bg-zinc-700 text-zinc-300 px-2 py-0.5 rounded">
+                {g.skills?.length || 0} kỹ năng
+              </span>
+              <span className="text-zinc-500">{isOpen ? '▼' : '▶'}</span>
+            </button>
+            {isOpen && g.skills && g.skills.length > 0 && (
+              <div className="border-t border-zinc-700/50 divide-y divide-zinc-700/30">
+                {g.skills.map((s) => (
+                  <div
+                    key={s.id}
+                    className="flex items-center gap-3 px-5 py-2.5 text-sm hover:bg-zinc-800/30"
+                  >
+                    <span className="text-zinc-500 font-mono text-xs w-16">{s.skillCode}</span>
+                    <p className="text-white flex-1">{s.name}</p>
+                    <div className="flex items-center gap-2 text-xs">
+                      {s.isRequired && (
+                        <span className="bg-red-500/20 text-red-300 px-1.5 py-0.5 rounded">
+                          Bắt buộc
+                        </span>
+                      )}
+                      <span className="bg-zinc-700 text-zinc-300 px-1.5 py-0.5 rounded">
+                        Lv {s.maxLevel}
+                      </span>
+                      <span className="bg-amber-500/15 text-amber-300 px-1.5 py-0.5 rounded">
+                        +{s.expPerLevel} EXP/lv
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// Verification Queue Tab
+// ═══════════════════════════════════════════════════════════
+
+function VerifyQueueTab({
+  showToast,
+}: {
+  showToast: (msg: string, type: 'success' | 'error') => void;
+}) {
+  const [queue, setQueue] = useState<VerifyQueueItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [processing, setProcessing] = useState<string | null>(null);
+
+  const loadQueue = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await api.get<VerifyQueueItem[]>('/scout/verify-queue');
+      setQueue(data);
+    } catch {
+      setQueue([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadQueue();
+  }, [loadQueue]);
+
+  const handleDecision = async (
+    progressId: string,
+    decision: 'approved' | 'rejected',
+    comment?: string,
+  ) => {
+    try {
+      setProcessing(progressId);
+      await api.post(`/scout/progress/${progressId}/verify-decision`, { decision, comment });
+      showToast(`${decision === 'approved' ? '✅ Đã duyệt' : '❌ Đã từ chối'}`, 'success');
+      await loadQueue();
+    } catch (err: unknown) {
+      showToast(`❌ ${err instanceof Error ? err.message : 'Lỗi'}`, 'error');
+    } finally {
+      setProcessing(null);
+    }
+  };
+
+  if (loading)
+    return <div className="text-zinc-400 text-center py-12">Đang tải hàng đợi duyệt...</div>;
+
+  return (
+    <div>
+      <h2 className="text-lg font-bold text-white mb-4">✅ Hàng đợi Xác nhận Kỹ năng</h2>
+      {queue.length === 0 ? (
+        <div className="bg-zinc-800/30 border border-zinc-700 border-dashed rounded-xl p-8 text-center">
+          <p className="text-zinc-400">🎉 Không có bài nộp cần duyệt. Tất cả đã hoàn thành!</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {queue.map((item) => (
+            <div key={item.id} className="bg-zinc-800/50 border border-zinc-700/50 rounded-xl p-4">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-600 to-cyan-600 flex items-center justify-center text-white font-bold">
+                  {(item.member?.user?.displayName || item.member?.scoutName || '?')[0]}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-white font-medium">
+                    {item.member?.user?.displayName || item.member?.scoutName || '—'}
+                  </p>
+                  <p className="text-xs text-zinc-400">
+                    Kỹ năng: <span className="text-amber-300">{item.skill?.name}</span> (
+                    {item.skill?.skillCode})
+                  </p>
+                  <p className="text-xs text-zinc-500 mt-1">
+                    Level hiện tại: {item.currentLevel} →{' '}
+                    {item.targetLevel ?? item.currentLevel + 1}
+                  </p>
+                  {/* Evidence preview */}
+                  {item.evidence && item.evidence.length > 0 && (
+                    <div className="mt-2 space-y-1">
+                      {item.evidence.map((ev) => (
+                        <div
+                          key={ev.id}
+                          className="text-xs bg-zinc-800 rounded px-2 py-1 text-zinc-300"
+                        >
+                          📎 {ev.note || ev.url || 'File đính kèm'}{' '}
+                          {ev.createdAt && (
+                            <span className="text-zinc-600 ml-1">
+                              {new Date(ev.createdAt).toLocaleDateString('vi-VN')}
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleDecision(item.id, 'approved')}
+                    disabled={processing === item.id}
+                    className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium disabled:opacity-50 transition-colors"
+                  >
+                    {processing === item.id ? '⏳' : '✅ Duyệt'}
+                  </button>
+                  <button
+                    onClick={() => handleDecision(item.id, 'rejected', 'Cần bổ sung bằng chứng')}
+                    disabled={processing === item.id}
+                    className="px-3 py-1.5 rounded-lg bg-red-600/80 hover:bg-red-500 text-white text-xs font-medium disabled:opacity-50 transition-colors"
+                  >
+                    ❌ Từ chối
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// Ranks Tab
+// ═══════════════════════════════════════════════════════════
+
+function RanksTab() {
+  const [ranks, setRanks] = useState<RankDef[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await api.get<RankDef[]>('/scout/ranks');
+        setRanks(data);
+      } catch {
+        setRanks([]);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  if (loading) return <div className="text-zinc-400 text-center py-12">Đang tải đẳng thứ...</div>;
+
+  return (
+    <div>
+      <h2 className="text-lg font-bold text-white mb-4">🏅 Hệ thống Đẳng thứ</h2>
+      {ranks.length === 0 ? (
+        <p className="text-zinc-500 text-center py-8">Chưa có đẳng thứ nào được cấu hình.</p>
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {ranks
+            .sort((a, b) => a.rankOrder - b.rankOrder)
+            .map((r) => (
+              <div
+                key={r.id}
+                className="bg-zinc-800/50 border border-zinc-700/50 rounded-xl p-4 hover:border-amber-600/40 transition-colors"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-2xl">{r.iconUrl || '🏅'}</span>
+                  <div>
+                    <h3 className="text-white font-bold text-sm">{r.rankName}</h3>
+                    {r.narrativeName && <p className="text-xs text-zinc-400">{r.narrativeName}</p>}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 text-xs mt-2">
+                  <span className="bg-zinc-700 text-zinc-300 px-2 py-0.5 rounded font-mono">
+                    {r.rankCode}
+                  </span>
+                  <span className="bg-amber-500/15 text-amber-300 px-2 py-0.5 rounded">
+                    #{r.rankOrder}
+                  </span>
+                  {r.minExp !== undefined && r.minExp > 0 && (
+                    <span className="bg-emerald-500/15 text-emerald-300 px-2 py-0.5 rounded">
+                      ≥{r.minExp} EXP
+                    </span>
+                  )}
+                </div>
+                {r.description && <p className="text-xs text-zinc-500 mt-2">{r.description}</p>}
+              </div>
+            ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// Main Skills Page
+// ═══════════════════════════════════════════════════════════
+
+export default function SkillsPage() {
+  const [activeTab, setActiveTab] = useState<TabKey>('tree');
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  return (
+    <div className="p-6 min-h-screen">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-white flex items-center gap-3">
+          <span className="text-3xl">🎯</span> Kỹ Năng Hướng Đạo
+        </h1>
+        <p className="text-zinc-400 mt-1">
+          Quản lý cây kỹ năng, duyệt bằng chứng, hệ thống đẳng thứ — STORY-003
+        </p>
+      </div>
+
+      <div className="mb-6 flex gap-1 bg-zinc-800/60 border border-zinc-700 rounded-xl p-1 w-fit">
+        {TABS.map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              activeTab === tab.key
+                ? 'bg-emerald-600 text-white shadow-lg'
+                : 'text-zinc-400 hover:text-white hover:bg-zinc-700/50'
+            }`}
+          >
+            {tab.emoji} {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === 'tree' && <SkillTreeTab />}
+      {activeTab === 'verify' && <VerifyQueueTab showToast={showToast} />}
+      {activeTab === 'ranks' && <RanksTab />}
+
+      {toast && (
+        <div
+          className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl shadow-2xl text-sm font-medium ${
+            toast.type === 'success'
+              ? 'bg-emerald-900/90 border border-emerald-700 text-emerald-200'
+              : 'bg-red-900/90 border border-red-700 text-red-200'
+          }`}
+        >
+          {toast.message}
+        </div>
+      )}
     </div>
   );
 }
