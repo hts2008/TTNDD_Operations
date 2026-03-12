@@ -27,7 +27,11 @@ async function fetcher<T>(endpoint: string, options: FetchOptions = {}): Promise
 
 export const api = {
   get: <T>(url: string, params?: Record<string, string>) => fetcher<T>(url, { params }),
-  post: <T>(url: string, data?: unknown) => fetcher<T>(url, { method: 'POST', body: JSON.stringify(data) }),
-  patch: <T>(url: string, data?: unknown) => fetcher<T>(url, { method: 'PATCH', body: JSON.stringify(data) }),
+  post: <T>(url: string, data?: unknown) =>
+    fetcher<T>(url, { method: 'POST', body: JSON.stringify(data) }),
+  put: <T>(url: string, data?: unknown) =>
+    fetcher<T>(url, { method: 'PUT', body: JSON.stringify(data) }),
+  patch: <T>(url: string, data?: unknown) =>
+    fetcher<T>(url, { method: 'PATCH', body: JSON.stringify(data) }),
   delete: <T>(url: string) => fetcher<T>(url, { method: 'DELETE' }),
 };

@@ -43,3 +43,6 @@ redis-data/
 *.key
 credentials.json
 service-account.json
+
+# Cloud SQL Auth Proxy
+cloud-sql-proxy.exe
