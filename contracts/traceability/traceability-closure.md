@@ -45,7 +45,7 @@
 | Assets | ~6 | 5+ | ~1 missing | 6 | 6 | ✅ match |
 | Process | ~6 | 4+ | ~2 missing | 4 | 4 | ✅ match |
 
-> **Key Finding:** DB schema is ahead of API — all 60 models exist, but not all controllers are wired.
+> **Key Finding:** DB schema is ahead of API — all 63 models exist, but not all controllers are wired.
 
 ---
 

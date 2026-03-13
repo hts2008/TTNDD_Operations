@@ -85,13 +85,13 @@ release-evidence/
 
 | Metric | Current | Target |
 |--------|---------|--------|
-| Prisma models | 60 | ~65 (enrichment pending) |
+| Prisma models | 63 | ~65 (enrichment pending) |
 | API endpoints | 44 (Scout) + ~80 (others) | ~150 |
 | State machines | 9 defined | 15+ (candidates identified) |
 | E2E specs | 4 stubs | 20+ full specs |
 | Domain events | 61 cataloged | 61 (complete) |
 | RLS at DB level | 0 policies | ALL tables |
-| Seed scripts | 0 | 12 packs |
+| Seed scripts | 1 (comprehensive) | 12 packs |
 
 ---
 
