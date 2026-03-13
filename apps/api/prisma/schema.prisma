@@ -1154,15 +1154,23 @@ model AssetLoan {
   requestedAt       DateTime  @default(now()) @map("requested_at") @db.Timestamptz()
   approvedAt        DateTime? @map("approved_at") @db.Timestamptz()
   approvedBy        String?   @map("approved_by") @db.Uuid
+  checkedOutAt      DateTime? @map("checked_out_at") @db.Timestamptz()
   expectedReturn    DateTime  @map("expected_return") @db.Date
   actualReturn      DateTime? @map("actual_return") @db.Date
   conditionOnReturn String?   @map("condition_on_return") @db.VarChar(50)
   returnNotes       String?   @map("return_notes")
+
+  // T-1087: Guardian acceptance for minor borrowers
+  guardianAcceptanceStatus String?   @default("not_required") @map("guardian_acceptance_status") @db.VarChar(30) // not_required, pending, accepted, rejected
+  guardianAcceptedBy       String?   @map("guardian_accepted_by") @db.Uuid
+  guardianAcceptedAt       DateTime? @map("guardian_accepted_at") @db.Timestamptz()
+
   createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz()
 
   asset Asset @relation(fields: [assetId], references: [id])
 
   @@index([orgId])
+  @@index([orgId, status, expectedReturn]) // T-1088: overdue loan queries
   @@map("asset_loans")
 }
 
