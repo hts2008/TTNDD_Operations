@@ -34,6 +34,67 @@ export class FinanceService {
     private readonly audit: AuditService,
   ) {}
 
+  // ── Cost Centers ──
+
+  async createCostCenter(
+    orgId: string,
+    data: {
+      code: string;
+      name: string;
+      description?: string;
+      parentId?: string;
+      branchId?: string;
+    },
+    actorUserId: string,
+  ) {
+    const costCenter = await this.prisma.costCenter.create({
+      data: { orgId, ...data },
+    });
+
+    await this.audit.log({
+      orgId,
+      userId: actorUserId,
+      action: 'finance.cost_center_created',
+      resource: 'CostCenter',
+      resourceId: costCenter.id,
+    });
+
+    return costCenter;
+  }
+
+  async getCostCenters(
+    orgId: string,
+    filters?: { isActive?: boolean; parentId?: string },
+    page = 1,
+    limit = 50,
+  ) {
+    const where: Prisma.CostCenterWhereInput = { orgId };
+    if (filters?.isActive !== undefined) where.isActive = filters.isActive;
+    if (filters?.parentId) where.parentId = filters.parentId;
+
+    const [data, total] = await Promise.all([
+      this.prisma.costCenter.findMany({
+        where,
+        include: { children: true, _count: { select: { transactions: true } } },
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: { code: 'asc' },
+      }),
+      this.prisma.costCenter.count({ where }),
+    ]);
+
+    return { data, meta: { total, page, limit } };
+  }
+
+  async getCostCenterById(orgId: string, costCenterId: string) {
+    const cc = await this.prisma.costCenter.findFirst({
+      where: { id: costCenterId, orgId },
+      include: { children: true, transactions: { take: 20, orderBy: { transactionDate: 'desc' } } },
+    });
+    if (!cc) throw new NotFoundException('Cost center not found');
+    return cc;
+  }
+
   // ── Accounts ──
 
   async createAccount(
@@ -110,6 +171,7 @@ export class FinanceService {
       referenceNo?: string;
       transactionDate: string;
       receiptUrls?: string[];
+      costCenterId?: string;
     },
     actorUserId: string,
   ) {
@@ -122,6 +184,7 @@ export class FinanceService {
       data: {
         orgId,
         accountId: data.accountId,
+        costCenterId: data.costCenterId,
         transactionType: data.transactionType,
         category: data.category,
         amount: data.amount,

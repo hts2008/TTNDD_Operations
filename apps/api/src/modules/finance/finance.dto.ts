@@ -75,12 +75,44 @@ export class CreateAccountDto {
   description?: string;
 }
 
+// ── Cost Centers ──
+
+export class CreateCostCenterDto {
+  @ApiProperty({ example: 'CC-001' })
+  @IsString()
+  code!: string;
+
+  @ApiProperty({ example: 'Chi phí hoạt động Chi nhánh 1' })
+  @IsString()
+  name!: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsUUID()
+  parentId?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsUUID()
+  branchId?: string;
+}
+
 // ── Transactions ──
 
 export class CreateTransactionDto {
   @ApiProperty()
   @IsUUID()
   accountId!: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsUUID()
+  costCenterId?: string;
 
   @ApiProperty({ example: 'income' })
   @IsString()

@@ -11,6 +11,7 @@ import {
   CreateFeePlanDto,
   ApplyFeePlanDto,
   RequestWaiverDto,
+  CreateCostCenterDto,
 } from './finance.dto';
 
 @ApiTags('Finance')
@@ -18,6 +19,43 @@ import {
 @Controller('finance')
 export class FinanceController {
   constructor(private readonly financeService: FinanceService) {}
+
+  // ── Cost Centers ──
+
+  @Post('cost-centers')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Create a cost center' })
+  createCostCenter(@CurrentUser() user: CurrentUserPayload, @Body() body: CreateCostCenterDto) {
+    return this.financeService.createCostCenter(user.orgId, body, user.userId);
+  }
+
+  @Get('cost-centers')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'List cost centers' })
+  getCostCenters(
+    @CurrentUser() user: CurrentUserPayload,
+    @Query('isActive') isActive?: string,
+    @Query('parentId') parentId?: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    return this.financeService.getCostCenters(
+      user.orgId,
+      {
+        isActive: isActive !== undefined ? isActive === 'true' : undefined,
+        parentId,
+      },
+      page ?? 1,
+      limit ?? 50,
+    );
+  }
+
+  @Get('cost-centers/:id')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Get cost center with transactions' })
+  getCostCenterById(@CurrentUser() user: CurrentUserPayload, @Param('id') id: string) {
+    return this.financeService.getCostCenterById(user.orgId, id);
+  }
 
   // ── Accounts ──
 
