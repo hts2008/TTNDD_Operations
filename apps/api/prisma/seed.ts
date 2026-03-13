@@ -287,6 +287,82 @@ async function main() {
   console.log(`  Course + Lessons: 1 course, 3 lessons`);
   console.log(`  Finance Accounts: 2`);
   console.log(`  Assets: ${assetDefs.length} in 2 categories`);
+
+  // 14b. More Assets (T-1097: armory expansion)
+  const moreAssets = [
+    { id: 'a5000001-0000-0000-0000-000000000008', orgId: org.id, categoryId: 'a4000001-0000-0000-0000-000000000001', name: 'Bếp Gas Di Động', assetCode: 'COOK-001', status: 'available', quantity: 3, availableQty: 3, condition: 'good', location: 'Kho Đoàn' },
+    { id: 'a5000001-0000-0000-0000-000000000009', orgId: org.id, categoryId: 'a4000001-0000-0000-0000-000000000001', name: 'Nồi Quân Dụng 20L', assetCode: 'COOK-002', status: 'maintenance', quantity: 4, availableQty: 2, condition: 'fair', location: 'Xưởng Sửa Chữa' },
+    { id: 'a5000001-0000-0000-0000-000000000010', orgId: org.id, categoryId: 'a4000001-0000-0000-0000-000000000002', name: 'Khăn Quàng Đoàn', assetCode: 'UNI-SCARF-01', status: 'available', quantity: 30, availableQty: 28, condition: 'good', location: 'Kho Đoàn' },
+  ];
+  for (const a of moreAssets) {
+    await prisma.asset.upsert({ where: { id: a.id }, update: {}, create: a });
+  }
+
+  // 14c. Kit Templates (T-1097)
+  await prisma.kitTemplate.upsert({
+    where: { id: 'a5100001-0000-0000-0000-000000000001' }, update: {},
+    create: { id: 'a5100001-0000-0000-0000-000000000001', orgId: org.id, name: 'Bộ Kit Cắm Trại 4 Người', description: 'Kit tiêu chuẩn cho 1 đội 4 người đi trại', kitType: 'camp', createdBy: 'dddddddd-0000-0000-0000-000000000001' },
+  });
+  const kitItems = [
+    { id: 'a5200001-0000-0000-0000-000000000001', orgId: org.id, templateId: 'a5100001-0000-0000-0000-000000000001', itemName: 'Lều 4 người', quantity: 1, isRequired: true },
+    { id: 'a5200001-0000-0000-0000-000000000002', orgId: org.id, templateId: 'a5100001-0000-0000-0000-000000000001', itemName: 'Đèn pin đội', quantity: 2, isRequired: true },
+    { id: 'a5200001-0000-0000-0000-000000000003', orgId: org.id, templateId: 'a5100001-0000-0000-0000-000000000001', itemName: 'Dây thừng 20m', quantity: 1, isRequired: true },
+    { id: 'a5200001-0000-0000-0000-000000000004', orgId: org.id, templateId: 'a5100001-0000-0000-0000-000000000001', itemName: 'La bàn', quantity: 1, isRequired: false, notes: 'Tùy chọn nếu có bài la bàn' },
+    { id: 'a5200001-0000-0000-0000-000000000005', orgId: org.id, templateId: 'a5100001-0000-0000-0000-000000000001', itemName: 'Túi sơ cứu', quantity: 1, isRequired: true },
+  ];
+  for (const ki of kitItems) {
+    await prisma.kitTemplateItem.upsert({ where: { id: ki.id }, update: {}, create: ki });
+  }
+
+  // 14d. Maintenance Schedules (T-1097)
+  const maintenanceDefs = [
+    { id: 'a5300001-0000-0000-0000-000000000001', orgId: org.id, assetId: 'a5000001-0000-0000-0000-000000000001', maintenanceType: 'Kiểm tra chống thấm', frequency: 'quarterly', nextDue: new Date('2026-06-01'), status: 'scheduled' },
+    { id: 'a5300001-0000-0000-0000-000000000002', orgId: org.id, assetId: 'a5000001-0000-0000-0000-000000000009', maintenanceType: 'Vệ sinh & kiểm tra', frequency: 'monthly', nextDue: new Date('2026-04-01'), status: 'scheduled', notes: 'Nồi có dấu hiệu rỉ sét nhẹ' },
+  ];
+  for (const m of maintenanceDefs) {
+    await prisma.maintenanceSchedule.upsert({ where: { id: m.id }, update: {}, create: m });
+  }
+
+  // 14e. Uniform Issues (T-1097)
+  const uniformDefs = [
+    { id: 'a5400001-0000-0000-0000-000000000001', orgId: org.id, memberId: 'eeeeeee1-0000-0000-0000-000000000005', uniformType: 'Đồng phục Ngành Thiếu', size: 'M', quantity: 1, status: 'issued', issuedDate: new Date('2026-01-15') },
+    { id: 'a5400001-0000-0000-0000-000000000002', orgId: org.id, memberId: 'eeeeeee1-0000-0000-0000-000000000006', uniformType: 'Đồng phục Ngành Thiếu', size: 'L', quantity: 1, status: 'issued', issuedDate: new Date('2026-01-15') },
+  ];
+  for (const u of uniformDefs) {
+    await prisma.uniformIssue.upsert({ where: { id: u.id }, update: {}, create: u });
+  }
+
+  // 14f. Sample Loans (T-1097) — 1 normal + 1 guardian pending
+  await prisma.assetLoan.upsert({
+    where: { id: 'a5500001-0000-0000-0000-000000000001' }, update: {},
+    create: { id: 'a5500001-0000-0000-0000-000000000001', orgId: org.id, assetId: 'a5000001-0000-0000-0000-000000000002', borrowerId: 'eeeeeee1-0000-0000-0000-000000000005', quantity: 1, purpose: 'Bài tập đọc bản đồ', status: 'checked_out', expectedReturn: new Date('2026-03-20'), approvedBy: 'dddddddd-0000-0000-0000-000000000001', approvedAt: new Date('2026-03-10'), checkedOutAt: new Date('2026-03-10') },
+  });
+  await prisma.assetLoan.upsert({
+    where: { id: 'a5500001-0000-0000-0000-000000000002' }, update: {},
+    create: { id: 'a5500001-0000-0000-0000-000000000002', orgId: org.id, assetId: 'a5000001-0000-0000-0000-000000000004', borrowerId: 'eeeeeee1-0000-0000-0000-000000000004', quantity: 2, purpose: 'Sinh hoạt ngoài trời', status: 'approved', expectedReturn: new Date('2026-04-05'), approvedBy: 'dddddddd-0000-0000-0000-000000000002', approvedAt: new Date('2026-03-12'), guardianAcceptanceStatus: 'pending' },
+  });
+
+  // Summary
+  console.log('');
+  console.log('✅ SEED COMPLETED SUCCESSFULLY!');
+  console.log('──────────────────────────────────');
+  console.log(`  Org: ${org.name} (${org.id})`);
+  console.log(`  Branches: 3 (Đồng / Thiếu / Thanh)`);
+  console.log(`  Units: 4`);
+  console.log(`  Users: 14 (2 Trưởng + 12 Đoàn sinh)`);
+  console.log(`  Ranks: 4`);
+  console.log(`  Skill Groups: 3 | Skills: ${skillDefs.length}`);
+  console.log(`  EXP Configs: ${expConfigs.length}`);
+  console.log(`  Badges: ${badgeDefs.length}`);
+  console.log(`  Sessions: ${sessionDefs.length}`);
+  console.log(`  Events: 2`);
+  console.log(`  Course + Lessons: 1 course, 3 lessons`);
+  console.log(`  Finance Accounts: 2`);
+  console.log(`  Assets: ${assetDefs.length + moreAssets.length} in 2 categories`);
+  console.log(`  Kit Templates: 1 (${kitItems.length} items)`);
+  console.log(`  Maintenance Schedules: ${maintenanceDefs.length}`);
+  console.log(`  Uniform Issues: ${uniformDefs.length}`);
+  console.log(`  Asset Loans: 2`);
   console.log(`  Plan + Project: 1 each`);
   console.log(`  Notification Templates: ${notifTemplates.length}`);
   console.log('──────────────────────────────────');
