@@ -549,6 +549,111 @@ export class FinanceService {
     return { fees, summary: { totalDue, totalPaid, outstanding } };
   }
 
+  // T-1072: Budget variance — compares actual income/expense vs expected (based on fee plans)
+  async getBudgetVariance(orgId: string, period?: string) {
+    // Expected income from active fee plans
+    const activePlans = await this.prisma.feePlan.findMany({
+      where: { orgId, isActive: true },
+      include: { _count: { select: { fees: true } } },
+    });
+
+    const expectedIncome = activePlans.reduce(
+      (sum, p) => sum + Number(p.amount) * p._count.fees,
+      0,
+    );
+
+    // Actual income from completed transactions
+    const actual = await this.prisma.financialTransaction.findMany({
+      where: { orgId, status: 'completed' },
+      select: { transactionType: true, amount: true, category: true },
+    });
+
+    const actualIncome = actual
+      .filter((t) => t.transactionType === 'income')
+      .reduce((sum, t) => sum + Number(t.amount), 0);
+    const actualExpense = actual
+      .filter((t) => t.transactionType === 'expense')
+      .reduce((sum, t) => sum + Number(t.amount), 0);
+
+    // By category
+    const byCategory: Record<
+      string,
+      { actual: number; budget: number; variance: number; pct: number }
+    > = {};
+    for (const tx of actual) {
+      const cat = tx.category ?? 'uncategorized';
+      if (!byCategory[cat]) byCategory[cat] = { actual: 0, budget: 0, variance: 0, pct: 0 };
+      byCategory[cat]!.actual += Number(tx.amount);
+    }
+    // Calculate variance
+    for (const cat of Object.keys(byCategory)) {
+      const entry = byCategory[cat]!;
+      entry.variance = entry.budget - entry.actual;
+      entry.pct = entry.budget > 0 ? (entry.actual / entry.budget) * 100 : 0;
+    }
+
+    return {
+      period: period ?? 'all-time',
+      budget: { expectedIncome },
+      actual: { income: actualIncome, expense: actualExpense, net: actualIncome - actualExpense },
+      variance: {
+        income: actualIncome - expectedIncome,
+        incomePct: expectedIncome > 0 ? ((actualIncome / expectedIncome) * 100).toFixed(1) : '0',
+      },
+      byCategory,
+      feeCollectionRate:
+        expectedIncome > 0 ? ((actualIncome / expectedIncome) * 100).toFixed(1) : '0',
+    };
+  }
+
+  // T-1078: Reconciliation — checks balance consistency
+  async getReconciliationReport(orgId: string) {
+    const accounts = await this.prisma.financialAccount.findMany({
+      where: { orgId },
+      select: { id: true, name: true, currentBalance: true },
+    });
+
+    const results = await Promise.all(
+      accounts.map(async (acc) => {
+        const transactions = await this.prisma.financialTransaction.findMany({
+          where: { orgId, accountId: acc.id, status: 'completed' },
+          select: { transactionType: true, amount: true },
+        });
+
+        const calculatedBalance = transactions.reduce((sum, tx) => {
+          const amt = Number(tx.amount);
+          return tx.transactionType === 'income' ? sum + amt : sum - amt;
+        }, 0);
+
+        const storedBalance = Number(acc.currentBalance);
+        const discrepancy = storedBalance - calculatedBalance;
+
+        return {
+          accountId: acc.id,
+          accountName: acc.name,
+          storedBalance,
+          calculatedBalance,
+          discrepancy,
+          isConsistent: Math.abs(discrepancy) < 0.01,
+          transactionCount: transactions.length,
+        };
+      }),
+    );
+
+    const inconsistentCount = results.filter((r) => !r.isConsistent).length;
+
+    return {
+      reportDate: new Date().toISOString(),
+      accounts: results,
+      summary: {
+        totalAccounts: results.length,
+        consistent: results.length - inconsistentCount,
+        inconsistent: inconsistentCount,
+        overallHealthy: inconsistentCount === 0,
+      },
+    };
+  }
+
   // ── Fee Plans ──
 
   async createFeePlan(

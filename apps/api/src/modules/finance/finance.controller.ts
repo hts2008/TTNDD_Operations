@@ -273,6 +273,20 @@ export class FinanceController {
     });
   }
 
+  @Get('budget-variance')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Get budget variance report (T-1072)' })
+  getBudgetVariance(@CurrentUser() user: CurrentUserPayload, @Query('period') period?: string) {
+    return this.financeService.getBudgetVariance(user.orgId, period);
+  }
+
+  @Get('reconciliation')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Get reconciliation report (T-1078)' })
+  getReconciliationReport(@CurrentUser() user: CurrentUserPayload) {
+    return this.financeService.getReconciliationReport(user.orgId);
+  }
+
   // ── Sponsors ──
 
   @Post('sponsors')
