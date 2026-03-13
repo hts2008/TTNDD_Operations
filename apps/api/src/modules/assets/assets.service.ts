@@ -867,4 +867,132 @@ export class AssetsService {
       critical: assets.filter((a) => a.availableQty === 0).length,
     };
   }
+
+  // ── T-1093: Pack/Unpack Checklists ──
+
+  async generatePackChecklist(orgId: string, templateId: string, eventLabel?: string) {
+    const kit = await this.prisma.kitTemplate.findFirst({
+      where: { id: templateId, orgId, isActive: true },
+      include: { items: { orderBy: { isRequired: 'desc' } } },
+    });
+    if (!kit) throw new NotFoundException('Kit template not found');
+
+    return {
+      checklistId: `chk-${kit.id}-${Date.now()}`,
+      templateId: kit.id,
+      templateName: kit.name,
+      eventLabel: eventLabel ?? 'General',
+      generatedAt: new Date().toISOString(),
+      items: kit.items.map((item) => ({
+        itemId: item.id,
+        itemName: item.itemName,
+        quantity: item.quantity,
+        isRequired: item.isRequired,
+        notes: item.notes,
+        packed: false,
+        packedAt: null,
+        packedBy: null,
+      })),
+      totalItems: kit.items.length,
+      requiredItems: kit.items.filter((i) => i.isRequired).length,
+      packedCount: 0,
+      isComplete: false,
+    };
+  }
+
+  async markItemPacked(
+    orgId: string,
+    checklistItems: Array<{
+      itemId: string;
+      itemName: string;
+      packed: boolean;
+      quantity: number;
+      isRequired: boolean;
+    }>,
+    itemId: string,
+    packed: boolean,
+    actorUserId: string,
+  ) {
+    const updated = checklistItems.map((item) => {
+      if (item.itemId === itemId) {
+        return {
+          ...item,
+          packed,
+          packedAt: packed ? new Date().toISOString() : null,
+          packedBy: packed ? actorUserId : null,
+        };
+      }
+      return item;
+    });
+
+    const packedCount = updated.filter((i) => i.packed).length;
+    const requiredPacked = updated.filter((i) => i.isRequired && i.packed).length;
+    const requiredTotal = updated.filter((i) => i.isRequired).length;
+
+    return {
+      items: updated,
+      packedCount,
+      totalItems: updated.length,
+      requiredPacked,
+      requiredTotal,
+      isComplete: requiredPacked === requiredTotal,
+      completionPercentage: Math.round((packedCount / updated.length) * 100),
+    };
+  }
+
+  // ── T-1098: CSV Export ──
+
+  async exportAssetsCsv(orgId: string): Promise<string> {
+    const assets = await this.prisma.asset.findMany({
+      where: { orgId },
+      include: { category: { select: { name: true } } },
+      orderBy: { assetCode: 'asc' },
+    });
+
+    const header = 'asset_code,name,category,status,condition,quantity,available_qty,location,serial_number,unit,notes';
+    const rows = assets.map((a) =>
+      [
+        a.assetCode,
+        `"${(a.name ?? '').replace(/"/g, '""')}"`,
+        `"${a.category?.name ?? ''}"`,
+        a.status,
+        a.condition,
+        a.quantity,
+        a.availableQty,
+        `"${(a.location ?? '').replace(/"/g, '""')}"`,
+        a.serialNumber ?? '',
+        a.unit ?? '',
+        `"${(a.notes ?? '').replace(/"/g, '""')}"`,
+      ].join(','),
+    );
+
+    return [header, ...rows].join('\n');
+  }
+
+  async exportLoansCsv(orgId: string): Promise<string> {
+    const loans = await this.prisma.assetLoan.findMany({
+      where: { orgId },
+      include: { asset: { select: { assetCode: true, name: true } } },
+      orderBy: { requestedAt: 'desc' },
+    });
+
+    const header = 'loan_id,asset_code,asset_name,borrower_id,status,quantity,requested_at,expected_return,actual_return,condition_on_return,guardian_status';
+    const rows = loans.map((l) =>
+      [
+        l.id,
+        l.asset?.assetCode ?? '',
+        `"${(l.asset?.name ?? '').replace(/"/g, '""')}"`,
+        l.borrowerId,
+        l.status,
+        l.quantity,
+        l.requestedAt.toISOString(),
+        l.expectedReturn.toISOString(),
+        l.actualReturn?.toISOString() ?? '',
+        l.conditionOnReturn ?? '',
+        l.guardianAcceptanceStatus ?? 'not_required',
+      ].join(','),
+    );
+
+    return [header, ...rows].join('\n');
+  }
 }

@@ -245,4 +245,32 @@ export class AssetsController {
   ) {
     return this.service.returnUniform(user.orgId, uniformId, dto, user.userId);
   }
+
+  // ── T-1093: Pack/Unpack Checklists ──
+
+  @Post('kits/:templateId/checklist')
+  @ApiOperation({ summary: 'T-1093: Generate pack checklist from kit template' })
+  generatePackChecklist(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('templateId') templateId: string,
+    @Body('eventLabel') eventLabel?: string,
+  ) {
+    return this.service.generatePackChecklist(user.orgId, templateId, eventLabel);
+  }
+
+  // ── T-1098: CSV Export ──
+
+  @Get('export/csv')
+  @ApiOperation({ summary: 'T-1098: Export assets as CSV' })
+  async exportAssetsCsv(@CurrentUser() user: CurrentUserPayload) {
+    const csv = await this.service.exportAssetsCsv(user.orgId);
+    return { csv, filename: `assets-export-${new Date().toISOString().split('T')[0]}.csv` };
+  }
+
+  @Get('loans/export/csv')
+  @ApiOperation({ summary: 'T-1098: Export loans as CSV' })
+  async exportLoansCsv(@CurrentUser() user: CurrentUserPayload) {
+    const csv = await this.service.exportLoansCsv(user.orgId);
+    return { csv, filename: `loans-export-${new Date().toISOString().split('T')[0]}.csv` };
+  }
 }
