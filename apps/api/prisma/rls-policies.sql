@@ -241,6 +241,8 @@ DROP POLICY IF EXISTS "org_isolation_tasks"     ON tasks;
 
 -- Tickets
 DROP POLICY IF EXISTS "org_isolation_tickets"         ON tickets;
+DROP POLICY IF EXISTS "sensitive_ticket_visibility"   ON tickets;
+DROP POLICY IF EXISTS "sensitive_ticket_write_guard"  ON tickets;
 DROP POLICY IF EXISTS "org_isolation_ticket_comments"  ON ticket_comments;
 
 -- Finance
@@ -479,6 +481,34 @@ CREATE POLICY "org_isolation_tasks" ON tasks
 CREATE POLICY "org_isolation_tickets" ON tickets
     USING (org_id = current_setting('app.current_org_id', true)::uuid)
     WITH CHECK (org_id = current_setting('app.current_org_id', true)::uuid);
+
+-- T-1052: Sensitive ticket visibility — restrict isSensitive=true to designated roles
+-- Non-sensitive tickets: visible to all org members (covered by org_isolation_tickets)
+-- Sensitive tickets: visible only to super_admin, admin
+-- This policy REPLACES the base org_isolation for SELECT on sensitive rows.
+CREATE POLICY "sensitive_ticket_visibility" ON tickets
+    FOR SELECT
+    USING (
+        org_id = current_setting('app.current_org_id', true)::uuid
+        AND (
+            is_sensitive = false
+            OR current_setting('app.user_role', true) IN ('super_admin', 'admin')
+        )
+    );
+
+-- T-1052: Sensitive ticket write guard — only designated roles can create/update sensitive tickets
+CREATE POLICY "sensitive_ticket_write_guard" ON tickets
+    FOR ALL
+    USING (
+        org_id = current_setting('app.current_org_id', true)::uuid
+    )
+    WITH CHECK (
+        org_id = current_setting('app.current_org_id', true)::uuid
+        AND (
+            is_sensitive = false
+            OR current_setting('app.user_role', true) IN ('super_admin', 'admin')
+        )
+    );
 
 CREATE POLICY "org_isolation_ticket_comments" ON ticket_comments
     USING (org_id = current_setting('app.current_org_id', true)::uuid)

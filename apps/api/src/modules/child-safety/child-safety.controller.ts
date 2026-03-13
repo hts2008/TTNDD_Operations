@@ -1,5 +1,14 @@
-import { Controller, Get, Post, Param, Body, Query, ParseIntPipe, DefaultValuePipe } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  Body,
+  Query,
+  ParseIntPipe,
+  DefaultValuePipe,
+} from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { ChildSafetyService } from './child-safety.service';
 import { CurrentUser, Roles } from '../../common/decorators';
 import type { CurrentUserPayload } from '../../common/decorators';
@@ -63,5 +72,12 @@ export class ChildSafetyController {
   @Roles('super_admin')
   applyRetention(@CurrentUser() user: CurrentUserPayload) {
     return this.service.applyRetentionPolicy(user.orgId);
+  }
+
+  @Get('retention-status')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'T-1055: Evidence retention status for dashboard' })
+  getRetentionStatus(@CurrentUser() user: CurrentUserPayload) {
+    return this.service.getRetentionStatus(user.orgId);
   }
 }
