@@ -2,7 +2,13 @@ name: Deploy to Cloud Run
 on:
   push:
     branches: [main]
-    paths: ['apps/api/**', 'packages/**', '.github/workflows/cd.yml']
+    paths:
+      - 'apps/api/**'
+      - 'packages/**'
+      - '.github/workflows/cd.yml'
+      - 'cloudbuild.yaml'
+      - '.gcloudignore'
+      - '.npmrc'
 
 jobs:
   deploy-api:
