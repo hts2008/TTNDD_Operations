@@ -1,5 +1,6 @@
 FROM node:20-slim AS builder
 WORKDIR /app
+RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 RUN corepack enable && corepack prepare pnpm@8 --activate
 COPY pnpm-lock.yaml pnpm-workspace.yaml turbo.json package.json .npmrc ./
 COPY apps/api/package.json apps/api/
@@ -9,16 +10,14 @@ COPY packages/tokens/package.json packages/tokens/
 COPY packages/ui/package.json packages/ui/
 RUN pnpm install --frozen-lockfile
 COPY . .
-RUN cd apps/api && npx prisma generate
+RUN npx prisma generate --schema=apps/api/prisma/schema.prisma
 RUN pnpm build --filter=api
-# Dereference pnpm symlinks for Prisma generated client
-RUN cp -rL /app/node_modules/.prisma /app/_prisma_generated
 
 FROM node:20-slim AS runner
 WORKDIR /app
+RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 ENV NODE_ENV=production
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/_prisma_generated ./node_modules/.prisma
 COPY --from=builder /app/apps/api/dist ./dist
 COPY --from=builder /app/apps/api/prisma ./prisma
 COPY --from=builder /app/apps/api/package.json ./
