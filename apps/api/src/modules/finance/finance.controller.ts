@@ -246,6 +246,33 @@ export class FinanceController {
     return this.financeService.getFinanceSummary(user.orgId, accountId);
   }
 
+  @Get('projections')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Get balance projections (T-1064)' })
+  getBalanceProjections(@CurrentUser() user: CurrentUserPayload, @Query('months') months?: number) {
+    return this.financeService.getBalanceProjections(user.orgId, months ?? 6);
+  }
+
+  @Get('export')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Export transactions as CSV-ready data (T-1065)' })
+  exportTransactions(
+    @CurrentUser() user: CurrentUserPayload,
+    @Query('accountId') accountId?: string,
+    @Query('costCenterId') costCenterId?: string,
+    @Query('status') status?: string,
+    @Query('fromDate') fromDate?: string,
+    @Query('toDate') toDate?: string,
+  ) {
+    return this.financeService.exportTransactions(user.orgId, {
+      accountId,
+      costCenterId,
+      status,
+      fromDate,
+      toDate,
+    });
+  }
+
   // ── Sponsors ──
 
   @Post('sponsors')

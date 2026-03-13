@@ -419,6 +419,122 @@ export class FinanceService {
     };
   }
 
+  // T-1064: Balance projections — estimated future balances based on recurring fees and recent spending
+  async getBalanceProjections(orgId: string, months = 6) {
+    // Current balances per account
+    const accounts = await this.prisma.financialAccount.findMany({
+      where: { orgId, isActive: true },
+      select: { id: true, name: true, currentBalance: true, currency: true },
+    });
+
+    // Outstanding fees (expected income)
+    const unpaidFees = await this.prisma.memberFee.findMany({
+      where: { orgId, status: { in: ['unpaid', 'partial', 'overdue'] } },
+      select: { amountDue: true, amountPaid: true, dueDate: true },
+    });
+
+    const expectedIncome = unpaidFees.reduce(
+      (sum, f) => sum + Number(f.amountDue) - Number(f.amountPaid),
+      0,
+    );
+
+    // Monthly spending avg (last 6 months)
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    const recentExpenses = await this.prisma.financialTransaction.findMany({
+      where: {
+        orgId,
+        status: 'completed',
+        transactionType: 'expense',
+        transactionDate: { gte: sixMonthsAgo },
+      },
+      select: { amount: true, transactionDate: true },
+    });
+
+    const monthlyExpenseAvg =
+      recentExpenses.length > 0
+        ? recentExpenses.reduce((sum, tx) => sum + Number(tx.amount), 0) / 6
+        : 0;
+
+    // Project forward
+    const totalCurrentBalance = accounts.reduce((sum, a) => sum + Number(a.currentBalance), 0);
+
+    const projections = Array.from({ length: months }, (_, i) => {
+      const month = i + 1;
+      const projectedIncome = (expectedIncome / months) * month;
+      const projectedExpense = monthlyExpenseAvg * month;
+      return {
+        month,
+        label: new Date(Date.now() + month * 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 7),
+        estimatedBalance: totalCurrentBalance + projectedIncome - projectedExpense,
+        projectedIncome,
+        projectedExpense,
+      };
+    });
+
+    return {
+      accounts: accounts.map((a) => ({
+        ...a,
+        currentBalance: Number(a.currentBalance),
+      })),
+      totalCurrentBalance,
+      expectedIncome,
+      monthlyExpenseAvg,
+      projections,
+    };
+  }
+
+  // T-1065: Export transactions — returns CSV-ready array for audit/export
+  async exportTransactions(
+    orgId: string,
+    filters?: {
+      accountId?: string;
+      costCenterId?: string;
+      status?: string;
+      fromDate?: string;
+      toDate?: string;
+    },
+  ) {
+    const where: Prisma.FinancialTransactionWhereInput = { orgId };
+    if (filters?.accountId) where.accountId = filters.accountId;
+    if (filters?.costCenterId) where.costCenterId = filters.costCenterId;
+    if (filters?.status) where.status = filters.status;
+    if (filters?.fromDate || filters?.toDate) {
+      where.transactionDate = {};
+      if (filters?.fromDate) where.transactionDate.gte = new Date(filters.fromDate);
+      if (filters?.toDate) where.transactionDate.lte = new Date(filters.toDate);
+    }
+
+    const transactions = await this.prisma.financialTransaction.findMany({
+      where,
+      include: {
+        account: { select: { name: true } },
+        costCenter: { select: { code: true, name: true } },
+      },
+      orderBy: { transactionDate: 'asc' },
+    });
+
+    return {
+      exportedAt: new Date().toISOString(),
+      totalRows: transactions.length,
+      rows: transactions.map((tx) => ({
+        id: tx.id,
+        date: tx.transactionDate.toISOString().slice(0, 10),
+        account: tx.account.name,
+        costCenter: tx.costCenter ? `${tx.costCenter.code} - ${tx.costCenter.name}` : '',
+        type: tx.transactionType,
+        category: tx.category ?? '',
+        amount: Number(tx.amount),
+        currency: tx.currency,
+        description: tx.description,
+        status: tx.status,
+        referenceNo: tx.referenceNo ?? '',
+        recordedBy: tx.recordedBy,
+        approvedBy: tx.approvedBy ?? '',
+      })),
+    };
+  }
+
   async getMemberFees(orgId: string, memberId: string) {
     const fees = await this.prisma.memberFee.findMany({
       where: { orgId, orgMemberId: memberId },
