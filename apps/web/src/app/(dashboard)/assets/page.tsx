@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  Package, MapPin, HandMetal, AlertTriangle, ClipboardList,
+  Package, MapPin, HandMetal, AlertTriangle, ClipboardList, Download,
   Shirt, Settings2, Boxes, Tags, ChevronRight, CalendarClock,
   CheckCircle2, XCircle, RotateCcw, ArrowDownUp, Wrench, Eye,
 } from 'lucide-react';
@@ -45,6 +45,15 @@ interface MaintenanceItem {
 interface StockAlert {
   id: string; name: string; assetCode: string; availableQty: number;
   totalQty: number; severity: 'critical' | 'high' | 'low';
+}
+
+interface KitTemplate {
+  id: string; name: string; description?: string; itemCount?: number;
+  items?: { id: string; itemName: string; quantity: number; isOptional: boolean }[];
+}
+
+interface Category {
+  id: string; name: string; icon?: string; _count?: { assets: number };
 }
 
 // ── Config ──
@@ -374,32 +383,98 @@ function MaintenanceTab({ items, loading }: { items: MaintenanceItem[]; loading:
   );
 }
 
-// ── Tab: Kits (placeholder) ──
+// ── Tab: Kits ──
 
-function KitsTab() {
+function KitsTab({ kits, loading }: { kits: KitTemplate[]; loading: boolean }) {
+  if (loading) return <div className="text-center py-12 text-[hsl(var(--muted-foreground))]">Đang tải...</div>;
+
+  if (kits.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <Boxes className="h-12 w-12 mx-auto text-[hsl(var(--muted-foreground))] mb-3" />
+        <h3 className="text-lg font-medium mb-1">Chưa có bộ kit nào</h3>
+        <p className="text-[hsl(var(--muted-foreground))]">Tạo template kit cho trại, sinh hoạt</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="text-center py-12">
-      <Boxes className="h-12 w-12 mx-auto text-[hsl(var(--muted-foreground))] mb-3" />
-      <h3 className="text-lg font-medium mb-1">Bộ Kit</h3>
-      <p className="text-[hsl(var(--muted-foreground))]">Quản lý template kit cho trại, sinh hoạt</p>
-      <Button className="mt-4">
-        <ClipboardList className="h-4 w-4 mr-1" /> Xem danh sách kit
-      </Button>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {kits.map((kit) => (
+        <Card key={kit.id} className="hover:shadow-md transition-shadow">
+          <CardHeader className="pb-3">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-2">
+                <Boxes className="h-5 w-5 text-sky-500" />
+                <CardTitle className="text-base">{kit.name}</CardTitle>
+              </div>
+              <Badge className="bg-sky-100 text-sky-700 border-sky-200 border text-xs">
+                {kit.items?.length ?? kit.itemCount ?? 0} món
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {kit.description && (
+              <p className="text-sm text-[hsl(var(--muted-foreground))]">{kit.description}</p>
+            )}
+            {kit.items && kit.items.length > 0 && (
+              <div className="space-y-1">
+                {kit.items.slice(0, 4).map((item) => (
+                  <div key={item.id} className="flex items-center justify-between text-sm">
+                    <span className={cn(item.isOptional && 'text-[hsl(var(--muted-foreground))]')}>
+                      {item.isOptional ? '○' : '●'} {item.itemName}
+                    </span>
+                    <span className="text-xs text-[hsl(var(--muted-foreground))]">×{item.quantity}</span>
+                  </div>
+                ))}
+                {kit.items.length > 4 && (
+                  <p className="text-xs text-[hsl(var(--muted-foreground))]">+{kit.items.length - 4} món khác...</p>
+                )}
+              </div>
+            )}
+            <Button size="sm" variant="outline" className="w-full mt-2">
+              <ClipboardList className="h-4 w-4 mr-1" /> Tạo checklist
+            </Button>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 }
 
-// ── Tab: Categories (placeholder) ──
+// ── Tab: Categories ──
 
-function CategoriesTab() {
+function CategoriesTab({ categories, loading }: { categories: Category[]; loading: boolean }) {
+  if (loading) return <div className="text-center py-12 text-[hsl(var(--muted-foreground))]">Đang tải...</div>;
+
+  if (categories.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <Tags className="h-12 w-12 mx-auto text-[hsl(var(--muted-foreground))] mb-3" />
+        <h3 className="text-lg font-medium mb-1">Chưa có danh mục</h3>
+        <p className="text-[hsl(var(--muted-foreground))]">Phân loại tài sản theo nhóm</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="text-center py-12">
-      <Tags className="h-12 w-12 mx-auto text-[hsl(var(--muted-foreground))] mb-3" />
-      <h3 className="text-lg font-medium mb-1">Danh mục tài sản</h3>
-      <p className="text-[hsl(var(--muted-foreground))]">Phân loại tài sản theo nhóm</p>
-      <Button className="mt-4">
-        <Eye className="h-4 w-4 mr-1" /> Xem danh mục
-      </Button>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {categories.map((cat) => (
+        <Card key={cat.id} className="hover:shadow-md transition-shadow group cursor-pointer">
+          <CardContent className="flex items-center justify-between p-4">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">{cat.icon ?? '📁'}</span>
+              <div>
+                <p className="font-medium group-hover:text-[hsl(var(--primary))] transition-colors">{cat.name}</p>
+                <p className="text-xs text-[hsl(var(--muted-foreground))]">
+                  {cat._count?.assets ?? 0} tài sản
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="h-4 w-4 text-[hsl(var(--muted-foreground))]" />
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 }
@@ -414,19 +489,47 @@ export default function AssetsPage() {
   const { data: alertsResp } = useApiData<{ alerts: StockAlert[] }>('assets/stock-alerts?threshold=5');
   const { data: uniformsResp, loading: uniformsLoading } = useApiData<UniformIssue[]>('assets/uniform');
   const { data: maintenanceResp, loading: maintenanceLoading } = useApiData<MaintenanceItem[]>('assets/maintenance');
+  const { data: kitsResp, loading: kitsLoading } = useApiData<KitTemplate[]>('assets/kits');
+  const { data: categoriesResp, loading: categoriesLoading } = useApiData<Category[]>('assets/categories');
 
   const assets = assetsResp?.data ?? [];
   const loans = loansResp?.data ?? [];
   const alerts = alertsResp?.alerts ?? [];
   const uniforms = Array.isArray(uniformsResp) ? uniformsResp : [];
   const maintenance = Array.isArray(maintenanceResp) ? maintenanceResp : [];
+  const kits = Array.isArray(kitsResp) ? kitsResp : [];
+  const categories = Array.isArray(categoriesResp) ? categoriesResp : [];
+
+  const handleCsvExport = async (type: 'assets' | 'loans') => {
+    try {
+      const endpoint = type === 'assets' ? 'assets/export/csv' : 'assets/loans/export/csv';
+      const res = await fetch(`/api/${endpoint}`, { credentials: 'include' });
+      if (!res.ok) return;
+      const { csv, filename } = await res.json();
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename; a.click();
+      URL.revokeObjectURL(url);
+    } catch { /* silently ignore */ }
+  };
 
   return (
     <div className="space-y-6 p-6">
-      <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-        <Package className="h-8 w-8 text-sky-500" />
-        Tài sản
-      </h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+          <Package className="h-8 w-8 text-sky-500" />
+          Tài sản
+        </h1>
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" onClick={() => handleCsvExport('assets')}>
+            <Download className="h-4 w-4 mr-1" /> Xuất CSV
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => handleCsvExport('loans')}>
+            <Download className="h-4 w-4 mr-1" /> Xuất Phiếu mượn
+          </Button>
+        </div>
+      </div>
 
       {/* Stock Alert Banner */}
       <StockAlertBanner alerts={alerts} />
@@ -461,8 +564,8 @@ export default function AssetsPage() {
       {activeTab === 'loans' && <LoansTab loans={loans} loading={loansLoading} />}
       {activeTab === 'uniform' && <UniformTab uniforms={uniforms} loading={uniformsLoading} />}
       {activeTab === 'maintenance' && <MaintenanceTab items={maintenance} loading={maintenanceLoading} />}
-      {activeTab === 'kits' && <KitsTab />}
-      {activeTab === 'categories' && <CategoriesTab />}
+      {activeTab === 'kits' && <KitsTab kits={kits} loading={kitsLoading} />}
+      {activeTab === 'categories' && <CategoriesTab categories={categories} loading={categoriesLoading} />}
     </div>
   );
 }
