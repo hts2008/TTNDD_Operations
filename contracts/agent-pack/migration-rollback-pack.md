@@ -7,18 +7,18 @@
 
 ## Migration File Registry
 
-| # | Timestamp | Name | Tables | Size Risk |
-|---|-----------|------|--------|-----------|
-| 1 | 20260305110811 | `init_foundation_tables` | 8 | Low |
-| 2 | 20260305112708 | `add_hrm_audit_models` | 5 | Low |
-| 3 | 20260305113109 | `add_reward_engine_models` | 8 | Low |
-| 4 | 20260305113435 | `add_scout_session_event_models` | 15 | Medium |
-| 5 | 20260305114907 | `add_phase2_all_models` | 50 | ⚠️ HIGH |
-| 6 | 20260305121858 | `add_notifications_models` | 4 | Low |
-| 7 | 20260305164804 | `sprint_a_spices_file_system_import` | 12 | Medium |
+| #   | Timestamp      | Name                                 | Tables | Size Risk |
+| --- | -------------- | ------------------------------------ | ------ | --------- |
+| 1   | 20260305110811 | `init_foundation_tables`             | 8      | Low       |
+| 2   | 20260305112708 | `add_hrm_audit_models`               | 5      | Low       |
+| 3   | 20260305113109 | `add_reward_engine_models`           | 8      | Low       |
+| 4   | 20260305113435 | `add_scout_session_event_models`     | 15     | Medium    |
+| 5   | 20260305114907 | `add_phase2_all_models`              | 50     | ⚠️ HIGH   |
+| 6   | 20260305121858 | `add_notifications_models`           | 4      | Low       |
+| 7   | 20260305164804 | `sprint_a_spices_file_system_import` | 12     | Medium    |
 
 **Location:** `apps/api/prisma/migrations/`
-**Total:** 7 migrations → 60 tables
+**Total:** 8 migrations → 63 tables
 
 ---
 
@@ -40,19 +40,21 @@ npx prisma migrate dev --name <descriptive_name>
 ```
 
 ### Migration Naming Rules
-| Prefix | Usage | Example |
-|--------|-------|---------|
-| `add_` | New tables or columns | `add_scout_feedback_table` |
-| `alter_` | Modify existing columns | `alter_events_add_max_age` |
-| `idx_` | Add indexes | `idx_sessions_org_date` |
-| `drop_` | Remove tables/columns | `drop_legacy_guardian_fields` |
-| `fix_` | Fix constraint or data | `fix_member_exp_summary_fk` |
+
+| Prefix   | Usage                   | Example                       |
+| -------- | ----------------------- | ----------------------------- |
+| `add_`   | New tables or columns   | `add_scout_feedback_table`    |
+| `alter_` | Modify existing columns | `alter_events_add_max_age`    |
+| `idx_`   | Add indexes             | `idx_sessions_org_date`       |
+| `drop_`  | Remove tables/columns   | `drop_legacy_guardian_fields` |
+| `fix_`   | Fix constraint or data  | `fix_member_exp_summary_fk`   |
 
 ---
 
 ## Rollback Procedures
 
 ### Dev Environment
+
 ```bash
 # Reset database completely (ONLY for dev)
 npx prisma migrate reset --force
@@ -68,12 +70,14 @@ npx prisma migrate reset --force
 > ⚠️ Prisma does NOT have built-in `migrate down`. Rollback requires manual SQL.
 
 **Procedure:**
+
 1. Create a new migration that reverses the changes
 2. Name it `rollback_{original_name}`
 3. Manually write the reverse SQL
 4. Apply via `npx prisma migrate deploy`
 
 **Critical Rules:**
+
 - NEVER use `migrate reset` in production
 - NEVER modify a migration file that has been applied
 - ALWAYS test rollback SQL in staging first

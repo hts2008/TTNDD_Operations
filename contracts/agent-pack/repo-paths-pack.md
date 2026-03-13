@@ -40,7 +40,7 @@ platform/                          # Git root
 │   │   │       ├── system/        # System admin
 │   │   │       └── warehouse/     # Data warehouse
 │   │   ├── prisma/
-│   │   │   ├── schema.prisma      # ← DB SSOT (2211 lines, 60 models)
+│   │   │   ├── schema.prisma      # ← DB SSOT (63 models)
 │   │   │   └── migrations/        # 7 migration dirs
 │   │   └── test/                  # E2E tests
 │   ├── web/                       # Next.js frontend
@@ -66,19 +66,19 @@ platform/                          # Git root
 
 ## Module → File Mapping
 
-| Module | Controller | Service | Module File | Test |
-|--------|-----------|---------|-------------|------|
-| HRM | `hrm/*.controller.ts` | `hrm/*.service.ts` | `hrm/hrm.module.ts` | `test/hrm/` |
-| Scout 8A | `scout/scout.controller.ts` | `scout/scout.service.ts` | `scout/scout.module.ts` | `test/scout/` |
-| Sessions 8B | `sessions/sessions.controller.ts` | `sessions/sessions.service.ts` | `sessions/sessions.module.ts` | `test/sessions/` |
-| Events 8C | `events/events-camp.controller.ts` | `events/events-camp.service.ts` | `events/events-camp.module.ts` | `test/events/` |
-| Rewards 9 | `rewards/*.controller.ts` | `rewards/*.service.ts` | `rewards/rewards.module.ts` | `test/rewards/` |
-| LMS 7 | `lms/*.controller.ts` | `lms/*.service.ts` | `lms/lms.module.ts` | `test/lms/` |
-| Projects 2 | `projects/*.controller.ts` | `projects/*.service.ts` | `projects/projects.module.ts` | `test/projects/` |
-| Tickets 3 | `tickets/*.controller.ts` | `tickets/*.service.ts` | `tickets/tickets.module.ts` | `test/tickets/` |
-| Finance 4 | `finance/*.controller.ts` | `finance/*.service.ts` | `finance/finance.module.ts` | `test/finance/` |
-| Assets 5 | `assets/*.controller.ts` | `assets/*.service.ts` | `assets/assets.module.ts` | `test/assets/` |
-| Process 6 | `process/*.controller.ts` | `process/*.service.ts` | `process/process.module.ts` | `test/process/` |
+| Module      | Controller                         | Service                         | Module File                    | Test             |
+| ----------- | ---------------------------------- | ------------------------------- | ------------------------------ | ---------------- |
+| HRM         | `hrm/*.controller.ts`              | `hrm/*.service.ts`              | `hrm/hrm.module.ts`            | `test/hrm/`      |
+| Scout 8A    | `scout/scout.controller.ts`        | `scout/scout.service.ts`        | `scout/scout.module.ts`        | `test/scout/`    |
+| Sessions 8B | `sessions/sessions.controller.ts`  | `sessions/sessions.service.ts`  | `sessions/sessions.module.ts`  | `test/sessions/` |
+| Events 8C   | `events/events-camp.controller.ts` | `events/events-camp.service.ts` | `events/events-camp.module.ts` | `test/events/`   |
+| Rewards 9   | `rewards/*.controller.ts`          | `rewards/*.service.ts`          | `rewards/rewards.module.ts`    | `test/rewards/`  |
+| LMS 7       | `lms/*.controller.ts`              | `lms/*.service.ts`              | `lms/lms.module.ts`            | `test/lms/`      |
+| Projects 2  | `projects/*.controller.ts`         | `projects/*.service.ts`         | `projects/projects.module.ts`  | `test/projects/` |
+| Tickets 3   | `tickets/*.controller.ts`          | `tickets/*.service.ts`          | `tickets/tickets.module.ts`    | `test/tickets/`  |
+| Finance 4   | `finance/*.controller.ts`          | `finance/*.service.ts`          | `finance/finance.module.ts`    | `test/finance/`  |
+| Assets 5    | `assets/*.controller.ts`           | `assets/*.service.ts`           | `assets/assets.module.ts`      | `test/assets/`   |
+| Process 6   | `process/*.controller.ts`          | `process/*.service.ts`          | `process/process.module.ts`    | `test/process/`  |
 
 ---
 
@@ -86,15 +86,15 @@ platform/                          # Git root
 
 ### What Each Module OWNS
 
-| Module | Prisma Models Owned | Events Produced | State Machines |
-|--------|-------------------|-----------------|----------------|
-| HRM | OrgMember, MemberProfile, GuardianLink, etc. (9) | `hrm.*` (7) | member-lifecycle |
-| Scout | ProgramVersion, Domain, Skill*, MemberSkillProgress, etc. (15) | `scout.*` (8) | skill-progress, rank-progression, program-version |
-| Sessions | Session, SessionAttendance, AnnualProgram (3) | `session.*` (5) | session-lifecycle |
-| Events | Event, EventRegistration (2) | `event.*` (6) | event-lifecycle |
-| Rewards | ExpConfig, ExpTransaction, BadgeDefinition, etc. (8) | `rewards.*` (5) | reward-redemption |
-| LMS | Course, Lesson, Quiz, QuizBattle, etc. (8) | `lms.*` (5) | course-progress, quiz-battle |
-| Notifications | Notification*, NotificationDeliveryLog (4) | `notification.*` (3) | — |
+| Module        | Prisma Models Owned                                             | Events Produced      | State Machines                                    |
+| ------------- | --------------------------------------------------------------- | -------------------- | ------------------------------------------------- |
+| HRM           | OrgMember, MemberProfile, GuardianLink, etc. (9)                | `hrm.*` (7)          | member-lifecycle                                  |
+| Scout         | ProgramVersion, Domain, Skill\*, MemberSkillProgress, etc. (15) | `scout.*` (8)        | skill-progress, rank-progression, program-version |
+| Sessions      | Session, SessionAttendance, AnnualProgram (3)                   | `session.*` (5)      | session-lifecycle                                 |
+| Events        | Event, EventRegistration (2)                                    | `event.*` (6)        | event-lifecycle                                   |
+| Rewards       | ExpConfig, ExpTransaction, BadgeDefinition, etc. (8)            | `rewards.*` (5)      | reward-redemption                                 |
+| LMS           | Course, Lesson, Quiz, QuizBattle, etc. (8)                      | `lms.*` (5)          | course-progress, quiz-battle                      |
+| Notifications | Notification\*, NotificationDeliveryLog (4)                     | `notification.*` (3) | —                                                 |
 
 ### Cross-Module Consumption Rules
 
