@@ -1,0 +1,17 @@
+# Ignore node_modules — Cloud Build runs pnpm install
+node_modules/
+.git/
+*.md
+!README.md
+.env*
+.vscode/
+.idea/
+tests/
+coverage/
+docs/
+scripts/
+.shared/
+.agent/
+*.spec.ts
+*.test.ts
+dist/

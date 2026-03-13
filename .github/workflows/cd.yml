@@ -2,7 +2,7 @@ name: Deploy to Cloud Run
 on:
   push:
     branches: [main]
-    paths: ['apps/api/**', 'packages/**']
+    paths: ['apps/api/**', 'packages/**', '.github/workflows/cd.yml']
 
 jobs:
   deploy-api:
@@ -24,6 +24,8 @@ jobs:
             --tag gcr.io/${{ secrets.GCP_PROJECT_ID }}/ttndd-api:${{ github.sha }} \
             --project ${{ secrets.GCP_PROJECT_ID }} \
             -f apps/api/Dockerfile \
+            --suppress-logs \
+            --timeout=600 \
             .
       - run: |
           gcloud run deploy ttndd-api \
