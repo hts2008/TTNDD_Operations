@@ -23,7 +23,8 @@ jobs:
           gcloud builds submit \
             --tag gcr.io/${{ secrets.GCP_PROJECT_ID }}/ttndd-api:${{ github.sha }} \
             --project ${{ secrets.GCP_PROJECT_ID }} \
-            apps/api
+            -f apps/api/Dockerfile \
+            .
       - run: |
           gcloud run deploy ttndd-api \
             --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/ttndd-api:${{ github.sha }} \
@@ -31,6 +32,8 @@ jobs:
             --platform managed \
             --allow-unauthenticated \
             --set-env-vars "NODE_ENV=production" \
-            --max-instances 2 \
-            --memory 512Mi \
+            --max-instances 3 \
+            --memory 1Gi \
+            --cpu 2 \
+            --add-cloudsql-instances ttndd-platform-2026:asia-southeast1:ttndd-db \
             --project ${{ secrets.GCP_PROJECT_ID }}
