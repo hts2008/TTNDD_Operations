@@ -104,11 +104,34 @@ modules:
     active: true
     required_routes:
       - /assets
+      - /assets/:id
+      - /assets/categories
+      - /assets/loans
+      - /assets/loans/overdue
+      - /assets/loans/:loanId/transition
+      - /assets/loans/:loanId/guardian-accept
+      - /assets/kits
+      - /assets/kits/:templateId/checklist
+      - /assets/maintenance
+      - /assets/maintenance/:scheduleId/complete
+      - /assets/uniform
+      - /assets/uniform/issue
+      - /assets/uniform/:uniformId/return
+      - /assets/stock-alerts
+      - /assets/export/csv
+      - /assets/loans/export/csv
     required_openapi_tags: [Assets]
     required_seed:
       - assets_demo
+      - assets_kit_templates
+      - assets_maintenance_schedules
+      - assets_uniform_issues
+      - assets_sample_loans
     required_e2e:
       - tests/e2e/assets/loan-return.spec.ts
+      - tests/e2e/assets/kit-checklist.spec.ts
+      - tests/e2e/assets/uniform-flow.spec.ts
+      - tests/e2e/assets/csv-export.spec.ts
 
   PROCESS:
     active: true
