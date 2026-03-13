@@ -1098,8 +1098,10 @@ model Asset {
   createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   updatedAt     DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
 
-  category AssetCategory @relation(fields: [categoryId], references: [id])
-  loans    AssetLoan[]
+  category     AssetCategory       @relation(fields: [categoryId], references: [id])
+  loans        AssetLoan[]
+  customFields AssetCustomField[]
+  maintenance  MaintenanceSchedule[]
 
   @@index([orgId])
   @@map("assets")
@@ -1134,6 +1136,91 @@ model AssetLoan {
   @@index([orgId])
   @@index([orgId, status, expectedReturn]) // T-1088: overdue loan queries
   @@map("asset_loans")
+}
+
+model AssetCustomField {
+  id         String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId      String  @map("org_id") @db.Uuid
+  assetId    String  @map("asset_id") @db.Uuid
+  fieldName  String  @map("field_name") @db.VarChar(100)
+  fieldValue String? @map("field_value")
+  fieldType  String  @default("text") @map("field_type") @db.VarChar(30)
+
+  asset Asset @relation(fields: [assetId], references: [id])
+
+  @@unique([assetId, fieldName])
+  @@index([orgId])
+  @@map("asset_custom_fields")
+}
+
+model KitTemplate {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId       String   @map("org_id") @db.Uuid
+  name        String   @db.VarChar(255)
+  description String?
+  kitType     String   @default("standard") @map("kit_type") @db.VarChar(50)
+  isActive    Boolean  @default(true) @map("is_active")
+  createdBy   String?  @map("created_by") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  items KitTemplateItem[]
+
+  @@index([orgId])
+  @@map("kit_templates")
+}
+
+model KitTemplateItem {
+  id         String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId      String  @map("org_id") @db.Uuid
+  templateId String  @map("template_id") @db.Uuid
+  itemName   String  @map("item_name") @db.VarChar(255)
+  quantity   Int     @default(1)
+  isRequired Boolean @default(true) @map("is_required")
+  notes      String?
+
+  template KitTemplate @relation(fields: [templateId], references: [id])
+
+  @@index([templateId])
+  @@map("kit_template_items")
+}
+
+model MaintenanceSchedule {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId           String    @map("org_id") @db.Uuid
+  assetId         String    @map("asset_id") @db.Uuid
+  maintenanceType String    @map("maintenance_type") @db.VarChar(100)
+  frequency       String    @default("monthly") @db.VarChar(30)
+  nextDue         DateTime  @map("next_due") @db.Date
+  lastPerformed   DateTime? @map("last_performed") @db.Timestamptz()
+  status          String    @default("scheduled") @db.VarChar(30)
+  assignedTo      String?   @map("assigned_to") @db.Uuid
+  notes           String?
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+
+  asset Asset @relation(fields: [assetId], references: [id])
+
+  @@index([orgId])
+  @@index([orgId, status, nextDue])
+  @@map("maintenance_schedules")
+}
+
+model UniformIssue {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId       String    @map("org_id") @db.Uuid
+  memberId    String    @map("member_id") @db.Uuid
+  uniformType String    @map("uniform_type") @db.VarChar(100)
+  size        String    @db.VarChar(20)
+  quantity    Int       @default(1)
+  status      String    @default("issued") @db.VarChar(30)
+  issuedDate  DateTime  @default(now()) @map("issued_date") @db.Date
+  returnDate  DateTime? @map("return_date") @db.Date
+  notes       String?
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+
+  @@index([orgId])
+  @@index([orgId, memberId])
+  @@map("uniform_issues")
 }
 
 // ============================================================
