@@ -15,7 +15,7 @@ import { Type } from 'class-transformer';
 // ── Categories ──
 
 export class CreateCategoryDto {
-  @ApiProperty() @IsString() @IsNotEmpty() name: string;
+  @ApiProperty() @IsString() @IsNotEmpty() name!: string;
   @ApiPropertyOptional() @IsOptional() @IsString() description?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() ownerType?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() branchId?: string;
@@ -25,9 +25,9 @@ export class CreateCategoryDto {
 // ── Assets ──
 
 export class CreateAssetDto {
-  @ApiProperty() @IsString() @IsNotEmpty() assetCode: string;
-  @ApiProperty() @IsString() @IsNotEmpty() name: string;
-  @ApiProperty() @IsString() @IsNotEmpty() categoryId: string;
+  @ApiProperty() @IsString() @IsNotEmpty() assetCode!: string;
+  @ApiProperty() @IsString() @IsNotEmpty() name!: string;
+  @ApiProperty() @IsString() @IsNotEmpty() categoryId!: string;
   @ApiPropertyOptional() @IsOptional() @IsString() ownerType?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() branchId?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() condition?: string;
@@ -58,11 +58,11 @@ export class UpdateAssetDto {
 // ── Loans ──
 
 export class CreateLoanDto {
-  @ApiProperty() @IsString() @IsNotEmpty() assetId: string;
+  @ApiProperty() @IsString() @IsNotEmpty() assetId!: string;
   @ApiPropertyOptional() @IsOptional() @IsInt() @Min(1) quantity?: number;
-  @ApiProperty() @IsString() @IsNotEmpty() borrowerId: string;
+  @ApiProperty() @IsString() @IsNotEmpty() borrowerId!: string;
   @ApiPropertyOptional() @IsOptional() @IsString() purpose?: string;
-  @ApiProperty() @IsDateString() expectedReturn: string;
+  @ApiProperty() @IsDateString() expectedReturn!: string;
   @ApiPropertyOptional() @IsOptional() @IsBoolean() isBorrowerMinor?: boolean;
 }
 
@@ -70,7 +70,7 @@ export class TransitionLoanDto {
   @ApiProperty({ description: 'Action: approve, checkout, return, report_lost' })
   @IsString()
   @IsNotEmpty()
-  action: string;
+  action!: string;
   @ApiPropertyOptional() @IsOptional() @IsString() conditionOnReturn?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() returnNotes?: string;
 }
@@ -79,29 +79,29 @@ export class GuardianAcceptDto {
   @ApiProperty({ description: 'accept or reject' })
   @IsString()
   @IsNotEmpty()
-  decision: string; // 'accept' | 'reject'
+  decision!: string; // 'accept' | 'reject'
   @ApiPropertyOptional() @IsOptional() @IsString() notes?: string;
 }
 
 // ── Custom Fields ──
 
 export class SetCustomFieldDto {
-  @ApiProperty() @IsString() @IsNotEmpty() fieldName: string;
-  @ApiProperty() @IsString() fieldValue: string;
+  @ApiProperty() @IsString() @IsNotEmpty() fieldName!: string;
+  @ApiProperty() @IsString() fieldValue!: string;
   @ApiPropertyOptional() @IsOptional() @IsString() fieldType?: string;
 }
 
 // ── Kit Templates ──
 
 export class KitItemDto {
-  @ApiProperty() @IsString() @IsNotEmpty() itemName: string;
+  @ApiProperty() @IsString() @IsNotEmpty() itemName!: string;
   @ApiPropertyOptional() @IsOptional() @IsInt() @Min(1) quantity?: number;
   @ApiPropertyOptional() @IsOptional() @IsBoolean() isRequired?: boolean;
   @ApiPropertyOptional() @IsOptional() @IsString() notes?: string;
 }
 
 export class CreateKitTemplateDto {
-  @ApiProperty() @IsString() @IsNotEmpty() name: string;
+  @ApiProperty() @IsString() @IsNotEmpty() name!: string;
   @ApiPropertyOptional() @IsOptional() @IsString() description?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() kitType?: string;
   @ApiPropertyOptional()
@@ -115,10 +115,10 @@ export class CreateKitTemplateDto {
 // ── Maintenance ──
 
 export class CreateMaintenanceDto {
-  @ApiProperty() @IsString() @IsNotEmpty() assetId: string;
-  @ApiProperty() @IsString() @IsNotEmpty() maintenanceType: string;
+  @ApiProperty() @IsString() @IsNotEmpty() assetId!: string;
+  @ApiProperty() @IsString() @IsNotEmpty() maintenanceType!: string;
   @ApiPropertyOptional() @IsOptional() @IsString() frequency?: string;
-  @ApiProperty() @IsDateString() nextDue: string;
+  @ApiProperty() @IsDateString() nextDue!: string;
   @ApiPropertyOptional() @IsOptional() @IsString() assignedTo?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() notes?: string;
 }
@@ -126,9 +126,9 @@ export class CreateMaintenanceDto {
 // ── Import ──
 
 export class ImportAssetItemDto {
-  @ApiProperty() @IsString() @IsNotEmpty() assetCode: string;
-  @ApiProperty() @IsString() @IsNotEmpty() name: string;
-  @ApiProperty() @IsString() @IsNotEmpty() categoryId: string;
+  @ApiProperty() @IsString() @IsNotEmpty() assetCode!: string;
+  @ApiProperty() @IsString() @IsNotEmpty() name!: string;
+  @ApiProperty() @IsString() @IsNotEmpty() categoryId!: string;
   @ApiPropertyOptional() @IsOptional() @IsInt() @Min(1) quantity?: number;
   @ApiPropertyOptional() @IsOptional() @IsString() unit?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() location?: string;
@@ -142,15 +142,15 @@ export class ImportAssetsDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ImportAssetItemDto)
-  items: ImportAssetItemDto[];
+  items!: ImportAssetItemDto[];
 }
 
 // ── Uniform ──
 
 export class IssueUniformDto {
-  @ApiProperty() @IsString() @IsNotEmpty() memberId: string;
-  @ApiProperty() @IsString() @IsNotEmpty() uniformType: string;
-  @ApiProperty() @IsString() @IsNotEmpty() size: string;
+  @ApiProperty() @IsString() @IsNotEmpty() memberId!: string;
+  @ApiProperty() @IsString() @IsNotEmpty() uniformType!: string;
+  @ApiProperty() @IsString() @IsNotEmpty() size!: string;
   @ApiPropertyOptional() @IsOptional() @IsInt() @Min(1) quantity?: number;
   @ApiPropertyOptional() @IsOptional() @IsDateString() issuedDate?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() notes?: string;
@@ -167,6 +167,6 @@ export class DisposeAssetDto {
   @ApiProperty({ description: 'retired | donated | scrapped' })
   @IsString()
   @IsNotEmpty()
-  reason: string;
+  reason!: string;
   @ApiPropertyOptional() @IsOptional() @IsString() notes?: string;
 }
