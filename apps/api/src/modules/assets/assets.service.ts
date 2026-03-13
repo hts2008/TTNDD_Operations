@@ -280,15 +280,6 @@ export class AssetsService {
     });
   }
 
-  // ── QR Code Placeholder ──
-
-  getQrData(orgId: string, assetId: string, assetCode: string) {
-    return {
-      qrPayload: JSON.stringify({ orgId, assetId, assetCode }),
-      message: 'Use this payload with a QR library (e.g. qrcode) to generate the image',
-    };
-  }
-
   // ── Loans ──
 
   async createLoan(

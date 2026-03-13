@@ -141,6 +141,27 @@ modules:
         events_out: [asset.checked_out, asset.returned]
         tests:
           e2e: [tests/e2e/assets/loan-return.spec.ts]
+      - id: ASSET-E2
+        name: Kit Management
+        workflow: create kit template -> add items -> generate checklist -> pack items
+        screens: [/assets]
+        tables: [kit_templates, kit_template_items]
+        tests:
+          e2e: [tests/e2e/assets/kit-checklist.spec.ts]
+      - id: ASSET-E3
+        name: Uniform Tracking
+        workflow: issue uniform -> track wear -> return -> inspect condition
+        screens: [/assets]
+        tables: [uniform_issues]
+        tests:
+          e2e: [tests/e2e/assets/uniform-flow.spec.ts]
+      - id: ASSET-E4
+        name: Maintenance Scheduling
+        workflow: create schedule -> due reminder -> perform -> reschedule
+        screens: [/assets]
+        tables: [maintenance_schedules, asset_custom_fields]
+        tests:
+          e2e: [tests/e2e/assets/csv-export.spec.ts]
 
   FILE_STORAGE:
     epics:
