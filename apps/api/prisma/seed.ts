@@ -2469,74 +2469,78 @@ async function main() {
     });
   }
 
-  // 31. Approval Templates (T-1057: Seed approval templates for M3-B)
-  const approvalTemplateDefs = [
+
+  // ── T-1057: Approval Definitions (5 core DTNDD workflows) ──
+  const approvalDefs = [
     {
       id: 'b9000001-0000-0000-0000-000000000001',
       orgId: org.id,
-      templateCode: 'LEAVE_REQUEST',
       name: 'Xin phép nghỉ',
-      description: 'Huynh trưởng/đoàn sinh xin phép vắng mặt',
-      requiredApprovers: 1,
-      autoApproveAfterDays: 3,
+      description: 'Huynh trưởng/đoàn sinh xin phép vắng mặt sinh hoạt',
+      entityType: 'leave_request',
       isActive: true,
-      formFields: { reason: 'text', fromDate: 'date', toDate: 'date', notifyParent: 'boolean' },
+      steps: [{ name: 'Đội trưởng duyệt', type: 'sequential', signerRole: 'unit_leader' }],
+      triggerConditions: [],
+      thresholds: [],
+      createdBy: 'dddddddd-0000-0000-0000-000000000001',
     },
     {
       id: 'b9000001-0000-0000-0000-000000000002',
       orgId: org.id,
-      templateCode: 'BUDGET_REQUEST',
       name: 'Xin cấp kinh phí',
       description: 'Yêu cầu duyệt ngân sách cho hoạt động',
-      requiredApprovers: 2,
-      autoApproveAfterDays: null,
+      entityType: 'budget',
       isActive: true,
-      formFields: { amount: 'number', purpose: 'text', account: 'select', attachments: 'file' },
+      steps: [
+        { name: 'Trưởng duyệt', type: 'sequential', signerRole: 'branch_leader' },
+        { name: 'Tài chính duyệt', type: 'sequential', signerRole: 'finance_admin' },
+      ],
+      triggerConditions: [{ field: 'amount', operator: 'gte', value: 500000 }],
+      thresholds: [{ minAmount: 500000, maxAmount: 5000000, requiredRole: 'branch_leader', requiredLevel: 1 }],
+      createdBy: 'dddddddd-0000-0000-0000-000000000001',
     },
     {
       id: 'b9000001-0000-0000-0000-000000000003',
       orgId: org.id,
-      templateCode: 'CAMP_CONSENT',
       name: 'Đồng ý tham gia trại',
-      description: 'Phụ huynh duyệt cho con em tham gia trại/sự kiện',
-      requiredApprovers: 1,
-      autoApproveAfterDays: null,
+      description: 'Phụ huynh duyệt cho con em tham gia trại/sự kiện qua đêm',
+      entityType: 'event',
       isActive: true,
-      formFields: {
-        eventId: 'select',
-        childName: 'text',
-        emergencyContact: 'phone',
-        medicalNotes: 'text',
-      },
+      steps: [{ name: 'Phụ huynh đồng ý', type: 'sequential', signerRole: 'guardian' }],
+      triggerConditions: [{ field: 'eventType', operator: 'eq', value: 'camp' }],
+      thresholds: [],
+      createdBy: 'dddddddd-0000-0000-0000-000000000001',
     },
     {
       id: 'b9000001-0000-0000-0000-000000000004',
       orgId: org.id,
-      templateCode: 'INCIDENT_ESCALATION',
       name: 'Leo thang sự cố',
-      description: 'Báo cáo sự cố cần xử lý cấp trên',
-      requiredApprovers: 1,
-      autoApproveAfterDays: null,
+      description: 'Báo cáo sự cố cần xử lý cấp trên (child-safety)',
+      entityType: 'ticket',
       isActive: true,
-      formFields: { incidentId: 'text', severity: 'select', actionRequired: 'text' },
+      steps: [{ name: 'Trưởng ban an toàn duyệt', type: 'sequential', signerRole: 'safety_officer' }],
+      triggerConditions: [{ field: 'category', operator: 'eq', value: 'incident' }],
+      thresholds: [],
+      createdBy: 'dddddddd-0000-0000-0000-000000000001',
     },
     {
       id: 'b9000001-0000-0000-0000-000000000005',
       orgId: org.id,
-      templateCode: 'EXPENSE_CLAIM',
       name: 'Thanh toán chi tiêu',
-      description: 'Xin hoàn trả chi phí đã ứng trước',
-      requiredApprovers: 1,
-      autoApproveAfterDays: 7,
+      description: 'Xin hoàn trả chi phí đã ứng trước cho hoạt động',
+      entityType: 'budget',
       isActive: true,
-      formFields: { amount: 'number', receipt: 'file', description: 'text', accountId: 'select' },
+      steps: [{ name: 'Thủ quỹ duyệt', type: 'sequential', signerRole: 'finance_admin' }],
+      triggerConditions: [],
+      thresholds: [{ minAmount: 0, maxAmount: 2000000, requiredRole: 'finance_admin', requiredLevel: 1 }],
+      createdBy: 'dddddddd-0000-0000-0000-000000000001',
     },
   ];
-  for (const at of approvalTemplateDefs) {
-    await prisma.approvalTemplate.upsert({
-      where: { orgId_templateCode: { orgId: org.id, templateCode: at.templateCode } },
+  for (const ad of approvalDefs) {
+    await prisma.approvalDefinition.upsert({
+      where: { id: ad.id },
       update: {},
-      create: { ...at, formFields: at.formFields as object },
+      create: ad,
     });
   }
 
