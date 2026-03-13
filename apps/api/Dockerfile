@@ -15,16 +15,8 @@ RUN pnpm build --filter=api
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
-RUN corepack enable && corepack prepare pnpm@8 --activate
-COPY --from=builder /app/pnpm-lock.yaml /app/pnpm-workspace.yaml /app/package.json /app/.npmrc ./
-COPY --from=builder /app/apps/api/package.json apps/api/
-COPY --from=builder /app/packages/constants/package.json packages/constants/
-COPY --from=builder /app/packages/shared/package.json packages/shared/
-COPY --from=builder /app/packages/tokens/package.json packages/tokens/
-COPY --from=builder /app/packages/ui/package.json packages/ui/
-RUN pnpm install --frozen-lockfile --prod --ignore-scripts
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/apps/api/node_modules ./apps/api/node_modules
 COPY --from=builder /app/apps/api/dist ./dist
 COPY --from=builder /app/apps/api/prisma ./prisma
 COPY --from=builder /app/apps/api/package.json ./
