@@ -7,13 +7,13 @@ import { Button } from '@/components/ui/button';
 import {
   Package, MapPin, HandMetal, AlertTriangle, ClipboardList, Download,
   Shirt, Settings2, Boxes, Tags, ChevronRight, CalendarClock,
-  CheckCircle2, XCircle, RotateCcw, ArrowDownUp, Wrench, Eye,
+  CheckCircle2, XCircle, RotateCcw, ArrowDownUp, Wrench,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // ── Types ──
 
-type AssetStatus = 'available' | 'in_use' | 'maintenance' | 'retired' | 'disposed';
+type _AssetStatus = 'available' | 'in_use' | 'maintenance' | 'retired' | 'disposed';
 type LoanStatus = 'pending' | 'approved' | 'checked_out' | 'returned' | 'rejected' | 'lost';
 type TabKey = 'inventory' | 'loans' | 'uniform' | 'maintenance' | 'kits' | 'categories';
 
@@ -103,7 +103,6 @@ function useApiData<T>(endpoint: string, deps: unknown[] = []) {
     } finally {
       setLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 
   useEffect(() => { fetchData(); }, [fetchData]);
