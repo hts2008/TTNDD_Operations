@@ -22,8 +22,9 @@ COPY --from=builder /app/packages/constants/package.json packages/constants/
 COPY --from=builder /app/packages/shared/package.json packages/shared/
 COPY --from=builder /app/packages/tokens/package.json packages/tokens/
 COPY --from=builder /app/packages/ui/package.json packages/ui/
-ENV HUSKY=0
-RUN pnpm install --frozen-lockfile --prod
+RUN pnpm install --frozen-lockfile --prod --ignore-scripts
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder /app/apps/api/dist ./dist
 COPY --from=builder /app/apps/api/prisma ./prisma
 COPY --from=builder /app/apps/api/package.json ./
