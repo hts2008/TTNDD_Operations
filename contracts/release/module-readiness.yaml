@@ -5,7 +5,7 @@
 # Actual implementation truth is audited in PROJECT_CONTEXT.md and KANBAN.md.
 release_profile: PROFILE_OPS
 spec_version: 'V10 FINAL'
-last_updated: '2026-03-07'
+last_updated: '2026-03-13'
 
 modules:
   HRM:
@@ -140,10 +140,13 @@ modules:
     active: true
     required_routes:
       - /child-safety
+      - /consent-templates
     required_openapi_tags: [ChildSafety]
-    required_seed: []
+    required_seed:
+      - approval_templates_demo
     required_e2e:
       - tests/e2e/child-safety/report-incident.spec.ts
+      - tests/e2e/tickets/consent-journey.spec.ts
 
   FILE_STORAGE:
     active: true
