@@ -11,13 +11,14 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 RUN cd apps/api && npx prisma generate
 RUN pnpm build --filter=api
+# Dereference pnpm symlinks for Prisma generated client
+RUN cp -rL /app/node_modules/.prisma /app/_prisma_generated
 
 FROM node:20-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/apps/api/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/apps/api/node_modules ./apps/api/node_modules
+COPY --from=builder /app/_prisma_generated ./node_modules/.prisma
 COPY --from=builder /app/apps/api/dist ./dist
 COPY --from=builder /app/apps/api/prisma ./prisma
 COPY --from=builder /app/apps/api/package.json ./
