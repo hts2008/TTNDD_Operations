@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { DomainEventService } from './domain-event.service';
@@ -14,6 +14,7 @@ import { DatabaseModule } from '../database';
  *   APP_ENV=production  → PubSubAdapter (GCP Pub/Sub)
  *   APP_ENV=*           → LocalAdapter (log + DB DLQ)
  */
+@Global()
 @Module({
   imports: [ConfigModule, EventEmitterModule.forRoot(), DatabaseModule],
   providers: [
