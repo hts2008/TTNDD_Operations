@@ -21,11 +21,10 @@ jobs:
       - uses: google-github-actions/setup-gcloud@v2
       - run: |
           gcloud builds submit \
-            --tag gcr.io/${{ secrets.GCP_PROJECT_ID }}/ttndd-api:${{ github.sha }} \
+            --config=cloudbuild.yaml \
+            --substitutions=COMMIT_SHA=${{ github.sha }} \
             --project ${{ secrets.GCP_PROJECT_ID }} \
-            -f apps/api/Dockerfile \
             --suppress-logs \
-            --timeout=600 \
             .
       - run: |
           gcloud run deploy ttndd-api \
