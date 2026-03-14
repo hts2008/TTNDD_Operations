@@ -23,8 +23,14 @@ modules:
   SCOUT:
     active: true
     required_routes:
+      - /scout
       - /skills
       - /skills/:skillId
+      - /scout/evidence/:memberId
+      - /scout/evidence/:evidenceId/review
+      - /scout/progress/:memberId/award
+      - /scout/member-ranks/:memberId/check-eligibility
+      - /scout/dashboard/:memberId
     required_openapi_tags: [Scout]
     required_seed:
       - scout_program_minimal
@@ -65,11 +71,30 @@ modules:
   LMS:
     active: true
     required_routes:
-      - /lms
-      - /lms/:courseId
-    required_openapi_tags: [LMS]
+      - /lms/courses
+      - /lms/courses/:courseId
+      - /lms/courses/:courseId/modules
+      - /lms/courses/:courseId/lessons
+      - /lms/courses/:courseId/enroll
+      - /lms/courses/:courseId/offline-pack
+      - /lms/courses/:courseId/pack-size
+      - /lms/courses/:courseId/completion-rules
+      - /lms/quizzes
+      - /lms/quizzes/:quizId/attempts/start
+      - /lms/attempts/:attemptId/submit
+      - /lms/attempts/:attemptId/grade
+      - /lms/grading-queue
+      - /lms/competencies
+      - /lms/battles/:gameCode
+      - /lms/battles/:gameCode/start
+      - /lms/battles/:gameCode/answer
+      - /lms/battles/:gameCode/scoreboard
+      - /lms/progress/:memberId
+    required_openapi_tags: [LMS, Quiz, Battle]
     required_seed:
       - course_demo
+      - quiz_scout_basics
+      - competencies_demo
     required_e2e:
       - tests/e2e/lms/enroll-complete.spec.ts
 
@@ -138,11 +163,29 @@ modules:
   PROCESS:
     active: true
     required_routes:
-      - /process
+      - /process/sops
+      - /process/sops/:id
+      - /process/definitions
+      - /process/definitions/:id
+      - /process/definitions/:id/graph
+      - /process/definitions/:id/execute
+      - /process/graph-runs/:id
+      - /process/graph-runs/stuck
+      - /process/graph-runs/:id/retry
+      - /process/trigger-event
+      - /process/templates
+      - /process/templates/:slug
+      - /process/templates/:slug/install
+      - /process/templates/seed
+      - /process/definitions/:id/export
+      - /process/definitions/import
+      - /process/health
+      - /process/auto-resolve-stuck
     required_openapi_tags: [Process]
-    required_seed: []
+    required_seed:
+      - workflow_templates_builtin
     required_e2e:
-      - tests/e2e/process/workflow-run.spec.ts
+      - apps/api/e2e/process.e2e.spec.ts
 
   NOTIFICATIONS:
     active: true
