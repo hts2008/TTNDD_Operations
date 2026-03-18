@@ -45,10 +45,11 @@ model Branch {
   settings      Json    @default("{}")
 
   organization    Organization     @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  units           Unit[]
-  orgMembers      OrgMember[]
-  rankDefinitions RankDefinition[]
-  sessions        Session[]
+  units            Unit[]
+  orgMembers       OrgMember[]
+  rankDefinitions  RankDefinition[]
+  sessions         Session[]
+  expVisualConfigs ExpVisualConfig[]
 
   @@unique([orgId, code])
   @@map("branches")
@@ -295,6 +296,29 @@ model ExpConfig {
   @@map("exp_configs")
 }
 
+model ExpVisualConfig {
+  id              String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId           String  @map("org_id") @db.Uuid
+  branchId        String  @map("branch_id") @db.Uuid
+  tier1Name       String  @default("Ngọc Xanh") @map("tier_1_name") @db.VarChar(50)
+  tier1IconUrl    String? @map("tier_1_icon_url")
+  tier1BaseExp    Int     @default(10) @map("tier_1_base_exp")
+  tier2Name       String  @default("Ngọc Vàng") @map("tier_2_name") @db.VarChar(50)
+  tier2IconUrl    String? @map("tier_2_icon_url")
+  tier2Conversion Int     @default(10) @map("tier_2_conversion")
+  tier3Name       String  @default("Ngọc Đỏ") @map("tier_3_name") @db.VarChar(50)
+  tier3IconUrl    String? @map("tier_3_icon_url")
+  tier3Conversion Int     @default(10) @map("tier_3_conversion")
+  tier4Name       String  @default("Ngọc Trắng") @map("tier_4_name") @db.VarChar(50)
+  tier4IconUrl    String? @map("tier_4_icon_url")
+  tier4Conversion Int     @default(10) @map("tier_4_conversion")
+
+  branch Branch @relation(fields: [branchId], references: [id])
+
+  @@unique([orgId, branchId])
+  @@map("exp_visual_configs")
+}
+
 model ExpTransaction {
   id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   orgId           String    @map("org_id") @db.Uuid
@@ -305,6 +329,11 @@ model ExpTransaction {
   sourceModule    String?   @map("source_module") @db.VarChar(100)
   sourceEntityId  String?   @map("source_entity_id") @db.Uuid
   deductionReason String?   @map("deduction_reason")
+  deductionItem   String?   @map("deduction_item") @db.VarChar(100)
+  correctionTask  String?   @map("correction_task")
+  isCorrected     Boolean   @default(false) @map("is_corrected")
+  correctedAt     DateTime? @map("corrected_at") @db.Timestamptz()
+  correctedBy     String?   @map("corrected_by") @db.Uuid
   balanceAfter    Int?      @map("balance_after")
   recordedBy      String?   @map("recorded_by") @db.Uuid
   notes           String?
@@ -421,6 +450,20 @@ model LeaderboardSnapshot {
 
   @@index([orgId, scope, snapshotDate])
   @@map("leaderboard_snapshots")
+}
+
+model PeerRecognition {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId      String   @map("org_id") @db.Uuid
+  fromMember String   @map("from_member_id") @db.Uuid
+  toMember   String   @map("to_member_id") @db.Uuid
+  category   String   @db.VarChar(50)
+  message    String?
+  expAwarded Int      @default(0) @map("exp_awarded")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  @@index([orgId, toMember])
+  @@map("peer_recognitions")
 }
 
 // ============================================================

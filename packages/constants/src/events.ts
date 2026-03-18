@@ -29,6 +29,10 @@ export const DOMAIN_EVENTS = {
     BADGE_AWARDED: 'rewards.badge_awarded',
     LEVEL_UP: 'rewards.level_up',
     ITEM_REDEEMED: 'rewards.item_redeemed',
+    PENALTY_APPLIED: 'rewards.penalty_applied',
+    PENALTY_CORRECTED: 'rewards.penalty_corrected',
+    REDEMPTION_REQUESTED: 'rewards.redemption_requested',
+    PEER_RECOGNIZED: 'rewards.peer_recognized',
   },
 
   // Module 8: Scout
@@ -64,11 +68,21 @@ export const DOMAIN_EVENTS = {
 
   // Module 7: LMS
   LMS: {
+    COURSE_CREATED: 'lms.course_created',
+    COURSE_UPDATED: 'lms.course_updated',
     COURSE_ENROLLED: 'lms.course_enrolled',
+    COURSE_COMPLETED: 'lms.course_completed',
     LESSON_COMPLETED: 'lms.lesson_completed',
+    COMPETENCY_MAPPED: 'lms.competency_mapped',
     QUIZ_SUBMITTED: 'lms.quiz_submitted',
     QUIZ_PASSED: 'lms.quiz_passed',
     QUIZ_FAILED: 'lms.quiz_failed',
+    QUIZ_ATTEMPT_STARTED: 'lms.quiz_attempt_started',
+    QUIZ_ATTEMPT_EXPIRED: 'lms.quiz_attempt_expired',
+    QUIZ_MANUALLY_GRADED: 'lms.quiz_manually_graded',
+    BATTLE_STARTED: 'lms.battle_started',
+    BATTLE_FINISHED: 'lms.battle_finished',
+    BATTLE_ANSWER_SUBMITTED: 'lms.battle_answer_submitted',
   },
 
   // Module 8D: Enrichment

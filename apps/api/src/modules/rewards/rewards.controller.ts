@@ -4,6 +4,9 @@ import { Prisma } from '@prisma/client';
 import { ExpService } from './exp.service';
 import { BadgeService } from './badge.service';
 import { RewardShopService } from './reward-shop.service';
+import { PenaltyService } from './penalty.service';
+import { LeaderboardService } from './leaderboard.service';
+import { PeerRecognitionService } from './peer-recognition.service';
 import { CurrentUser, type CurrentUserPayload, Roles } from '../../common/decorators';
 
 @ApiTags('Rewards')
@@ -14,6 +17,9 @@ export class RewardsController {
     private readonly expService: ExpService,
     private readonly badgeService: BadgeService,
     private readonly shopService: RewardShopService,
+    private readonly penaltyService: PenaltyService,
+    private readonly leaderboardService: LeaderboardService,
+    private readonly peerRecognitionService: PeerRecognitionService,
   ) {}
 
   // ── EXP Config ──
@@ -30,7 +36,16 @@ export class RewardsController {
   @ApiOperation({ summary: 'Upsert EXP config rule' })
   upsertExpConfig(
     @CurrentUser() user: CurrentUserPayload,
-    @Body() body: { eventType: string; sourceModule: string; actionName: string; expAmount: number; maxPerDay?: number; maxPerWeek?: number; description?: string },
+    @Body()
+    body: {
+      eventType: string;
+      sourceModule: string;
+      actionName: string;
+      expAmount: number;
+      maxPerDay?: number;
+      maxPerWeek?: number;
+      description?: string;
+    },
   ) {
     return this.expService.upsertConfig(user.orgId, body);
   }
@@ -44,7 +59,16 @@ export class RewardsController {
     @CurrentUser() user: CurrentUserPayload,
     @Body() body: { memberId: string; amount: number; notes?: string },
   ) {
-    return this.expService.awardExp(user.orgId, body.memberId, body.amount, 'manual_award', 'admin', undefined, user.userId, body.notes);
+    return this.expService.awardExp(
+      user.orgId,
+      body.memberId,
+      body.amount,
+      'manual_award',
+      'admin',
+      undefined,
+      user.userId,
+      body.notes,
+    );
   }
 
   @Post('exp/deduct')
@@ -54,7 +78,13 @@ export class RewardsController {
     @CurrentUser() user: CurrentUserPayload,
     @Body() body: { memberId: string; amount: number; reason: string },
   ) {
-    return this.expService.deductExp(user.orgId, body.memberId, body.amount, body.reason, user.userId);
+    return this.expService.deductExp(
+      user.orgId,
+      body.memberId,
+      body.amount,
+      body.reason,
+      user.userId,
+    );
   }
 
   // ── EXP Member View ──
@@ -76,16 +106,108 @@ export class RewardsController {
     return this.expService.getTransactions(user.orgId, memberId, page ?? 1, limit ?? 20);
   }
 
-  // ── Leaderboard ──
+  // ── Penalties (G3) ──
+
+  @Post('penalties')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Apply a penalty (deduct EXP with metadata)' })
+  applyPenalty(
+    @CurrentUser() user: CurrentUserPayload,
+    @Body()
+    body: {
+      memberId: string;
+      amount: number;
+      reason: string;
+      deductionItem?: string;
+      correctionTask?: string;
+    },
+  ) {
+    return this.penaltyService.applyPenalty(
+      user.orgId,
+      body.memberId,
+      body.amount,
+      body.reason,
+      user.userId,
+      body.deductionItem,
+      body.correctionTask,
+    );
+  }
+
+  @Post('penalties/:id/correct')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Correct (reverse) a penalty' })
+  correctPenalty(@CurrentUser() user: CurrentUserPayload, @Param('id') penaltyTxId: string) {
+    return this.penaltyService.correctPenalty(user.orgId, penaltyTxId, user.userId);
+  }
+
+  // ── Leaderboard (G6) ──
 
   @Get('leaderboard')
-  @ApiOperation({ summary: 'Get EXP leaderboard' })
+  @ApiOperation({ summary: 'Get EXP leaderboard with scope filtering' })
   getLeaderboard(
     @CurrentUser() user: CurrentUserPayload,
     @Query('scope') scope?: string,
+    @Query('scopeId') scopeId?: string,
     @Query('limit') limit?: number,
   ) {
-    return this.expService.getLeaderboard(user.orgId, scope ?? 'org', limit ?? 20);
+    return this.leaderboardService.getLive(user.orgId, scope ?? 'org', scopeId, limit ?? 20);
+  }
+
+  @Get('leaderboard/snapshots')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Get historical leaderboard snapshots' })
+  getLeaderboardSnapshots(
+    @CurrentUser() user: CurrentUserPayload,
+    @Query('scope') scope?: string,
+    @Query('period') period?: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    return this.leaderboardService.getSnapshots(
+      user.orgId,
+      scope ?? 'org',
+      period,
+      page ?? 1,
+      limit ?? 10,
+    );
+  }
+
+  @Post('leaderboard/snapshot')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Take a leaderboard snapshot' })
+  takeLeaderboardSnapshot(
+    @CurrentUser() user: CurrentUserPayload,
+    @Body() body: { scope?: string; scopeId?: string; period?: string },
+  ) {
+    return this.leaderboardService.takeSnapshot(user.orgId, body.scope, body.scopeId, body.period);
+  }
+
+  // ── Peer Recognition (G5) ──
+
+  @Post('peer-recognition')
+  @ApiOperation({ summary: 'Give recognition to a peer' })
+  givePeerRecognition(
+    @CurrentUser() user: CurrentUserPayload,
+    @Body() body: { toMemberId: string; category: string; message?: string },
+  ) {
+    return this.peerRecognitionService.give(
+      user.orgId,
+      user.memberId!,
+      body.toMemberId,
+      body.category,
+      body.message,
+    );
+  }
+
+  @Get('peer-recognition/received/:memberId')
+  @ApiOperation({ summary: 'Get recognitions received by a member' })
+  getPeerRecognitionsReceived(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('memberId') memberId: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    return this.peerRecognitionService.getReceived(user.orgId, memberId, page ?? 1, limit ?? 20);
   }
 
   // ── Badges ──
@@ -101,7 +223,19 @@ export class RewardsController {
   @ApiOperation({ summary: 'Create badge definition' })
   createBadgeDefinition(
     @CurrentUser() user: CurrentUserPayload,
-    @Body() body: { badgeCode: string; name: string; description?: string; badgeType?: string; imageUrl: string; rarity?: string; triggerEvent?: string; triggerConfig?: Prisma.InputJsonValue; expReward?: number; isAutoAward?: boolean },
+    @Body()
+    body: {
+      badgeCode: string;
+      name: string;
+      description?: string;
+      badgeType?: string;
+      imageUrl: string;
+      rarity?: string;
+      triggerEvent?: string;
+      triggerConfig?: Prisma.InputJsonValue;
+      expReward?: number;
+      isAutoAward?: boolean;
+    },
   ) {
     return this.badgeService.createDefinition(user.orgId, body);
   }
@@ -113,7 +247,14 @@ export class RewardsController {
     @CurrentUser() user: CurrentUserPayload,
     @Body() body: { memberId: string; badgeId: string; notes?: string },
   ) {
-    return this.badgeService.awardBadge(user.orgId, body.memberId, body.badgeId, undefined, body.notes, user.userId);
+    return this.badgeService.awardBadge(
+      user.orgId,
+      body.memberId,
+      body.badgeId,
+      undefined,
+      body.notes,
+      user.userId,
+    );
   }
 
   @Get('badges/member/:memberId')
@@ -135,17 +276,23 @@ export class RewardsController {
   @ApiOperation({ summary: 'Create shop item' })
   createShopItem(
     @CurrentUser() user: CurrentUserPayload,
-    @Body() body: { name: string; description?: string; costExp: number; category?: string; imageUrl?: string; quantityAvailable?: number; validUntil?: string },
+    @Body()
+    body: {
+      name: string;
+      description?: string;
+      costExp: number;
+      category?: string;
+      imageUrl?: string;
+      quantityAvailable?: number;
+      validUntil?: string;
+    },
   ) {
     return this.shopService.createItem(user.orgId, body);
   }
 
   @Post('shop/redeem')
   @ApiOperation({ summary: 'Redeem a shop item (spend EXP)' })
-  redeem(
-    @CurrentUser() user: CurrentUserPayload,
-    @Body() body: { rewardId: string },
-  ) {
+  redeem(@CurrentUser() user: CurrentUserPayload, @Body() body: { rewardId: string }) {
     return this.shopService.redeem(user.orgId, user.memberId!, body.rewardId);
   }
 
