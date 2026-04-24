@@ -2,6 +2,10 @@ import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { FinanceService } from './finance.service';
 import { CurrentUser, type CurrentUserPayload, Roles } from '../../common/decorators';
+import {
+  CreateAccountDto, CreateTransactionDto, TransitionTransactionDto,
+  CreateFeeDto, PayFeeDto,
+} from './finance.dto';
 
 @ApiTags('Finance')
 @ApiBearerAuth()
@@ -16,12 +20,9 @@ export class FinanceController {
   @ApiOperation({ summary: 'Create financial account' })
   createAccount(
     @CurrentUser() user: CurrentUserPayload,
-    @Body() body: {
-      name: string; accountType?: string; branchId?: string;
-      currency?: string; description?: string;
-    },
+    @Body() dto: CreateAccountDto,
   ) {
-    return this.financeService.createAccount(user.orgId, body, user.userId);
+    return this.financeService.createAccount(user.orgId, dto, user.userId);
   }
 
   @Get('accounts')
@@ -55,14 +56,9 @@ export class FinanceController {
   @ApiOperation({ summary: 'Create a financial transaction' })
   createTransaction(
     @CurrentUser() user: CurrentUserPayload,
-    @Body() body: {
-      accountId: string; transactionType: string; category?: string;
-      amount: number; description: string; sourceType?: string;
-      sourceId?: string; referenceNo?: string; transactionDate: string;
-      receiptUrls?: string[];
-    },
+    @Body() dto: CreateTransactionDto,
   ) {
-    return this.financeService.createTransaction(user.orgId, body, user.userId);
+    return this.financeService.createTransaction(user.orgId, dto, user.userId);
   }
 
   @Post('transactions/:id/transition')
@@ -71,9 +67,9 @@ export class FinanceController {
   transitionTransaction(
     @CurrentUser() user: CurrentUserPayload,
     @Param('id') id: string,
-    @Body('action') action: string,
+    @Body() dto: TransitionTransactionDto,
   ) {
-    return this.financeService.transitionTransaction(user.orgId, id, action, user.userId);
+    return this.financeService.transitionTransaction(user.orgId, id, dto.action, user.userId);
   }
 
   // ── Fees ──
@@ -83,12 +79,9 @@ export class FinanceController {
   @ApiOperation({ summary: 'Create a member fee' })
   createFee(
     @CurrentUser() user: CurrentUserPayload,
-    @Body() body: {
-      orgMemberId: string; feeType?: string; feePeriod?: string;
-      amountDue: number; dueDate?: string; notes?: string;
-    },
+    @Body() dto: CreateFeeDto,
   ) {
-    return this.financeService.createFee(user.orgId, body, user.userId);
+    return this.financeService.createFee(user.orgId, dto, user.userId);
   }
 
   @Post('fees/:id/pay')
@@ -97,9 +90,9 @@ export class FinanceController {
   payFee(
     @CurrentUser() user: CurrentUserPayload,
     @Param('id') id: string,
-    @Body() body: { amount: number; transactionId?: string },
+    @Body() dto: PayFeeDto,
   ) {
-    return this.financeService.payFee(user.orgId, id, body.amount, body.transactionId, user.userId);
+    return this.financeService.payFee(user.orgId, id, dto.amount, dto.transactionId, user.userId);
   }
 
   @Get('fees')

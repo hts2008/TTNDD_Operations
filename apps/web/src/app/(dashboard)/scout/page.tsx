@@ -180,12 +180,13 @@ export default function ScoutDashboardPage() {
                 );
               })}
             </div>
-            <Button variant="outline" size="sm" className="w-full mt-4" asChild>
-              <a href="/skills">
-                <BookOpen className="h-4 w-4 mr-1" />
-                Xem Kỹ năng & Đẳng thứ chi tiết
-              </a>
-            </Button>
+            <a
+              href="/skills"
+              className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-[hsl(var(--background))] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2 border border-[hsl(var(--input))] bg-transparent hover:bg-[hsl(var(--accent))] hover:text-[hsl(var(--accent-foreground))] h-9 px-3 w-full mt-4"
+            >
+              <BookOpen className="h-4 w-4 mr-1" />
+              Xem Kỹ năng & Đẳng thứ chi tiết
+            </a>
           </CardContent>
         </Card>
 

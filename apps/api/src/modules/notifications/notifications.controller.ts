@@ -12,6 +12,7 @@ import {
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { NotificationsService } from './notifications.service';
 import { CurrentUser, type CurrentUserPayload, Roles } from '../../common/decorators';
+import { UpdatePreferenceDto, UpsertTemplateDto } from './notifications.dto';
 
 @ApiTags('Notifications')
 @ApiBearerAuth()
@@ -79,7 +80,7 @@ export class NotificationsController {
   @ApiOperation({ summary: 'Update a notification preference' })
   updatePreference(
     @CurrentUser() user: CurrentUserPayload,
-    @Body() body: { channel: string; eventType: string; enabled: boolean },
+    @Body() body: UpdatePreferenceDto,
   ) {
     return this.notificationsService.updatePreference(
       user.orgId,
@@ -104,7 +105,7 @@ export class NotificationsController {
   @ApiOperation({ summary: 'Create or update a notification template' })
   upsertTemplate(
     @CurrentUser() user: CurrentUserPayload,
-    @Body() body: { eventType: string; channel: string; title: string; body: string; isActive?: boolean },
+    @Body() body: UpsertTemplateDto,
   ) {
     return this.notificationsService.upsertTemplate(user.orgId, body);
   }

@@ -178,4 +178,117 @@ describe('NotificationsService', () => {
       expect(result).toBe(false);
     });
   });
+
+  // ── Preferences ────────────────────────────────────────
+
+  describe('getPreferences', () => {
+    it('should return preferences for user', async () => {
+      prisma.notificationPreference.findMany.mockResolvedValue([
+        { id: 'pref-1', channel: 'in_app', eventType: 'test', enabled: true },
+      ]);
+      const result = await service.getPreferences('org-1', 'u-1');
+      expect(result).toHaveLength(1);
+      expect(prisma.notificationPreference.findMany).toHaveBeenCalledWith({
+        where: { orgId: 'org-1', userId: 'u-1' },
+      });
+    });
+  });
+
+  describe('updatePreference', () => {
+    it('should upsert preference', async () => {
+      await service.updatePreference('org-1', 'u-1', 'zalo', 'test_event', false);
+      expect(prisma.notificationPreference.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { userId_channel_eventType: { userId: 'u-1', channel: 'zalo', eventType: 'test_event' } },
+          create: expect.objectContaining({ enabled: false }),
+          update: { enabled: false },
+        }),
+      );
+    });
+  });
+
+  // ── Templates ──────────────────────────────────────────
+
+  describe('getTemplates', () => {
+    it('should return templates ordered by eventType', async () => {
+      prisma.notificationTemplate.findMany.mockResolvedValue([
+        { id: 't-1', eventType: 'a_event' },
+        { id: 't-2', eventType: 'b_event' },
+      ]);
+      const result = await service.getTemplates('org-1');
+      expect(result).toHaveLength(2);
+      expect(prisma.notificationTemplate.findMany).toHaveBeenCalledWith({
+        where: { orgId: 'org-1' },
+        orderBy: { eventType: 'asc' },
+      });
+    });
+  });
+
+  describe('upsertTemplate', () => {
+    it('should upsert template with composite key', async () => {
+      await service.upsertTemplate('org-1', {
+        eventType: 'member_joined',
+        channel: 'in_app',
+        title: 'Welcome {{name}}',
+        body: 'Chào mừng {{name}} gia nhập!',
+      });
+      expect(prisma.notificationTemplate.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { orgId_eventType_channel: { orgId: 'org-1', eventType: 'member_joined', channel: 'in_app' } },
+        }),
+      );
+    });
+
+    it('should default isActive to true on update', async () => {
+      await service.upsertTemplate('org-1', {
+        eventType: 'test', channel: 'in_app', title: 'T', body: 'B',
+      });
+      const call = prisma.notificationTemplate.upsert.mock.calls[0][0];
+      expect(call.update.isActive).toBe(true);
+    });
+  });
+
+  // ── sendBulk ───────────────────────────────────────────
+
+  describe('sendBulk', () => {
+    it('should send to multiple recipients and publish event', async () => {
+      const result = await service.sendBulk('org-1', ['u-1', 'u-2', 'u-3'], {
+        title: 'Announcement', body: 'Meeting at 5pm', type: 'announcement',
+      });
+      expect(result.total).toBe(3);
+      expect(result.sent).toBe(3);
+      expect(result.suppressed).toBe(0);
+      expect(domainEvents.publish).toHaveBeenCalled();
+    });
+
+    it('should count suppressed notifications', async () => {
+      prisma.notificationPreference.findFirst
+        .mockResolvedValueOnce({ enabled: false })
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce({ enabled: false });
+      const result = await service.sendBulk('org-1', ['u-1', 'u-2', 'u-3'], {
+        title: 'Test', body: 'Body', type: 'test',
+      });
+      expect(result.suppressed).toBe(2);
+      expect(result.sent).toBe(1);
+    });
+  });
+
+  // ── findByRecipient ────────────────────────────────────
+
+  describe('findByRecipient', () => {
+    it('should paginate results with meta', async () => {
+      const result = await service.findByRecipient('org-1', 'u-1', 2, 10);
+      expect(result.meta).toEqual({ total: 1, page: 2, limit: 10 });
+      expect(prisma.notification.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ skip: 10, take: 10 }),
+      );
+    });
+
+    it('should filter unread only when requested', async () => {
+      await service.findByRecipient('org-1', 'u-1', 1, 20, true);
+      const call = prisma.notification.findMany.mock.calls[0][0];
+      expect(call.where.isRead).toBe(false);
+    });
+  });
 });
