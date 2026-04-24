@@ -248,6 +248,10 @@ model MemberBranchHistory {
   transitionDate DateTime @map("transition_date") @db.Date
   reason         String?
   approvedBy     String?  @map("approved_by") @db.Uuid
+  // T-1010: Transfer handover signature fields
+  handoverSignedBy String?   @map("handover_signed_by") @db.Uuid
+  handoverSignedAt DateTime? @map("handover_signed_at") @db.Timestamptz()
+  handoverNote     String?   @map("handover_note")
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz()
 
   orgMember OrgMember @relation(fields: [orgMemberId], references: [id])

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../core/database';
 import { DomainEventService } from '../../core/events';
@@ -6,38 +6,18 @@ import { AuditService } from '../../core/audit';
 import { DOMAIN_EVENTS } from '@ttndd/constants';
 import { MemberLifecycleService } from './member-lifecycle.service';
 import { MemberValidationService } from './member-validation.service';
-
-interface CreateMemberDto {
-  userId: string;
-  role: string;
-  branchId?: string;
-  unitId?: string;
-  memberCode?: string;
-  scoutName?: string;
-  heroName?: string;
-  profile: {
-    fullName: string;
-    birthDate?: string;
-    gender?: string;
-    address?: string;
-    personalPhone?: string;
-    personalEmail?: string;
-    guardianName?: string;
-    guardianPhone?: string;
-    guardianRelation?: string;
-    healthNotes?: string;
-    emergencyContact?: string;
-  };
-}
-
-interface TransferMemberDto {
-  toBranchId: string;
-  toUnitId?: string;
-  reason?: string;
-}
+import {
+  CreateMemberDto,
+  UpdateMemberProfileDto,
+  TransferMemberDto,
+  AssignUnitDto,
+  SignTransferDto,
+} from './hrm.dto';
 
 @Injectable()
 export class HrmService {
+  private readonly logger = new Logger(HrmService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly domainEvents: DomainEventService,
@@ -45,6 +25,8 @@ export class HrmService {
     private readonly lifecycle: MemberLifecycleService,
     private readonly validation: MemberValidationService,
   ) {}
+
+  // ─── T-1001/T-1004: Create member with validated DTO ──────────────
 
   async createMember(orgId: string, dto: CreateMemberDto, actorUserId: string) {
     // T-0043: Age→Branch validation
@@ -59,6 +41,17 @@ export class HrmService {
       );
       if (!ageBranch.valid) {
         throw new BadRequestException(ageBranch.reason);
+      }
+    }
+
+    // T-1002: Under-age guardian requirement check at creation
+    if (dto.profile.birthDate) {
+      const needsGuardian = this.validation.requiresGuardian(new Date(dto.profile.birthDate));
+      if (needsGuardian && !dto.profile.guardianName && !dto.profile.guardianPhone) {
+        this.logger.warn(
+          `Creating under-18 member without guardian info — compliance flag will be raised`,
+          { orgId, fullName: dto.profile.fullName },
+        );
       }
     }
 
@@ -112,8 +105,11 @@ export class HrmService {
       newValue: { role: dto.role, fullName: dto.profile.fullName },
     });
 
+    this.logger.log(`Member created: ${member.id}`, { orgId, role: dto.role });
     return member;
   }
+
+  // ─── T-1004: List with proper filtering ───────────────────────────
 
   async findMany(
     orgId: string,
@@ -149,7 +145,7 @@ export class HrmService {
       this.prisma.orgMember.count({ where }),
     ]);
 
-    return { data, meta: { total, page, limit } };
+    return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } };
   }
 
   async findById(orgId: string, memberId: string) {
@@ -170,48 +166,74 @@ export class HrmService {
     return member;
   }
 
+  // ─── T-1004: Update with audit oldValue ───────────────────────────
+
   async updateProfile(
     orgId: string,
     memberId: string,
-    data: Partial<CreateMemberDto['profile']>,
+    data: UpdateMemberProfileDto,
     actorUserId: string,
   ) {
     const member = await this.findById(orgId, memberId);
     if (!member.profile) throw new NotFoundException('Member profile not found');
 
+    // Capture old values for audit trail
+    const oldValue: Record<string, unknown> = {};
     const updateData: Prisma.MemberProfileUpdateInput = {};
-    if (data.fullName) updateData.fullName = data.fullName;
-    if (data.birthDate) updateData.birthDate = new Date(data.birthDate);
-    if (data.gender !== undefined) updateData.gender = data.gender;
-    if (data.address !== undefined) updateData.address = data.address;
-    if (data.personalPhone !== undefined) updateData.personalPhone = data.personalPhone;
-    if (data.personalEmail !== undefined) updateData.personalEmail = data.personalEmail;
-    if (data.guardianName !== undefined) updateData.guardianName = data.guardianName;
-    if (data.guardianPhone !== undefined) updateData.guardianPhone = data.guardianPhone;
-    if (data.guardianRelation !== undefined) updateData.guardianRelation = data.guardianRelation;
-    if (data.healthNotes !== undefined) updateData.healthNotes = data.healthNotes;
-    if (data.emergencyContact !== undefined) updateData.emergencyContact = data.emergencyContact;
+
+    for (const [key, value] of Object.entries(data)) {
+      if (value !== undefined) {
+        oldValue[key] = (member.profile as Record<string, unknown>)[key];
+        if (key === 'birthDate') {
+          (updateData as Record<string, unknown>)[key] = new Date(value as string);
+        } else {
+          (updateData as Record<string, unknown>)[key] = value;
+        }
+      }
+    }
 
     const updated = await this.prisma.memberProfile.update({
       where: { orgMemberId: memberId },
       data: updateData,
     });
 
+    // T-1005: Full audit with oldValue
     await this.audit.log({
       orgId,
       userId: actorUserId,
       action: 'hrm.profile_updated',
       resource: 'MemberProfile',
       resourceId: member.profile.id,
-      newValue: data as Prisma.InputJsonValue,
+      oldValue: oldValue as Prisma.InputJsonValue,
+      newValue: data as unknown as Prisma.InputJsonValue,
     });
 
+    this.logger.log(`Profile updated: ${memberId}`, { orgId, fields: Object.keys(data) });
     return updated;
   }
 
+  // ─── T-1003: Transition with guards ───────────────────────────────
+
   async transitionStatus(orgId: string, memberId: string, action: string, actorUserId: string) {
     const member = await this.findById(orgId, memberId);
-    const newStatus = this.lifecycle.transition(member.status, action);
+
+    // T-1003: Build guard context for transition
+    const compliance = await this.validation.checkCompliance(orgId, memberId);
+    const pendingFees = await this.prisma.memberFee.count({
+      where: { orgMemberId: memberId, status: { in: ['pending', 'overdue'] } },
+    });
+
+    const guardContext = {
+      hasCompleteProfile: !!(member.profile?.fullName && member.profile?.birthDate),
+      hasGuardianIfRequired: member.profile?.birthDate
+        ? !this.validation.requiresGuardian(member.profile.birthDate) ||
+          member.guardianLinks.length > 0
+        : true,
+      hasPendingFees: pendingFees > 0,
+      complianceViolations: compliance.violations,
+    };
+
+    const newStatus = this.lifecycle.transition(member.status, action, guardContext);
 
     const updated = await this.prisma.orgMember.update({
       where: { id: memberId },
@@ -244,8 +266,16 @@ export class HrmService {
       newValue: { status: newStatus },
     });
 
+    this.logger.log(`Member transition: ${member.status} → ${newStatus}`, {
+      orgId,
+      memberId,
+      action,
+    });
+
     return { ...updated, allowedActions: this.lifecycle.getAllowedActions(newStatus) };
   }
+
+  // ─── T-1008: Transfer with full audit ─────────────────────────────
 
   async transferMember(
     orgId: string,
@@ -258,7 +288,7 @@ export class HrmService {
       throw new BadRequestException('Only active members can be transferred');
     }
 
-    const [updatedMember] = await this.prisma.$transaction([
+    const [updatedMember, historyRecord] = await this.prisma.$transaction([
       this.prisma.orgMember.update({
         where: { id: memberId },
         data: { branchId: dto.toBranchId, unitId: dto.toUnitId, status: 'transferred' },
@@ -283,12 +313,75 @@ export class HrmService {
       eventType: DOMAIN_EVENTS.HRM.MEMBER_TRANSFERRED,
       aggregateId: memberId,
       aggregateType: 'OrgMember',
-      payload: { fromBranch: member.branchId, toBranch: dto.toBranchId, reason: dto.reason },
+      payload: {
+        fromBranch: member.branchId,
+        toBranch: dto.toBranchId,
+        reason: dto.reason,
+        historyId: historyRecord.id,
+      },
       actorUserId,
     });
 
-    return updatedMember;
+    // T-1005: Audit with oldValue capture
+    await this.audit.log({
+      orgId,
+      userId: actorUserId,
+      action: 'hrm.member_transferred',
+      resource: 'OrgMember',
+      resourceId: memberId,
+      oldValue: { branchId: member.branchId, unitId: member.unitId, status: member.status },
+      newValue: {
+        branchId: dto.toBranchId,
+        unitId: dto.toUnitId,
+        status: 'transferred',
+        reason: dto.reason,
+      },
+    });
+
+    this.logger.log(`Member transferred: ${memberId}`, {
+      orgId,
+      from: member.branchId,
+      to: dto.toBranchId,
+    });
+
+    return { member: updatedMember, transferRecord: historyRecord };
   }
+
+  // ─── T-1007: Unit assignment ──────────────────────────────────────
+
+  async assignUnit(orgId: string, memberId: string, dto: AssignUnitDto, actorUserId: string) {
+    const member = await this.findById(orgId, memberId);
+
+    // Validate unit belongs to member's branch
+    const unit = await this.prisma.unit.findFirst({
+      where: { id: dto.unitId, orgId },
+    });
+    if (!unit) {
+      throw new NotFoundException('Unit not found in this organization');
+    }
+
+    const oldUnitId = member.unitId;
+    const updated = await this.prisma.orgMember.update({
+      where: { id: memberId },
+      data: { unitId: dto.unitId },
+      include: { unit: { select: { id: true, name: true } } },
+    });
+
+    await this.audit.log({
+      orgId,
+      userId: actorUserId,
+      action: 'hrm.unit_assigned',
+      resource: 'OrgMember',
+      resourceId: memberId,
+      oldValue: { unitId: oldUnitId },
+      newValue: { unitId: dto.unitId, reason: dto.reason },
+    });
+
+    this.logger.log(`Unit assigned: ${memberId} → ${dto.unitId}`, { orgId });
+    return updated;
+  }
+
+  // ─── T-1006: Org chart (flat + tree) ──────────────────────────────
 
   async getOrgChart(orgId: string) {
     return this.prisma.orgChartNode.findMany({
@@ -297,8 +390,79 @@ export class HrmService {
     });
   }
 
+  /**
+   * T-1006: Build hierarchical tree from flat OrgChartNode list.
+   * Includes member counts per node and cycle detection.
+   */
+  async getOrgChartTree(orgId: string) {
+    const [nodes, memberCounts] = await Promise.all([
+      this.prisma.orgChartNode.findMany({
+        where: { orgId },
+        orderBy: [{ displayOrder: 'asc' }, { name: 'asc' }],
+      }),
+      this.prisma.orgMember.groupBy({
+        by: ['branchId'],
+        where: { orgId, status: { in: ['active', 'pending'] } },
+        _count: true,
+      }),
+    ]);
+
+    const countMap = new Map(memberCounts.map((c) => [c.branchId, c._count]));
+
+    // Build tree with cycle detection
+    const nodeMap = new Map<
+      string,
+      (typeof nodes)[0] & { children: unknown[]; memberCount: number }
+    >();
+    const roots: ((typeof nodes)[0] & { children: unknown[]; memberCount: number })[] = [];
+    const visited = new Set<string>();
+
+    for (const node of nodes) {
+      nodeMap.set(node.id, { ...node, children: [], memberCount: countMap.get(node.id) || 0 });
+    }
+
+    for (const node of nodes) {
+      const treeNode = nodeMap.get(node.id)!;
+
+      if (!node.parentNodeId) {
+        roots.push(treeNode);
+      } else {
+        // Cycle detection
+        let current: string | null = node.parentNodeId;
+        const path = new Set<string>([node.id]);
+        let cycleDetected = false;
+
+        while (current) {
+          if (path.has(current)) {
+            this.logger.warn(`Cycle detected in org chart: ${node.id} → ${current}`, { orgId });
+            cycleDetected = true;
+            break;
+          }
+          path.add(current);
+          const parent = nodeMap.get(current);
+          current = parent?.parentNodeId ?? null;
+        }
+
+        if (cycleDetected) {
+          roots.push(treeNode); // Treat as root if cycle detected
+        } else {
+          const parent = nodeMap.get(node.parentNodeId);
+          if (parent) {
+            parent.children.push(treeNode);
+          } else {
+            roots.push(treeNode); // Orphan → root
+          }
+        }
+      }
+    }
+
+    return { tree: roots, totalNodes: nodes.length };
+  }
+
+  // ─── T-1009: Enhanced timeline ────────────────────────────────────
+
   async getTimeline(orgId: string, memberId: string) {
-    const [events, history] = await Promise.all([
+    const [events, history, fees] = await Promise.all([
       this.prisma.domainEvent.findMany({
         where: { orgId, aggregateId: memberId, aggregateType: 'OrgMember' },
         orderBy: { createdAt: 'desc' },
@@ -308,9 +472,108 @@ export class HrmService {
         where: { orgId, orgMemberId: memberId },
         orderBy: { transitionDate: 'desc' },
       }),
+      this.prisma.memberFee.findMany({
+        where: { orgMemberId: memberId },
+        orderBy: { createdAt: 'desc' },
+        take: 20,
+        select: { id: true, amountDue: true, status: true, createdAt: true, notes: true },
+      }),
     ]);
-    return { events, branchHistory: history };
+
+    // T-1009: Merge all timeline sources into unified chronological list
+    const timeline = [
+      ...events.map((e) => ({
+        type: 'event' as const,
+        date: e.createdAt,
+        title: e.eventType,
+        detail: e.payload as Record<string, unknown>,
+      })),
+      ...history.map((h) => ({
+        type: 'transfer' as const,
+        date: h.transitionDate,
+        title: 'Branch Transfer',
+        detail: {
+          fromBranch: h.fromBranchId,
+          toBranch: h.toBranchId,
+          reason: h.reason,
+          approvedBy: h.approvedBy,
+        },
+      })),
+      ...fees.map((f) => ({
+        type: 'fee' as const,
+        date: f.createdAt,
+        title: `Fee: ${f.notes || 'Payment'}`,
+        detail: { amount: Number(f.amountDue), status: f.status },
+      })),
+    ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    return {
+      timeline,
+      counts: { events: events.length, transfers: history.length, fees: fees.length },
+    };
   }
+
+  // ─── T-1010: Transfer handover signature ──────────────────────────
+
+  async signTransferHandover(
+    orgId: string,
+    transferId: string,
+    dto: SignTransferDto,
+    actorUserId: string,
+  ) {
+    const transfer = await this.prisma.memberBranchHistory.findFirst({
+      where: { id: transferId, orgId },
+    });
+    if (!transfer) throw new NotFoundException('Transfer record not found');
+
+    const updated = await this.prisma.memberBranchHistory.update({
+      where: { id: transferId },
+      data: {
+        handoverSignedBy: actorUserId,
+        handoverSignedAt: new Date(),
+        handoverNote: dto.signatureNote,
+      },
+    });
+
+    // If accepted, reactivate member in new branch
+    if (dto.accepted !== false) {
+      await this.prisma.orgMember.update({
+        where: { id: transfer.orgMemberId },
+        data: { status: 'active' },
+      });
+
+      await this.domainEvents.publish({
+        orgId,
+        eventType: DOMAIN_EVENTS.HRM.MEMBER_ACTIVATED,
+        aggregateId: transfer.orgMemberId,
+        aggregateType: 'OrgMember',
+        payload: {
+          action: 'accept_in_new_branch',
+          transferId,
+          signedBy: actorUserId,
+        },
+        actorUserId,
+      });
+    }
+
+    await this.audit.log({
+      orgId,
+      userId: actorUserId,
+      action: 'hrm.transfer_signed',
+      resource: 'MemberBranchHistory',
+      resourceId: transferId,
+      newValue: {
+        signedBy: actorUserId,
+        note: dto.signatureNote,
+        accepted: dto.accepted !== false,
+      },
+    });
+
+    this.logger.log(`Transfer signed: ${transferId}`, { orgId, accepted: dto.accepted !== false });
+    return updated;
+  }
+
+  // ─── Stats ────────────────────────────────────────────────────────
 
   async getStats(orgId: string) {
     const [total, byStatus, byBranch, byRole] = await Promise.all([
@@ -322,10 +585,8 @@ export class HrmService {
     return { total, byStatus, byBranch, byRole };
   }
 
-  /**
-   * T-0048: Cross-module character sheet aggregation.
-   * Combines: HRM profile + Rewards (EXP/Badges) + Scout (rank/skills) + attendance stats
-   */
+  // ─── T-0048: Character Sheet ──────────────────────────────────────
+
   async getCharacterSheet(orgId: string, memberId: string) {
     const [member, expSummary, badges, ranks, attendance] = await Promise.all([
       this.findById(orgId, memberId),
@@ -373,13 +634,56 @@ export class HrmService {
         {} as Record<string, number>,
       ),
       compliance,
+      allowedActions: this.lifecycle.getAllowedActions(member.status),
     };
   }
 
-  /**
-   * T-0050: Check compliance for a member.
-   */
+  // ─── T-0050/T-1005: Compliance ────────────────────────────────────
+
   async checkMemberCompliance(orgId: string, memberId: string) {
     return this.validation.checkCompliance(orgId, memberId);
+  }
+
+  /**
+   * T-1005: Org-wide compliance dashboard.
+   * Returns aggregated compliance status for all active members.
+   */
+  async getComplianceDashboard(orgId: string) {
+    const members = await this.prisma.orgMember.findMany({
+      where: { orgId, status: { in: ['active', 'pending'] } },
+      include: {
+        profile: true,
+        guardianLinks: { select: { id: true, consentSigned: true } },
+        branch: { select: { code: true } },
+      },
+    });
+
+    let compliant = 0;
+    let nonCompliant = 0;
+    const violations: { memberId: string; memberName: string; issues: string[] }[] = [];
+
+    for (const member of members) {
+      const result = await this.validation.checkCompliance(orgId, member.id);
+      if (result.compliant) {
+        compliant++;
+      } else {
+        nonCompliant++;
+        violations.push({
+          memberId: member.id,
+          memberName: member.profile?.fullName || 'Unknown',
+          issues: result.violations,
+        });
+      }
+    }
+
+    return {
+      summary: {
+        total: members.length,
+        compliant,
+        nonCompliant,
+        complianceRate: members.length > 0 ? Math.round((compliant / members.length) * 100) : 100,
+      },
+      violations: violations.slice(0, 50), // Cap at 50 for performance
+    };
   }
 }
