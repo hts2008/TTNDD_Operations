@@ -1,0 +1,88 @@
+# PM Readiness Manifest — STORY-011
+
+story: STORY-011
+module: projects-planning
+version: 1.0.0
+date: 2026-04-25
+status: IMPLEMENTED
+
+acceptance_criteria:
+  - id: AC-011.01
+    description: Plan CRUD with 9 sections and validated DTOs
+    status: PASS
+    evidence: projects.dto.ts (14 DTO classes), projects.controller.ts (22 endpoints)
+
+  - id: AC-011.02
+    description: 3 plan templates (camp/event/year_plan) pre-loaded
+    status: PASS
+    evidence: PLAN_TEMPLATES constant in projects.service.ts, GET /plans/templates
+
+  - id: AC-011.03
+    description: Plan autosave creates audit trail version
+    status: PASS
+    evidence: PATCH /plans/:id + GET /plans/:id/versions
+
+  - id: AC-011.04
+    description: Pre-submit validation blocks incomplete plans
+    status: PASS
+    evidence: validatePlanForSubmit() in projects.service.ts
+
+  - id: AC-011.05
+    description: Pre-approval guard blocks plans without budget/timeline/personnel
+    status: PASS
+    evidence: validatePlanForApproval() in projects.service.ts
+
+  - id: AC-011.06
+    description: RACI personnel parsed from plan to project assignees
+    status: PASS
+    evidence: generateProjectFromPlan() extracts responsibleUserIds
+
+  - id: AC-011.07
+    description: Budget/timeline propagated from plan to project
+    status: PASS
+    evidence: settings.budget and startDate/endDate in generateProjectFromPlan()
+
+  - id: AC-011.08
+    description: Domain events on plan transitions
+    status: PASS
+    evidence: DOMAIN_EVENTS.PROJECT.PLAN_SUBMITTED/APPROVED published
+
+  - id: AC-011.09
+    description: Calendar data adapter for task timeline
+    status: PASS
+    evidence: GET /projects/:id/calendar → [{id, title, start, end, status}]
+
+  - id: AC-011.10
+    description: EXP hooks on task completion (10 + storyPoints*5)
+    status: PASS
+    evidence: transitionTask() publishes TASK_COMPLETED with expEarned
+
+  - id: AC-011.11
+    description: Due alerts within 48h
+    status: PASS
+    evidence: GET /projects/tasks/due-alerts
+
+  - id: AC-011.12
+    description: Kanban board (existing M2-B)
+    status: PASS
+    evidence: GET /projects/:id/kanban
+
+  - id: AC-011.13
+    description: Plans list page with status filters
+    status: PASS
+    evidence: apps/web/src/app/(dashboard)/plans/page.tsx
+
+  - id: AC-011.14
+    description: Seed data for demo environment
+    status: PASS
+    evidence: prisma/seed-pm.ts (2 plans, 1 project, 8 tasks)
+
+state_machines:
+  - SM-2: Plan Approval (draft→submitted→approved→locked, submitted→rejected→resubmitted)
+  - SM-3: Project Lifecycle (planning→active→on_hold→completed, →cancelled)
+  - SM-4: Task Lifecycle (todo→in_progress→review→done, →cancelled)
+
+decisions:
+  - DEC-020: Plan templates hardcoded (3 seed) + user-creatable via API
+  - DEC-021: EXP = 10 base + storyPoints * 5 per completed task
+  - DEC-022: Calendar API returns data adapter only (FE chooses renderer)

@@ -1,30 +1,65 @@
-import { Controller, Get, Post, Patch, Body, Param, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Body,
+  Param,
+  Query,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ProjectsService } from './projects.service';
 import { CurrentUser, type CurrentUserPayload, Roles } from '../../common/decorators';
-import { Prisma } from '@prisma/client';
+import {
+  CreatePlanDto,
+  UpdatePlanDto,
+  TransitionPlanDto,
+  CreatePlanFromTemplateDto,
+  CreateProjectDto,
+  TransitionProjectDto,
+  CreateTaskDto,
+  UpdateTaskDto,
+  TransitionTaskDto,
+} from './projects.dto';
 
 @ApiTags('Projects')
 @ApiBearerAuth()
+@UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
 @Controller('projects')
 export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
+
+  // ── Plan Templates (T-1022) ──
+
+  @Get('plans/templates')
+  @ApiOperation({ summary: 'T-1022: List available plan templates' })
+  getTemplates() {
+    return this.projectsService.getTemplates();
+  }
+
+  @Post('plans/from-template')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'T-1022: Create plan from template' })
+  createFromTemplate(
+    @CurrentUser() user: CurrentUserPayload,
+    @Body() body: CreatePlanFromTemplateDto,
+  ) {
+    return this.projectsService.createPlanFromTemplate(
+      user.orgId,
+      body.templateKey,
+      body.title,
+      user.userId,
+    );
+  }
 
   // ── Plans ──
 
   @Post('plans')
   @Roles('super_admin', 'admin')
-  @ApiOperation({ summary: 'Create a new plan' })
-  createPlan(
-    @CurrentUser() user: CurrentUserPayload,
-    @Body() body: {
-      title: string; planType?: string; sectionIDescription?: string;
-      sectionIIObjectives?: Prisma.InputJsonValue; sectionIIIOutcomes?: Prisma.InputJsonValue;
-      sectionIVActivities?: Prisma.InputJsonValue; sectionVPersonnel?: Prisma.InputJsonValue;
-      sectionVIContent?: Prisma.InputJsonValue; sectionVIITimeline?: Prisma.InputJsonValue;
-      sectionVIIIProposal?: string; sectionIXBudget?: Prisma.InputJsonValue;
-    },
-  ) {
+  @ApiOperation({ summary: 'Create a new plan (T-1021)' })
+  createPlan(@CurrentUser() user: CurrentUserPayload, @Body() body: CreatePlanDto) {
     return this.projectsService.createPlan(user.orgId, body, user.userId);
   }
 
@@ -46,20 +81,43 @@ export class ProjectsController {
     return this.projectsService.findPlanById(user.orgId, id);
   }
 
+  @Patch('plans/:id')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'T-1023: Update plan (autosave — creates version)' })
+  updatePlan(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id') id: string,
+    @Body() body: UpdatePlanDto,
+  ) {
+    return this.projectsService.updatePlan(user.orgId, id, body, user.userId);
+  }
+
+  @Get('plans/:id/versions')
+  @ApiOperation({ summary: 'T-1023: Get plan version history' })
+  getPlanVersions(@CurrentUser() user: CurrentUserPayload, @Param('id') id: string) {
+    return this.projectsService.getPlanVersions(user.orgId, id);
+  }
+
   @Post('plans/:id/transition')
   @Roles('super_admin', 'admin')
-  @ApiOperation({ summary: 'Transition plan status (SM-2)' })
+  @ApiOperation({ summary: 'Transition plan status (SM-2) with guards (T-1024/T-1026)' })
   transitionPlan(
     @CurrentUser() user: CurrentUserPayload,
     @Param('id') id: string,
-    @Body() body: { action: string; rejectionReason?: string },
+    @Body() body: TransitionPlanDto,
   ) {
-    return this.projectsService.transitionPlan(user.orgId, id, body.action, user.userId, body.rejectionReason);
+    return this.projectsService.transitionPlan(
+      user.orgId,
+      id,
+      body.action,
+      user.userId,
+      body.rejectionReason,
+    );
   }
 
   @Post('plans/:id/generate')
   @Roles('super_admin', 'admin')
-  @ApiOperation({ summary: 'Generate project + tasks from approved plan' })
+  @ApiOperation({ summary: 'T-1028: Generate project + tasks from approved plan (RACI + budget)' })
   generateFromPlan(@CurrentUser() user: CurrentUserPayload, @Param('id') id: string) {
     return this.projectsService.generateProjectFromPlan(user.orgId, id, user.userId);
   }
@@ -68,16 +126,8 @@ export class ProjectsController {
 
   @Post()
   @Roles('super_admin', 'admin')
-  @ApiOperation({ summary: 'Create a new project' })
-  createProject(
-    @CurrentUser() user: CurrentUserPayload,
-    @Body() body: {
-      title: string; description?: string; projectType?: string;
-      sourcePlanId?: string; objectives?: Prisma.InputJsonValue;
-      keyResults?: Prisma.InputJsonValue; ownerId?: string;
-      startDate?: string; endDate?: string; settings?: Prisma.InputJsonValue;
-    },
-  ) {
+  @ApiOperation({ summary: 'Create a new project (T-1021)' })
+  createProject(@CurrentUser() user: CurrentUserPayload, @Body() body: CreateProjectDto) {
     return this.projectsService.createProject(user.orgId, body, user.userId);
   }
 
@@ -91,7 +141,18 @@ export class ProjectsController {
     @Query('page') page?: number,
     @Query('limit') limit?: number,
   ) {
-    return this.projectsService.findProjects(user.orgId, { status, projectType, ownerId }, page ?? 1, limit ?? 20);
+    return this.projectsService.findProjects(
+      user.orgId,
+      { status, projectType, ownerId },
+      page ?? 1,
+      limit ?? 20,
+    );
+  }
+
+  @Get('tasks/due-alerts')
+  @ApiOperation({ summary: 'T-1036: Get tasks due within 48h' })
+  getDueAlerts(@CurrentUser() user: CurrentUserPayload, @Query('hours') hours?: number) {
+    return this.projectsService.getDueAlerts(user.orgId, hours ?? 48);
   }
 
   @Get(':id')
@@ -106,9 +167,17 @@ export class ProjectsController {
   transitionProject(
     @CurrentUser() user: CurrentUserPayload,
     @Param('id') id: string,
-    @Body('action') action: string,
+    @Body() body: TransitionProjectDto,
   ) {
-    return this.projectsService.transitionProject(user.orgId, id, action, user.userId);
+    return this.projectsService.transitionProject(user.orgId, id, body.action, user.userId);
+  }
+
+  // ── T-1033: Calendar ──
+
+  @Get(':id/calendar')
+  @ApiOperation({ summary: 'T-1033: Get calendar data for project tasks' })
+  getCalendar(@CurrentUser() user: CurrentUserPayload, @Param('id') projectId: string) {
+    return this.projectsService.getCalendarData(user.orgId, projectId);
   }
 
   // ── Tasks ──
@@ -119,12 +188,7 @@ export class ProjectsController {
   createTask(
     @CurrentUser() user: CurrentUserPayload,
     @Param('id') projectId: string,
-    @Body() body: {
-      title: string; description?: string; taskType?: string;
-      assigneeIds?: string[]; reporterId?: string;
-      startDate?: string; dueDate?: string; storyPoints?: number;
-      priority?: string; tags?: string[]; parentTaskId?: string; position?: number;
-    },
+    @Body() body: CreateTaskDto,
   ) {
     return this.projectsService.createTask(user.orgId, projectId, body, user.userId);
   }
@@ -140,7 +204,13 @@ export class ProjectsController {
     @Query('page') page?: number,
     @Query('limit') limit?: number,
   ) {
-    return this.projectsService.findTasks(user.orgId, projectId, { status, priority, assigneeId }, page ?? 1, limit ?? 50);
+    return this.projectsService.findTasks(
+      user.orgId,
+      projectId,
+      { status, priority, assigneeId },
+      page ?? 1,
+      limit ?? 50,
+    );
   }
 
   @Get('tasks/:id')
@@ -155,24 +225,20 @@ export class ProjectsController {
   updateTask(
     @CurrentUser() user: CurrentUserPayload,
     @Param('id') id: string,
-    @Body() body: {
-      title?: string; description?: string; assigneeIds?: string[];
-      startDate?: string; dueDate?: string; storyPoints?: number;
-      priority?: string; tags?: string[]; position?: number;
-    },
+    @Body() body: UpdateTaskDto,
   ) {
     return this.projectsService.updateTask(user.orgId, id, body, user.userId);
   }
 
   @Post('tasks/:id/transition')
   @Roles('super_admin', 'admin')
-  @ApiOperation({ summary: 'Transition task status (SM-4)' })
+  @ApiOperation({ summary: 'Transition task status (SM-4) with EXP hooks (T-1037)' })
   transitionTask(
     @CurrentUser() user: CurrentUserPayload,
     @Param('id') id: string,
-    @Body('action') action: string,
+    @Body() body: TransitionTaskDto,
   ) {
-    return this.projectsService.transitionTask(user.orgId, id, action, user.userId);
+    return this.projectsService.transitionTask(user.orgId, id, body.action, user.userId);
   }
 
   // ── Kanban ──
