@@ -1,0 +1,1385 @@
+# TTNDD_OPS Appendix A — All Modules Database Schemas
+# Auto-generated from prisma/schema.prisma
+# Generated: 2026-04-11
+# Ref: STORY-009 / WP-9.2 / T-0906→T-0910
+
+spec_version: 'V10 FINAL'
+total_models: 80
+total_fields: 898
+rls_coverage: 74/80 models have orgId
+
+modules:
+  OrgConfig:
+    Organization:
+      rls_required: false
+      pii_fields: [name, fullName]
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - slug: String [UNIQUE]
+        - name: String
+        - fullName: String [NULLABLE]
+        - logoUrl: String [NULLABLE]
+        - settings: Json
+    Branch:
+      rls_required: true
+      pii_fields: [name, narrativeName]
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - code: String
+        - name: String
+        - minAge: Int [NULLABLE]
+        - maxAge: Int [NULLABLE]
+        - colorTheme: String [NULLABLE]
+        - narrativeName: String [NULLABLE]
+        - settings: Json
+    Unit:
+      rls_required: true
+      pii_fields: [name, totemName]
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - branchId: String
+        - name: String
+        - totemName: String [NULLABLE]
+        - unitType: String [NULLABLE]
+        - parentUnitId: String [NULLABLE]
+        - leaderUserId: String [NULLABLE]
+        - createdAt: DateTime [default=now(]
+      indexes:
+        - "@@map(\"units\")"
+  Auth:
+    User:
+      rls_required: false
+      pii_fields: [email, phone, displayName]
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - firebaseUid: String [UNIQUE]
+        - email: String [UNIQUE, NULLABLE]
+        - phone: String [NULLABLE]
+        - displayName: String [NULLABLE]
+        - avatarUrl: String [NULLABLE]
+        - isActive: Boolean [default=true]
+        - createdAt: DateTime [default=now(]
+        - updatedAt: DateTime [default=now(]
+      indexes:
+        - "@@map(\"users\")"
+  HRM:
+    OrgMember:
+      rls_required: true
+      pii_fields: [scoutName, heroName]
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - userId: String
+        - role: String
+        - truongLevel: String [NULLABLE]
+        - branchId: String [NULLABLE]
+        - unitId: String [NULLABLE]
+        - memberCode: String [NULLABLE]
+        - joinedDate: DateTime [NULLABLE]
+        - status: String [default="active"]
+        - linkedMemberId: String [NULLABLE]
+        - scoutName: String [NULLABLE]
+        - heroName: String [NULLABLE]
+        - meta: Json
+    MemberProfile:
+      rls_required: true
+      pii_fields: [fullName, address, personalPhone, personalEmail, guardianName, guardianPhone, emergencyContact]
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - orgMemberId: String [UNIQUE]
+        - fullName: String
+        - birthDate: DateTime [NULLABLE]
+        - gender: String [NULLABLE]
+        - idCard: String [NULLABLE]
+        - address: String [NULLABLE]
+        - photoUrl: String [NULLABLE]
+        - personalPhone: String [NULLABLE]
+        - personalEmail: String [NULLABLE]
+        - zaloId: String [NULLABLE]
+        - guardianName: String [NULLABLE]
+        - guardianPhone: String [NULLABLE]
+        - guardianRelation: String [NULLABLE]
+        - guardianZalo: String [NULLABLE]
+        - promiseDate: DateTime [NULLABLE]
+        - uniformSize: String [NULLABLE]
+        - healthNotes: String [NULLABLE]
+        - emergencyContact: String [NULLABLE]
+        - woodBadgeLevel: String [NULLABLE]
+        - specializations: String[] [default=[]]
+        - joinReason: String [NULLABLE]
+        - customFields: Json
+    GuardianLink:
+      rls_required: true
+      pii_fields: [fullName, phone, email, address]
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - orgMemberId: String
+        - fullName: String
+        - relation: String
+        - phone: String [NULLABLE]
+        - email: String [NULLABLE]
+        - zaloId: String [NULLABLE]
+        - address: String [NULLABLE]
+        - idCard: String [NULLABLE]
+        - isPrimary: Boolean [default=false]
+        - canPickup: Boolean [default=true]
+        - consentSigned: Boolean [default=false]
+        - consentDate: DateTime [NULLABLE]
+        - notes: String [NULLABLE]
+        - createdAt: DateTime [default=now(]
+        - updatedAt: DateTime [default=now(]
+      indexes:
+        - "@@unique([orgMemberId, fullName, relation])"
+        - "@@index([orgId])"
+        - "@@index([orgMemberId])"
+        - "@@map(\"guardian_links\")"
+    MemberBranchHistory:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - orgMemberId: String
+        - fromBranchId: String [NULLABLE]
+        - toBranchId: String [NULLABLE]
+        - fromUnitId: String [NULLABLE]
+        - toUnitId: String [NULLABLE]
+        - transitionDate: DateTime
+        - reason: String [NULLABLE]
+        - approvedBy: String [NULLABLE]
+        - createdAt: DateTime [default=now(]
+      indexes:
+        - "@@index([orgId, orgMemberId])"
+        - "@@map(\"member_branch_history\")"
+    OrgChartNode:
+      rls_required: true
+      pii_fields: [name]
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - nodeType: String
+        - name: String
+        - parentNodeId: String [NULLABLE]
+        - orgMemberId: String [NULLABLE]
+        - positionTitle: String [NULLABLE]
+        - displayOrder: Int [default=0]
+        - metadata: Json
+  System:
+    AuditLog:
+      rls_required: true
+      pii_fields: [ipAddress]
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - userId: String [NULLABLE]
+        - action: String
+        - resource: String
+        - resourceId: String [NULLABLE]
+        - oldValue: Json [NULLABLE]
+        - newValue: Json [NULLABLE]
+        - ipAddress: String [NULLABLE]
+        - userAgent: String [NULLABLE]
+        - createdAt: DateTime [default=now(]
+      indexes:
+        - "@@index([orgId, action])"
+        - "@@index([orgId, resource, resourceId])"
+        - "@@index([orgId, createdAt])"
+        - "@@map(\"audit_logs\")"
+    DomainEvent:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - eventType: String
+        - aggregateId: String
+        - aggregateType: String
+        - payload: Json
+        - actorUserId: String [NULLABLE]
+        - processed: Boolean [default=false]
+        - processedAt: DateTime [NULLABLE]
+        - createdAt: DateTime [default=now(]
+      indexes:
+        - "@@index([orgId, eventType])"
+        - "@@index([processed, createdAt])"
+        - "@@map(\"domain_events\")"
+    ReleaseGateReport:
+      rls_required: false
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - environment: String
+        - buildId: String [NULLABLE]
+        - commitSha: String [NULLABLE]
+        - profile: String [default="PROFILE_CORE"]
+        - status: String [default="pending"]
+        - reportJson: Json
+  Rewards:
+    ExpConfig:
+      rls_required: true
+      pii_fields: [actionName]
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - eventType: String
+        - sourceModule: String
+        - actionName: String
+        - expAmount: Int
+        - maxPerDay: Int [default=-1]
+        - maxPerWeek: Int [default=-1]
+        - isActive: Boolean [default=true]
+        - description: String [NULLABLE]
+        - createdAt: DateTime [default=now(]
+      indexes:
+        - "@@unique([orgId, eventType])"
+        - "@@map(\"exp_configs\")"
+    ExpVisualConfig:
+      rls_required: true
+      pii_fields: [tier1Name, tier2Name, tier3Name, tier4Name]
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - branchId: String
+        - tier1Name: String [default="Ngọc Xanh"]
+        - tier1IconUrl: String [NULLABLE]
+        - tier1BaseExp: Int [default=10]
+        - tier2Name: String [default="Ngọc Vàng"]
+        - tier2IconUrl: String [NULLABLE]
+        - tier2Conversion: Int [default=10]
+        - tier3Name: String [default="Ngọc Đỏ"]
+        - tier3IconUrl: String [NULLABLE]
+        - tier3Conversion: Int [default=10]
+        - tier4Name: String [default="Ngọc Trắng"]
+        - tier4IconUrl: String [NULLABLE]
+        - tier4Conversion: Int [default=10]
+      indexes:
+        - "@@unique([orgId, branchId])"
+        - "@@map(\"exp_visual_configs\")"
+    ExpTransaction:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - orgMemberId: String
+        - transactionType: String
+        - expAmount: Int
+        - eventType: String [NULLABLE]
+        - sourceModule: String [NULLABLE]
+        - sourceEntityId: String [NULLABLE]
+        - deductionReason: String [NULLABLE]
+        - deductionItem: String [NULLABLE]
+        - correctionTask: String [NULLABLE]
+        - isCorrected: Boolean [default=false]
+        - correctedAt: DateTime [NULLABLE]
+        - correctedBy: String [NULLABLE]
+        - balanceAfter: Int [NULLABLE]
+        - recordedBy: String [NULLABLE]
+        - notes: String [NULLABLE]
+        - createdAt: DateTime [default=now(]
+      indexes:
+        - "@@index([orgId, orgMemberId])"
+        - "@@index([orgId, createdAt])"
+        - "@@map(\"exp_transactions\")"
+    MemberExpSummary:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - orgMemberId: String [UNIQUE]
+        - totalExp: Int [default=0]
+        - availableExp: Int [default=0]
+        - tier1Count: Int [default=0]
+        - tier2Count: Int [default=0]
+        - tier3Count: Int [default=0]
+        - tier4Count: Int [default=0]
+        - penaltyCount: Int [default=0]
+        - lastUpdated: DateTime [default=now(]
+      indexes:
+        - "@@index([orgId])"
+        - "@@map(\"member_exp_summary\")"
+    BadgeDefinition:
+      rls_required: true
+      pii_fields: [name]
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - badgeCode: String
+        - name: String
+        - description: String [NULLABLE]
+        - badgeType: String [NULLABLE]
+        - imageUrl: String
+        - rarity: String [default="common"]
+        - triggerEvent: String [NULLABLE]
+        - triggerConfig: Json
+    MemberBadge:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - orgMemberId: String
+        - badgeId: String
+        - earnedAt: DateTime [default=now(]
+        - sourceEventId: String [NULLABLE]
+        - notes: String [NULLABLE]
+      indexes:
+        - "@@unique([orgMemberId, badgeId])"
+        - "@@index([orgId])"
+        - "@@map(\"member_badges\")"
+    RewardItem:
+      rls_required: true
+      pii_fields: [name]
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - name: String
+        - description: String [NULLABLE]
+        - costExp: Int
+        - category: String [NULLABLE]
+        - imageUrl: String [NULLABLE]
+        - quantityAvailable: Int [default=-1]
+        - isActive: Boolean [default=true]
+        - validUntil: DateTime [NULLABLE]
+        - createdAt: DateTime [default=now(]
+      indexes:
+        - "@@index([orgId])"
+        - "@@map(\"reward_items\")"
+    RewardRedemption:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - orgMemberId: String
+        - rewardId: String
+        - expSpent: Int
+        - status: String [default="pending"]
+        - approvedBy: String [NULLABLE]
+        - redeemedAt: DateTime [default=now(]
+      indexes:
+        - "@@index([orgId])"
+        - "@@map(\"reward_redemptions\")"
+    LeaderboardSnapshot:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - scope: String
+        - scopeId: String [NULLABLE]
+        - period: String [NULLABLE]
+        - snapshotDate: DateTime
+        - rankings: Json
+        - createdAt: DateTime [default=now(]
+      indexes:
+        - "@@index([orgId, scope, snapshotDate])"
+        - "@@map(\"leaderboard_snapshots\")"
+    PeerRecognition:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - fromMember: String
+        - toMember: String
+        - category: String
+        - message: String [NULLABLE]
+        - expAwarded: Int [default=0]
+        - createdAt: DateTime [default=now(]
+      indexes:
+        - "@@index([orgId, toMember])"
+        - "@@map(\"peer_recognitions\")"
+  Scout:
+    RankDefinition:
+      rls_required: true
+      pii_fields: [rankName, narrativeName]
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - branchId: String
+        - rankCode: String
+        - rankName: String
+        - narrativeName: String [NULLABLE]
+        - rankOrder: Int
+        - description: String [NULLABLE]
+        - iconUrl: String [NULLABLE]
+        - badgeImageUrl: String [NULLABLE]
+        - minExp: Int [default=0]
+      indexes:
+        - "@@unique([orgId, branchId, rankCode])"
+        - "@@map(\"rank_definitions\")"
+    SkillGroup:
+      rls_required: true
+      pii_fields: [name, narrativeName]
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - branchId: String [NULLABLE]
+        - name: String
+        - narrativeName: String [NULLABLE]
+        - description: String [NULLABLE]
+        - icon: String [NULLABLE]
+        - color: String [NULLABLE]
+        - orderIndex: Int [default=0]
+      indexes:
+        - "@@map(\"skill_groups\")"
+    Skill:
+      rls_required: true
+      pii_fields: [name, narrativeName]
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - skillGroupId: String
+        - branchId: String [NULLABLE]
+        - rankId: String [NULLABLE]
+        - skillCode: String
+        - name: String
+        - narrativeName: String [NULLABLE]
+        - description: String [NULLABLE]
+        - levels: Json
+        - maxLevel: Int [default=4]
+        - iconUrl: String [NULLABLE]
+        - isRequired: Boolean [default=false]
+        - requiredForRankId: String [NULLABLE]
+        - expPerLevel: Int [default=10]
+        - spicesTags: String[]
+        - createdAt: DateTime [default=now(]
+      indexes:
+        - "@@map(\"skills\")"
+    MemberSkillProgress:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - orgMemberId: String
+        - skillId: String
+        - currentLevel: Int [default=0]
+        - criteriaCompleted: Json
+    MemberRank:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - orgMemberId: String
+        - branchId: String
+        - rankId: String
+        - status: String [default="in_progress"]
+        - startedAt: DateTime [NULLABLE]
+        - completedAt: DateTime [NULLABLE]
+        - verifiedBy: String [NULLABLE]
+        - ceremonyDate: DateTime [NULLABLE]
+        - notes: String [NULLABLE]
+      indexes:
+        - "@@unique([orgMemberId, branchId, rankId])"
+        - "@@map(\"member_ranks\")"
+    SkillEvidence:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - orgMemberId: String
+        - skillId: String
+        - level: Int
+        - evidenceType: String
+        - evidenceUrl: String [NULLABLE]
+        - notes: String [NULLABLE]
+        - status: String [default="submitted"]
+        - reviewedBy: String [NULLABLE]
+        - reviewedAt: DateTime [NULLABLE]
+        - reviewNotes: String [NULLABLE]
+        - createdAt: DateTime [default=now(]
+      indexes:
+        - "@@unique([orgMemberId, skillId, level])"
+        - "@@index([orgId])"
+        - "@@map(\"skill_evidences\")"
+  Sessions:
+    Session:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - branchId: String
+        - title: String
+        - sessionDate: DateTime
+        - startTime: String [NULLABLE]
+        - endTime: String [NULLABLE]
+        - location: String [NULLABLE]
+        - sessionType: String [NULLABLE]
+        - theme: String [NULLABLE]
+        - pillarDaoDuc: String [NULLABLE]
+        - pillarPhuongPhap: String [NULLABLE]
+        - pillarGiaoDuc: String [NULLABLE]
+        - lessonPlan: Json [NULLABLE]
+        - materials: Json [NULLABLE]
+        - debriefNotes: String [NULLABLE]
+        - energyRating: Int [NULLABLE]
+        - engagementRating: Int [NULLABLE]
+        - status: String [default="planned"]
+        - spicesTags: String[]
+        - createdBy: String [NULLABLE]
+        - expReward: Int [default=5]
+        - createdAt: DateTime [default=now(]
+        - updatedAt: DateTime [default=now(]
+      indexes:
+        - "@@index([orgId, sessionDate])"
+        - "@@map(\"sessions\")"
+    SessionAttendance:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - sessionId: String
+        - orgMemberId: String
+        - checkInTime: DateTime [NULLABLE]
+        - checkOutTime: DateTime [NULLABLE]
+        - status: String [default="present"]
+        - excusedReason: String [NULLABLE]
+        - notedBy: String [NULLABLE]
+      indexes:
+        - "@@unique([sessionId, orgMemberId])"
+        - "@@map(\"session_attendance\")"
+    AnnualProgram:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - branchId: String
+        - year: Int
+        - title: String [NULLABLE]
+        - monthlyThemes: Json [NULLABLE]
+        - objectives: Json [NULLABLE]
+        - status: String [default="draft"]
+        - approvedBy: String [NULLABLE]
+        - createdAt: DateTime [default=now(]
+      indexes:
+        - "@@unique([orgId, branchId, year])"
+        - "@@map(\"annual_programs\")"
+  Events:
+    Event:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - title: String
+        - eventType: String [NULLABLE]
+        - startDate: DateTime
+        - endDate: DateTime
+        - location: String [NULLABLE]
+        - maxParticipants: Int [NULLABLE]
+        - targetBranches: String[]
+        - schedule: Json [NULLABLE]
+        - raciMatrix: Json [NULLABLE]
+        - riskAssessment: Json [NULLABLE]
+        - weatherBackup: String [NULLABLE]
+        - emergencyPlan: String [NULLABLE]
+        - firstAidOfficer: String [NULLABLE]
+        - budget: Json [NULLABLE]
+        - actualCost: Decimal [NULLABLE]
+        - status: String [default="planning"]
+        - registrationDeadline: DateTime [NULLABLE]
+        - expReward: Int [default=20]
+        - createdBy: String [NULLABLE]
+        - safetyChecklist: Json [NULLABLE]
+        - postEventReport: Json [NULLABLE]
+        - spicesTags: String[]
+        - createdAt: DateTime [default=now(]
+        - updatedAt: DateTime [default=now(]
+      indexes:
+        - "@@index([orgId, startDate])"
+        - "@@map(\"events\")"
+    EventRegistration:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - eventId: String
+        - orgMemberId: String
+        - status: String [default="registered"]
+        - consentSigned: Boolean [default=false]
+        - consentDate: DateTime [NULLABLE]
+        - consentBy: String [NULLABLE]
+        - medicalInfo: Json [NULLABLE]
+        - checkInTime: DateTime [NULLABLE]
+        - checkOutTime: DateTime [NULLABLE]
+        - createdAt: DateTime [default=now(]
+      indexes:
+        - "@@unique([eventId, orgMemberId])"
+        - "@@map(\"event_registrations\")"
+  LMS:
+    Course:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - title: String
+        - description: String [NULLABLE]
+        - coverImageUrl: String [NULLABLE]
+        - category: String [NULLABLE]
+        - difficulty: String [NULLABLE]
+        - targetBranches: String[]
+        - isPublic: Boolean [default=true]
+        - expReward: Int [default=0]
+        - createdBy: String [NULLABLE]
+        - status: String [default="draft"]
+        - totalDuration: Int [NULLABLE]
+        - spicesTags: String[]
+        - createdAt: DateTime [default=now(]
+        - updatedAt: DateTime [default=now(]
+        - publishedAt: DateTime [NULLABLE]
+      indexes:
+        - "@@index([orgId])"
+        - "@@map(\"courses\")"
+    CourseModule:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - courseId: String
+        - title: String
+        - description: String [NULLABLE]
+        - orderIndex: Int [default=0]
+        - createdAt: DateTime [default=now(]
+      indexes:
+        - "@@map(\"course_modules\")"
+    Lesson:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - courseId: String
+        - moduleId: String [NULLABLE]
+        - title: String
+        - orderIndex: Int [default=0]
+        - lessonType: String [NULLABLE]
+        - content: Json
+    LessonProgress:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - orgMemberId: String
+        - lessonId: String
+        - status: String [default="not_started"]
+        - completedAt: DateTime [NULLABLE]
+      indexes:
+        - "@@unique([orgMemberId, lessonId])"
+        - "@@map(\"lesson_progress\")"
+    Competency:
+      rls_required: true
+      pii_fields: [name]
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - competencyCode: String
+        - name: String
+        - description: String [NULLABLE]
+        - category: String [NULLABLE]
+        - createdAt: DateTime [default=now(]
+      indexes:
+        - "@@unique([orgId, competencyCode])"
+        - "@@map(\"competencies\")"
+    CourseCompetency:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - courseId: String
+        - competencyId: String
+      indexes:
+        - "@@unique([courseId, competencyId])"
+        - "@@map(\"course_competencies\")"
+    CompletionRule:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - courseId: String
+        - ruleType: String
+        - config: Json
+    Quiz:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - title: String
+        - description: String [NULLABLE]
+        - quizType: String [NULLABLE]
+        - timeLimit: Int [NULLABLE]
+        - passingScore: Int [default=70]
+        - randomizeQ: Boolean [default=false]
+        - maxRetries: Int [default=3]
+        - courseId: String [NULLABLE]
+        - expReward: Int [default=0]
+        - createdBy: String [NULLABLE]
+        - createdAt: DateTime [default=now(]
+      indexes:
+        - "@@index([orgId])"
+        - "@@map(\"quizzes\")"
+    QuizQuestion:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - quizId: String
+        - questionText: String
+        - questionType: String [default="multiple_choice"]
+        - options: Json
+        - correctAnswer: Json [NULLABLE]
+        - explanation: String [NULLABLE]
+        - points: Int [default=10]
+        - timeLimit: Int [NULLABLE]
+        - mediaUrl: String [NULLABLE]
+        - orderIndex: Int [default=0]
+        - createdAt: DateTime [default=now(]
+      indexes:
+        - "@@map(\"quiz_questions\")"
+    QuizAttempt:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - quizId: String
+        - orgMemberId: String
+        - attemptNumber: Int [default=1]
+        - status: String [default="in_progress"]
+        - answers: Json [default="[]"]
+        - score: Int [NULLABLE]
+        - passed: Boolean [NULLABLE]
+        - startedAt: DateTime [default=now(]
+        - submittedAt: DateTime [NULLABLE]
+        - gradedAt: DateTime [NULLABLE]
+        - gradedBy: String [NULLABLE]
+        - feedback: String [NULLABLE]
+      indexes:
+        - "@@index([orgId, quizId, orgMemberId])"
+        - "@@map(\"quiz_attempts\")"
+    QuizBattle:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - quizId: String
+        - hostId: String
+        - gameCode: String [UNIQUE]
+        - status: String [default="waiting"]
+        - maxPlayers: Int [default=30]
+        - currentQuestion: Int [default=0]
+        - startedAt: DateTime [NULLABLE]
+        - endedAt: DateTime [NULLABLE]
+        - results: Json
+    MemberCourseProgress:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - orgMemberId: String
+        - courseId: String
+        - status: String [default="not_started"]
+        - progressPct: Int [default=0]
+        - startedAt: DateTime [NULLABLE]
+        - completedAt: DateTime [NULLABLE]
+        - score: Decimal [NULLABLE]
+        - expEarned: Int [default=0]
+      indexes:
+        - "@@unique([orgMemberId, courseId])"
+        - "@@map(\"member_course_progress\")"
+  Enrichment:
+    SpiritualLog:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - orgMemberId: String
+        - logDate: DateTime
+        - logType: String [NULLABLE]
+        - durationMinutes: Int [NULLABLE]
+        - notes: String [NULLABLE]
+        - thanhNgonRef: String [NULLABLE]
+        - emotionBefore: Int [NULLABLE]
+        - emotionAfter: Int [NULLABLE]
+        - expEarned: Int [default=3]
+      indexes:
+        - "@@unique([orgMemberId, logDate, logType])"
+        - "@@map(\"spiritual_logs\")"
+    NguGioiAssessment:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - orgMemberId: String
+        - weekStart: DateTime
+        - batSatSinh: Int [NULLABLE]
+        - batDuDao: Int [NULLABLE]
+        - batTaDam: Int [NULLABLE]
+        - batTuuNhuc: Int [NULLABLE]
+        - batVongNgu: Int [NULLABLE]
+        - reflection: String [NULLABLE]
+      indexes:
+        - "@@unique([orgMemberId, weekStart])"
+        - "@@map(\"ngu_gioi_assessments\")"
+    Evaluation:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - orgMemberId: String
+        - evaluatorId: String
+        - branchId: String
+        - evaluationType: String [NULLABLE]
+        - scoreDaoDuc: Int [NULLABLE]
+        - scoreKyNang: Int [NULLABLE]
+        - scoreTheChat: Int [NULLABLE]
+        - scoreLanhDao: Int [NULLABLE]
+        - scorePhungSu: Int [NULLABLE]
+        - strengths: String [NULLABLE]
+        - areasToImprove: String [NULLABLE]
+        - recommendations: String [NULLABLE]
+        - selfAssessment: Json [NULLABLE]
+        - evaluationDate: DateTime
+        - status: String [default="draft"]
+        - createdAt: DateTime [default=now(]
+      indexes:
+        - "@@index([orgId, orgMemberId])"
+        - "@@map(\"evaluations\")"
+    MentoringRelationship:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - mentorId: String
+        - menteeId: String
+        - startDate: DateTime [NULLABLE]
+        - status: String [default="active"]
+      indexes:
+        - "@@unique([orgId, mentorId, menteeId])"
+        - "@@map(\"mentoring_relationships\")"
+    MentoringLog:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - relationshipId: String
+        - sessionDate: DateTime
+        - topic: String [NULLABLE]
+        - outcome: String [NULLABLE]
+        - followUp: String [NULLABLE]
+        - createdAt: DateTime [default=now(]
+      indexes:
+        - "@@map(\"mentoring_logs\")"
+  Projects:
+    Plan:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - title: String
+        - planType: String [NULLABLE]
+        - sectionIDescription: String [NULLABLE]
+        - sectionIIObjectives: Json [NULLABLE]
+        - sectionIIIOutcomes: Json [NULLABLE]
+        - sectionIVActivities: Json [NULLABLE]
+        - sectionVPersonnel: Json [NULLABLE]
+        - sectionVIContent: Json [NULLABLE]
+        - sectionVIITimeline: Json [NULLABLE]
+        - sectionVIIIProposal: String [NULLABLE]
+        - sectionIXBudget: Json [NULLABLE]
+        - status: String [default="draft"]
+        - submittedBy: String [NULLABLE]
+        - submittedAt: DateTime [NULLABLE]
+        - approvedBy: String [NULLABLE]
+        - approvedAt: DateTime [NULLABLE]
+        - rejectionReason: String [NULLABLE]
+        - generatedProjectId: String [NULLABLE]
+        - createdAt: DateTime [default=now(]
+        - updatedAt: DateTime [default=now(]
+      indexes:
+        - "@@index([orgId])"
+        - "@@map(\"plans\")"
+    Project:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - title: String
+        - description: String [NULLABLE]
+        - projectType: String [NULLABLE]
+        - status: String [default="planning"]
+        - sourcePlanId: String [NULLABLE]
+        - objectives: Json [default="[]"]
+        - keyResults: Json [default="[]"]
+        - ownerId: String [NULLABLE]
+        - startDate: DateTime [NULLABLE]
+        - endDate: DateTime [NULLABLE]
+        - settings: Json
+    ProjectTask:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - projectId: String
+        - title: String
+        - description: String [NULLABLE]
+        - status: String [default="todo"]
+        - taskType: String [default="task"]
+        - assigneeIds: String[]
+        - reporterId: String [NULLABLE]
+        - startDate: DateTime [NULLABLE]
+        - dueDate: DateTime [NULLABLE]
+        - storyPoints: Int [NULLABLE]
+        - priority: String [default="medium"]
+        - tags: String[] [default=[]]
+        - attachments: Json [default="[]"]
+        - parentTaskId: String [NULLABLE]
+        - position: Float [default=0]
+        - createdBy: String [NULLABLE]
+        - createdAt: DateTime [default=now(]
+        - updatedAt: DateTime [default=now(]
+      indexes:
+        - "@@index([orgId, projectId])"
+        - "@@map(\"tasks\")"
+  Tickets:
+    Ticket:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - ticketNumber: String
+        - title: String
+        - description: String [NULLABLE]
+        - category: String [NULLABLE]
+        - priority: String [default="medium"]
+        - status: String [default="open"]
+        - requesterId: String
+        - assigneeId: String [NULLABLE]
+        - attachments: Json [default="[]"]
+        - approvalNotes: String [NULLABLE]
+        - resolvedAt: DateTime [NULLABLE]
+        - dueDate: DateTime [NULLABLE]
+        - tags: String[] [default=[]]
+        - customFields: Json
+    TicketComment:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - ticketId: String
+        - authorId: String
+        - content: String
+        - attachments: Json [default="[]"]
+        - isInternal: Boolean [default=false]
+        - createdAt: DateTime [default=now(]
+      indexes:
+        - "@@map(\"ticket_comments\")"
+    TicketStatusHistory:
+      rls_required: false
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - ticketId: String
+        - fromStatus: String [NULLABLE]
+        - toStatus: String
+        - changedBy: String [NULLABLE]
+        - notes: String [NULLABLE]
+        - createdAt: DateTime [default=now(]
+      indexes:
+        - "@@map(\"ticket_status_history\")"
+  Finance:
+    FinancialAccount:
+      rls_required: true
+      pii_fields: [name]
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - name: String
+        - accountType: String [NULLABLE]
+        - branchId: String [NULLABLE]
+        - currentBalance: Decimal [default=0]
+        - currency: String [default="VND"]
+        - description: String [NULLABLE]
+        - isActive: Boolean [default=true]
+        - createdAt: DateTime [default=now(]
+      indexes:
+        - "@@index([orgId])"
+        - "@@map(\"financial_accounts\")"
+    FinancialTransaction:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - accountId: String
+        - transactionType: String
+        - category: String [NULLABLE]
+        - amount: Decimal
+        - currency: String [default="VND"]
+        - sourceType: String [NULLABLE]
+        - sourceId: String [NULLABLE]
+        - description: String
+        - recordedBy: String
+        - approvedBy: String [NULLABLE]
+        - status: String [default="pending"]
+        - receiptUrls: String[]
+        - referenceNo: String [NULLABLE]
+        - transactionDate: DateTime
+        - createdAt: DateTime [default=now(]
+      indexes:
+        - "@@index([orgId, transactionDate])"
+        - "@@map(\"financial_transactions\")"
+    MemberFee:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - orgMemberId: String
+        - feeType: String [NULLABLE]
+        - feePeriod: String [NULLABLE]
+        - amountDue: Decimal
+        - amountPaid: Decimal [default=0]
+        - dueDate: DateTime [NULLABLE]
+        - paidDate: DateTime [NULLABLE]
+        - status: String [default="unpaid"]
+        - transactionId: String [NULLABLE]
+        - notes: String [NULLABLE]
+        - createdAt: DateTime [default=now(]
+      indexes:
+        - "@@index([orgId, orgMemberId])"
+        - "@@map(\"member_fees\")"
+  Assets:
+    AssetCategory:
+      rls_required: true
+      pii_fields: [name]
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - name: String
+        - description: String [NULLABLE]
+        - ownerType: String [NULLABLE]
+        - branchId: String [NULLABLE]
+        - icon: String [NULLABLE]
+        - createdAt: DateTime [default=now(]
+      indexes:
+        - "@@index([orgId])"
+        - "@@map(\"asset_categories\")"
+    Asset:
+      rls_required: true
+      pii_fields: [name]
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - assetCode: String [UNIQUE]
+        - name: String
+        - categoryId: String
+        - ownerType: String [default="org"]
+        - branchId: String [NULLABLE]
+        - status: String [default="available"]
+        - condition: String [default="good"]
+        - quantity: Int [default=1]
+        - availableQty: Int [default=1]
+        - unit: String [NULLABLE]
+        - purchaseDate: DateTime [NULLABLE]
+        - purchasePrice: Decimal [NULLABLE]
+        - serialNumber: String [NULLABLE]
+        - location: String [NULLABLE]
+        - photoUrls: String[]
+        - notes: String [NULLABLE]
+        - managedBy: String [NULLABLE]
+        - createdAt: DateTime [default=now(]
+        - updatedAt: DateTime [default=now(]
+      indexes:
+        - "@@index([orgId])"
+        - "@@map(\"assets\")"
+    AssetLoan:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - assetId: String
+        - quantity: Int [default=1]
+        - borrowerId: String
+        - purpose: String [NULLABLE]
+        - status: String [default="pending"]
+        - requestedAt: DateTime [default=now(]
+        - approvedAt: DateTime [NULLABLE]
+        - approvedBy: String [NULLABLE]
+        - checkedOutAt: DateTime [NULLABLE]
+        - expectedReturn: DateTime
+        - actualReturn: DateTime [NULLABLE]
+        - conditionOnReturn: String [NULLABLE]
+        - returnNotes: String [NULLABLE]
+        - guardianAcceptanceStatus: String [NULLABLE, default="not_required"]
+        - guardianAcceptedBy: String [NULLABLE]
+        - guardianAcceptedAt: DateTime [NULLABLE]
+        - createdAt: DateTime [default=now(]
+      indexes:
+        - "@@index([orgId])"
+        - "@@index([orgId, status, expectedReturn]) // T-1088: overdue loan queries"
+        - "@@map(\"asset_loans\")"
+    AssetCustomField:
+      rls_required: true
+      pii_fields: [fieldName]
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - assetId: String
+        - fieldName: String
+        - fieldValue: String [NULLABLE]
+        - fieldType: String [default="text"]
+      indexes:
+        - "@@unique([assetId, fieldName])"
+        - "@@index([orgId])"
+        - "@@map(\"asset_custom_fields\")"
+    KitTemplate:
+      rls_required: true
+      pii_fields: [name]
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - name: String
+        - description: String [NULLABLE]
+        - kitType: String [default="standard"]
+        - isActive: Boolean [default=true]
+        - createdBy: String [NULLABLE]
+        - createdAt: DateTime [default=now(]
+        - updatedAt: DateTime [default=now(]
+      indexes:
+        - "@@index([orgId])"
+        - "@@map(\"kit_templates\")"
+    KitTemplateItem:
+      rls_required: true
+      pii_fields: [itemName]
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - templateId: String
+        - itemName: String
+        - quantity: Int [default=1]
+        - isRequired: Boolean [default=true]
+        - notes: String [NULLABLE]
+      indexes:
+        - "@@index([templateId])"
+        - "@@map(\"kit_template_items\")"
+    MaintenanceSchedule:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - assetId: String
+        - maintenanceType: String
+        - frequency: String [default="monthly"]
+        - nextDue: DateTime
+        - lastPerformed: DateTime [NULLABLE]
+        - status: String [default="scheduled"]
+        - assignedTo: String [NULLABLE]
+        - notes: String [NULLABLE]
+        - createdAt: DateTime [default=now(]
+      indexes:
+        - "@@index([orgId])"
+        - "@@index([orgId, status, nextDue])"
+        - "@@map(\"maintenance_schedules\")"
+    UniformIssue:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - memberId: String
+        - uniformType: String
+        - size: String
+        - quantity: Int [default=1]
+        - status: String [default="issued"]
+        - issuedDate: DateTime [default=now(]
+        - returnDate: DateTime [NULLABLE]
+        - notes: String [NULLABLE]
+        - createdAt: DateTime [default=now(]
+      indexes:
+        - "@@index([orgId])"
+        - "@@index([orgId, memberId])"
+        - "@@map(\"uniform_issues\")"
+  Process:
+    WorkflowDefinition:
+      rls_required: true
+      pii_fields: [name]
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - name: String
+        - description: String [NULLABLE]
+        - steps: Json
+        - nodesJson: Json [default="[]"]
+        - edgesJson: Json [default="[]"]
+        - triggersJson: Json [default="[]"]
+        - version: Int [default=1]
+        - isActive: Boolean [default=true]
+        - createdBy: String [NULLABLE]
+        - createdAt: DateTime [default=now(]
+        - updatedAt: DateTime [default=now(]
+      indexes:
+        - "@@index([orgId])"
+        - "@@map(\"workflow_definitions\")"
+    WorkflowRun:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - definitionId: String
+        - status: String [default="pending"]
+        - currentStep: Int [default=0]
+        - currentNodeId: String [NULLABLE]
+        - stepResults: Json [default="[]"]
+        - nodeResults: Json
+    WorkflowRunLog:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - runId: String
+        - nodeId: String [NULLABLE]
+        - action: String
+        - fromNode: String [NULLABLE]
+        - toNode: String [NULLABLE]
+        - payload: Json
+    WorkflowTemplate:
+      rls_required: false
+      pii_fields: [name]
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - slug: String [UNIQUE]
+        - name: String
+        - description: String [NULLABLE]
+        - category: String
+        - nodesJson: Json [default="[]"]
+        - edgesJson: Json [default="[]"]
+        - triggersJson: Json [default="[]"]
+        - isBuiltIn: Boolean [default=true]
+        - version: Int [default=1]
+        - createdAt: DateTime [default=now(]
+      indexes:
+        - "@@map(\"workflow_templates\")"
+    SopDocument:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - title: String
+        - description: String [NULLABLE]
+        - category: String [NULLABLE]
+        - tags: String[] [default=[]]
+        - status: String [default="draft"]
+        - createdBy: String
+        - createdAt: DateTime [default=now(]
+        - updatedAt: DateTime [default=now(]
+      indexes:
+        - "@@index([orgId])"
+        - "@@index([orgId, status])"
+        - "@@map(\"sop_documents\")"
+    SopVersion:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - documentId: String
+        - versionNo: Int
+        - content: Json
+    SopApproval:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - documentId: String
+        - versionNo: Int
+        - approverId: String
+        - decision: String
+        - comments: String [NULLABLE]
+        - decidedAt: DateTime [default=now(]
+      indexes:
+        - "@@index([orgId, documentId])"
+        - "@@map(\"sop_approvals\")"
+  Notifications:
+    Notification:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - recipientId: String
+        - title: String
+        - body: String
+        - type: String
+        - channel: String [default="in_app"]
+        - isRead: Boolean [default=false]
+        - readAt: DateTime [NULLABLE]
+        - actionUrl: String [NULLABLE]
+        - metadata: Json
+    NotificationPreference:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - userId: String
+        - channel: String
+        - eventType: String
+        - enabled: Boolean [default=true]
+      indexes:
+        - "@@unique([userId, channel, eventType])"
+        - "@@map(\"notification_preferences\")"
+    NotificationTemplate:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - eventType: String
+        - channel: String
+        - title: String
+        - body: String
+        - isActive: Boolean [default=true]
+        - createdAt: DateTime [default=now(]
+      indexes:
+        - "@@unique([orgId, eventType, channel])"
+        - "@@map(\"notification_templates\")"
+    NotificationDeliveryLog:
+      rls_required: false
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - notificationId: String
+        - channel: String
+        - status: String [default="pending"]
+        - attempts: Int [default=0]
+        - lastError: String [NULLABLE]
+        - sentAt: DateTime [NULLABLE]
+        - createdAt: DateTime [default=now(]
+      indexes:
+        - "@@map(\"notification_delivery_logs\")"
+  FileStorage:
+    FileObjectRef:
+      rls_required: true
+      pii_fields: [bucketName, originalName]
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - uploaderUserId: String [NULLABLE]
+        - bucketName: String
+        - objectKey: String
+        - originalName: String
+        - mimeType: String
+        - sizeBytes: BigInt
+        - entityType: String [NULLABLE]
+        - entityId: String [NULLABLE]
+        - isPublic: Boolean [default=false]
+        - uploadedAt: DateTime [default=now(]
+        - deletedAt: DateTime [NULLABLE]
+      indexes:
+        - "@@index([orgId, entityType, entityId])"
+        - "@@index([orgId, uploadedAt])"
+        - "@@map(\"file_object_refs\")"
+  DataImport:
+    ImportBatch:
+      rls_required: true
+      columns:
+        - id: String [PK, default=dbgenerated("gen_random_uuid(]
+        - orgId: String
+        - importType: String
+        - status: String [default="pending"]
+        - totalRows: Int [default=0]
+        - successRows: Int [default=0]
+        - errorRows: Int [default=0]
+        - errorDetails: Json [default="[]"]
+        - importedBy: String [NULLABLE]
+        - isDryRun: Boolean [default=false]
+        - createdAt: DateTime [default=now(]
+        - completedAt: DateTime [NULLABLE]
+      indexes:
+        - "@@index([orgId, importType])"
+        - "@@map(\"import_batches\")"

@@ -157,3 +157,79 @@ jobs:
         env:
           DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
           DATABASE_MIGRATION_URL: postgresql://dummy:dummy@localhost:5432/dummy
+
+      # STORY-009 contract artifact validations
+      - name: Validate state machine registry
+        run: |
+          if [ ! -f contracts/state-machines/registry.yaml ]; then
+            echo "❌ State machine registry missing!"
+            exit 1
+          fi
+          node -e "
+            const yaml = require('fs').readFileSync('contracts/state-machines/registry.yaml','utf8');
+            if (!yaml.includes('SM-001') || !yaml.includes('SM-009')) {
+              console.error('❌ Registry missing expected state machines');
+              process.exit(1);
+            }
+            console.log('✅ State machine registry valid');
+          "
+
+      - name: Validate DB schema contract (Appendix A)
+        run: |
+          if [ ! -f contracts/db/appendix-a.yaml ]; then
+            echo "❌ Appendix A (DB schema contract) missing!"
+            exit 1
+          fi
+          node -e "
+            const content = require('fs').readFileSync('contracts/db/appendix-a.yaml','utf8');
+            const modelCount = (content.match(/model_name:/g) || []).length;
+            if (modelCount < 70) {
+              console.error('❌ Appendix A has only', modelCount, 'models (expected ≥70)');
+              process.exit(1);
+            }
+            console.log('✅ Appendix A valid:', modelCount, 'models');
+          "
+
+      - name: Validate module contract packs
+        run: |
+          if [ ! -f contracts/modules/module-contract-packs.yaml ]; then
+            echo "❌ Module contract packs missing!"
+            exit 1
+          fi
+          node -e "
+            const content = require('fs').readFileSync('contracts/modules/module-contract-packs.yaml','utf8');
+            const modules = (content.match(/module_id:/g) || []).length;
+            if (modules < 10) {
+              console.error('❌ Only', modules, 'modules found (expected ≥10)');
+              process.exit(1);
+            }
+            console.log('✅ Module contract packs valid:', modules, 'modules');
+          "
+
+      - name: Validate release artifacts
+        run: |
+          missing=""
+          for f in contracts/release/checklist-matrix.yaml \
+                   contracts/release/evidence-bundle.md \
+                   contracts/release/module-readiness.yaml \
+                   contracts/release/module-capabilities.yaml; do
+            if [ ! -f "$f" ]; then
+              missing="$missing $f"
+            fi
+          done
+          if [ -n "$missing" ]; then
+            echo "❌ Missing release artifacts:$missing"
+            exit 1
+          fi
+          echo "✅ All release artifacts present"
+
+      - name: Validate AI-agent handoff pack
+        run: |
+          for f in contracts/modules/ai-agent-handoff.md \
+                   contracts/modules/scout-contract-pack.md; do
+            if [ ! -f "$f" ]; then
+              echo "❌ Missing: $f"
+              exit 1
+            fi
+          done
+          echo "✅ AI-agent handoff artifacts present"

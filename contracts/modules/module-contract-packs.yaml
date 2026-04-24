@@ -1,0 +1,454 @@
+# Module Contract Packs — TTNDD_OPS Platform
+# Template-based engineering contract for all 15 active modules
+# Ref: STORY-009 / WP-9.5 / T-0921→T-0925
+
+spec_version: 'V10 FINAL'
+generated: '2026-04-11'
+total_modules: 15
+
+modules:
+
+  HRM:
+    module_id: 1
+    name: People, Org & Parent Operations (HRM)
+    owner_service: HrmService
+    repo_path: apps/api/src/modules/hrm/
+    file_count: 10
+    size_kb: 45.6
+    openapi_tags: [HRM, Org]
+    state_machines: [SM-001 member_lifecycle]
+    db_tables:
+      - OrgMember (rls: true, pii: [scoutName, heroName])
+      - MemberProfile (rls: true, pii: [fullName, address, phone, email, guardianName])
+      - GuardianLink (rls: true, pii: [fullName, phone, email, address])
+      - MemberBranchHistory (rls: true)
+      - OrgChartNode (rls: true, pii: [name])
+    routes:
+      - GET /api/v1/members
+      - GET /api/v1/members/:id
+    events_out: [hrm.member_created, hrm.member_activated, hrm.member_suspended, hrm.member_reinstated, hrm.member_transferred, hrm.member_left, hrm.guardian_linked]
+    events_in: []
+    required_seed: [org_demo_structure, members_minimal]
+    required_e2e: [tests/e2e/hrm/onboard-member.spec.ts]
+    feature_flags: []
+    cost_impact: LOW
+    readiness: IMPLEMENTED
+    known_issues:
+      - RLS at PostgreSQL level not applied (app-level only)
+      - CSV import tested via data-import module, not HRM directly
+
+  SCOUT:
+    module_id: 8
+    name: Scout Core (Skills & Ranks)
+    owner_service: ScoutService
+    repo_path: apps/api/src/modules/scout/
+    file_count: 5
+    size_kb: 21.7
+    openapi_tags: [Scout]
+    state_machines: [SM-004 skill_progress, SM-005 rank_progression]
+    db_tables:
+      - RankDefinition (rls: true, pii: [rankName])
+      - SkillGroup (rls: true, pii: [name])
+      - Skill (rls: true, pii: [name])
+      - MemberSkillProgress (rls: true)
+      - MemberRank (rls: true)
+      - SkillEvidence (rls: true)
+    routes:
+      - GET /api/v1/skills
+      - GET /api/v1/skills/:skillId
+      - POST /api/v1/scout/evidence/:memberId
+      - PATCH /api/v1/scout/evidence/:evidenceId/review
+      - POST /api/v1/scout/progress/:memberId/award
+      - GET /api/v1/scout/member-ranks/:memberId/check-eligibility
+      - GET /api/v1/scout/dashboard/:memberId
+    events_out: [scout.skill_started, scout.evidence_submitted, scout.skill_verified, scout.skill_awarded, scout.rank_eligible, scout.rank_proposed, scout.rank_approved, scout.rank_awarded]
+    events_in: []
+    required_seed: [scout_program_minimal, skills_minimal]
+    required_e2e: [tests/e2e/scout/skill-progress.spec.ts]
+    feature_flags: []
+    cost_impact: MEDIUM
+    readiness: IMPLEMENTED
+    known_issues:
+      - scout.yaml OpenAPI standalone not yet extracted
+      - RLS at DB level pending
+
+  SESSIONS:
+    module_id: 11
+    name: Session Management
+    owner_service: SessionsService
+    repo_path: apps/api/src/modules/sessions/
+    file_count: 4
+    size_kb: 10.2
+    openapi_tags: [Sessions]
+    state_machines: [SM-002 session_lifecycle]
+    db_tables:
+      - Session (rls: true)
+      - SessionAttendance (rls: true)
+      - AnnualProgram (rls: true)
+    routes:
+      - GET /api/v1/sessions
+    events_out: [session.session_created, session.session_published, session.session_started, session.attendance_marked, session.session_debriefed]
+    events_in: []
+    required_seed: [sessions_sample]
+    required_e2e: [tests/e2e/sessions/create-attend.spec.ts]
+    feature_flags: []
+    cost_impact: LOW
+    readiness: IMPLEMENTED
+    known_issues: []
+
+  EVENTS:
+    module_id: 12
+    name: Events & Camps
+    owner_service: EventsCampService
+    repo_path: apps/api/src/modules/events/
+    file_count: 4
+    size_kb: 11.4
+    openapi_tags: [Events]
+    state_machines: [SM-003 event_lifecycle]
+    db_tables:
+      - Event (rls: true)
+      - EventRegistration (rls: true)
+    routes:
+      - GET /api/v1/events
+    events_out: [event.event_created, event.event_published, event.registration_opened, event.consent_received, event.participant_checked_in, event.event_completed]
+    events_in: []
+    required_seed: [events_sample]
+    required_e2e: [tests/e2e/events/register-event.spec.ts]
+    feature_flags: []
+    cost_impact: LOW
+    readiness: IMPLEMENTED
+    known_issues: []
+
+  REWARDS:
+    module_id: 9
+    name: Rewards & Gamification
+    owner_service: RewardsService
+    repo_path: apps/api/src/modules/rewards/
+    file_count: 15
+    size_kb: 54.5
+    openapi_tags: [Rewards]
+    state_machines: [SM-007 reward_redemption]
+    db_tables:
+      - ExpConfig (rls: true)
+      - ExpVisualConfig (rls: true)
+      - ExpTransaction (rls: true)
+      - MemberExpSummary (rls: true)
+      - BadgeDefinition (rls: true)
+      - MemberBadge (rls: true)
+      - RewardItem (rls: true)
+      - RewardRedemption (rls: true)
+      - LeaderboardSnapshot (rls: true)
+      - PeerRecognition (rls: true)
+    routes:
+      - GET /api/v1/rewards
+    events_out: [rewards.exp_awarded, rewards.exp_deducted, rewards.badge_awarded, rewards.level_up, rewards.item_redeemed]
+    events_in: [scout.skill_verified, scout.rank_awarded, session.attendance_marked, event.participant_checked_in, lms.lesson_completed, lms.quiz_passed, enrichment.spiritual_log_created, project.task_completed]
+    required_seed: [rewards_config_minimal]
+    required_e2e: [tests/e2e/rewards/earn-badge.spec.ts]
+    feature_flags: []
+    cost_impact: MEDIUM
+    readiness: IMPLEMENTED
+    known_issues:
+      - Leaderboard snapshot worker not yet automated
+
+  LMS:
+    module_id: 7
+    name: Learning Management System
+    owner_service: LmsService
+    repo_path: apps/api/src/modules/lms/
+    file_count: 5
+    size_kb: 50.0
+    openapi_tags: [LMS, Quiz, Battle]
+    state_machines: [SM-006 course_enrollment, SM-008 quiz_battle]
+    db_tables:
+      - Course (rls: true)
+      - CourseModule (rls: true)
+      - Lesson (rls: true)
+      - LessonProgress (rls: true)
+      - Competency (rls: true)
+      - CourseCompetency (rls: true)
+      - CompletionRule (rls: true)
+      - Quiz (rls: true)
+      - QuizQuestion (rls: true)
+      - QuizAttempt (rls: true)
+      - QuizBattle (rls: true)
+      - MemberCourseProgress (rls: true)
+    routes:
+      - GET /api/v1/lms/courses
+      - GET /api/v1/lms/courses/:courseId
+      - GET /api/v1/lms/courses/:courseId/modules
+      - GET /api/v1/lms/courses/:courseId/lessons
+      - POST /api/v1/lms/courses/:courseId/enroll
+      - GET /api/v1/lms/courses/:courseId/offline-pack
+      - GET /api/v1/lms/courses/:courseId/pack-size
+      - GET /api/v1/lms/courses/:courseId/completion-rules
+      - GET /api/v1/lms/quizzes
+      - POST /api/v1/lms/quizzes/:quizId/attempts/start
+      - POST /api/v1/lms/attempts/:attemptId/submit
+      - POST /api/v1/lms/attempts/:attemptId/grade
+      - GET /api/v1/lms/grading-queue
+      - GET /api/v1/lms/competencies
+      - GET /api/v1/lms/battles/:gameCode
+      - POST /api/v1/lms/battles/:gameCode/start
+      - POST /api/v1/lms/battles/:gameCode/answer
+      - GET /api/v1/lms/battles/:gameCode/scoreboard
+      - GET /api/v1/lms/progress/:memberId
+    events_out: [lms.course_enrolled, lms.lesson_completed, lms.quiz_submitted, lms.quiz_passed, lms.quiz_failed, lms.battle_started, lms.battle_finished]
+    events_in: []
+    required_seed: [course_demo, quiz_scout_basics, competencies_demo]
+    required_e2e: [tests/e2e/lms/enroll-complete.spec.ts]
+    feature_flags: []
+    cost_impact: HIGH
+    readiness: IMPLEMENTED
+    known_issues:
+      - Offline pack generation is placeholder
+
+  FINANCE:
+    module_id: 4
+    name: Treasury, Fees, Budgeting
+    owner_service: FinanceService
+    repo_path: apps/api/src/modules/finance/
+    file_count: 6
+    size_kb: 30.3
+    openapi_tags: [Finance]
+    state_machines: []
+    db_tables:
+      - FinancialAccount (rls: true)
+      - FinancialTransaction (rls: true)
+      - MemberFee (rls: true)
+    routes:
+      - GET /api/v1/finance
+    events_out: [finance.fee_created, finance.fee_paid, finance.fee_overdue, finance.transaction_completed]
+    events_in: []
+    required_seed: [finance_accounts_demo]
+    required_e2e: [tests/e2e/finance/fee-payment.spec.ts]
+    feature_flags: []
+    cost_impact: LOW
+    readiness: IMPLEMENTED
+    known_issues: []
+
+  ASSETS:
+    module_id: 5
+    name: Assets & Inventory
+    owner_service: AssetsService
+    repo_path: apps/api/src/modules/assets/
+    file_count: 6
+    size_kb: 64.2
+    openapi_tags: [Assets]
+    state_machines: []
+    db_tables:
+      - AssetCategory (rls: true)
+      - Asset (rls: true)
+      - AssetLoan (rls: true)
+      - AssetCustomField (rls: true)
+      - KitTemplate (rls: true)
+      - KitTemplateItem (rls: true)
+      - MaintenanceSchedule (rls: true)
+      - UniformIssue (rls: true)
+    routes:
+      - GET /api/v1/assets
+      - GET /api/v1/assets/:id
+      - GET /api/v1/assets/categories
+      - GET /api/v1/assets/loans
+      - GET /api/v1/assets/loans/overdue
+      - PATCH /api/v1/assets/loans/:loanId/transition
+      - POST /api/v1/assets/loans/:loanId/guardian-accept
+      - GET /api/v1/assets/kits
+      - GET /api/v1/assets/kits/:templateId/checklist
+      - GET /api/v1/assets/maintenance
+      - PATCH /api/v1/assets/maintenance/:scheduleId/complete
+      - GET /api/v1/assets/uniform
+      - POST /api/v1/assets/uniform/issue
+      - PATCH /api/v1/assets/uniform/:uniformId/return
+      - GET /api/v1/assets/stock-alerts
+      - GET /api/v1/assets/export/csv
+      - GET /api/v1/assets/loans/export/csv
+    events_out: [asset.asset_checked_out, asset.asset_returned, asset.asset_reported_lost]
+    events_in: []
+    required_seed: [assets_demo, assets_kit_templates, assets_maintenance_schedules, assets_uniform_issues, assets_sample_loans]
+    required_e2e: [tests/e2e/assets/loan-return.spec.ts, tests/e2e/assets/kit-checklist.spec.ts, tests/e2e/assets/uniform-flow.spec.ts, tests/e2e/assets/csv-export.spec.ts]
+    feature_flags: []
+    cost_impact: LOW
+    readiness: IMPLEMENTED
+    known_issues: []
+
+  PROJECTS:
+    module_id: 2
+    name: Project & Service Learning
+    owner_service: ProjectsService
+    repo_path: apps/api/src/modules/projects/
+    file_count: 5
+    size_kb: 30.4
+    openapi_tags: [Projects]
+    state_machines: []
+    db_tables:
+      - Plan (rls: true)
+      - Project (rls: true)
+      - ProjectTask (rls: true)
+    routes:
+      - GET /api/v1/projects
+    events_out: [project.plan_submitted, project.plan_approved, project.task_completed, project.project_completed]
+    events_in: []
+    required_seed: [plan_template_demo]
+    required_e2e: [tests/e2e/projects/plan-to-project.spec.ts]
+    feature_flags: []
+    cost_impact: LOW
+    readiness: IMPLEMENTED
+    known_issues: []
+
+  TICKETS:
+    module_id: 3
+    name: Tickets & Support
+    owner_service: TicketsService
+    repo_path: apps/api/src/modules/tickets/
+    file_count: 5
+    size_kb: 18.0
+    openapi_tags: [Tickets]
+    state_machines: [SM-009 ticket_lifecycle]
+    db_tables:
+      - Ticket (rls: true)
+      - TicketComment (rls: true)
+      - TicketStatusHistory (rls: true)
+    routes:
+      - GET /api/v1/tickets
+    events_out: [ticket.ticket_created, ticket.ticket_assigned, ticket.ticket_resolved, ticket.ticket_closed]
+    events_in: []
+    required_seed: []
+    required_e2e: [tests/e2e/tickets/create-close.spec.ts]
+    feature_flags: []
+    cost_impact: LOW
+    readiness: IMPLEMENTED
+    known_issues: []
+
+  PROCESS:
+    module_id: 6
+    name: Process & Workflow Engine
+    owner_service: ProcessService
+    repo_path: apps/api/src/modules/process/
+    file_count: 9
+    size_kb: 87.5
+    openapi_tags: [Process]
+    state_machines: []
+    db_tables:
+      - WorkflowDefinition (rls: true)
+      - WorkflowRun (rls: true)
+      - WorkflowRunLog (rls: true)
+      - WorkflowTemplate (rls: true)
+      - SopDocument (rls: true)
+      - SopVersion (rls: true)
+      - SopApproval (rls: true)
+    routes:
+      - GET /api/v1/process/sops
+      - GET /api/v1/process/definitions
+      - POST /api/v1/process/definitions/:id/execute
+      - GET /api/v1/process/graph-runs/:id
+      - POST /api/v1/process/trigger-event
+      - GET /api/v1/process/templates
+      - POST /api/v1/process/templates/:slug/install
+      - POST /api/v1/process/templates/seed
+      - GET /api/v1/process/health
+      - POST /api/v1/process/auto-resolve-stuck
+    events_out: [process.workflow_started, process.step_completed, process.workflow_completed]
+    events_in: []
+    required_seed: [workflow_templates_builtin]
+    required_e2e: [apps/api/e2e/process.e2e.spec.ts]
+    feature_flags: []
+    cost_impact: MEDIUM
+    readiness: IMPLEMENTED
+    known_issues:
+      - DAG execution engine is complex, needs dedicated load testing
+
+  NOTIFICATIONS:
+    module_id: 14
+    name: Notifications
+    owner_service: NotificationsService
+    repo_path: apps/api/src/modules/notifications/
+    file_count: 7
+    size_kb: 30.0
+    openapi_tags: [Notifications]
+    state_machines: []
+    db_tables:
+      - Notification (rls: true)
+      - NotificationPreference (rls: true)
+      - NotificationTemplate (rls: true)
+      - NotificationDeliveryLog (rls: true)
+    routes:
+      - GET /api/v1/notifications
+    events_out: [notification.notification_sent, notification.notification_read, notification.bulk_sent]
+    events_in: ["*"]
+    required_seed: [notification_templates]
+    required_e2e: [tests/e2e/notifications/receive-notif.spec.ts]
+    feature_flags: []
+    cost_impact: MEDIUM
+    readiness: IMPLEMENTED
+    known_issues:
+      - Push notification integration not yet configured
+
+  FILE_STORAGE:
+    module_id: 15
+    name: File Storage (GCS)
+    owner_service: FileStorageService
+    repo_path: apps/api/src/modules/file-storage/
+    file_count: 9
+    size_kb: 24.3
+    openapi_tags: [FileStorage]
+    state_machines: []
+    db_tables:
+      - FileObjectRef (rls: true)
+    routes:
+      - GET /api/v1/file-storage
+    events_out: []
+    events_in: []
+    required_seed: []
+    required_e2e: [tests/e2e/file-storage/upload-download.spec.ts]
+    feature_flags: []
+    cost_impact: LOW
+    readiness: IMPLEMENTED
+    known_issues: []
+
+  DATA_IMPORT:
+    module_id: 16
+    name: Data Import (CSV)
+    owner_service: DataImportService
+    repo_path: apps/api/src/modules/data-import/
+    file_count: 4
+    size_kb: 9.1
+    openapi_tags: [DataImport]
+    state_machines: []
+    db_tables:
+      - ImportBatch (rls: true)
+    routes:
+      - GET /api/v1/data-import
+    events_out: []
+    events_in: []
+    required_seed: []
+    required_e2e: [tests/e2e/data-import/csv-import.spec.ts]
+    feature_flags: []
+    cost_impact: LOW
+    readiness: IMPLEMENTED
+    known_issues: []
+
+  ENRICHMENT:
+    module_id: 13
+    name: Enrichment & Spiritual (Đạo Đức)
+    owner_service: EnrichmentService
+    repo_path: apps/api/src/modules/enrichment/
+    file_count: 4
+    size_kb: 13.8
+    openapi_tags: [Enrichment]
+    state_machines: []
+    db_tables:
+      - SpiritualLog (rls: true)
+      - NguGioiAssessment (rls: true)
+      - Evaluation (rls: true)
+      - MentoringRelationship (rls: true)
+      - MentoringLog (rls: true)
+    routes: []
+    events_out: [enrichment.spiritual_log_created, enrichment.ngu_gioi_assessed, enrichment.evaluation_created, enrichment.mentoring_started]
+    events_in: []
+    required_seed: []
+    required_e2e: []
+    feature_flags: []
+    cost_impact: LOW
+    readiness: IMPLEMENTED
+    known_issues: []

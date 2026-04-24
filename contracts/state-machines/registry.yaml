@@ -1,0 +1,374 @@
+# TTNDD_OPS State Machine Registry (Canonical)
+# Source: contracts/state-machines/registry.yaml
+# Every state machine P0/P1 has: source, guard, test, enum mapping, transition table
+# Generated from codebase audit 2026-04-11
+# Ref: STORY-009 / WP-9.1 / T-0901→T-0905
+
+spec_version: 'V10 FINAL'
+last_updated: '2026-04-11'
+total_state_machines: 9
+
+state_machines:
+
+  member_lifecycle:
+    id: SM-001
+    module: HRM (Module 1)
+    db_model: OrgMember
+    db_status_field: status
+    status_enum_values: [PENDING, ACTIVE, SUSPENDED, REINSTATED, TRANSFERRED, LEFT]
+    initial_state: PENDING
+    terminal_states: [LEFT]
+    transitions:
+      - from: PENDING
+        to: ACTIVE
+        action: activate
+        guard: has_guardian_if_minor
+        actor: [ADMIN, LEADER]
+        event: hrm.member_activated
+      - from: ACTIVE
+        to: SUSPENDED
+        action: suspend
+        guard: requires_reason
+        actor: [ADMIN]
+        event: hrm.member_suspended
+      - from: SUSPENDED
+        to: ACTIVE
+        action: reinstate
+        guard: suspension_review_complete
+        actor: [ADMIN]
+        event: hrm.member_reinstated
+      - from: ACTIVE
+        to: TRANSFERRED
+        action: transfer
+        guard: target_unit_exists
+        actor: [ADMIN, LEADER]
+        event: hrm.member_transferred
+      - from: TRANSFERRED
+        to: ACTIVE
+        action: complete_transfer
+        guard: none
+        actor: [SYSTEM]
+        event: hrm.member_activated
+      - from: [ACTIVE, SUSPENDED]
+        to: LEFT
+        action: depart
+        guard: exit_interview_optional
+        actor: [ADMIN, MEMBER]
+        event: hrm.member_left
+    failure_states:
+      - state: SUSPENDED
+        recovery: reinstate (requires admin approval)
+    audit_events: true
+    test_harness: apps/api/src/modules/hrm/hrm.service.spec.ts
+
+  session_lifecycle:
+    id: SM-002
+    module: Sessions (Module 11)
+    db_model: Session
+    db_status_field: status
+    status_enum_values: [DRAFT, PUBLISHED, IN_PROGRESS, COMPLETED, CANCELLED]
+    initial_state: DRAFT
+    terminal_states: [COMPLETED, CANCELLED]
+    transitions:
+      - from: DRAFT
+        to: PUBLISHED
+        action: publish
+        guard: has_date_and_leader
+        actor: [LEADER]
+        event: session.session_published
+      - from: PUBLISHED
+        to: IN_PROGRESS
+        action: start
+        guard: within_scheduled_window
+        actor: [LEADER]
+        event: session.session_started
+      - from: IN_PROGRESS
+        to: COMPLETED
+        action: complete
+        guard: attendance_recorded
+        actor: [LEADER]
+        event: session.session_debriefed
+      - from: [DRAFT, PUBLISHED]
+        to: CANCELLED
+        action: cancel
+        guard: none
+        actor: [LEADER, ADMIN]
+        event: null
+    failure_states:
+      - state: CANCELLED
+        recovery: create new session
+    audit_events: true
+    test_harness: apps/api/src/modules/sessions/sessions.service.spec.ts
+
+  event_lifecycle:
+    id: SM-003
+    module: Events & Camps (Module 12)
+    db_model: Event
+    db_status_field: status
+    status_enum_values: [DRAFT, PUBLISHED, REGISTRATION_OPEN, IN_PROGRESS, COMPLETED, CANCELLED]
+    initial_state: DRAFT
+    terminal_states: [COMPLETED, CANCELLED]
+    transitions:
+      - from: DRAFT
+        to: PUBLISHED
+        action: publish
+        guard: has_venue_and_dates
+        actor: [ADMIN, LEADER]
+        event: event.event_published
+      - from: PUBLISHED
+        to: REGISTRATION_OPEN
+        action: open_registration
+        guard: registration_deadline_set
+        actor: [ADMIN]
+        event: event.registration_opened
+      - from: REGISTRATION_OPEN
+        to: IN_PROGRESS
+        action: start
+        guard: min_participants_met
+        actor: [ADMIN, LEADER]
+        event: null
+      - from: IN_PROGRESS
+        to: COMPLETED
+        action: complete
+        guard: none
+        actor: [ADMIN, LEADER]
+        event: event.event_completed
+      - from: [DRAFT, PUBLISHED, REGISTRATION_OPEN]
+        to: CANCELLED
+        action: cancel
+        guard: notify_registered_participants
+        actor: [ADMIN]
+        event: null
+    failure_states:
+      - state: CANCELLED
+        recovery: create new event
+    audit_events: true
+    test_harness: apps/api/src/modules/events/events.service.spec.ts
+
+  skill_progress:
+    id: SM-004
+    module: Scout Core (Module 8A)
+    db_model: MemberSkillProgress
+    db_status_field: status
+    status_enum_values: [NOT_STARTED, IN_PROGRESS, EVIDENCE_SUBMITTED, VERIFIED, AWARDED]
+    initial_state: NOT_STARTED
+    terminal_states: [AWARDED]
+    transitions:
+      - from: NOT_STARTED
+        to: IN_PROGRESS
+        action: start
+        guard: skill_prerequisites_met
+        actor: [MEMBER]
+        event: scout.skill_started
+      - from: IN_PROGRESS
+        to: EVIDENCE_SUBMITTED
+        action: submit_evidence
+        guard: has_file_attachment
+        actor: [MEMBER]
+        event: scout.evidence_submitted
+      - from: EVIDENCE_SUBMITTED
+        to: VERIFIED
+        action: verify
+        guard: assessor_is_qualified
+        actor: [LEADER, ASSESSOR]
+        event: scout.skill_verified
+      - from: EVIDENCE_SUBMITTED
+        to: IN_PROGRESS
+        action: reject
+        guard: requires_feedback
+        actor: [LEADER, ASSESSOR]
+        event: null
+      - from: VERIFIED
+        to: AWARDED
+        action: award
+        guard: none
+        actor: [SYSTEM]
+        event: scout.skill_awarded
+    failure_states:
+      - state: IN_PROGRESS (after rejection)
+        recovery: re-submit evidence
+    audit_events: true
+    test_harness: apps/api/src/modules/scout/scout.service.spec.ts
+
+  rank_progression:
+    id: SM-005
+    module: Scout Core (Module 8B)
+    db_model: MemberRank
+    db_status_field: status
+    status_enum_values: [ELIGIBLE, PROPOSED, APPROVED, AWARDED]
+    initial_state: ELIGIBLE
+    terminal_states: [AWARDED]
+    transitions:
+      - from: ELIGIBLE
+        to: PROPOSED
+        action: propose
+        guard: all_required_skills_met
+        actor: [LEADER]
+        event: scout.rank_proposed
+      - from: PROPOSED
+        to: APPROVED
+        action: approve
+        guard: council_quorum_met
+        actor: [COUNCIL, ADMIN]
+        event: scout.rank_approved
+      - from: PROPOSED
+        to: ELIGIBLE
+        action: reject
+        guard: requires_reason
+        actor: [COUNCIL, ADMIN]
+        event: null
+      - from: APPROVED
+        to: AWARDED
+        action: award
+        guard: ceremony_scheduled
+        actor: [ADMIN]
+        event: scout.rank_awarded
+    failure_states:
+      - state: ELIGIBLE (after rejection)
+        recovery: re-propose after addressing feedback
+    audit_events: true
+    test_harness: apps/api/src/modules/scout/scout.service.spec.ts
+
+  course_enrollment:
+    id: SM-006
+    module: LMS (Module 7)
+    db_model: MemberCourseProgress
+    db_status_field: status
+    status_enum_values: [ENROLLED, IN_PROGRESS, COMPLETED, DROPPED]
+    initial_state: ENROLLED
+    terminal_states: [COMPLETED, DROPPED]
+    transitions:
+      - from: ENROLLED
+        to: IN_PROGRESS
+        action: start_lesson
+        guard: course_is_published
+        actor: [MEMBER]
+        event: null
+      - from: IN_PROGRESS
+        to: COMPLETED
+        action: complete
+        guard: all_required_lessons_done_and_quiz_passed
+        actor: [SYSTEM]
+        event: lms.course_completed
+      - from: [ENROLLED, IN_PROGRESS]
+        to: DROPPED
+        action: drop
+        guard: none
+        actor: [MEMBER, ADMIN]
+        event: null
+    failure_states:
+      - state: DROPPED
+        recovery: re-enroll
+    audit_events: true
+    test_harness: apps/api/src/modules/lms/lms.service.spec.ts
+
+  reward_redemption:
+    id: SM-007
+    module: Rewards (Module 9)
+    db_model: RewardRedemption
+    db_status_field: status
+    status_enum_values: [REQUESTED, APPROVED, FULFILLED, REJECTED]
+    initial_state: REQUESTED
+    terminal_states: [FULFILLED, REJECTED]
+    transitions:
+      - from: REQUESTED
+        to: APPROVED
+        action: approve
+        guard: sufficient_exp_balance
+        actor: [LEADER, ADMIN]
+        event: rewards.item_redeemed
+      - from: REQUESTED
+        to: REJECTED
+        action: reject
+        guard: requires_reason
+        actor: [LEADER, ADMIN]
+        event: null
+      - from: APPROVED
+        to: FULFILLED
+        action: fulfill
+        guard: item_available
+        actor: [ADMIN]
+        event: null
+    failure_states:
+      - state: REJECTED
+        recovery: re-request with more EXP or different item
+    audit_events: true
+    test_harness: apps/api/src/modules/rewards/rewards.service.spec.ts
+
+  quiz_battle:
+    id: SM-008
+    module: LMS Battle (Module 7B)
+    db_model: QuizBattle
+    db_status_field: status
+    status_enum_values: [WAITING, IN_PROGRESS, FINISHED]
+    initial_state: WAITING
+    terminal_states: [FINISHED]
+    transitions:
+      - from: WAITING
+        to: IN_PROGRESS
+        action: start
+        guard: min_players_joined
+        actor: [LEADER, SYSTEM]
+        event: lms.battle_started
+      - from: IN_PROGRESS
+        to: FINISHED
+        action: finish
+        guard: time_expired_or_all_answered
+        actor: [SYSTEM]
+        event: lms.battle_finished
+    failure_states:
+      - state: WAITING (timeout)
+        recovery: auto-cancel after TTL
+    audit_events: false
+    test_harness: apps/api/src/modules/lms/battle.service.spec.ts
+
+  ticket_lifecycle:
+    id: SM-009
+    module: Tickets (Module 3)
+    db_model: Ticket
+    db_status_field: status
+    status_enum_values: [OPEN, ASSIGNED, IN_PROGRESS, RESOLVED, CLOSED]
+    initial_state: OPEN
+    terminal_states: [CLOSED]
+    transitions:
+      - from: OPEN
+        to: ASSIGNED
+        action: assign
+        guard: assignee_has_permission
+        actor: [ADMIN, SYSTEM]
+        event: ticket.ticket_assigned
+      - from: ASSIGNED
+        to: IN_PROGRESS
+        action: start_work
+        guard: none
+        actor: [ASSIGNEE]
+        event: null
+      - from: [ASSIGNED, IN_PROGRESS]
+        to: RESOLVED
+        action: resolve
+        guard: has_resolution_note
+        actor: [ASSIGNEE]
+        event: ticket.ticket_resolved
+      - from: RESOLVED
+        to: CLOSED
+        action: close
+        guard: requester_confirmed_or_auto_close_7d
+        actor: [REQUESTER, SYSTEM]
+        event: ticket.ticket_closed
+      - from: RESOLVED
+        to: IN_PROGRESS
+        action: reopen
+        guard: within_reopen_window
+        actor: [REQUESTER]
+        event: null
+    failure_states:
+      - state: OPEN (stale)
+        recovery: auto-assign after SLA threshold
+    audit_events: true
+    test_harness: apps/api/src/modules/tickets/tickets.service.spec.ts
+
+# Transition Table Summary
+# Total states across all SMs: 42
+# Total transitions: 38
+# Total events emitted: 28
+# Modules covered: HRM, Sessions, Events, Scout, LMS, Rewards, Tickets

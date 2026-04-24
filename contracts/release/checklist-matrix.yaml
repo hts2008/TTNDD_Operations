@@ -1,0 +1,182 @@
+# TTNDD_OPS Checklist Sync & Release Gates Matrix
+# Maps checklists to roadmap items, modules, Playwright suites, and release gates
+# Ref: STORY-009 / WP-9.6 / T-0926→T-0930
+
+spec_version: 'V10 FINAL'
+generated: '2026-04-11'
+
+checklist_roadmap_matrix:
+  DC_01:
+    name: Data Contract Checklist
+    description: Schema, migration, seed verification
+    owner: D - Backend Engineer
+    run_location: CI pipeline (prisma migrate deploy)
+    modules: [ALL]
+    gate: PRE_MERGE
+    fail_condition: Migration fails on clean PostgreSQL
+    roadmap_refs: [WP-9.2, WP-9.5]
+    verification: "npx prisma migrate deploy --dry-run"
+
+  DC_02:
+    name: Domain Contract Checklist
+    description: Event catalog, state machine, service boundary verification
+    owner: C - System Architect
+    run_location: Manual review + automated event catalog diff
+    modules: [HRM, Scout, Sessions, Events, Rewards, LMS, Finance, Assets, Process, Tickets]
+    gate: PRE_RELEASE
+    fail_condition: New events not in catalog.json OR state machine not in registry
+    roadmap_refs: [WP-9.1, WP-9.3]
+    verification: "diff contracts/events/catalog.json against DOMAIN_EVENTS constant"
+
+  DC_06:
+    name: API Contract Checklist
+    description: OpenAPI spec matches implemented routes
+    owner: D - Backend Engineer
+    run_location: CI pipeline (openapi-diff)
+    modules: [ALL]
+    gate: PRE_MERGE
+    fail_condition: Route exists in code but missing from OpenAPI spec
+    roadmap_refs: [WP-9.4, WP-9.5]
+    verification: "npx ts-node contracts/openapi/generate.ts && diff output"
+
+  DC_08:
+    name: Database Schema Checklist
+    description: Appendix A traceability check
+    owner: D - Backend Engineer
+    run_location: CI pipeline
+    modules: [ALL]
+    gate: PRE_RELEASE
+    fail_condition: Model in Prisma not in appendix-a.yaml
+    roadmap_refs: [WP-9.2]
+    verification: "npx ts-node scripts/generate-appendix-a.ts && diff"
+
+  SE_02:
+    name: Security Engineering Checklist
+    description: Auth guards, RLS, PII classification
+    owner: G - SRE/Security
+    run_location: Manual audit
+    modules: [HRM, ChildSafety, OrgConfig]
+    gate: PRE_RELEASE
+    fail_condition: Endpoint without @Roles or @Public decorator
+    roadmap_refs: [WP-9.3, WP-9.5]
+    verification: "grep -r '@Controller' --include='*.ts' | check for guard decorators"
+
+  SE_04:
+    name: PII Protection Checklist
+    description: PII fields classified and masked in logs
+    owner: G - SRE/Security
+    run_location: Manual audit
+    modules: [HRM, Auth]
+    gate: PRE_RELEASE
+    fail_condition: PII field in logs without masking
+    roadmap_refs: [WP-9.2]
+    verification: "Review appendix-a.yaml pii_fields against log statements"
+
+  TS_01:
+    name: Testing Standards Checklist
+    description: Unit test coverage per module
+    owner: F - QA/Release Engineer
+    run_location: CI pipeline (jest --coverage)
+    modules: [ALL]
+    gate: PRE_MERGE
+    fail_condition: Coverage below 70% for modified files
+    roadmap_refs: [WP-9.1, WP-9.5]
+    verification: "pnpm test -- --coverage"
+
+  TS_02:
+    name: Contract Test Checklist
+    description: API contract tests pass
+    owner: F - QA/Release Engineer
+    run_location: CI pipeline
+    modules: [ALL]
+    gate: PRE_RELEASE
+    fail_condition: Contract test fails (route/response mismatch)
+    roadmap_refs: [WP-9.3, WP-9.5]
+    verification: "pnpm test:e2e"
+
+  TS_04:
+    name: Cross-Module Integration Checklist
+    description: Event flow through producer → consumer verified
+    owner: F - QA/Release Engineer
+    run_location: Staging environment
+    modules: [Scout→Rewards, Session→Rewards, HRM→Notifications]
+    gate: PRE_RELEASE
+    fail_condition: Event emitted but not consumed within 5s
+    roadmap_refs: [WP-9.6]
+    verification: "Monitor domain_events table for unprocessed events"
+
+  GL_06:
+    name: Release Gate Checklist
+    description: Full release readiness verification
+    owner: F - QA/Release Engineer
+    run_location: Staging environment
+    modules: [ALL]
+    gate: PRE_PRODUCTION
+    fail_condition: Any P0 checklist fails OR health endpoint returns non-200
+    roadmap_refs: [WP-9.6, WP-9.7]
+    verification: "curl /api/v1/system/health && run all e2e"
+
+checklist_module_coverage:
+  HRM: [DC_01, DC_02, DC_06, DC_08, SE_02, SE_04, TS_01, TS_02, GL_06]
+  Scout: [DC_01, DC_02, DC_06, DC_08, SE_02, TS_01, TS_02, TS_04, GL_06]
+  Sessions: [DC_01, DC_02, DC_06, DC_08, TS_01, TS_02, TS_04, GL_06]
+  Events: [DC_01, DC_02, DC_06, DC_08, TS_01, TS_02, GL_06]
+  Rewards: [DC_01, DC_02, DC_06, DC_08, TS_01, TS_02, TS_04, GL_06]
+  LMS: [DC_01, DC_02, DC_06, DC_08, TS_01, TS_02, GL_06]
+  Finance: [DC_01, DC_02, DC_06, DC_08, TS_01, TS_02, GL_06]
+  Assets: [DC_01, DC_06, DC_08, TS_01, TS_02, GL_06]
+  Projects: [DC_01, DC_06, DC_08, TS_01, TS_02, GL_06]
+  Tickets: [DC_01, DC_02, DC_06, DC_08, TS_01, TS_02, GL_06]
+  Process: [DC_01, DC_06, DC_08, TS_01, TS_02, GL_06]
+  Notifications: [DC_01, DC_06, DC_08, TS_01, GL_06]
+  FileStorage: [DC_01, DC_06, DC_08, TS_01, GL_06]
+  DataImport: [DC_01, DC_06, DC_08, TS_01, GL_06]
+  Enrichment: [DC_01, DC_02, DC_06, DC_08, TS_01, GL_06]
+
+checklist_playwright_mapping:
+  DC_01:
+    suite: null
+    reason: "Migration checked via CLI, not browser"
+  DC_02:
+    suite: null
+    reason: "Event catalog checked via diff, not browser"
+  DC_06:
+    suite: null
+    reason: "OpenAPI diff checked via CLI"
+  TS_02:
+    suite: tests/e2e/**/*.spec.ts
+    reason: "Contract tests run as Playwright e2e suites"
+  GL_06:
+    suite: tests/e2e/smoke/production-health.spec.ts
+    reason: "Final production health verification"
+
+release_gate_ownership:
+  PRE_MERGE:
+    owner: D - Backend Engineer
+    checklists: [DC_01, DC_06, TS_01]
+    approver: C - System Architect
+    automation: GitHub Actions CI
+
+  PRE_RELEASE:
+    owner: F - QA/Release Engineer
+    checklists: [DC_02, DC_08, SE_02, SE_04, TS_02, TS_04]
+    approver: A - PM/BA
+    automation: Manual + staging smoke tests
+
+  PRE_PRODUCTION:
+    owner: G - SRE/Security
+    checklists: [GL_06]
+    approver: CTO (final sign-off)
+    automation: Health check + canary deployment
+
+fail_conditions:
+  critical_blockers:
+    - "Migration fails on clean PostgreSQL → BLOCK merge"
+    - "Health endpoint returns non-200 → BLOCK deploy"
+    - "PII exposed in logs → BLOCK release (security incident)"
+  warnings:
+    - "Coverage below 70% → flag but allow merge with tech debt ticket"
+    - "Event not consumed within 5s → flag for performance review"
+  informational:
+    - "New model not yet in appendix-a.yaml → auto-regenerate"
+    - "Checklist not yet mapped to Playwright → add to backlog"
