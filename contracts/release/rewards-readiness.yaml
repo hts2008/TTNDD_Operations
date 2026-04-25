@@ -1,0 +1,123 @@
+# Rewards Readiness Manifest — STORY-020
+
+story: STORY-020
+module: rewards
+version: 1.0.0
+date: 2026-04-25
+status: IMPLEMENTED
+
+acceptance_criteria:
+  - id: AC-020.01
+    description: EXP config CRUD with eventType, sourceModule, actionName, expAmount, maxPerDay, maxPerWeek
+    status: PASS
+    evidence: upsertConfig with orgId_eventType compound unique
+
+  - id: AC-020.02
+    description: EXP award with positive amount validation and cap enforcement
+    status: PASS
+    evidence: awardExp checks amount > 0, calls capCounter.canAward before processing
+
+  - id: AC-020.03
+    description: EXP deduct with balance check (availableExp >= amount)
+    status: PASS
+    evidence: deductExp throws BadRequestException("Insufficient EXP") if balance too low
+
+  - id: AC-020.04
+    description: Daily/weekly cap enforcement per event type per member
+    status: PASS
+    evidence: CapCounterService.canAward — daily count + weekly count against config limits
+
+  - id: AC-020.05
+    description: EXP transactions are atomic (transaction + summary updated together)
+    status: PASS
+    evidence: prisma.$transaction([create tx, update summary]) in both award and deduct
+
+  - id: AC-020.06
+    description: Member EXP summary with totalExp, availableExp, penaltyCount
+    status: PASS
+    evidence: getOrCreateSummary with auto-initialization for new members
+
+  - id: AC-020.07
+    description: Transaction history with pagination (page, limit, total)
+    status: PASS
+    evidence: getTransactions returns { data, meta: { total, page, limit } }
+
+  - id: AC-020.08
+    description: Badge definition CRUD with rarity, triggerEvent, autoAward config
+    status: PASS
+    evidence: createDefinition with badgeCode, badgeType, triggerConfig, expReward, isAutoAward
+
+  - id: AC-020.09
+    description: Badge award is idempotent (duplicate check before create)
+    status: PASS
+    evidence: awardBadge checks existing MemberBadge before creating, returns existing if found
+
+  - id: AC-020.10
+    description: Member badges with badge definition includes
+    status: PASS
+    evidence: getMemberBadges include badge definition, ordered by earnedAt desc
+
+  - id: AC-020.11
+    description: Reward shop items with costExp, category, quantity, expiry
+    status: PASS
+    evidence: createItem with quantityAvailable and validUntil fields
+
+  - id: AC-020.12
+    description: Redemption validates stock, expiry, and EXP balance
+    status: PASS
+    evidence: redeem checks isActive, quantityAvailable, validUntil, availableExp
+
+  - id: AC-020.13
+    description: Redemption approval workflow (pending → approved)
+    status: PASS
+    evidence: approveRedemption with status update and domain event
+
+  - id: AC-020.14
+    description: Penalty apply with deduction metadata (deductionItem, correctionTask)
+    status: PASS
+    evidence: applyPenalty delegates to deductExp, then adds penalty-specific fields
+
+  - id: AC-020.15
+    description: Penalty correction (reversal) with audit trail
+    status: PASS
+    evidence: correctPenalty awards back EXP, marks isCorrected, decrements penaltyCount
+
+  - id: AC-020.16
+    description: Leaderboard with scope filtering (org, branch, unit)
+    status: PASS
+    evidence: getLive with where clause for branchId/unitId based on scope
+
+  - id: AC-020.17
+    description: Leaderboard snapshot for historical tracking
+    status: PASS
+    evidence: takeSnapshot creates snapshot with rankings array and period
+
+  - id: AC-020.18
+    description: Peer recognition with 5 categories and daily limit (3/day)
+    status: PASS
+    evidence: give validates category against RECOGNITION_CATEGORIES, checks dailyCount < MAX
+
+  - id: AC-020.19
+    description: Peer recognition blocks self-recognition
+    status: PASS
+    evidence: give throws BadRequestException("Cannot recognize yourself")
+
+  - id: AC-020.20
+    description: Event subscriber consumes 12 cross-module events for auto EXP
+    status: PASS
+    evidence: RewardEventSubscriber with @OnEvent handlers for HRM, Session, Scout, Event, LMS, Project, Enrichment
+
+  - id: AC-020.21
+    description: 8 domain event types published (EXP, Badge, Redemption, Penalty, Peer)
+    status: PASS
+    evidence: EXP_AWARDED, EXP_DEDUCTED, BADGE_AWARDED, REDEMPTION_REQUESTED, ITEM_REDEEMED, PENALTY_APPLIED, PENALTY_CORRECTED, PEER_RECOGNIZED
+
+  - id: AC-020.22
+    description: E2E test coverage (35 specs — 3 existing + 32 new across 5 files)
+    status: PASS
+    evidence: exp-transactions (8), badge-leaderboard (8), shop-redemption (8), penalty-recognition (8), earn-badge (3)
+
+decisions:
+  - DEC-045: Event-driven EXP — 12 cross-module events auto-award EXP via subscriber pattern
+  - DEC-046: Cap enforcement — daily/weekly limits per event type, configurable per org
+  - DEC-047: Penalty reversibility — corrections award back EXP with full audit trail
