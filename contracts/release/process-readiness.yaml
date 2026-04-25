@@ -1,0 +1,119 @@
+# Process/SOP Readiness Manifest — STORY-015
+
+story: STORY-015
+module: process-sop
+version: 1.0.0
+date: 2026-04-25
+status: IMPLEMENTED
+
+acceptance_criteria:
+  - id: AC-015.01
+    description: SOP document CRUD with versioning (draft → published → superseded → archived)
+    status: PASS
+    evidence: SopService — create, update, findMany, findById, archiveDocument
+
+  - id: AC-015.02
+    description: SOP version lifecycle (draft → review → approved → published, rejected → draft)
+    status: PASS
+    evidence: SOP_VERSION_TRANSITIONS + submitForReview, approveVersion, publishVersion
+
+  - id: AC-015.03
+    description: SOP version diff (side-by-side comparison)
+    status: PASS
+    evidence: SopService.diffVersions() — returns from/to content + metadata
+
+  - id: AC-015.04
+    description: SOP approval flow with approver tracking
+    status: PASS
+    evidence: sopApproval table — approverId, decision, comments, decidedAt
+
+  - id: AC-015.05
+    description: SOP search — full-text on title/description/tags with category filtering
+    status: PASS
+    evidence: findMany() with Prisma contains + mode insensitive + tags has
+
+  - id: AC-015.06
+    description: SOP tags and categories discovery
+    status: PASS
+    evidence: findCategories() + findTags() endpoints
+
+  - id: AC-015.07
+    description: Linear workflow definitions with step-based runs
+    status: PASS
+    evidence: ProcessService — createDefinition, startRun, advanceStep, completeRun
+
+  - id: AC-015.08
+    description: Graph-based workflow builder with node/edge JSON schemas
+    status: PASS
+    evidence: WorkflowNode/WorkflowEdge types + saveDefinitionGraph with validation
+
+  - id: AC-015.09
+    description: Graph validation (start/end node checks, condition branching, connectivity)
+    status: PASS
+    evidence: validateGraph() — 6 structural checks
+
+  - id: AC-015.10
+    description: Graph executor runtime with node-by-node advancement
+    status: PASS
+    evidence: startGraphRun, executeNode, resolveNextNodes, auto-advance past start
+
+  - id: AC-015.11
+    description: Condition node evaluation (==, !=, >, <, contains)
+    status: PASS
+    evidence: evaluateCondition() with 5 operators
+
+  - id: AC-015.12
+    description: Auto-execute notification nodes with domain events
+    status: PASS
+    evidence: autoExecuteNotification() — publishes workflow.notification.requested
+
+  - id: AC-015.13
+    description: Trigger adapter — event-based workflow auto-start
+    status: PASS
+    evidence: handleTriggerEvent() — scans triggersJson for matching eventType
+
+  - id: AC-015.14
+    description: Run history timeline with full node results
+    status: PASS
+    evidence: getRunHistory() — timeline from WorkflowRunLog + nodeResults JSON
+
+  - id: AC-015.15
+    description: Stuck run detection and auto-resolution
+    status: PASS
+    evidence: findStuckRuns() + autoResolveStuckRuns() with 24h threshold
+
+  - id: AC-015.16
+    description: Template library with install, import/export, built-in seed
+    status: PASS
+    evidence: TemplateService — findAll, findBySlug, installTemplate, exportDefinition, importDefinition, seedBuiltInTemplates
+
+  - id: AC-015.17
+    description: Process health endpoint with stuck-run metrics
+    status: PASS
+    evidence: GET /process/health — module, status (healthy/degraded), metrics
+
+  - id: AC-015.18
+    description: FE with 3 pages (SOP dashboard, templates, workflow builder)
+    status: PASS
+    evidence: process/page.tsx (600L), templates/page.tsx (450L), workflow-builder/page.tsx (650L)
+
+  - id: AC-015.19
+    description: Unit test coverage (2 spec files)
+    status: PASS
+    evidence: process.service.spec.ts + sop.service.spec.ts
+
+  - id: AC-015.20
+    description: E2E test coverage (24 specs across 3 files)
+    status: PASS
+    evidence: sop-lifecycle, workflow-run, template-builder E2E specs
+
+state_machines:
+  - SM-SOP-DOC: draft → published → superseded | archived
+  - SM-SOP-VER: draft → review → approved → published (rejected → draft)
+  - SM-WORKFLOW-RUN: in_progress → completed | cancelled
+  - SM-NODE-EXEC: completed | rejected | error | waiting
+
+decisions:
+  - DEC-032: Graph executor is synchronous node-by-node (no parallel branches in V1)
+  - DEC-033: SOP uses dual state machines — document-level and version-level independently
+  - DEC-034: Workflow triggers are pull-based (scan definitions on event, not push subscriptions)
