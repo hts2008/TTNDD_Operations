@@ -1,0 +1,108 @@
+# Events/Camp Readiness Manifest — STORY-018
+
+story: STORY-018
+module: events
+version: 1.0.0
+date: 2026-04-25
+status: IMPLEMENTED
+
+acceptance_criteria:
+  - id: AC-018.01
+    description: Event CRUD with title, type, dates, location, maxParticipants, targetBranches
+    status: PASS
+    evidence: EventsCampService.create, update, findById, findMany
+
+  - id: AC-018.02
+    description: Events list with pagination (page, limit) and total count
+    status: PASS
+    evidence: findMany returns { data, meta: { total, page, limit } }
+
+  - id: AC-018.03
+    description: Events filter by status
+    status: PASS
+    evidence: findMany where.status filter
+
+  - id: AC-018.04
+    description: Events filter by date range (from, to)
+    status: PASS
+    evidence: findMany where.startDate.gte/lte filters
+
+  - id: AC-018.05
+    description: SM-13 Event Lifecycle (8 states) with valid transitions only
+    status: PASS
+    evidence: EVENT_TRANSITIONS map — planning→proposed→approved→registration_open→go_live→in_progress→completed→reported
+
+  - id: AC-018.06
+    description: Safety gate enforcement before go_live (RACI + 2-adult rule)
+    status: PASS
+    evidence: validateSafetyGates — requires raciMatrix and safetyChecklist.two_adult_rule
+
+  - id: AC-018.07
+    description: Registration with capacity enforcement
+    status: PASS
+    evidence: register — checks status in [registration_open, approved] and maxParticipants
+
+  - id: AC-018.08
+    description: Guardian consent tracking with date and consentBy
+    status: PASS
+    evidence: signConsent — sets consentSigned, consentDate, consentBy on EventRegistration
+
+  - id: AC-018.09
+    description: Check-in with timestamp
+    status: PASS
+    evidence: checkIn — sets checkInTime, status=checked_in
+
+  - id: AC-018.10
+    description: RACI matrix (JSON-based responsibility assignment)
+    status: PASS
+    evidence: Event.raciMatrix Prisma.InputJsonValue field
+
+  - id: AC-018.11
+    description: Risk assessment per event (JSON risk register)
+    status: PASS
+    evidence: Event.riskAssessment field — stores categorized risks with mitigations
+
+  - id: AC-018.12
+    description: Safety checklist with mandatory items
+    status: PASS
+    evidence: Event.safetyChecklist JSON with two_adult_rule boolean gate
+
+  - id: AC-018.13
+    description: Post-event report submission
+    status: PASS
+    evidence: update({ postEventReport }) + SM-13 completed→reported transition
+
+  - id: AC-018.14
+    description: Domain events published for lifecycle transitions
+    status: PASS
+    evidence: EVENT.CREATED, EVENT.REGISTRATION_OPENED, EVENT.CONSENT_RECEIVED, EVENT.CHECKED_IN, EVENT.COMPLETED
+
+  - id: AC-018.15
+    description: Audit logging on event updates
+    status: PASS
+    evidence: AuditService.log on update with action=event.updated
+
+  - id: AC-018.16
+    description: Swagger annotations and role guards on admin endpoints
+    status: PASS
+    evidence: @ApiTags, @ApiBearerAuth, @Roles on create/update/transition/check-in
+
+  - id: AC-018.17
+    description: FE events page renders
+    status: PASS
+    evidence: events/page.tsx with content rendering
+
+  - id: AC-018.18
+    description: E2E test coverage (19 specs across 3 files)
+    status: PASS
+    evidence: register-event (3), event-lifecycle (8), registration-consent (8)
+
+state_machines:
+  - "SM-13: planning → proposed → approved → registration_open → go_live → in_progress → completed → reported"
+  - "Reject: proposed → [reject] → planning"
+  - "Close reg: registration_open → [close_registration] → approved"
+  - "Safety gate: go_live requires RACI matrix + 2-adult-rule checklist"
+
+decisions:
+  - DEC-041: SM-13 has 8 states with safety gates hardcoded before go_live
+  - DEC-042: 2-adult rule is a hard gate — cannot go live without confirmation in safety checklist
