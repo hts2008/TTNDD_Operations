@@ -1,0 +1,96 @@
+# Assets Readiness Manifest — STORY-014
+
+story: STORY-014
+module: assets-armory
+version: 1.0.0
+date: 2026-04-25
+status: IMPLEMENTED
+
+acceptance_criteria:
+  - id: AC-014.01
+    description: Asset CRUD with categories, filtering, pagination
+    status: PASS
+    evidence: AssetsController (POST/GET/PATCH/DELETE /assets)
+
+  - id: AC-014.02
+    description: Asset loan lifecycle (SM-8 pending→approved→checked_out→returned/lost)
+    status: PASS
+    evidence: LOAN_TRANSITIONS + transitionLoan() with balance tracking
+
+  - id: AC-014.03
+    description: Guardian acceptance for minor borrowers
+    status: PASS
+    evidence: guardianAcceptLoan() with pending→accepted/rejected + domain events
+
+  - id: AC-014.04
+    description: Overdue loan detection
+    status: PASS
+    evidence: getOverdueLoans() — queries checked_out with expectedReturn < now
+
+  - id: AC-014.05
+    description: Kit templates with pack/unpack checklists
+    status: PASS
+    evidence: createKitTemplate() + generatePackChecklist() + markItemPacked()
+
+  - id: AC-014.06
+    description: Uniform issue/return flow
+    status: PASS
+    evidence: issueUniform() + returnUniform() + getUniformIssues()
+
+  - id: AC-014.07
+    description: Stock threshold alerts with severity levels
+    status: PASS
+    evidence: getStockAlerts() — critical/high/low based on availableQty
+
+  - id: AC-014.08
+    description: Maintenance schedule with auto-reschedule
+    status: PASS
+    evidence: completeMaintenanceTask() calculates nextDue from frequency
+
+  - id: AC-014.09
+    description: Asset dispose (retired/donated/scrapped) with audit
+    status: PASS
+    evidence: disposeAsset() + retireAsset() with domain events
+
+  - id: AC-014.10
+    description: QR code generation for assets
+    status: PASS
+    evidence: generateQrDataUrl() via qrcode library
+
+  - id: AC-014.11
+    description: Custom fields per asset (upsert pattern)
+    status: PASS
+    evidence: setCustomField() with findFirst + update/create
+
+  - id: AC-014.12
+    description: Bulk import/export (JSON + CSV)
+    status: PASS
+    evidence: importAssets() + exportAssets() + exportAssetsCsv() + exportLoansCsv()
+
+  - id: AC-014.13
+    description: FE with 6 tabs (inventory/loans/uniform/maintenance/kits/categories)
+    status: PASS
+    evidence: assets/page.tsx — 571 lines, live API, stock alert banner, CSV download
+
+  - id: AC-014.14
+    description: DTOs with class-validator (14 classes)
+    status: PASS
+    evidence: assets.dto.ts — 173 lines
+
+  - id: AC-014.15
+    description: E2E test coverage (4 spec files)
+    status: PASS
+    evidence: loan-return, kit-checklist, uniform-flow, csv-export specs
+
+  - id: AC-014.16
+    description: Seed data (4 categories, 6 assets, 1 kit, 2 uniforms)
+    status: PASS
+    evidence: prisma/seed-assets.ts
+
+state_machines:
+  - SM-8: Asset Loan Lifecycle (pending→approved→checked_out→returned/lost)
+
+decisions:
+  - DEC-029: QR uses qrcode library with TTNDD_ASSET structured payload
+  - DEC-030: Maintenance auto-reschedule based on frequency lookup table
+  - DEC-031: Kit checklists are in-memory (no dedicated DB table for pack state)
