@@ -1,56 +1,63 @@
 'use client';
 
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { DataTable } from '@/components/ui/data-table';
-import { Wallet, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import {
+  Wallet,
+  TrendingUp,
+  TrendingDown,
+  ArrowUpRight,
+  ArrowDownRight,
+  Search,
+  AlertTriangle,
+  Plus,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+const API = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
 
 const formatVND = (amount: number) =>
   new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
 
 interface Transaction {
-  id: string;
   date: string;
   description: string;
   category: string;
   amount: number;
-  type: 'income' | 'expense';
-  status: 'completed' | 'pending';
+  type: string;
+  status: string;
+  reference: string;
 }
 
-interface Fee {
+interface FinanceSummary {
+  byCategory: Record<string, { income: number; expense: number; net: number }>;
+  totals: { income: number; expense: number; net: number };
+}
+
+interface FeeItem {
   id: string;
-  memberName: string;
-  period: string;
-  amount: number;
-  status: 'paid' | 'pending' | 'overdue';
+  feeType: string | null;
+  feePeriod: string | null;
+  amountDue: number;
+  amountPaid: number;
+  status: string;
+  dueDate: string | null;
+  orgMember?: { scoutName: string; memberCode: string };
 }
 
-const STATS = {
-  balance: 45_600_000,
-  incomeThisMonth: 12_500_000,
-  expenseThisMonth: 8_200_000,
-};
-
-const TRANSACTIONS: Transaction[] = [
-  { id: '1', date: '2026-03-04', description: 'Thu phí sinh hoạt tháng 3', category: 'Phí sinh hoạt', amount: 5_000_000, type: 'income', status: 'completed' },
-  { id: '2', date: '2026-03-03', description: 'Mua vật tư trại huấn luyện', category: 'Vật tư', amount: -3_200_000, type: 'expense', status: 'completed' },
-  { id: '3', date: '2026-03-02', description: 'Tài trợ từ Ban Đại Diện', category: 'Tài trợ', amount: 7_500_000, type: 'income', status: 'completed' },
-  { id: '4', date: '2026-03-01', description: 'In ấn tài liệu giáo lý', category: 'In ấn', amount: -1_800_000, type: 'expense', status: 'pending' },
-  { id: '5', date: '2026-02-28', description: 'Chi phí thuê xe cho dã ngoại', category: 'Vận chuyển', amount: -3_200_000, type: 'expense', status: 'completed' },
-];
-
-const FEES: Fee[] = [
-  { id: 'f1', memberName: 'Nguyễn Minh Tuấn', period: 'Q1/2026', amount: 300_000, status: 'paid' },
-  { id: 'f2', memberName: 'Trần Thị Hồng Nhung', period: 'Q1/2026', amount: 300_000, status: 'pending' },
-  { id: 'f3', memberName: 'Lê Hoàng Nam', period: 'Q1/2026', amount: 300_000, status: 'overdue' },
-];
-
-const FEE_STATUS: Record<string, { label: string; variant: 'success' | 'warning' | 'destructive' }> = {
+const FEE_STATUS: Record<
+  string,
+  { label: string; variant: 'success' | 'warning' | 'destructive' | 'outline' }
+> = {
   paid: { label: 'Đã đóng', variant: 'success' },
-  pending: { label: 'Chờ đóng', variant: 'warning' },
+  partial: { label: 'Đóng 1 phần', variant: 'warning' },
+  unpaid: { label: 'Chờ đóng', variant: 'outline' },
   overdue: { label: 'Quá hạn', variant: 'destructive' },
+  waived: { label: 'Miễn phí', variant: 'success' },
 };
 
 const txColumns = [
@@ -71,8 +78,14 @@ const txColumns = [
     key: 'amount',
     label: 'Số tiền',
     render: (item: Transaction) => (
-      <span className={cn('font-semibold', item.type === 'income' ? 'text-emerald-600' : 'text-red-600')}>
-        {item.type === 'income' ? '+' : ''}{formatVND(item.amount)}
+      <span
+        className={cn(
+          'font-semibold',
+          item.type === 'income' ? 'text-emerald-600' : 'text-red-600',
+        )}
+      >
+        {item.type === 'income' ? '+' : '-'}
+        {formatVND(item.amount)}
       </span>
     ),
   },
@@ -80,42 +93,152 @@ const txColumns = [
     key: 'status',
     label: 'Trạng thái',
     render: (item: Transaction) => (
-      <Badge variant={item.status === 'completed' ? 'success' : 'warning'}>
-        {item.status === 'completed' ? 'Hoàn thành' : 'Chờ duyệt'}
+      <Badge
+        variant={
+          item.status === 'completed'
+            ? 'success'
+            : item.status === 'reversed'
+              ? 'destructive'
+              : 'warning'
+        }
+      >
+        {item.status === 'completed'
+          ? 'Hoàn thành'
+          : item.status === 'reversed'
+            ? 'Đã hủy'
+            : 'Chờ duyệt'}
       </Badge>
     ),
   },
 ];
 
 const feeColumns = [
-  { key: 'memberName', label: 'Đoàn sinh', render: (item: Fee) => <span className="font-medium">{item.memberName}</span> },
-  { key: 'period', label: 'Kỳ thu' },
-  { key: 'amount', label: 'Số tiền', render: (item: Fee) => <span>{formatVND(item.amount)}</span> },
+  {
+    key: 'memberName',
+    label: 'Đoàn sinh',
+    render: (item: FeeItem) => (
+      <span className="font-medium">{item.orgMember?.scoutName ?? '—'}</span>
+    ),
+  },
+  {
+    key: 'feePeriod',
+    label: 'Kỳ thu',
+    render: (item: FeeItem) => <span>{item.feePeriod ?? '—'}</span>,
+  },
+  {
+    key: 'amountDue',
+    label: 'Phải thu',
+    render: (item: FeeItem) => <span>{formatVND(Number(item.amountDue))}</span>,
+  },
+  {
+    key: 'amountPaid',
+    label: 'Đã thu',
+    render: (item: FeeItem) => (
+      <span className="text-emerald-600">{formatVND(Number(item.amountPaid))}</span>
+    ),
+  },
   {
     key: 'status',
     label: 'Trạng thái',
-    render: (item: Fee) => {
-      const cfg = FEE_STATUS[item.status];
+    render: (item: FeeItem) => {
+      const cfg = FEE_STATUS[item.status] ?? { label: item.status, variant: 'outline' as const };
       return <Badge variant={cfg.variant}>{cfg.label}</Badge>;
+    },
+  },
+  {
+    key: 'dueDate',
+    label: 'Hạn nộp',
+    render: (item: FeeItem) => {
+      if (!item.dueDate)
+        return <span className="text-sm text-[hsl(var(--muted-foreground))]">—</span>;
+      const isOverdue =
+        new Date(item.dueDate) < new Date() && !['paid', 'waived'].includes(item.status);
+      return (
+        <span className={cn('text-sm', isOverdue ? 'text-red-500 font-medium' : '')}>
+          {isOverdue && <AlertTriangle className="inline h-3 w-3 mr-1" />}
+          {new Date(item.dueDate).toLocaleDateString('vi-VN')}
+        </span>
+      );
     },
   },
 ];
 
 export default function FinancePage() {
+  const [summary, setSummary] = useState<FinanceSummary | null>(null);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [fees, setFees] = useState<FeeItem[]>([]);
+  const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const [sumRes, txRes, feeRes] = await Promise.all([
+        fetch(`${API}/finance/summary`, { credentials: 'include' }),
+        fetch(`${API}/finance/export/transactions`, { credentials: 'include' }),
+        fetch(`${API}/finance/fees?limit=50`, { credentials: 'include' }),
+      ]);
+      if (sumRes.ok) setSummary(await sumRes.json());
+      if (txRes.ok) {
+        const d = await txRes.json();
+        setTransactions(d.data ?? []);
+      }
+      if (feeRes.ok) {
+        const d = await feeRes.json();
+        setFees(d.data ?? []);
+      }
+      setError(null);
+    } catch (e: unknown) {
+      setError((e as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const filteredFees = fees.filter((f) =>
+    (f.orgMember?.scoutName ?? '').toLowerCase().includes(search.toLowerCase()),
+  );
+
+  if (error)
+    return (
+      <div className="p-6">
+        <h1 className="text-3xl font-bold mb-4 flex items-center gap-3">
+          <Wallet className="h-8 w-8 text-emerald-500" />
+          Tài chính
+        </h1>
+        <div className="p-4 bg-red-950 rounded-lg text-red-200">⚠️ {error}</div>
+      </div>
+    );
+
+  const totals = summary?.totals ?? { income: 0, expense: 0, net: 0 };
+
   return (
     <div className="space-y-6 p-6">
-      <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-        <Wallet className="h-8 w-8 text-emerald-500" />
-        Tài chính
-      </h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+          <Wallet className="h-8 w-8 text-emerald-500" />
+          Tài chính
+        </h1>
+        <Button>
+          <Plus className="h-4 w-4 mr-1" /> Tạo giao dịch
+        </Button>
+      </div>
 
+      {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-emerald-600 font-medium">Tổng số dư</p>
-                <p className="text-2xl font-bold text-emerald-800">{formatVND(STATS.balance)}</p>
+                <p className="text-2xl font-bold text-emerald-800">
+                  {loading ? '...' : formatVND(totals.net)}
+                </p>
               </div>
               <div className="h-12 w-12 rounded-full bg-emerald-100 flex items-center justify-center">
                 <Wallet className="h-6 w-6 text-emerald-600" />
@@ -128,8 +251,10 @@ export default function FinancePage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-blue-600 font-medium">Thu nhập tháng này</p>
-                <p className="text-2xl font-bold text-blue-800">{formatVND(STATS.incomeThisMonth)}</p>
+                <p className="text-sm text-blue-600 font-medium">Thu nhập</p>
+                <p className="text-2xl font-bold text-blue-800">
+                  {loading ? '...' : formatVND(totals.income)}
+                </p>
               </div>
               <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
                 <ArrowUpRight className="h-6 w-6 text-blue-600" />
@@ -142,8 +267,10 @@ export default function FinancePage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-rose-600 font-medium">Chi tiêu tháng này</p>
-                <p className="text-2xl font-bold text-rose-800">{formatVND(STATS.expenseThisMonth)}</p>
+                <p className="text-sm text-rose-600 font-medium">Chi tiêu</p>
+                <p className="text-2xl font-bold text-rose-800">
+                  {loading ? '...' : formatVND(totals.expense)}
+                </p>
               </div>
               <div className="h-12 w-12 rounded-full bg-rose-100 flex items-center justify-center">
                 <ArrowDownRight className="h-6 w-6 text-rose-600" />
@@ -153,6 +280,7 @@ export default function FinancePage() {
         </Card>
       </div>
 
+      {/* Transactions */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
@@ -161,19 +289,57 @@ export default function FinancePage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <DataTable columns={txColumns} data={TRANSACTIONS} />
+          {loading ? (
+            <div className="flex gap-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-12 w-full bg-muted animate-pulse rounded" />
+              ))}
+            </div>
+          ) : transactions.length === 0 ? (
+            <div className="text-center py-12 text-[hsl(var(--muted-foreground))]">
+              <p className="text-4xl mb-2">📊</p>
+              <p>Chưa có giao dịch nào.</p>
+            </div>
+          ) : (
+            <DataTable columns={txColumns} data={transactions.slice(0, 20)} />
+          )}
         </CardContent>
       </Card>
 
+      {/* Fees */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <TrendingDown className="h-5 w-5" />
-            Thu phí Đoàn sinh
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <TrendingDown className="h-5 w-5" />
+              Thu phí Đoàn sinh
+            </CardTitle>
+            <div className="relative w-64">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[hsl(var(--muted-foreground))]" />
+              <Input
+                placeholder="Tìm Đoàn sinh..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
-          <DataTable columns={feeColumns} data={FEES} />
+          {loading ? (
+            <div className="flex gap-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-12 w-full bg-muted animate-pulse rounded" />
+              ))}
+            </div>
+          ) : filteredFees.length === 0 ? (
+            <div className="text-center py-12 text-[hsl(var(--muted-foreground))]">
+              <p className="text-4xl mb-2">💳</p>
+              <p>Chưa có khoản phí nào.</p>
+            </div>
+          ) : (
+            <DataTable columns={feeColumns} data={filteredFees} />
+          )}
         </CardContent>
       </Card>
     </div>

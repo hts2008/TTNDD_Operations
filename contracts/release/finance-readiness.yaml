@@ -1,0 +1,97 @@
+# Finance Readiness Manifest — STORY-013
+
+story: STORY-013
+module: finance-ledger
+version: 1.0.0
+date: 2026-04-25
+status: IMPLEMENTED
+
+acceptance_criteria:
+  - id: AC-013.01
+    description: Account CRUD with type filtering
+    status: PASS
+    evidence: finance.controller.ts (POST/GET /finance/accounts)
+
+  - id: AC-013.02
+    description: Transaction lifecycle (SM-6 pending→approved→completed→reversed)
+    status: PASS
+    evidence: TRANSACTION_TRANSITIONS + balance update on complete/reverse
+
+  - id: AC-013.03
+    description: Cost center creation and budget tracking
+    status: PASS
+    evidence: createCostCenter() + getCostCenters() — JSON-based in org.settings
+
+  - id: AC-013.04
+    description: Fee creation + partial payment + overdue (SM-7)
+    status: PASS
+    evidence: FEE_TRANSITIONS + payFee() + amountPaid tracking
+
+  - id: AC-013.05
+    description: Fee waiver with audit reason
+    status: PASS
+    evidence: POST /finance/fees/:id/waive with WaiveFeeDto
+
+  - id: AC-013.06
+    description: Recurring fee plan templates
+    status: PASS
+    evidence: POST/GET /finance/fee-plans
+
+  - id: AC-013.07
+    description: Sponsor and in-kind contribution tracking
+    status: PASS
+    evidence: POST/GET /finance/sponsors with summary aggregation
+
+  - id: AC-013.08
+    description: Balance projections (current + pending + expected fee income)
+    status: PASS
+    evidence: GET /finance/projections
+
+  - id: AC-013.09
+    description: Budget vs actual variance report
+    status: PASS
+    evidence: GET /finance/budget-variance with on_track/warning/over_budget status
+
+  - id: AC-013.10
+    description: Parent payment visibility (read-only fee view)
+    status: PASS
+    evidence: GET /finance/parent-view/:memberId
+
+  - id: AC-013.11
+    description: Transaction export (CSV-ready data structure)
+    status: PASS
+    evidence: GET /finance/export/transactions
+
+  - id: AC-013.12
+    description: Account balance reconciliation check
+    status: PASS
+    evidence: GET /finance/reconciliation
+
+  - id: AC-013.13
+    description: FE wired to live API (3 cards + 2 tables)
+    status: PASS
+    evidence: finance/page.tsx fetches from /finance/summary + /finance/export + /finance/fees
+
+  - id: AC-013.14
+    description: E2E specs (12 Playwright tests)
+    status: PASS
+    evidence: tests/e2e/finance/fee-payment.spec.ts
+
+  - id: AC-013.15
+    description: Seed data (2 accounts, 5 tx, 3 fees, 2 CC, 1 FP, 2 sponsors)
+    status: PASS
+    evidence: prisma/seed-finance.ts
+
+  - id: AC-013.16
+    description: DTOs with class-validator (9 classes)
+    status: PASS
+    evidence: finance.dto.ts
+
+state_machines:
+  - SM-6: Transaction Lifecycle (pending→approved→completed→reversed)
+  - SM-7: Fee Payment Lifecycle (unpaid→partial→paid→waived, →overdue)
+
+decisions:
+  - DEC-026: Keep simplified single-amount model (not double-entry); deferred to P2
+  - DEC-027: Cost centers + fee plans + sponsors stored as JSON in org.settings (no migration)
+  - DEC-028: Budget variance = live computation against cost center budgets
