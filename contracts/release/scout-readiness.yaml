@@ -1,0 +1,117 @@
+# Scout Advancement Readiness Manifest — STORY-017
+
+story: STORY-017
+module: scout
+version: 1.0.0
+date: 2026-04-25
+status: IMPLEMENTED
+
+acceptance_criteria:
+  - id: AC-017.01
+    description: Rank definitions CRUD with branchId, rankCode, rankOrder, narrativeName
+    status: PASS
+    evidence: ScoutService.getRankDefinitions, createRankDefinition — ordered by rankOrder ASC
+
+  - id: AC-017.02
+    description: Skill groups with nested skills hierarchy
+    status: PASS
+    evidence: getSkillGroups — includes skills ordered by skillCode, grouped by branch
+
+  - id: AC-017.03
+    description: Skill creation with multi-level criteria (JSON levels), maxLevel, isRequired
+    status: PASS
+    evidence: createSkill — levels as InputJsonValue, expPerLevel, requiredForRankId
+
+  - id: AC-017.04
+    description: Skill progress tracking — start, verify, award lifecycle
+    status: PASS
+    evidence: startSkill (idempotent), verifySkillLevel (level-based), awardSkill (marks completedAt)
+
+  - id: AC-017.05
+    description: SM-10 Skill Progress State Machine (5 states)
+    status: PASS
+    evidence: RankProgressionService — not_started → in_progress → pending_review → verified → awarded (with reject loop)
+
+  - id: AC-017.06
+    description: SM-11 Rank Progression State Machine (7 states)
+    status: PASS
+    evidence: RankProgressionService — in_progress → eligible → proposed → council_review → approved → ceremony_scheduled → completed (with reject loop)
+
+  - id: AC-017.07
+    description: Evidence submission with type classification (photo, video, document)
+    status: PASS
+    evidence: submitEvidence — evidenceType, evidenceUrl, notes, status=submitted
+
+  - id: AC-017.08
+    description: Evidence review with auto-verify on approval
+    status: PASS
+    evidence: reviewEvidence → if approved → verifySkillLevel auto-called → skill level updated
+
+  - id: AC-017.09
+    description: Rank transition with action validation and event publishing
+    status: PASS
+    evidence: transitionRank — validates via SM-11, publishes RANK_ELIGIBLE/PROPOSED/APPROVED/AWARDED
+
+  - id: AC-017.10
+    description: Rank eligibility auto-check based on completed required skills
+    status: PASS
+    evidence: checkRankEligibility — scans in_progress ranks, checks required skills, auto-transitions to eligible
+
+  - id: AC-017.11
+    description: Skill award triggers rank eligibility check
+    status: PASS
+    evidence: awardSkill → calls checkRankEligibility automatically
+
+  - id: AC-017.12
+    description: Scout dashboard with aggregated stats
+    status: PASS
+    evidence: getScoutDashboard — totalSkills, completedSkills, skillCompletionRate, currentRank, completedRanksCount
+
+  - id: AC-017.13
+    description: Dashboard includes allowedActions per rank (SM-11 awareness)
+    status: PASS
+    evidence: memberRanks mapped with getAllowedRankActions(status)
+
+  - id: AC-017.14
+    description: Domain events for all skill/rank transitions (6+ event types)
+    status: PASS
+    evidence: SKILL_STARTED, SKILL_VERIFIED, SKILL_AWARDED, EVIDENCE_SUBMITTED, RANK_ELIGIBLE, RANK_PROPOSED, RANK_APPROVED, RANK_AWARDED
+
+  - id: AC-017.15
+    description: Verified levels stored as JSON map per skill progress
+    status: PASS
+    evidence: verifiedLevels Record<string, boolean> persisted via Prisma JSON
+
+  - id: AC-017.16
+    description: Controller has Swagger annotations and role guards
+    status: PASS
+    evidence: @ApiTags, @ApiBearerAuth, @ApiOperation, @Roles('super_admin', 'admin') on admin endpoints
+
+  - id: AC-017.17
+    description: Rank definitions include narrative names and badge images
+    status: PASS
+    evidence: Schema supports narrativeName, iconUrl, badgeImageUrl for gamification UI
+
+  - id: AC-017.18
+    description: Skill groups have visual properties (icon, color)
+    status: PASS
+    evidence: SkillGroup.icon and SkillGroup.color for skill tree UI rendering
+
+  - id: AC-017.19
+    description: FE scout page renders dashboard
+    status: PASS
+    evidence: scout/page.tsx (9KB) with skill groups, ranks, evidence
+
+  - id: AC-017.20
+    description: E2E test coverage (27 specs across 4 files)
+    status: PASS
+    evidence: skill-progress (3), rank-lifecycle (8), evidence-review (8), dashboard-eligibility (8)
+
+state_machines:
+  - SM-10 Skill: not_started → in_progress → pending_review → verified → awarded (reject → in_progress)
+  - SM-11 Rank: in_progress → eligible → proposed → council_review → approved → ceremony_scheduled → completed (reject → proposed)
+
+decisions:
+  - DEC-038: 7-state rank SM includes council_review and ceremony_scheduled for formal scouting process
+  - DEC-039: Evidence approval auto-triggers verifySkillLevel — no manual skill update needed
+  - DEC-040: Rank eligibility is pull-based — scans required skills on awardSkill, not push-subscription
