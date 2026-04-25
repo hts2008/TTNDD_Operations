@@ -5,16 +5,57 @@ import { DomainEventService } from '../../core/events';
 import { AuditService } from '../../core/audit';
 import { DOMAIN_EVENTS } from '@ttndd/constants';
 
-/**
- * SM-5: Ticket Lifecycle
- * open → assigned → in_progress → resolved → closed
- */
+/** SM-5: Ticket Lifecycle */
 const TICKET_TRANSITIONS: Record<string, Record<string, string>> = {
   open: { assign: 'assigned', close: 'closed' },
   assigned: { start: 'in_progress', reassign: 'assigned', close: 'closed' },
   in_progress: { resolve: 'resolved', reassign: 'assigned' },
   resolved: { close: 'closed', reopen: 'open' },
   closed: { reopen: 'open' },
+};
+
+/** T-1044: SLA targets per priority (hours) */
+const SLA_TARGETS: Record<string, { firstResponse: number; resolution: number }> = {
+  critical: { firstResponse: 1, resolution: 4 },
+  high: { firstResponse: 2, resolution: 8 },
+  medium: { firstResponse: 4, resolution: 24 },
+  low: { firstResponse: 8, resolution: 72 },
+};
+
+/** T-1042: Category → default assignee role mapping */
+const CATEGORY_ROUTING: Record<string, string> = {
+  'Tài khoản': 'admin',
+  'Kỹ thuật': 'tech_support',
+  'Tài sản': 'asset_manager',
+  'Tính năng': 'product_owner',
+  'An toàn': 'safety_officer',
+  'Tài chính': 'finance_admin',
+};
+
+/** T-1054: Guardian consent templates */
+const CONSENT_TEMPLATES: Record<string, { title: string; description: string; category: string }> =
+  {
+    camp_consent: {
+      title: 'Đồng ý cho con tham gia trại',
+      description:
+        'Phụ huynh xác nhận đồng ý cho con tham gia hoạt động trại. Vui lòng đính kèm giấy đồng ý đã ký.',
+      category: 'Đồng ý phụ huynh',
+    },
+    medical_consent: {
+      title: 'Đồng ý y tế',
+      description: 'Phụ huynh cung cấp thông tin y tế và đồng ý cho phép xử lý y tế khẩn cấp.',
+      category: 'Đồng ý phụ huynh',
+    },
+    photo_consent: {
+      title: 'Đồng ý sử dụng hình ảnh',
+      description: 'Phụ huynh đồng ý cho phép sử dụng hình ảnh con trong tài liệu hoạt động.',
+      category: 'Đồng ý phụ huynh',
+    },
+  };
+
+/** T-1048: Approval thresholds */
+const APPROVAL_THRESHOLDS = {
+  budget: { autoApproveLimit: 500000, escalateLimit: 5000000 },
 };
 
 @Injectable()
@@ -27,13 +68,31 @@ export class TicketsService {
 
   // ── Ticket CRUD ──
 
-  async createTicket(orgId: string, data: {
-    title: string; description?: string; category?: string;
-    priority?: string; requesterId: string; assigneeId?: string;
-    dueDate?: string; tags?: string[]; customFields?: Prisma.InputJsonValue;
-    isSensitive?: boolean; isAnonymous?: boolean;
-  }, actorUserId: string) {
+  async createTicket(
+    orgId: string,
+    data: {
+      title: string;
+      description?: string;
+      category?: string;
+      priority?: string;
+      requesterId: string;
+      assigneeId?: string;
+      dueDate?: string;
+      tags?: string[];
+      customFields?: Prisma.InputJsonValue;
+      isSensitive?: boolean;
+      isAnonymous?: boolean;
+    },
+    actorUserId: string,
+  ) {
     const ticketNumber = await this.generateTicketNumber(orgId);
+    const priority = data.priority ?? 'medium';
+
+    // T-1044: Calculate SLA deadlines
+    const sla = SLA_TARGETS[priority] ?? SLA_TARGETS['medium'];
+    const now = new Date();
+    const firstResponseDeadline = new Date(now.getTime() + sla!.firstResponse * 3600000);
+    const resolutionDeadline = new Date(now.getTime() + sla!.resolution * 3600000);
 
     const ticket = await this.prisma.ticket.create({
       data: {
@@ -42,10 +101,10 @@ export class TicketsService {
         title: data.title,
         description: data.description,
         category: data.category,
-        priority: data.priority,
+        priority,
         requesterId: data.requesterId,
         assigneeId: data.assigneeId,
-        dueDate: data.dueDate ? new Date(data.dueDate) : undefined,
+        dueDate: data.dueDate ? new Date(data.dueDate) : resolutionDeadline,
         tags: data.tags ?? [],
         customFields: data.customFields ?? {},
         isSensitive: data.isSensitive ?? false,
@@ -60,17 +119,42 @@ export class TicketsService {
       eventType: DOMAIN_EVENTS.TICKET.CREATED,
       aggregateId: ticket.id,
       aggregateType: 'Ticket',
-      payload: { ticketNumber, title: data.title, priority: data.priority ?? 'medium', isSensitive: data.isSensitive ?? false },
+      payload: {
+        ticketNumber,
+        title: data.title,
+        priority,
+        isSensitive: data.isSensitive ?? false,
+        sla: {
+          firstResponseDeadline: firstResponseDeadline.toISOString(),
+          resolutionDeadline: resolutionDeadline.toISOString(),
+        },
+      },
       actorUserId,
     });
 
-    return ticket;
+    await this.audit.log({
+      orgId,
+      userId: actorUserId,
+      action: 'ticket.created',
+      resource: 'Ticket',
+      resourceId: ticket.id,
+    });
+    return { ...ticket, sla: { firstResponseDeadline, resolutionDeadline } };
   }
 
-  async findTickets(orgId: string, filters?: {
-    status?: string; priority?: string; category?: string;
-    assigneeId?: string; requesterId?: string; isSensitive?: boolean;
-  }, page = 1, limit = 20) {
+  async findTickets(
+    orgId: string,
+    filters?: {
+      status?: string;
+      priority?: string;
+      category?: string;
+      assigneeId?: string;
+      requesterId?: string;
+      isSensitive?: boolean;
+    },
+    page = 1,
+    limit = 20,
+  ) {
     const where: Prisma.TicketWhereInput = { orgId };
     if (filters?.status) where.status = filters.status;
     if (filters?.priority) where.priority = filters.priority;
@@ -89,7 +173,6 @@ export class TicketsService {
       }),
       this.prisma.ticket.count({ where }),
     ]);
-
     return { data, meta: { total, page, limit } };
   }
 
@@ -105,30 +188,41 @@ export class TicketsService {
     return ticket;
   }
 
-  // ── State Machine ──
+  // ── SM-5 State Machine ──
 
-  async transitionTicket(orgId: string, ticketId: string, action: string, actorUserId: string, data?: {
-    assigneeId?: string; approvalNotes?: string;
-  }) {
+  async transitionTicket(
+    orgId: string,
+    ticketId: string,
+    action: string,
+    actorUserId: string,
+    data?: {
+      assigneeId?: string;
+      approvalNotes?: string;
+    },
+  ) {
     const ticket = await this.findById(orgId, ticketId);
     const allowed = TICKET_TRANSITIONS[ticket.status];
-    if (!allowed?.[action]) {
+    if (!allowed?.[action])
       throw new BadRequestException(`Action '${action}' not allowed from '${ticket.status}'`);
-    }
     const newStatus = allowed[action];
+    const oldValue = { status: ticket.status };
 
     const updateData: Prisma.TicketUpdateInput = { status: newStatus };
-    if ((action === 'assign' || action === 'reassign') && data?.assigneeId) {
+    if ((action === 'assign' || action === 'reassign') && data?.assigneeId)
       updateData.assigneeId = data.assigneeId;
-    }
     if (action === 'resolve') {
       updateData.resolvedAt = new Date();
       if (data?.approvalNotes) updateData.approvalNotes = data.approvalNotes;
     }
 
     const updated = await this.prisma.ticket.update({ where: { id: ticketId }, data: updateData });
-
-    await this.recordStatusHistory(ticketId, ticket.status, newStatus, actorUserId, data?.approvalNotes);
+    await this.recordStatusHistory(
+      ticketId,
+      ticket.status,
+      newStatus,
+      actorUserId,
+      data?.approvalNotes,
+    );
 
     const eventMap: Record<string, string | undefined> = {
       assigned: DOMAIN_EVENTS.TICKET.ASSIGNED,
@@ -146,17 +240,236 @@ export class TicketsService {
       });
     }
 
+    await this.audit.log({
+      orgId,
+      userId: actorUserId,
+      action: `ticket.${action}`,
+      resource: 'Ticket',
+      resourceId: ticketId,
+      oldValue,
+      newValue: { status: newStatus },
+    });
     return updated;
+  }
+
+  // ── T-1049/T-1053: Escalation ──
+
+  async escalateTicket(orgId: string, ticketId: string, actorUserId: string, reason?: string) {
+    const ticket = await this.findById(orgId, ticketId);
+    if (ticket.status === 'closed' || ticket.status === 'resolved') {
+      throw new BadRequestException('Cannot escalate a closed/resolved ticket');
+    }
+
+    const priorityLadder = ['low', 'medium', 'high', 'critical'];
+    const currentIdx = priorityLadder.indexOf(ticket.priority);
+    const newPriority =
+      currentIdx < priorityLadder.length - 1 ? priorityLadder[currentIdx + 1] : 'critical';
+
+    const updated = await this.prisma.ticket.update({
+      where: { id: ticketId },
+      data: { priority: newPriority },
+    });
+
+    await this.addComment(
+      orgId,
+      ticketId,
+      {
+        content: `⬆️ Escalated: ${ticket.priority} → ${newPriority}${reason ? `. Lý do: ${reason}` : ''}`,
+        isInternal: true,
+      },
+      actorUserId,
+    );
+
+    await this.domainEvents.publish({
+      orgId,
+      eventType: DOMAIN_EVENTS.TICKET.ASSIGNED,
+      aggregateId: ticketId,
+      aggregateType: 'Ticket',
+      payload: {
+        ticketNumber: ticket.ticketNumber,
+        escalated: true,
+        oldPriority: ticket.priority,
+        newPriority,
+        reason,
+      },
+      actorUserId,
+    });
+
+    await this.audit.log({
+      orgId,
+      userId: actorUserId,
+      action: 'ticket.escalated',
+      resource: 'Ticket',
+      resourceId: ticketId,
+      oldValue: { priority: ticket.priority },
+      newValue: { priority: newPriority, reason },
+    });
+    return updated;
+  }
+
+  // ── T-1046/T-1047/T-1048: Approval Engine (single-level) ──
+
+  async requestApproval(
+    orgId: string,
+    ticketId: string,
+    actorUserId: string,
+    data: {
+      approvalType: string;
+      amount?: number;
+      notes?: string;
+    },
+  ) {
+    const ticket = await this.findById(orgId, ticketId);
+
+    // T-1048: Auto-approve if under threshold
+    if (data.approvalType === 'budget' && data.amount !== undefined) {
+      if (data.amount <= APPROVAL_THRESHOLDS.budget.autoApproveLimit) {
+        await this.addComment(
+          orgId,
+          ticketId,
+          {
+            content: `✅ Tự động duyệt: ${data.approvalType} — ${data.amount.toLocaleString('vi-VN')} VND (dưới ngưỡng ${APPROVAL_THRESHOLDS.budget.autoApproveLimit.toLocaleString('vi-VN')} VND)`,
+            isInternal: true,
+          },
+          actorUserId,
+        );
+        return { ticketId, approvalStatus: 'auto_approved', amount: data.amount };
+      }
+    }
+
+    // Record approval request as internal comment + custom field
+    await this.prisma.ticket.update({
+      where: { id: ticketId },
+      data: {
+        customFields: {
+          ...((ticket.customFields as Record<string, unknown>) ?? {}),
+          approvalRequest: {
+            type: data.approvalType,
+            amount: data.amount,
+            notes: data.notes,
+            requestedBy: actorUserId,
+            requestedAt: new Date().toISOString(),
+            status: 'pending',
+          },
+        },
+      },
+    });
+
+    await this.addComment(
+      orgId,
+      ticketId,
+      {
+        content: `📋 Yêu cầu duyệt: ${data.approvalType}${data.amount ? ` — ${data.amount.toLocaleString('vi-VN')} VND` : ''}${data.notes ? `. Ghi chú: ${data.notes}` : ''}`,
+        isInternal: true,
+      },
+      actorUserId,
+    );
+
+    await this.audit.log({
+      orgId,
+      userId: actorUserId,
+      action: 'ticket.approval_requested',
+      resource: 'Ticket',
+      resourceId: ticketId,
+      newValue: data as unknown as Prisma.InputJsonValue,
+    });
+    return { ticketId, approvalStatus: 'pending', data };
+  }
+
+  async handleApproval(
+    orgId: string,
+    ticketId: string,
+    actorUserId: string,
+    decision: string,
+    notes?: string,
+  ) {
+    const ticket = await this.findById(orgId, ticketId);
+    const cf = (ticket.customFields as Record<string, unknown>) ?? {};
+    const approval = cf.approvalRequest as Record<string, unknown> | undefined;
+    if (!approval || approval.status !== 'pending')
+      throw new BadRequestException('No pending approval request');
+
+    approval.status = decision === 'approve' ? 'approved' : 'rejected';
+    approval.decidedBy = actorUserId;
+    approval.decidedAt = new Date().toISOString();
+    approval.decisionNotes = notes;
+
+    await this.prisma.ticket.update({
+      where: { id: ticketId },
+      data: { customFields: cf as Prisma.InputJsonValue },
+    });
+
+    const emoji = decision === 'approve' ? '✅' : '❌';
+    await this.addComment(
+      orgId,
+      ticketId,
+      {
+        content: `${emoji} ${decision === 'approve' ? 'Đã duyệt' : 'Từ chối'}${notes ? `: ${notes}` : ''}`,
+        isInternal: true,
+      },
+      actorUserId,
+    );
+
+    await this.audit.log({
+      orgId,
+      userId: actorUserId,
+      action: `ticket.approval_${decision}`,
+      resource: 'Ticket',
+      resourceId: ticketId,
+      newValue: { decision, notes },
+    });
+    return { ticketId, approvalStatus: approval.status };
+  }
+
+  // ── T-1054: Guardian Consent Templates ──
+
+  getConsentTemplates() {
+    return Object.entries(CONSENT_TEMPLATES).map(([key, tmpl]) => ({ key, ...tmpl }));
+  }
+
+  async createConsentTicket(
+    orgId: string,
+    templateKey: string,
+    guardianName: string,
+    actorUserId: string,
+  ) {
+    const tmpl = CONSENT_TEMPLATES[templateKey];
+    if (!tmpl) throw new BadRequestException(`Unknown consent template: ${templateKey}`);
+
+    return this.createTicket(
+      orgId,
+      {
+        title: `${tmpl.title} — ${guardianName}`,
+        description: tmpl.description,
+        category: tmpl.category,
+        priority: 'medium',
+        requesterId: actorUserId,
+        tags: ['consent', templateKey],
+      },
+      actorUserId,
+    );
+  }
+
+  // ── T-1042: Category Routing ──
+
+  getCategoryRouting() {
+    return CATEGORY_ROUTING;
   }
 
   // ── Comments ──
 
-  async addComment(orgId: string, ticketId: string, data: {
-    content: string; isInternal?: boolean; attachments?: Prisma.InputJsonValue;
-  }, actorUserId: string) {
+  async addComment(
+    orgId: string,
+    ticketId: string,
+    data: {
+      content: string;
+      isInternal?: boolean;
+      attachments?: Prisma.InputJsonValue;
+    },
+    actorUserId: string,
+  ) {
     await this.findById(orgId, ticketId);
-
-    const comment = await this.prisma.ticketComment.create({
+    return this.prisma.ticketComment.create({
       data: {
         orgId,
         ticketId,
@@ -166,8 +479,6 @@ export class TicketsService {
         attachments: data.attachments ?? [],
       },
     });
-
-    return comment;
   }
 
   async getComments(orgId: string, ticketId: string) {
@@ -178,6 +489,48 @@ export class TicketsService {
     });
   }
 
+  // ── T-1058: SLA Dashboard ──
+
+  async getSlaDashboard(orgId: string) {
+    const now = new Date();
+    const [open, overdue, resolved, avgResolution] = await Promise.all([
+      this.prisma.ticket.count({
+        where: { orgId, status: { in: ['open', 'assigned', 'in_progress'] } },
+      }),
+      this.prisma.ticket.count({
+        where: { orgId, status: { in: ['open', 'assigned', 'in_progress'] }, dueDate: { lt: now } },
+      }),
+      this.prisma.ticket.count({ where: { orgId, status: 'resolved' } }),
+      this.prisma.ticket.findMany({
+        where: { orgId, status: { in: ['resolved', 'closed'] }, resolvedAt: { not: null } },
+        select: { createdAt: true, resolvedAt: true },
+        take: 100,
+        orderBy: { resolvedAt: 'desc' },
+      }),
+    ]);
+
+    let avgHours = 0;
+    if (avgResolution.length > 0) {
+      const totalMs = avgResolution.reduce(
+        (sum, t) => sum + ((t.resolvedAt?.getTime() ?? 0) - t.createdAt.getTime()),
+        0,
+      );
+      avgHours = Math.round((totalMs / avgResolution.length / 3600000) * 10) / 10;
+    }
+
+    const total =
+      open + resolved + (await this.prisma.ticket.count({ where: { orgId, status: 'closed' } }));
+    const slaCompliance = total > 0 ? Math.round(((total - overdue) / total) * 100) : 100;
+
+    return {
+      openCount: open,
+      overdueCount: overdue,
+      resolvedCount: resolved,
+      avgResolutionHours: avgHours,
+      slaCompliancePercent: slaCompliance,
+    };
+  }
+
   // ── Helpers ──
 
   private async generateTicketNumber(orgId: string): Promise<string> {
@@ -185,15 +538,15 @@ export class TicketsService {
     return `TK-${String(count + 1).padStart(5, '0')}`;
   }
 
-  private async recordStatusHistory(ticketId: string, fromStatus: string | null, toStatus: string, changedBy: string, notes?: string) {
+  private async recordStatusHistory(
+    ticketId: string,
+    fromStatus: string | null,
+    toStatus: string,
+    changedBy: string,
+    notes?: string,
+  ) {
     await this.prisma.ticketStatusHistory.create({
-      data: {
-        ticketId,
-        fromStatus,
-        toStatus,
-        changedBy,
-        notes,
-      },
+      data: { ticketId, fromStatus, toStatus, changedBy, notes },
     });
   }
 }

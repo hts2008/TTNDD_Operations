@@ -1,0 +1,71 @@
+# Tickets Readiness Manifest — STORY-012
+
+story: STORY-012
+module: tickets-approval
+version: 1.0.0
+date: 2026-04-25
+status: IMPLEMENTED
+
+acceptance_criteria:
+  - id: AC-012.01
+    description: Ticket CRUD with validated DTOs
+    status: PASS
+    evidence: tickets.dto.ts (7 DTO classes), tickets.controller.ts (14 endpoints)
+
+  - id: AC-012.02
+    description: Category routing rules (6 categories)
+    status: PASS
+    evidence: CATEGORY_ROUTING map + GET /tickets/category-routing
+
+  - id: AC-012.03
+    description: Thread/comments/internal notes
+    status: PASS
+    evidence: POST/GET /tickets/:id/comments with isInternal flag
+
+  - id: AC-012.04
+    description: SLA timestamps calculated on creation
+    status: PASS
+    evidence: SLA_TARGETS per priority, firstResponseDeadline + resolutionDeadline
+
+  - id: AC-012.05
+    description: SM-5 ticket state machine with audit
+    status: PASS
+    evidence: TICKET_TRANSITIONS + recordStatusHistory + domain events
+
+  - id: AC-012.06
+    description: Approval engine (single-level + auto-approve thresholds)
+    status: PASS
+    evidence: requestApproval() + handleApproval() + APPROVAL_THRESHOLDS
+
+  - id: AC-012.07
+    description: Escalation ladder (priority bump)
+    status: PASS
+    evidence: POST /tickets/:id/escalate
+
+  - id: AC-012.08
+    description: Guardian consent templates (3 types)
+    status: PASS
+    evidence: CONSENT_TEMPLATES + POST /tickets/consent/:templateKey
+
+  - id: AC-012.09
+    description: SLA dashboard (open, overdue, resolved, avg, compliance %)
+    status: PASS
+    evidence: GET /tickets/sla-dashboard
+
+  - id: AC-012.10
+    description: FE wired to live API with SLA cards
+    status: PASS
+    evidence: tickets/page.tsx fetches from /tickets + /tickets/sla-dashboard
+
+  - id: AC-012.11
+    description: Seed data (5 tickets, 1 sensitive)
+    status: PASS
+    evidence: prisma/seed-tickets.ts
+
+state_machines:
+  - SM-5: Ticket Lifecycle (open→assigned→in_progress→resolved→closed, closed→reopen→open)
+
+decisions:
+  - DEC-023: SLA hardcoded defaults (critical=4h, high=8h, medium=24h, low=72h)
+  - DEC-024: Single-level approval with auto-approve under 500K VND
+  - DEC-025: Guardian consent = template-based ticket with signature attachment
