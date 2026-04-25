@@ -1,0 +1,47 @@
+# System Readiness Manifest — STORY-028
+
+story: STORY-028
+module: system
+version: 1.0.0
+date: 2026-04-25
+status: IMPLEMENTED
+
+acceptance_criteria:
+  - id: AC-028.01
+    description: Health check endpoint (public, no auth)
+    status: PASS
+    evidence: GET /system/health returns { status } with @Public() decorator
+
+  - id: AC-028.02
+    description: Canary endpoint for post-deploy verification
+    status: PASS
+    evidence: GET /system/health/canary returns status + buildId + timestamp
+
+  - id: AC-028.03
+    description: Synthetic probe results with overall status
+    status: PASS
+    evidence: GET /system/health/probes returns { overall, probes[] }
+
+  - id: AC-028.04
+    description: Module health check per org
+    status: PASS
+    evidence: getModuleHealth checks readiness of all registered modules
+
+  - id: AC-028.05
+    description: Seed data completeness check per org
+    status: PASS
+    evidence: getSeedHealth verifies required seed data exists
+
+  - id: AC-028.06
+    description: Release gate report storage and retrieval
+    status: PASS
+    evidence: saveReleaseGateReport/getLatestReleaseGate with gates array
+
+  - id: AC-028.07
+    description: Synthetic probe service with scheduled health checks
+    status: PASS
+    evidence: synthetic-probe.service.ts (109L) with interval-based probing
+
+decisions:
+  - DEC-063: Health/canary/probes are public endpoints (@Public decorator)
+  - DEC-064: Release gate reports are CI-pipeline artifacts stored in DB

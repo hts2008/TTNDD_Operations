@@ -1,0 +1,37 @@
+# Data Import Readiness Manifest — STORY-027
+
+story: STORY-027
+module: data-import
+version: 1.0.0
+date: 2026-04-25
+status: IMPLEMENTED
+
+acceptance_criteria:
+  - id: AC-027.01
+    description: CSV template download per import type
+    status: PASS
+    evidence: getCsvTemplate returns header row for members/sessions/etc
+
+  - id: AC-027.02
+    description: Member import with dry-run validation
+    status: PASS
+    evidence: importMembers with isDryRun=true returns totalRows, validRows, errors
+
+  - id: AC-027.03
+    description: Member import with actual data insertion
+    status: PASS
+    evidence: importMembers with isDryRun=false creates OrgMember records
+
+  - id: AC-027.04
+    description: Import history tracking
+    status: PASS
+    evidence: getImportHistory with optional importType filter
+
+  - id: AC-027.05
+    description: Admin-only access enforcement
+    status: PASS
+    evidence: @Roles('admin', 'super_admin') + RolesGuard on controller
+
+decisions:
+  - DEC-061: Data import always supports dry-run first (default isDryRun=true)
+  - DEC-062: Import types are extensible via getCsvTemplate switch

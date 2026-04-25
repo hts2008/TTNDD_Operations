@@ -1,0 +1,42 @@
+# File Storage Readiness Manifest — STORY-026
+
+story: STORY-026
+module: file-storage
+version: 1.0.0
+date: 2026-04-25
+status: IMPLEMENTED
+
+acceptance_criteria:
+  - id: AC-026.01
+    description: Signed upload URL generation (GCS adapter)
+    status: PASS
+    evidence: createUploadRequest generates signed URL with expiry
+
+  - id: AC-026.02
+    description: Signed download URL generation
+    status: PASS
+    evidence: getDownloadUrl returns time-limited access URL
+
+  - id: AC-026.03
+    description: File listing with entity type/ID filtering
+    status: PASS
+    evidence: listFiles with optional entityType + entityId params
+
+  - id: AC-026.04
+    description: Soft-delete file references (204 No Content)
+    status: PASS
+    evidence: softDelete marks file as deleted without removing from storage
+
+  - id: AC-026.05
+    description: Storage adapter interface (pluggable GCS/local)
+    status: PASS
+    evidence: storage-adapter.interface.ts (42L) with GCS and local implementations
+
+  - id: AC-026.06
+    description: GCS adapter with bucket configuration
+    status: PASS
+    evidence: gcs-storage.adapter.ts (78L) with @google-cloud/storage
+
+decisions:
+  - DEC-059: File storage uses adapter pattern (GCS prod, local dev) via interface
+  - DEC-060: File deletion is soft-delete only (original files preserved in GCS)

@@ -1,0 +1,52 @@
+# Notifications Readiness Manifest — STORY-025
+
+story: STORY-025
+module: notifications
+version: 1.0.0
+date: 2026-04-25
+status: IMPLEMENTED
+
+acceptance_criteria:
+  - id: AC-025.01
+    description: Notification inbox with pagination and unread-only filter
+    status: PASS
+    evidence: findByRecipient with page, limit, unreadOnly params
+
+  - id: AC-025.02
+    description: Unread notification count
+    status: PASS
+    evidence: getUnreadCount returns count for recipient
+
+  - id: AC-025.03
+    description: Mark single notification as read
+    status: PASS
+    evidence: markRead updates readAt timestamp
+
+  - id: AC-025.04
+    description: Mark all notifications as read (bulk)
+    status: PASS
+    evidence: markAllRead updates all unread for recipient
+
+  - id: AC-025.05
+    description: User notification preferences (per channel + event type)
+    status: PASS
+    evidence: getPreferences/updatePreference with channel, eventType, enabled
+
+  - id: AC-025.06
+    description: Notification templates (admin CRUD)
+    status: PASS
+    evidence: getTemplates/upsertTemplate with titleTemplate, bodyTemplate
+
+  - id: AC-025.07
+    description: Event subscriber for automatic notification dispatch (12 events)
+    status: PASS
+    evidence: notification-event.subscriber.ts (151L) with @OnEvent handlers
+
+  - id: AC-025.08
+    description: DTO validation for preferences and templates
+    status: PASS
+    evidence: UpdatePreferenceDto, UpsertTemplateDto with class-validator
+
+decisions:
+  - DEC-057: Notification dispatch is event-driven via subscriber (mirrors reward subscriber pattern)
+  - DEC-058: User preferences override template defaults (opt-out per channel per event)
