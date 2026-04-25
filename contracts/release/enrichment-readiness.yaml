@@ -1,0 +1,108 @@
+# Enrichment Readiness Manifest — STORY-019
+
+story: STORY-019
+module: enrichment
+version: 1.0.0
+date: 2026-04-25
+status: IMPLEMENTED
+
+acceptance_criteria:
+  - id: AC-019.01
+    description: Spiritual log creation with logDate, logType, durationMinutes, notes, thanhNgonRef, emotionBefore/After
+    status: PASS
+    evidence: createSpiritualLog — full field set with domain event publish
+
+  - id: AC-019.02
+    description: Spiritual logs are private — only the member can create/view their own
+    status: PASS
+    evidence: ForbiddenException if memberId !== actorUserId
+
+  - id: AC-019.03
+    description: Spiritual logs ordered by logDate desc
+    status: PASS
+    evidence: findSpiritualLogsByMember orderBy logDate desc
+
+  - id: AC-019.04
+    description: Ngũ Giới self-assessment with 5 precept scores (1-10 scale)
+    status: PASS
+    evidence: batSatSinh, batDuDao, batTaDam, batTuuNhuc, batVongNgu + reflection
+
+  - id: AC-019.05
+    description: Ngũ Giới is hidden from leaders — only the member can self-assess and view
+    status: PASS
+    evidence: ForbiddenException("Ngu Gioi assessments are hidden from leaders")
+
+  - id: AC-019.06
+    description: Ngũ Giới upsert by (orgMemberId, weekStart) — updates existing if same week
+    status: PASS
+    evidence: prisma.nguGioiAssessment.upsert with unique constraint
+
+  - id: AC-019.07
+    description: Ngũ Giới ordered by weekStart desc
+    status: PASS
+    evidence: findNguGioiByMember orderBy weekStart desc
+
+  - id: AC-019.08
+    description: 5-dimension evaluation with scores (DaoDuc, KyNang, TheChat, LanhDao, PhungSu)
+    status: PASS
+    evidence: createEvaluation with 5 score fields + strengths/areasToImprove/recommendations
+
+  - id: AC-019.09
+    description: Evaluations require admin role to create and view
+    status: PASS
+    evidence: @Roles('super_admin', 'admin') on createEvaluation and getEvaluationsByMember
+
+  - id: AC-019.10
+    description: Evaluations ordered by evaluationDate desc
+    status: PASS
+    evidence: findEvaluationsByMember orderBy evaluationDate desc
+
+  - id: AC-019.11
+    description: Mentoring relationship creation with mentor-mentee pairing
+    status: PASS
+    evidence: createMentoringRelationship with mentorId, menteeId, startDate
+
+  - id: AC-019.12
+    description: Mentoring relationships require admin to create
+    status: PASS
+    evidence: @Roles('super_admin', 'admin') on createMentoringRelationship
+
+  - id: AC-019.13
+    description: Mentor can view their mentees (as-mentor endpoint)
+    status: PASS
+    evidence: findByMentor filters status=active, includes 5 recent logs
+
+  - id: AC-019.14
+    description: Mentee can view their mentors (as-mentee endpoint)
+    status: PASS
+    evidence: findByMentee filters status=active, includes 5 recent logs
+
+  - id: AC-019.15
+    description: Mentoring session log with topic, outcome, followUp
+    status: PASS
+    evidence: createMentoringLog validates relationship exists
+
+  - id: AC-019.16
+    description: Domain events for spiritual log, Ngũ Giới, evaluation, mentoring
+    status: PASS
+    evidence: SPIRITUAL_LOG_CREATED, NGU_GIOI_ASSESSED, EVALUATION_CREATED, MENTORING_STARTED
+
+  - id: AC-019.17
+    description: Swagger annotations and role guards on all endpoints
+    status: PASS
+    evidence: @ApiTags, @ApiBearerAuth, @ApiOperation on all 10 endpoints
+
+  - id: AC-019.18
+    description: E2E test coverage (24 specs across 3 files)
+    status: PASS
+    evidence: spiritual-journal (8), ngu-gioi-evaluation (8), mentoring-relationship (8)
+
+privacy_rules:
+  - "Spiritual logs: member-only access (ForbiddenException for other users)"
+  - "Ngũ Giới: hidden from leaders (ForbiddenException with explicit message)"
+  - "Evaluations: admin-only create and view"
+  - "Mentoring: admin creates, participants view own relationships"
+
+decisions:
+  - DEC-043: Spiritual data is member-only — enforced at service layer with ForbiddenException
+  - DEC-044: Ngũ Giới is hidden from leaders — even admin cannot view member self-assessments
