@@ -1,0 +1,52 @@
+# Sessions Readiness Manifest — STORY-024
+
+story: STORY-024
+module: sessions
+version: 1.0.0
+date: 2026-04-25
+status: IMPLEMENTED
+
+acceptance_criteria:
+  - id: AC-024.01
+    description: Session creation with Tam Trụ pillars (Đạo Đức, Phương Pháp, Giáo Dục)
+    status: PASS
+    evidence: create with pillarDaoDuc, pillarPhuongPhap, pillarGiaoDuc fields
+
+  - id: AC-024.02
+    description: Session listing with branch, status, date range filters and pagination
+    status: PASS
+    evidence: findMany with Prisma.SessionWhereInput composition
+
+  - id: AC-024.03
+    description: Session detail with attendance includes (member scoutName, memberCode)
+    status: PASS
+    evidence: findById includes branch + attendance with orgMember select
+
+  - id: AC-024.04
+    description: Session update (debrief, energy/engagement ratings)
+    status: PASS
+    evidence: update with debriefNotes, energyRating, engagementRating + audit log
+
+  - id: AC-024.05
+    description: SM-12 session lifecycle (planned → published → in_progress → completed → archived)
+    status: PASS
+    evidence: SESSION_TRANSITIONS map with transition method and status validation
+
+  - id: AC-024.06
+    description: Bulk attendance marking (idempotent via upsert)
+    status: PASS
+    evidence: markAttendance uses $transaction with sessionId_orgMemberId upsert
+
+  - id: AC-024.07
+    description: Attendance domain events for present members only
+    status: PASS
+    evidence: domainEvents.publish filtered to status === 'present' records
+
+  - id: AC-024.08
+    description: Member attendance report (total, present, absent, excused, rate%)
+    status: PASS
+    evidence: getAttendanceReport with 4 parallel counts and rate calculation
+
+decisions:
+  - DEC-055: Session lifecycle uses SM-12 (5-state machine with cancel from planned/published)
+  - DEC-056: Attendance events fire only for 'present' status (not absent/excused)

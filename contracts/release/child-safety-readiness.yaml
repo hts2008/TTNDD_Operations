@@ -1,0 +1,63 @@
+# Child Safety Readiness Manifest — STORY-021
+
+story: STORY-021
+module: child-safety
+version: 1.0.0
+date: 2026-04-25
+status: IMPLEMENTED
+
+acceptance_criteria:
+  - id: AC-021.01
+    description: Incident reporting with title, description, category, evidence URLs
+    status: PASS
+    evidence: reportIncident creates ticket with isSensitive=true, priority=critical
+
+  - id: AC-021.02
+    description: Anonymous incident reporting (reporter identity hidden)
+    status: PASS
+    evidence: isAnonymous=true strips actorUserId from audit and status history
+
+  - id: AC-021.03
+    description: Incident list restricted to designated roles (super_admin, admin)
+    status: PASS
+    evidence: ForbiddenException if role not in DESIGNATED_ROLES array
+
+  - id: AC-021.04
+    description: Incident escalation with level tracking
+    status: PASS
+    evidence: escalateIncident increments escalationLevel in customFields
+
+  - id: AC-021.05
+    description: Evidence attachment to existing incidents
+    status: PASS
+    evidence: addEvidence appends to evidenceUrls array in customFields
+
+  - id: AC-021.06
+    description: Council export with anonymous redaction
+    status: PASS
+    evidence: exportForCouncil returns [ANONYMOUS REPORT] for anonymous tickets
+
+  - id: AC-021.07
+    description: 2-adult rule validation (child protection hard gate)
+    status: PASS
+    evidence: validate2AdultRule returns true only when staffCount >= 2
+
+  - id: AC-021.08
+    description: Quiet hours detection (22:00-07:00)
+    status: PASS
+    evidence: isQuietHours checks hour against QUIET_HOUR_START/END
+
+  - id: AC-021.09
+    description: Data retention policy (90-day auto-redaction of closed incidents)
+    status: PASS
+    evidence: applyRetentionPolicy redacts description and evidence of expired tickets
+
+  - id: AC-021.10
+    description: Full audit trail for all incident actions
+    status: PASS
+    evidence: AuditService.log called on report and escalation
+
+decisions:
+  - DEC-048: Child safety incidents are isSensitive=true with ForbiddenException access control
+  - DEC-049: 2-adult rule is a hard validation gate (not advisory)
+  - DEC-050: 90-day retention policy auto-redacts closed incident descriptions

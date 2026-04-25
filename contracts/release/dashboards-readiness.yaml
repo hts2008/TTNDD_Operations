@@ -1,0 +1,62 @@
+# Dashboards Readiness Manifest — STORY-023
+
+story: STORY-023
+module: dashboards
+version: 1.0.0
+date: 2026-04-25
+status: IMPLEMENTED
+
+acceptance_criteria:
+  - id: AC-023.01
+    description: Org-wide dashboard with cross-module aggregation (members, sessions, finance, rewards)
+    status: PASS
+    evidence: getOrgDashboard aggregates from 6+ Prisma models
+
+  - id: AC-023.02
+    description: SPICES / Tam Trụ coverage analysis dashboard
+    status: PASS
+    evidence: getSpicesDashboard computes pillar coverage percentages
+
+  - id: AC-023.03
+    description: Personal dashboard for current user
+    status: PASS
+    evidence: getMyDashboard returns member-specific EXP, attendance, skills
+
+  - id: AC-023.04
+    description: Member progress report (comprehensive, admin-only)
+    status: PASS
+    evidence: getMemberReport with attendance, skills, badges, EXP history
+
+  - id: AC-023.05
+    description: Finance report with date range and category breakdown
+    status: PASS
+    evidence: getFinanceReport with from/to filters, byCategory aggregation
+
+  - id: AC-023.06
+    description: Attendance analytics with branch filtering
+    status: PASS
+    evidence: getAttendanceAnalytics with branchId, date range, bySession breakdown
+
+  - id: AC-023.07
+    description: Global search across all modules (min 2 chars)
+    status: PASS
+    evidence: globalSearch queries members, sessions, tickets, projects
+
+  - id: AC-023.08
+    description: CSV export with configurable columns per resource
+    status: PASS
+    evidence: exportCSV with column definitions for members, attendance, finance, skills
+
+  - id: AC-023.09
+    description: Excel (TSV) export with same column definitions
+    status: PASS
+    evidence: exportExcel mirrors CSV with application/vnd.ms-excel content type
+
+  - id: AC-023.10
+    description: Export service with resource-specific data fetching
+    status: PASS
+    evidence: getExportData switch handles 4 resource types with proper field mapping
+
+decisions:
+  - DEC-053: Dashboard aggregation is real-time (no cached materialized views)
+  - DEC-054: Export uses TSV format labeled as Excel (no xlsx dependency)

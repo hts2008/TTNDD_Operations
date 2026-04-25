@@ -1,0 +1,72 @@
+# Org Config Readiness Manifest — STORY-022
+
+story: STORY-022
+module: org-config
+version: 1.0.0
+date: 2026-04-25
+status: IMPLEMENTED
+
+acceptance_criteria:
+  - id: AC-022.01
+    description: Organization creation with slug uniqueness
+    status: PASS
+    evidence: createOrganization with unique slug constraint
+
+  - id: AC-022.02
+    description: Organization info update (name, fullName, logoUrl)
+    status: PASS
+    evidence: updateInfo with audit logging
+
+  - id: AC-022.03
+    description: Organization settings (JSONB) with merge semantics
+    status: PASS
+    evidence: updateSettings deep-merges settings JSONB field
+
+  - id: AC-022.04
+    description: Module toggle on/off per organization
+    status: PASS
+    evidence: toggleModule updates enabledModules array
+
+  - id: AC-022.05
+    description: Branch CRUD with scouting fields (minAge, maxAge, colorTheme, narrativeName)
+    status: PASS
+    evidence: createBranch/updateBranch with Hướng Đạo age ranges and themes
+
+  - id: AC-022.06
+    description: Branch deletion with member safety check
+    status: PASS
+    evidence: deleteBranch throws if branch has active members
+
+  - id: AC-022.07
+    description: Unit CRUD with totem, type, and parent hierarchy
+    status: PASS
+    evidence: createUnit with totemName, unitType, parentUnitId
+
+  - id: AC-022.08
+    description: Unit deletion with member/child safety check
+    status: PASS
+    evidence: deleteUnit throws if unit has members or child units
+
+  - id: AC-022.09
+    description: Member listing (paginated)
+    status: PASS
+    evidence: getMembers with pagination support
+
+  - id: AC-022.10
+    description: Audit log query with action, resource, date range filters
+    status: PASS
+    evidence: getAuditLog with multiple filter params and pagination
+
+  - id: AC-022.11
+    description: IAM service with role management
+    status: PASS
+    evidence: iam.service.ts (291L) with role assignment and validation
+
+  - id: AC-022.12
+    description: Role constants with permission definitions
+    status: PASS
+    evidence: roles.constants.ts (113L) with DESIGNATED_ROLES and permissions
+
+decisions:
+  - DEC-051: Org settings use JSONB merge semantics (existing keys preserved)
+  - DEC-052: Branch/unit deletion has safety gates (no orphaned members)
