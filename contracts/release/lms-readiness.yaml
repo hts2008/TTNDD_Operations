@@ -1,0 +1,144 @@
+# LMS Readiness Manifest — STORY-016
+
+story: STORY-016
+module: lms
+version: 1.0.0
+date: 2026-04-25
+status: IMPLEMENTED
+
+acceptance_criteria:
+  - id: AC-016.01
+    description: Course CRUD with category, difficulty, target branches filtering
+    status: PASS
+    evidence: LmsService — createCourse, updateCourse, deleteCourse, findCourses (with filters), findCourseById
+
+  - id: AC-016.02
+    description: Course module hierarchy (modules contain lessons, ordered by index)
+    status: PASS
+    evidence: createModule, getModules, updateModule, deleteModule — CourseModule → Lesson relation
+
+  - id: AC-016.03
+    description: Lesson CRUD with rich content types (video, text, JSON blocks)
+    status: PASS
+    evidence: createLesson, updateLesson, deleteLesson, getLessons — lessonType + content JSON
+
+  - id: AC-016.04
+    description: Competency registry with category filtering and course mapping
+    status: PASS
+    evidence: createCompetency, listCompetencies, mapCompetencyToCourse
+
+  - id: AC-016.05
+    description: Completion rules engine (all_lessons, min_score) with live evaluation
+    status: PASS
+    evidence: addCompletionRule + checkCompletionRules — evaluates rules against progress
+
+  - id: AC-016.06
+    description: Course enrollment with auto-progress tracking
+    status: PASS
+    evidence: startCourse upserts MemberCourseProgress, completeLesson auto-recalculates progressPct
+
+  - id: AC-016.07
+    description: Lesson completion with auto-course completion at 100%
+    status: PASS
+    evidence: completeLesson → if progressPct >= 100 → completeCourse auto-triggers
+
+  - id: AC-016.08
+    description: Member progress view with course details
+    status: PASS
+    evidence: getProgress — includes course title, category, expReward
+
+  - id: AC-016.09
+    description: Quiz CRUD with time limits, passing scores, retry caps
+    status: PASS
+    evidence: createQuiz (timeLimit, passingScore, maxRetries), getQuizzes, getQuizById
+
+  - id: AC-016.10
+    description: Quiz public view strips correct answers
+    status: PASS
+    evidence: getQuizPublic — destructures correctAnswer from options before returning
+
+  - id: AC-016.11
+    description: Quiz question CRUD with multiple types (MCQ, essay, etc.)
+    status: PASS
+    evidence: createQuestion, getQuestions — questionType, options, correctAnswer, points
+
+  - id: AC-016.12
+    description: Timed quiz attempts with maxRetries enforcement
+    status: PASS
+    evidence: startQuizAttempt — checks attemptCount vs maxRetries, rejects in_progress duplicates
+
+  - id: AC-016.13
+    description: Quiz submission with auto-grading (MCQ) and time limit check
+    status: PASS
+    evidence: submitQuizAttempt — elapsed vs timeLimit, auto-grade non-essay, essay→submitted
+
+  - id: AC-016.14
+    description: Manual grading queue for essay questions
+    status: PASS
+    evidence: getGradingQueue (status=submitted), gradeAttempt (sets score, passed, feedback, gradedBy)
+
+  - id: AC-016.15
+    description: Quiz pass/fail domain events with distinct event types
+    status: PASS
+    evidence: QUIZ_PASSED / QUIZ_FAILED events published on both auto and manual grading
+
+  - id: AC-016.16
+    description: Battle arena — create, join, start with minimum player check
+    status: PASS
+    evidence: createBattle (random gameCode), joinBattle (lobby check, full check, duplicate guard), startBattle (host-only, min 2 players)
+
+  - id: AC-016.17
+    description: Battle answer submission with anti-cheat (2-second interval, duplicate guard, speed bonus)
+    status: PASS
+    evidence: submitBattleAnswer — alreadyAnswered check, 2000ms interval, speedFactor scoring
+
+  - id: AC-016.18
+    description: Battle finish with ranked scoreboard
+    status: PASS
+    evidence: finishBattle → status=finished, rankings sorted by score desc
+
+  - id: AC-016.19
+    description: WebSocket gateway for real-time battle rooms
+    status: PASS
+    evidence: LmsBattleGateway — joinRoom, startCountdown (3s delay), submitAnswer (score broadcast), endBattle
+
+  - id: AC-016.20
+    description: Offline pack generation with correct answer stripping
+    status: PASS
+    evidence: generateOfflinePack — full course+modules+quizzes JSON, correctAnswer removed from quiz options
+
+  - id: AC-016.21
+    description: Pack size estimation with 5MB bandwidth guardrail
+    status: PASS
+    evidence: estimatePackSize — contentBytes + questionCount*500, withinLimit < 5MB check
+
+  - id: AC-016.22
+    description: Domain events published across all LMS actions (12+ event types)
+    status: PASS
+    evidence: COURSE_CREATED/UPDATED, COURSE_ENROLLED, LESSON_COMPLETED, COURSE_COMPLETED, QUIZ_SUBMITTED/PASSED/FAILED, BATTLE_STARTED/FINISHED, etc.
+
+  - id: AC-016.23
+    description: Audit logging for all state transitions
+    status: PASS
+    evidence: AuditService.log() called on course create/update/delete, quiz submissions, battle starts
+
+  - id: AC-016.24
+    description: FE with 3 pages (course list, course detail, battle room)
+    status: PASS
+    evidence: lms/page.tsx, lms/[courseId]/page.tsx, lms/battle/[code]/page.tsx
+
+  - id: AC-016.25
+    description: E2E test coverage (31 specs across 4 files)
+    status: PASS
+    evidence: enroll-complete (4), quiz-lifecycle (9), battle-arena (8), competency-offline (10)
+
+state_machines:
+  - SM-BATTLE: lobby → active → finished
+  - SM-ATTEMPT: in_progress → submitted → graded (or expired)
+  - SM-COURSE-PROGRESS: (none) → in_progress → completed
+  - SM-LESSON-PROGRESS: (none) → completed
+
+decisions:
+  - DEC-035: Battle anti-cheat uses 2-second minimum interval + duplicate answer guard + speed-bonus scoring
+  - DEC-036: Completion rules are evaluated dynamically (no cached completion state) — supports all_lessons and min_score
+  - DEC-037: Offline packs strip correct answers from quiz options to prevent client-side cheating
