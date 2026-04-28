@@ -59,7 +59,12 @@ describe('ProjectsService', () => {
   describe('createPlan', () => {
     it('should create a plan and log audit', async () => {
       const planData = { title: 'Kế hoạch Trại Hè 2026' };
-      prisma.plan.create.mockResolvedValue({ id: 'plan-1', orgId: ORG_ID, ...planData, status: 'draft' });
+      prisma.plan.create.mockResolvedValue({
+        id: 'plan-1',
+        orgId: ORG_ID,
+        ...planData,
+        status: 'draft',
+      });
 
       const result = await service.createPlan(ORG_ID, planData, USER_ID);
 
@@ -100,7 +105,18 @@ describe('ProjectsService', () => {
 
   describe('transitionPlan (SM-2)', () => {
     it('should submit a draft plan', async () => {
-      prisma.plan.findFirst.mockResolvedValue({ id: 'plan-1', orgId: ORG_ID, status: 'draft', title: 'Test' });
+      prisma.plan.findFirst.mockResolvedValue({
+        id: 'plan-1',
+        orgId: ORG_ID,
+        status: 'draft',
+        title: 'Test',
+        sectionIDescription: 'Mô tả',
+        sectionIIObjectives: ['Obj1'],
+        sectionIVActivities: [{ name: 'A1' }],
+        sectionVPersonnel: [{ name: 'P1' }],
+        sectionVIITimeline: { start: '2026-06-01' },
+        sectionIXBudget: { total: 1000 },
+      });
       prisma.plan.update.mockResolvedValue({ id: 'plan-1', status: 'submitted' });
 
       const result = await service.transitionPlan(ORG_ID, 'plan-1', 'submit', USER_ID);
@@ -112,7 +128,18 @@ describe('ProjectsService', () => {
     });
 
     it('should approve a submitted plan', async () => {
-      prisma.plan.findFirst.mockResolvedValue({ id: 'plan-1', orgId: ORG_ID, status: 'submitted', title: 'Test' });
+      prisma.plan.findFirst.mockResolvedValue({
+        id: 'plan-1',
+        orgId: ORG_ID,
+        status: 'submitted',
+        title: 'Test',
+        sectionIDescription: 'Mô tả',
+        sectionIIObjectives: ['Obj1'],
+        sectionIVActivities: [{ name: 'A1' }],
+        sectionVPersonnel: [{ name: 'P1' }],
+        sectionVIITimeline: { start: '2026-06-01' },
+        sectionIXBudget: { total: 1000 },
+      });
       prisma.plan.update.mockResolvedValue({ id: 'plan-1', status: 'approved' });
 
       const result = await service.transitionPlan(ORG_ID, 'plan-1', 'approve', USER_ID);
@@ -121,22 +148,35 @@ describe('ProjectsService', () => {
     });
 
     it('should reject invalid transition', async () => {
-      prisma.plan.findFirst.mockResolvedValue({ id: 'plan-1', orgId: ORG_ID, status: 'draft', title: 'Test' });
+      prisma.plan.findFirst.mockResolvedValue({
+        id: 'plan-1',
+        orgId: ORG_ID,
+        status: 'draft',
+        title: 'Test',
+      });
 
-      await expect(
-        service.transitionPlan(ORG_ID, 'plan-1', 'approve', USER_ID),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.transitionPlan(ORG_ID, 'plan-1', 'approve', USER_ID)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should reject a submitted plan with reason', async () => {
-      prisma.plan.findFirst.mockResolvedValue({ id: 'plan-1', orgId: ORG_ID, status: 'submitted', title: 'Test' });
+      prisma.plan.findFirst.mockResolvedValue({
+        id: 'plan-1',
+        orgId: ORG_ID,
+        status: 'submitted',
+        title: 'Test',
+      });
       prisma.plan.update.mockResolvedValue({ id: 'plan-1', status: 'rejected' });
 
       await service.transitionPlan(ORG_ID, 'plan-1', 'reject', USER_ID, 'Thiếu mục ngân sách');
 
       expect(prisma.plan.update).toHaveBeenCalledWith({
         where: { id: 'plan-1' },
-        data: expect.objectContaining({ status: 'rejected', rejectionReason: 'Thiếu mục ngân sách' }),
+        data: expect.objectContaining({
+          status: 'rejected',
+          rejectionReason: 'Thiếu mục ngân sách',
+        }),
       });
     });
   });
@@ -165,7 +205,10 @@ describe('ProjectsService', () => {
   describe('transitionProject (SM-3)', () => {
     it('should activate a planning project', async () => {
       prisma.project.findFirst.mockResolvedValue({
-        id: 'proj-1', orgId: ORG_ID, status: 'planning', title: 'Test',
+        id: 'proj-1',
+        orgId: ORG_ID,
+        status: 'planning',
+        title: 'Test',
         projectTasks: [],
       });
       prisma.project.update.mockResolvedValue({ id: 'proj-1', status: 'active' });
@@ -176,7 +219,10 @@ describe('ProjectsService', () => {
 
     it('should reject activating a completed project', async () => {
       prisma.project.findFirst.mockResolvedValue({
-        id: 'proj-1', orgId: ORG_ID, status: 'completed', title: 'Test',
+        id: 'proj-1',
+        orgId: ORG_ID,
+        status: 'completed',
+        title: 'Test',
         projectTasks: [],
       });
 
@@ -191,8 +237,13 @@ describe('ProjectsService', () => {
   describe('transitionTask (SM-4)', () => {
     it('should start a todo task', async () => {
       prisma.projectTask.findFirst.mockResolvedValue({
-        id: 'task-1', orgId: ORG_ID, status: 'todo', title: 'Task 1',
-        projectId: 'proj-1', project: { title: 'P', status: 'active' }, subTasks: [],
+        id: 'task-1',
+        orgId: ORG_ID,
+        status: 'todo',
+        title: 'Task 1',
+        projectId: 'proj-1',
+        project: { title: 'P', status: 'active' },
+        subTasks: [],
       });
       prisma.projectTask.update.mockResolvedValue({ id: 'task-1', status: 'in_progress' });
 
@@ -202,8 +253,13 @@ describe('ProjectsService', () => {
 
     it('should emit event on task completion', async () => {
       prisma.projectTask.findFirst.mockResolvedValue({
-        id: 'task-1', orgId: ORG_ID, status: 'review', title: 'Task 1',
-        projectId: 'proj-1', project: { title: 'P', status: 'active' }, subTasks: [],
+        id: 'task-1',
+        orgId: ORG_ID,
+        status: 'review',
+        title: 'Task 1',
+        projectId: 'proj-1',
+        project: { title: 'P', status: 'active' },
+        subTasks: [],
       });
       prisma.projectTask.update.mockResolvedValue({ id: 'task-1', status: 'done' });
 
@@ -239,22 +295,26 @@ describe('ProjectsService', () => {
   describe('generateProjectFromPlan', () => {
     it('should generate project from approved plan with tasks', async () => {
       prisma.plan.findFirst.mockResolvedValue({
-        id: 'plan-1', orgId: ORG_ID, status: 'approved', title: 'Trại Hè',
-        sectionIDescription: 'Mô tả', sectionIIObjectives: [],
-        sectionIVActivities: [
-          { name: 'Nghiên cứu địa điểm' },
-          { name: 'Chuẩn bị hậu cần' },
-        ],
+        id: 'plan-1',
+        orgId: ORG_ID,
+        status: 'approved',
+        title: 'Trại Hè',
+        sectionIDescription: 'Mô tả',
+        sectionIIObjectives: [],
+        sectionIVActivities: [{ name: 'Nghiên cứu địa điểm' }, { name: 'Chuẩn bị hậu cần' }],
         generatedProjectId: null,
       });
-      prisma.project.create.mockResolvedValue({ id: 'proj-gen-1', orgId: ORG_ID, title: 'Trại Hè' });
+      prisma.project.create.mockResolvedValue({
+        id: 'proj-gen-1',
+        orgId: ORG_ID,
+        title: 'Trại Hè',
+      });
       prisma.projectTask.create.mockResolvedValue({});
       prisma.plan.update.mockResolvedValue({});
       prisma.project.findFirst.mockResolvedValue({
-        id: 'proj-gen-1', title: 'Trại Hè', projectTasks: [
-          { title: 'Nghiên cứu địa điểm' },
-          { title: 'Chuẩn bị hậu cần' },
-        ],
+        id: 'proj-gen-1',
+        title: 'Trại Hè',
+        projectTasks: [{ title: 'Nghiên cứu địa điểm' }, { title: 'Chuẩn bị hậu cần' }],
       });
 
       const result = await service.generateProjectFromPlan(ORG_ID, 'plan-1', USER_ID);
@@ -268,23 +328,29 @@ describe('ProjectsService', () => {
 
     it('should reject generating from unapproved plan', async () => {
       prisma.plan.findFirst.mockResolvedValue({
-        id: 'plan-1', orgId: ORG_ID, status: 'draft', title: 'Test',
+        id: 'plan-1',
+        orgId: ORG_ID,
+        status: 'draft',
+        title: 'Test',
       });
 
-      await expect(
-        service.generateProjectFromPlan(ORG_ID, 'plan-1', USER_ID),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.generateProjectFromPlan(ORG_ID, 'plan-1', USER_ID)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should reject re-generating from already-generated plan', async () => {
       prisma.plan.findFirst.mockResolvedValue({
-        id: 'plan-1', orgId: ORG_ID, status: 'approved', title: 'Test',
+        id: 'plan-1',
+        orgId: ORG_ID,
+        status: 'approved',
+        title: 'Test',
         generatedProjectId: 'existing-proj',
       });
 
-      await expect(
-        service.generateProjectFromPlan(ORG_ID, 'plan-1', USER_ID),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.generateProjectFromPlan(ORG_ID, 'plan-1', USER_ID)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 });

@@ -13,10 +13,12 @@ describe('ExpService', () => {
     expTransaction: { create: jest.Mock; findMany: jest.Mock; count: jest.Mock };
     memberExpSummary: {
       findUnique: jest.Mock;
+      create: jest.Mock;
       upsert: jest.Mock;
       update: jest.Mock;
       findMany: jest.Mock;
     };
+    $transaction: jest.Mock;
   };
   let domainEvents: { publish: jest.Mock };
   let capCounter: { canAward: jest.Mock };
@@ -27,10 +29,12 @@ describe('ExpService', () => {
       expTransaction: { create: jest.fn(), findMany: jest.fn(), count: jest.fn() },
       memberExpSummary: {
         findUnique: jest.fn(),
+        create: jest.fn(),
         upsert: jest.fn(),
         update: jest.fn(),
         findMany: jest.fn(),
       },
+      $transaction: jest.fn(),
     };
     domainEvents = { publish: jest.fn() };
     capCounter = { canAward: jest.fn() };
@@ -63,7 +67,8 @@ describe('ExpService', () => {
     it('should award EXP and emit event when cap allows', async () => {
       capCounter.canAward.mockResolvedValue({ allowed: true });
       prisma.memberExpSummary.findUnique.mockResolvedValue(null);
-      prisma.memberExpSummary.upsert.mockResolvedValue({ totalExp: 10, availableExp: 10 });
+      prisma.memberExpSummary.create.mockResolvedValue({ totalExp: 0, availableExp: 0 });
+      prisma.$transaction.mockResolvedValue([{ id: 'tx1', expAmount: 10 }, {}]);
       prisma.expTransaction.create.mockResolvedValue({ id: 'tx1', expAmount: 10 });
       prisma.memberExpSummary.update.mockResolvedValue({});
 
@@ -93,6 +98,9 @@ describe('ExpService', () => {
         availableExp: 100,
         penaltyCount: 0,
       });
+      prisma.$transaction.mockImplementation(async (args: unknown[]) =>
+        args.map(() => ({ id: 'tx1' })),
+      );
       prisma.expTransaction.create.mockResolvedValue({ id: 'tx1', expAmount: -10 });
       prisma.memberExpSummary.update.mockResolvedValue({});
 

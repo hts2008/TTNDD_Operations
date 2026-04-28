@@ -13,7 +13,7 @@ describe('RewardShopService', () => {
     rewardRedemption: { create: jest.Mock; update: jest.Mock; findMany: jest.Mock };
   };
   let domainEvents: { publish: jest.Mock };
-  let expService: { deductExp: jest.Mock };
+  let expService: { deductExp: jest.Mock; getSummary: jest.Mock };
 
   beforeEach(async () => {
     prisma = {
@@ -24,9 +24,10 @@ describe('RewardShopService', () => {
         update: jest.fn(),
       },
       rewardRedemption: { create: jest.fn(), update: jest.fn(), findMany: jest.fn() },
+      $transaction: jest.fn(),
     };
     domainEvents = { publish: jest.fn() };
-    expService = { deductExp: jest.fn() };
+    expService = { deductExp: jest.fn(), getSummary: jest.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -67,12 +68,14 @@ describe('RewardShopService', () => {
         quantityAvailable: 5,
         isActive: true,
       });
-      prisma.rewardItem.update.mockResolvedValue({});
-      prisma.rewardRedemption.create.mockResolvedValue({
-        id: 'red1',
-        orgMemberId: 'member1',
-        rewardId: 'item1',
-      });
+      prisma.$transaction.mockResolvedValue([
+        {
+          id: 'red1',
+          orgMemberId: 'member1',
+          rewardId: 'item1',
+        },
+      ]);
+      expService.getSummary.mockResolvedValue({ availableExp: 100, totalExp: 200 });
       expService.deductExp.mockResolvedValue({});
 
       await service.redeem('org1', 'member1', 'item1');

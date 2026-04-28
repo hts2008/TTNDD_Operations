@@ -185,7 +185,8 @@ jobs:
           fi
           node -e "
             const content = require('fs').readFileSync('contracts/db/appendix-a.yaml','utf8');
-            const modelCount = (content.match(/model_name:/g) || []).length;
+            const totalMatch = content.match(/total_models:\s*(\d+)/);
+            const modelCount = totalMatch ? parseInt(totalMatch[1], 10) : 0;
             if (modelCount < 70) {
               console.error('❌ Appendix A has only', modelCount, 'models (expected ≥70)');
               process.exit(1);

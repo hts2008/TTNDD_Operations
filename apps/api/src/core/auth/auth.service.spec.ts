@@ -4,9 +4,16 @@ import { AuthService } from './auth.service';
 import { PrismaService } from '../database';
 import * as admin from 'firebase-admin';
 
-// Mock firebase-admin
+// Mock firebase-admin with writable apps array
+const mockApps: unknown[] = [];
 jest.mock('firebase-admin', () => ({
-  apps: [],
+  get apps() {
+    return mockApps;
+  },
+  set apps(v: unknown[]) {
+    mockApps.length = 0;
+    v.forEach((item) => mockApps.push(item));
+  },
   initializeApp: jest.fn(),
   auth: jest.fn(() => ({
     verifyIdToken: jest.fn(),
@@ -46,7 +53,7 @@ describe('AuthService', () => {
     };
 
     // Reset firebase-admin mock state
-    (admin as any).apps = [];
+    mockApps.length = 0;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -75,14 +82,14 @@ describe('AuthService', () => {
     });
 
     it('should not re-initialize if Firebase app already exists', () => {
-      (admin as any).apps = [{}]; // Simulate existing app
+      mockApps.push({}); // Simulate existing app
       config.get.mockReturnValue('ttndd-platform-2026');
       service.onModuleInit();
       // initializeApp should NOT be called again in this test
       // (it may have been called in previous tests, so we check call count)
       const callCount = (admin.initializeApp as jest.Mock).mock.calls.length;
       // Since we set apps to non-empty, initializeApp should not have been called
-      expect((admin as any).apps.length).toBe(1);
+      expect(mockApps.length).toBe(1);
     });
   });
 
@@ -142,13 +149,14 @@ describe('AuthService', () => {
     });
 
     it('should return null when Firebase is not initialized', async () => {
-      (admin as any).apps = [];
+      mockApps.length = 0;
       const result = await service.verifyToken('some-firebase-token');
       expect(result).toBeNull();
     });
 
     it('should verify token via Firebase and resolve user', async () => {
-      (admin as any).apps = [{}]; // Simulate initialized app
+      mockApps.length = 0;
+      mockApps.push({}); // Simulate initialized app
       const mockVerifyIdToken = jest.fn().mockResolvedValue({ uid: 'firebase-uid-1' });
       (admin.auth as jest.Mock).mockReturnValue({ verifyIdToken: mockVerifyIdToken });
       prisma.user.findUnique.mockResolvedValue(mockUser);
@@ -166,7 +174,8 @@ describe('AuthService', () => {
     });
 
     it('should return null when Firebase token verification fails', async () => {
-      (admin as any).apps = [{}];
+      mockApps.length = 0;
+      mockApps.push({});
       const mockVerifyIdToken = jest.fn().mockRejectedValue(new Error('Token expired'));
       (admin.auth as jest.Mock).mockReturnValue({ verifyIdToken: mockVerifyIdToken });
 
@@ -175,7 +184,8 @@ describe('AuthService', () => {
     });
 
     it('should return null when Firebase user is not in local DB', async () => {
-      (admin as any).apps = [{}];
+      mockApps.length = 0;
+      mockApps.push({});
       const mockVerifyIdToken = jest.fn().mockResolvedValue({ uid: 'unknown-firebase-uid' });
       (admin.auth as jest.Mock).mockReturnValue({ verifyIdToken: mockVerifyIdToken });
       prisma.user.findUnique.mockResolvedValue(null);

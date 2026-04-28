@@ -5,10 +5,22 @@ describe('SyntheticProbeService', () => {
   const mockPrisma = {
     $queryRaw: jest.fn(),
   };
+  let memUsageSpy: jest.SpyInstance;
 
   beforeEach(() => {
     service = new SyntheticProbeService(mockPrisma as any);
     jest.clearAllMocks();
+    memUsageSpy = jest.spyOn(process, 'memoryUsage').mockReturnValue({
+      heapUsed: 50 * 1024 * 1024,
+      heapTotal: 100 * 1024 * 1024,
+      rss: 120 * 1024 * 1024,
+      external: 10 * 1024 * 1024,
+      arrayBuffers: 5 * 1024 * 1024,
+    });
+  });
+
+  afterEach(() => {
+    memUsageSpy.mockRestore();
   });
 
   describe('probeDatabase', () => {
@@ -30,11 +42,35 @@ describe('SyntheticProbeService', () => {
   });
 
   describe('probeMemory', () => {
-    it('should return healthy under normal conditions', async () => {
+    it('should return healthy when memory usage is normal', async () => {
       const result = await service.probeMemory();
       expect(result.name).toBe('memory');
-      expect(['healthy', 'degraded']).toContain(result.status);
+      expect(result.status).toBe('healthy');
       expect(result.latencyMs).toBeGreaterThanOrEqual(0);
+    });
+
+    it('should return degraded when memory usage is high', async () => {
+      memUsageSpy.mockReturnValue({
+        heapUsed: 80 * 1024 * 1024,
+        heapTotal: 100 * 1024 * 1024,
+        rss: 120 * 1024 * 1024,
+        external: 10 * 1024 * 1024,
+        arrayBuffers: 5 * 1024 * 1024,
+      });
+      const result = await service.probeMemory();
+      expect(result.status).toBe('degraded');
+    });
+
+    it('should return unhealthy when memory usage is critical', async () => {
+      memUsageSpy.mockReturnValue({
+        heapUsed: 95 * 1024 * 1024,
+        heapTotal: 100 * 1024 * 1024,
+        rss: 120 * 1024 * 1024,
+        external: 10 * 1024 * 1024,
+        arrayBuffers: 5 * 1024 * 1024,
+      });
+      const result = await service.probeMemory();
+      expect(result.status).toBe('unhealthy');
     });
   });
 
