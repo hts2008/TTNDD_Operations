@@ -1,8 +1,4 @@
-import {
-  PipeTransform,
-  Injectable,
-  BadRequestException,
-} from '@nestjs/common';
+import { PipeTransform, Injectable, BadRequestException } from '@nestjs/common';
 
 const ALLOWED_MIMES = new Set([
   'image/jpeg',
@@ -25,10 +21,22 @@ const MAGIC_BYTES: Array<{ mime: string; bytes: number[] }> = [
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
+// eslint-disable-next-line no-control-regex
 const DANGEROUS_PATTERNS = /[<>:"/\\|?*\x00-\x1f]/g;
 const DANGEROUS_EXTENSIONS = new Set([
-  '.exe', '.bat', '.cmd', '.com', '.msi', '.scr', '.pif',
-  '.js', '.vbs', '.wsf', '.ps1', '.sh', '.php',
+  '.exe',
+  '.bat',
+  '.cmd',
+  '.com',
+  '.msi',
+  '.scr',
+  '.pif',
+  '.js',
+  '.vbs',
+  '.wsf',
+  '.ps1',
+  '.sh',
+  '.php',
 ]);
 
 interface UploadedFile {
@@ -54,9 +62,7 @@ export class FileValidationPipe implements PipeTransform {
     }
 
     if (!ALLOWED_MIMES.has(file.mimetype)) {
-      throw new BadRequestException(
-        `File type "${file.mimetype}" is not allowed`,
-      );
+      throw new BadRequestException(`File type "${file.mimetype}" is not allowed`);
     }
 
     this.validateMagicBytes(file);
@@ -76,9 +82,7 @@ export class FileValidationPipe implements PipeTransform {
     const matches = signature.bytes.every((b, i) => headerBytes[i] === b);
 
     if (!matches) {
-      throw new BadRequestException(
-        'File content does not match declared MIME type',
-      );
+      throw new BadRequestException('File content does not match declared MIME type');
     }
   }
 

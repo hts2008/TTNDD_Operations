@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
 import { SopService } from './sop.service';
 import { PrismaService } from '../../core/database';
 import { DomainEventService } from '../../core/events';
@@ -53,8 +53,13 @@ describe('SopService', () => {
 
   describe('create', () => {
     it('should create SOP with auto-version 1', async () => {
-      const sopDoc = { id: 'sop-1', orgId: ORG_ID, title: 'Hướng dẫn An toàn Trại', status: 'draft' };
-      prisma.$transaction.mockImplementation(async (cb: Function) => {
+      const sopDoc = {
+        id: 'sop-1',
+        orgId: ORG_ID,
+        title: 'Hướng dẫn An toàn Trại',
+        status: 'draft',
+      };
+      prisma.$transaction.mockImplementation(async (cb: (tx: unknown) => unknown) => {
         const tx = {
           sopDocument: { create: jest.fn().mockResolvedValue(sopDoc) },
           sopVersion: { create: jest.fn().mockResolvedValue({ id: 'v-1', versionNo: 1 }) },
@@ -62,13 +67,19 @@ describe('SopService', () => {
         return cb(tx);
       });
       prisma.sopDocument.findFirst.mockResolvedValue({
-        ...sopDoc, versions: [{ versionNo: 1, status: 'draft' }], approvals: [],
+        ...sopDoc,
+        versions: [{ versionNo: 1, status: 'draft' }],
+        approvals: [],
       });
 
-      const result = await service.create(ORG_ID, {
-        title: 'Hướng dẫn An toàn Trại',
-        category: 'safety',
-      }, USER_ID);
+      const result = await service.create(
+        ORG_ID,
+        {
+          title: 'Hướng dẫn An toàn Trại',
+          category: 'safety',
+        },
+        USER_ID,
+      );
 
       expect(result.title).toBe('Hướng dẫn An toàn Trại');
       expect(audit.log).toHaveBeenCalledWith(
@@ -80,19 +91,24 @@ describe('SopService', () => {
     });
 
     it('should reject empty title', async () => {
-      await expect(
-        service.create(ORG_ID, { title: '' }, USER_ID),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.create(ORG_ID, { title: '' }, USER_ID)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
   describe('update', () => {
     it('should update draft SOP', async () => {
       prisma.sopDocument.findFirst.mockResolvedValue({
-        id: 'sop-1', orgId: ORG_ID, status: 'draft', versions: [], approvals: [],
+        id: 'sop-1',
+        orgId: ORG_ID,
+        status: 'draft',
+        versions: [],
+        approvals: [],
       });
       prisma.sopDocument.update.mockResolvedValue({
-        id: 'sop-1', title: 'Updated Title',
+        id: 'sop-1',
+        title: 'Updated Title',
       });
 
       const result = await service.update(ORG_ID, 'sop-1', { title: 'Updated Title' }, USER_ID);
@@ -101,12 +117,16 @@ describe('SopService', () => {
 
     it('should reject editing published SOP', async () => {
       prisma.sopDocument.findFirst.mockResolvedValue({
-        id: 'sop-1', orgId: ORG_ID, status: 'published', versions: [], approvals: [],
+        id: 'sop-1',
+        orgId: ORG_ID,
+        status: 'published',
+        versions: [],
+        approvals: [],
       });
 
-      await expect(
-        service.update(ORG_ID, 'sop-1', { title: 'X' }, USER_ID),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.update(ORG_ID, 'sop-1', { title: 'X' }, USER_ID)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -149,24 +169,37 @@ describe('SopService', () => {
   describe('createVersion', () => {
     it('should increment version number', async () => {
       prisma.sopDocument.findFirst.mockResolvedValue({
-        id: 'sop-1', orgId: ORG_ID, status: 'published',
-        versions: [{ versionNo: 2, status: 'published' }], approvals: [],
+        id: 'sop-1',
+        orgId: ORG_ID,
+        status: 'published',
+        versions: [{ versionNo: 2, status: 'published' }],
+        approvals: [],
       });
       prisma.sopVersion.create.mockResolvedValue({
-        id: 'v-3', versionNo: 3, status: 'draft',
+        id: 'v-3',
+        versionNo: 3,
+        status: 'draft',
       });
 
-      const result = await service.createVersion(ORG_ID, 'sop-1', {
-        content: { type: 'doc', content: [] },
-      }, USER_ID);
+      const result = await service.createVersion(
+        ORG_ID,
+        'sop-1',
+        {
+          content: { type: 'doc', content: [] },
+        },
+        USER_ID,
+      );
 
       expect(result.versionNo).toBe(3);
     });
 
     it('should reject version for archived SOP', async () => {
       prisma.sopDocument.findFirst.mockResolvedValue({
-        id: 'sop-1', orgId: ORG_ID, status: 'archived',
-        versions: [], approvals: [],
+        id: 'sop-1',
+        orgId: ORG_ID,
+        status: 'archived',
+        versions: [],
+        approvals: [],
       });
 
       await expect(
@@ -180,7 +213,11 @@ describe('SopService', () => {
   describe('submitForReview', () => {
     it('should transition draft version to review', async () => {
       prisma.sopVersion.findFirst.mockResolvedValue({
-        id: 'v-1', orgId: ORG_ID, documentId: 'sop-1', versionNo: 2, status: 'draft',
+        id: 'v-1',
+        orgId: ORG_ID,
+        documentId: 'sop-1',
+        versionNo: 2,
+        status: 'draft',
       });
       prisma.sopVersion.update.mockResolvedValue({ id: 'v-1', status: 'review' });
 
@@ -196,15 +233,20 @@ describe('SopService', () => {
   describe('approveVersion', () => {
     it('should approve a version in review', async () => {
       prisma.sopVersion.findFirst.mockResolvedValue({
-        id: 'v-1', orgId: ORG_ID, documentId: 'sop-1', versionNo: 2, status: 'review',
+        id: 'v-1',
+        orgId: ORG_ID,
+        documentId: 'sop-1',
+        versionNo: 2,
+        status: 'review',
       });
-      prisma.$transaction.mockResolvedValue([
-        { id: 'v-1', status: 'approved' },
-        { id: 'appr-1' },
-      ]);
+      prisma.$transaction.mockResolvedValue([{ id: 'v-1', status: 'approved' }, { id: 'appr-1' }]);
 
       const result = await service.approveVersion(
-        ORG_ID, 'sop-1', 2, { approved: true, comments: 'LGTM' }, USER_ID,
+        ORG_ID,
+        'sop-1',
+        2,
+        { approved: true, comments: 'LGTM' },
+        USER_ID,
       );
 
       expect(result.status).toBe('approved');
@@ -212,15 +254,20 @@ describe('SopService', () => {
 
     it('should reject a version in review', async () => {
       prisma.sopVersion.findFirst.mockResolvedValue({
-        id: 'v-1', orgId: ORG_ID, documentId: 'sop-1', versionNo: 2, status: 'review',
+        id: 'v-1',
+        orgId: ORG_ID,
+        documentId: 'sop-1',
+        versionNo: 2,
+        status: 'review',
       });
-      prisma.$transaction.mockResolvedValue([
-        { id: 'v-1', status: 'rejected' },
-        { id: 'appr-1' },
-      ]);
+      prisma.$transaction.mockResolvedValue([{ id: 'v-1', status: 'rejected' }, { id: 'appr-1' }]);
 
       const result = await service.approveVersion(
-        ORG_ID, 'sop-1', 2, { approved: false, comments: 'Cần sửa' }, USER_ID,
+        ORG_ID,
+        'sop-1',
+        2,
+        { approved: false, comments: 'Cần sửa' },
+        USER_ID,
       );
 
       expect(result.status).toBe('rejected');
@@ -228,7 +275,10 @@ describe('SopService', () => {
 
     it('should reject approving non-review version', async () => {
       prisma.sopVersion.findFirst.mockResolvedValue({
-        id: 'v-1', orgId: ORG_ID, status: 'draft', versionNo: 1,
+        id: 'v-1',
+        orgId: ORG_ID,
+        status: 'draft',
+        versionNo: 1,
       });
 
       await expect(
@@ -242,7 +292,11 @@ describe('SopService', () => {
   describe('archiveDocument', () => {
     it('should archive a published SOP', async () => {
       prisma.sopDocument.findFirst.mockResolvedValue({
-        id: 'sop-1', orgId: ORG_ID, status: 'published', versions: [], approvals: [],
+        id: 'sop-1',
+        orgId: ORG_ID,
+        status: 'published',
+        versions: [],
+        approvals: [],
       });
       prisma.sopDocument.update.mockResolvedValue({ id: 'sop-1', status: 'archived' });
 
@@ -252,12 +306,16 @@ describe('SopService', () => {
 
     it('should reject archiving a draft SOP', async () => {
       prisma.sopDocument.findFirst.mockResolvedValue({
-        id: 'sop-1', orgId: ORG_ID, status: 'draft', versions: [], approvals: [],
+        id: 'sop-1',
+        orgId: ORG_ID,
+        status: 'draft',
+        versions: [],
+        approvals: [],
       });
 
-      await expect(
-        service.archiveDocument(ORG_ID, 'sop-1', USER_ID),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.archiveDocument(ORG_ID, 'sop-1', USER_ID)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 });

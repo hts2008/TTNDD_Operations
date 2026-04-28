@@ -29,6 +29,8 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: '${{ env.NODE_VERSION }}', cache: 'pnpm' }
       - run: pnpm install --frozen-lockfile
+      - name: Build workspace packages
+        run: pnpm --filter @ttndd/constants build && pnpm --filter @ttndd/shared build
       - name: Generate Prisma Client
         run: cd apps/api && npx prisma generate
         env:
@@ -69,7 +71,8 @@ jobs:
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/ttndd_test
           DATABASE_MIGRATION_URL: postgresql://test:test@localhost:5432/ttndd_test
-      - run: pnpm test -- --passWithNoTests
+      - name: Run tests
+        run: pnpm --filter api exec jest --passWithNoTests
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/ttndd_test
           DATABASE_MIGRATION_URL: postgresql://test:test@localhost:5432/ttndd_test
