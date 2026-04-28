@@ -14,6 +14,7 @@ import { AuthService } from './auth.service';
 import { PrismaService } from '../database';
 import { AuthGuard } from './guards/auth.guard';
 import { CurrentUser, type CurrentUserPayload } from '../../common/decorators';
+import { Public } from './decorators/public.decorator';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -35,6 +36,7 @@ export class AuthController {
    * - In DEV mode (APP_ENV=development): Looks up user by email and returns
    *   a dev token for local testing without Firebase.
    */
+  @Public()
   @Post('login')
   @ApiOperation({ summary: 'Authenticate user with email/password' })
   async login(@Body() body: { email: string; password: string }) {
