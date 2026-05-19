@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../core/database';
 import { DomainEventService } from '../../core/events';
@@ -21,6 +26,12 @@ const SLA_TARGETS: Record<string, { firstResponse: number; resolution: number }>
   medium: { firstResponse: 4, resolution: 24 },
   low: { firstResponse: 8, resolution: 72 },
 };
+
+function toPositiveInt(value: number | string | undefined, fallback: number, max = 100) {
+  const parsed = typeof value === 'number' ? value : Number.parseInt(String(value ?? ''), 10);
+  if (!Number.isFinite(parsed) || parsed < 1) return fallback;
+  return Math.min(Math.trunc(parsed), max);
+}
 
 /** T-1042: Category → default assignee role mapping */
 const CATEGORY_ROUTING: Record<string, string> = {
@@ -57,6 +68,23 @@ const CONSENT_TEMPLATES: Record<string, { title: string; description: string; ca
 const APPROVAL_THRESHOLDS = {
   budget: { autoApproveLimit: 500000, escalateLimit: 5000000 },
 };
+
+type ApprovalStepInput = {
+  stepName?: string;
+  approverRole?: string;
+  approverUserId?: string;
+  dueInHours?: number;
+};
+
+type NormalizedApprovalStep = {
+  stepOrder: number;
+  stepName: string;
+  approverRole?: string;
+  approverUserId?: string;
+  dueAt?: Date;
+};
+
+const MAX_APPROVAL_STEPS = 8;
 
 @Injectable()
 export class TicketsService {
@@ -152,9 +180,11 @@ export class TicketsService {
       requesterId?: string;
       isSensitive?: boolean;
     },
-    page = 1,
-    limit = 20,
+    page: number | string = 1,
+    limit: number | string = 20,
   ) {
+    const currentPage = toPositiveInt(page, 1);
+    const pageSize = toPositiveInt(limit, 20);
     const where: Prisma.TicketWhereInput = { orgId };
     if (filters?.status) where.status = filters.status;
     if (filters?.priority) where.priority = filters.priority;
@@ -167,13 +197,13 @@ export class TicketsService {
       this.prisma.ticket.findMany({
         where,
         include: { _count: { select: { comments: true } } },
-        skip: (page - 1) * limit,
-        take: limit,
+        skip: (currentPage - 1) * pageSize,
+        take: pageSize,
         orderBy: { createdAt: 'desc' },
       }),
       this.prisma.ticket.count({ where }),
     ]);
-    return { data, meta: { total, page, limit } };
+    return { data, meta: { total, page: currentPage, limit: pageSize } };
   }
 
   async findById(orgId: string, ticketId: string) {
@@ -317,6 +347,7 @@ export class TicketsService {
       approvalType: string;
       amount?: number;
       notes?: string;
+      steps?: ApprovalStepInput[];
     },
   ) {
     const ticket = await this.findById(orgId, ticketId);
@@ -337,20 +368,52 @@ export class TicketsService {
       }
     }
 
-    // Record approval request as internal comment + custom field
+    const existingPending = await this.prisma.approvalFlow.findFirst({
+      where: { orgId, ticketId, status: 'pending' },
+      select: { id: true },
+    });
+    if (existingPending) {
+      throw new BadRequestException('A pending approval flow already exists');
+    }
+
+    const requestedAt = new Date();
+    const approvalSteps = this.normalizeApprovalSteps(data.steps, requestedAt);
+    const flow = await this.prisma.approvalFlow.create({
+      data: {
+        orgId,
+        ticketId,
+        approvalType: data.approvalType,
+        amount: data.amount,
+        status: 'pending',
+        currentStepOrder: 1,
+        requestedBy: actorUserId,
+        requestedAt,
+        slaDueAt: this.findLatestDueAt(approvalSteps),
+        metadata: {
+          notes: data.notes ?? null,
+          legacySingleLevelDefault: !data.steps?.length,
+        },
+        steps: {
+          create: approvalSteps.map((step) => ({
+            orgId,
+            stepOrder: step.stepOrder,
+            stepName: step.stepName,
+            approverRole: step.approverRole,
+            approverUserId: step.approverUserId,
+            status: 'pending',
+            dueAt: step.dueAt,
+          })),
+        },
+      },
+      include: { steps: { orderBy: { stepOrder: 'asc' } } },
+    });
+
     await this.prisma.ticket.update({
       where: { id: ticketId },
       data: {
         customFields: {
           ...((ticket.customFields as Record<string, unknown>) ?? {}),
-          approvalRequest: {
-            type: data.approvalType,
-            amount: data.amount,
-            notes: data.notes,
-            requestedBy: actorUserId,
-            requestedAt: new Date().toISOString(),
-            status: 'pending',
-          },
+          approvalRequest: this.buildApprovalSnapshot(flow),
         },
       },
     });
@@ -371,9 +434,39 @@ export class TicketsService {
       action: 'ticket.approval_requested',
       resource: 'Ticket',
       resourceId: ticketId,
-      newValue: data as unknown as Prisma.InputJsonValue,
+      newValue: {
+        ...data,
+        flowId: flow.id,
+        stepCount: flow.steps.length,
+      } as unknown as Prisma.InputJsonValue,
     });
-    return { ticketId, approvalStatus: 'pending', data };
+    return {
+      ticketId,
+      approvalStatus: 'pending',
+      flowId: flow.id,
+      currentStepOrder: flow.currentStepOrder,
+      totalSteps: flow.steps.length,
+      data,
+    };
+  }
+
+  async getApprovalFlow(orgId: string, ticketId: string) {
+    const ticket = await this.findById(orgId, ticketId);
+    const flow = await this.prisma.approvalFlow.findFirst({
+      where: { orgId, ticketId },
+      include: {
+        steps: { orderBy: { stepOrder: 'asc' } },
+        decisions: { orderBy: { decidedAt: 'asc' } },
+      },
+      orderBy: { requestedAt: 'desc' },
+    });
+
+    return {
+      ticketId,
+      flow: flow ? this.serializeApprovalFlow(flow) : null,
+      legacyApprovalRequest: ((ticket.customFields as Record<string, unknown>) ?? {})
+        .approvalRequest,
+    };
   }
 
   async handleApproval(
@@ -382,14 +475,38 @@ export class TicketsService {
     actorUserId: string,
     decision: string,
     notes?: string,
+    actorRole?: string,
   ) {
     const ticket = await this.findById(orgId, ticketId);
+    const flow = await this.prisma.approvalFlow.findFirst({
+      where: { orgId, ticketId, status: 'pending' },
+      include: {
+        steps: { orderBy: { stepOrder: 'asc' } },
+        decisions: { orderBy: { decidedAt: 'asc' } },
+      },
+      orderBy: { requestedAt: 'desc' },
+    });
+
+    if (flow) {
+      return this.handleApprovalFlow(
+        orgId,
+        ticketId,
+        ticket,
+        flow,
+        actorUserId,
+        decision,
+        notes,
+        actorRole,
+      );
+    }
+
+    const normalizedDecision = this.normalizeDecision(decision);
     const cf = (ticket.customFields as Record<string, unknown>) ?? {};
     const approval = cf.approvalRequest as Record<string, unknown> | undefined;
     if (!approval || approval.status !== 'pending')
       throw new BadRequestException('No pending approval request');
 
-    approval.status = decision === 'approve' ? 'approved' : 'rejected';
+    approval.status = normalizedDecision;
     approval.decidedBy = actorUserId;
     approval.decidedAt = new Date().toISOString();
     approval.decisionNotes = notes;
@@ -416,12 +533,152 @@ export class TicketsService {
       action: `ticket.approval_${decision}`,
       resource: 'Ticket',
       resourceId: ticketId,
-      newValue: { decision, notes },
+      newValue: { decision: normalizedDecision, notes },
     });
     return { ticketId, approvalStatus: approval.status };
   }
 
   // ── T-1054: Guardian Consent Templates ──
+
+  private async handleApprovalFlow(
+    orgId: string,
+    ticketId: string,
+    ticket: { customFields: Prisma.JsonValue },
+    flow: {
+      id: string;
+      approvalType: string;
+      amount: unknown;
+      status: string;
+      currentStepOrder: number;
+      requestedBy: string;
+      requestedAt: Date;
+      completedAt: Date | null;
+      slaDueAt: Date | null;
+      metadata: Prisma.JsonValue;
+      steps: Array<{
+        id: string;
+        orgId: string;
+        flowId: string;
+        stepOrder: number;
+        stepName: string;
+        approverRole: string | null;
+        approverUserId: string | null;
+        status: string;
+        dueAt: Date | null;
+        decidedAt: Date | null;
+      }>;
+      decisions?: unknown[];
+    },
+    actorUserId: string,
+    decision: string,
+    notes?: string,
+    actorRole?: string,
+  ) {
+    const normalizedDecision = this.normalizeDecision(decision);
+    const currentStep =
+      flow.steps.find(
+        (step) => step.stepOrder === flow.currentStepOrder && step.status === 'pending',
+      ) ?? flow.steps.find((step) => step.status === 'pending');
+    if (!currentStep) throw new BadRequestException('No pending approval step');
+
+    this.assertCanDecideStep(currentStep, actorUserId, actorRole);
+
+    const decidedAt = new Date();
+    await this.prisma.approvalDecision.create({
+      data: {
+        orgId,
+        flowId: flow.id,
+        stepId: currentStep.id,
+        decision: normalizedDecision,
+        notes,
+        decidedBy: actorUserId,
+        decidedAt,
+      },
+    });
+
+    await this.prisma.approvalStep.update({
+      where: { id: currentStep.id },
+      data: { status: normalizedDecision, decidedAt },
+    });
+
+    const updatedSteps = flow.steps.map((step) =>
+      step.id === currentStep.id ? { ...step, status: normalizedDecision, decidedAt } : step,
+    );
+    const nextStep = updatedSteps.find(
+      (step) => step.status === 'pending' && step.stepOrder > currentStep.stepOrder,
+    );
+    const flowStatus =
+      normalizedDecision === 'rejected' ? 'rejected' : nextStep ? 'pending' : 'approved';
+    const currentStepOrder = nextStep?.stepOrder ?? currentStep.stepOrder;
+
+    await this.prisma.approvalFlow.update({
+      where: { id: flow.id },
+      data: {
+        status: flowStatus,
+        currentStepOrder,
+        completedAt: flowStatus === 'pending' ? undefined : decidedAt,
+      },
+    });
+
+    const cf = (ticket.customFields as Record<string, unknown>) ?? {};
+    await this.prisma.ticket.update({
+      where: { id: ticketId },
+      data: {
+        customFields: {
+          ...cf,
+          approvalRequest: this.buildApprovalSnapshot(
+            {
+              ...flow,
+              status: flowStatus,
+              currentStepOrder,
+              completedAt: flowStatus === 'pending' ? null : decidedAt,
+              steps: updatedSteps,
+            },
+            {
+              lastDecision: normalizedDecision,
+              decidedBy: actorUserId,
+              decidedAt,
+              decisionNotes: notes,
+            },
+          ),
+        },
+      },
+    });
+
+    await this.addComment(
+      orgId,
+      ticketId,
+      {
+        content: `${normalizedDecision === 'approved' ? 'Approved' : 'Rejected'} step ${currentStep.stepName} (${currentStep.stepOrder}/${flow.steps.length})${notes ? `: ${notes}` : ''}`,
+        isInternal: true,
+      },
+      actorUserId,
+    );
+
+    await this.audit.log({
+      orgId,
+      userId: actorUserId,
+      action: `ticket.approval_${decision}`,
+      resource: 'Ticket',
+      resourceId: ticketId,
+      newValue: {
+        flowId: flow.id,
+        stepId: currentStep.id,
+        decision: normalizedDecision,
+        notes,
+        flowStatus,
+        currentStepOrder,
+      },
+    });
+
+    return {
+      ticketId,
+      approvalStatus: flowStatus,
+      flowId: flow.id,
+      currentStepOrder,
+      completed: flowStatus !== 'pending',
+    };
+  }
 
   getConsentTemplates() {
     return Object.entries(CONSENT_TEMPLATES).map(([key, tmpl]) => ({ key, ...tmpl }));
@@ -532,6 +789,149 @@ export class TicketsService {
   }
 
   // ── Helpers ──
+
+  private normalizeApprovalSteps(
+    steps: ApprovalStepInput[] | undefined,
+    requestedAt: Date,
+  ): NormalizedApprovalStep[] {
+    const rawSteps = steps?.length ? steps : [{ stepName: 'Default approval' }];
+    if (rawSteps.length > MAX_APPROVAL_STEPS) {
+      throw new BadRequestException(`Approval flow supports at most ${MAX_APPROVAL_STEPS} steps`);
+    }
+
+    return rawSteps.map((step, index) => {
+      const dueInHours =
+        typeof step.dueInHours === 'number' && Number.isFinite(step.dueInHours)
+          ? Math.trunc(step.dueInHours)
+          : undefined;
+      return {
+        stepOrder: index + 1,
+        stepName: step.stepName?.trim() || 'Default approval',
+        approverRole: step.approverRole?.trim() || undefined,
+        approverUserId: step.approverUserId?.trim() || undefined,
+        dueAt: dueInHours
+          ? new Date(requestedAt.getTime() + dueInHours * 60 * 60 * 1000)
+          : undefined,
+      };
+    });
+  }
+
+  private findLatestDueAt(steps: NormalizedApprovalStep[]) {
+    const dueTimes = steps
+      .map((step) => step.dueAt?.getTime())
+      .filter((time): time is number => typeof time === 'number');
+    return dueTimes.length ? new Date(Math.max(...dueTimes)) : undefined;
+  }
+
+  private normalizeDecision(decision: string) {
+    if (decision === 'approve' || decision === 'approved') return 'approved';
+    if (decision === 'reject' || decision === 'rejected') return 'rejected';
+    throw new BadRequestException("Approval decision must be 'approve' or 'reject'");
+  }
+
+  private assertCanDecideStep(
+    step: { approverRole: string | null; approverUserId: string | null },
+    actorUserId: string,
+    actorRole?: string,
+  ) {
+    if (step.approverUserId && step.approverUserId !== actorUserId) {
+      throw new ForbiddenException('Current user is not assigned to this approval step');
+    }
+    if (
+      step.approverRole &&
+      actorRole &&
+      actorRole !== step.approverRole &&
+      actorRole !== 'super_admin'
+    ) {
+      throw new ForbiddenException(
+        `Current role cannot approve step assigned to ${step.approverRole}`,
+      );
+    }
+  }
+
+  private buildApprovalSnapshot(
+    flow: {
+      id: string;
+      approvalType: string;
+      amount: unknown;
+      status: string;
+      currentStepOrder: number;
+      requestedBy: string;
+      requestedAt: Date;
+      completedAt?: Date | null;
+      slaDueAt?: Date | null;
+      metadata?: Prisma.JsonValue;
+      steps: Array<{
+        id?: string;
+        stepOrder: number;
+        stepName: string;
+        approverRole?: string | null;
+        approverUserId?: string | null;
+        status: string;
+        dueAt?: Date | null;
+        decidedAt?: Date | null;
+      }>;
+    },
+    decision?: {
+      lastDecision?: string;
+      decidedBy?: string;
+      decidedAt?: Date;
+      decisionNotes?: string;
+    },
+  ) {
+    const metadata =
+      flow.metadata && typeof flow.metadata === 'object' && !Array.isArray(flow.metadata)
+        ? (flow.metadata as Record<string, unknown>)
+        : {};
+
+    return {
+      flowId: flow.id,
+      type: flow.approvalType,
+      amount: this.toPlainNumber(flow.amount),
+      notes: metadata.notes ?? null,
+      requestedBy: flow.requestedBy,
+      requestedAt: flow.requestedAt.toISOString(),
+      status: flow.status,
+      currentStepOrder: flow.currentStepOrder,
+      totalSteps: flow.steps.length,
+      completedAt: flow.completedAt ? flow.completedAt.toISOString() : null,
+      slaDueAt: flow.slaDueAt ? flow.slaDueAt.toISOString() : null,
+      steps: flow.steps.map((step) => ({
+        id: step.id,
+        stepOrder: step.stepOrder,
+        stepName: step.stepName,
+        approverRole: step.approverRole ?? null,
+        approverUserId: step.approverUserId ?? null,
+        status: step.status,
+        dueAt: step.dueAt ? step.dueAt.toISOString() : null,
+        decidedAt: step.decidedAt ? step.decidedAt.toISOString() : null,
+      })),
+      ...decision,
+      decidedAt: decision?.decidedAt?.toISOString(),
+    };
+  }
+
+  private serializeApprovalFlow(flow: {
+    amount: unknown;
+    metadata: Prisma.JsonValue;
+    steps: Array<Record<string, unknown>>;
+    decisions?: Array<Record<string, unknown>>;
+    [key: string]: unknown;
+  }) {
+    return {
+      ...flow,
+      amount: this.toPlainNumber(flow.amount),
+    };
+  }
+
+  private toPlainNumber(value: unknown) {
+    if (value === null || value === undefined) return undefined;
+    if (typeof value === 'object' && 'toNumber' in value && typeof value.toNumber === 'function') {
+      return value.toNumber();
+    }
+    const numeric = Number(value);
+    return Number.isFinite(numeric) ? numeric : undefined;
+  }
 
   private async generateTicketNumber(orgId: string): Promise<string> {
     const count = await this.prisma.ticket.count({ where: { orgId } });

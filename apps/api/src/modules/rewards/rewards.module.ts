@@ -8,6 +8,7 @@ import { CapCounterService } from './cap-counter.service';
 import { PenaltyService } from './penalty.service';
 import { LeaderboardService } from './leaderboard.service';
 import { PeerRecognitionService } from './peer-recognition.service';
+import { RewardAutomationService } from './reward-automation.service';
 
 @Module({
   controllers: [RewardsController],
@@ -20,7 +21,8 @@ import { PeerRecognitionService } from './peer-recognition.service';
     PenaltyService,
     LeaderboardService,
     PeerRecognitionService,
+    RewardAutomationService,
   ],
-  exports: [ExpService, BadgeService],
+  exports: [ExpService, BadgeService, RewardAutomationService],
 })
 export class RewardsModule {}

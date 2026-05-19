@@ -16,14 +16,24 @@ export class EnrichmentController {
   @ApiOperation({ summary: 'Create a spiritual log entry (private to member)' })
   createSpiritualLog(
     @CurrentUser() user: CurrentUserPayload,
-    @Body() body: {
-      logDate: string; logType?: string; durationMinutes?: number;
-      notes?: string; thanhNgonRef?: string;
-      emotionBefore?: number; emotionAfter?: number;
+    @Body()
+    body: {
+      logDate: string;
+      logType?: string;
+      durationMinutes?: number;
+      notes?: string;
+      thanhNgonRef?: string;
+      emotionBefore?: number;
+      emotionAfter?: number;
     },
   ) {
+    const memberId = user.memberId ?? user.userId;
     return this.enrichmentService.createSpiritualLog(
-      user.orgId, user.memberId ?? user.userId, body, user.userId,
+      user.orgId,
+      memberId,
+      body,
+      user.userId,
+      memberId,
     );
   }
 
@@ -31,7 +41,7 @@ export class EnrichmentController {
   @ApiOperation({ summary: 'Get my spiritual logs (private)' })
   getMySpiritualLogs(@CurrentUser() user: CurrentUserPayload) {
     const memberId = user.memberId ?? user.userId;
-    return this.enrichmentService.findSpiritualLogsByMember(user.orgId, memberId, user.userId);
+    return this.enrichmentService.findSpiritualLogsByMember(user.orgId, memberId, memberId);
   }
 
   // ── Ngu Gioi Self-Assessment (hidden from leaders) ──
@@ -40,14 +50,24 @@ export class EnrichmentController {
   @ApiOperation({ summary: 'Create/update Ngu Gioi self-assessment (hidden from leaders)' })
   createOrUpdateNguGioi(
     @CurrentUser() user: CurrentUserPayload,
-    @Body() body: {
+    @Body()
+    body: {
       weekStart: string;
-      batSatSinh?: number; batDuDao?: number; batTaDam?: number;
-      batTuuNhuc?: number; batVongNgu?: number; reflection?: string;
+      batSatSinh?: number;
+      batDuDao?: number;
+      batTaDam?: number;
+      batTuuNhuc?: number;
+      batVongNgu?: number;
+      reflection?: string;
     },
   ) {
+    const memberId = user.memberId ?? user.userId;
     return this.enrichmentService.createOrUpdateNguGioi(
-      user.orgId, user.memberId ?? user.userId, body, user.userId,
+      user.orgId,
+      memberId,
+      body,
+      user.userId,
+      memberId,
     );
   }
 
@@ -55,7 +75,7 @@ export class EnrichmentController {
   @ApiOperation({ summary: 'Get my Ngu Gioi assessments (hidden from leaders)' })
   getMyNguGioi(@CurrentUser() user: CurrentUserPayload) {
     const memberId = user.memberId ?? user.userId;
-    return this.enrichmentService.findNguGioiByMember(user.orgId, memberId, user.userId);
+    return this.enrichmentService.findNguGioiByMember(user.orgId, memberId, memberId);
   }
 
   // ── Evaluations (5-dimension rubric) ──
@@ -65,12 +85,20 @@ export class EnrichmentController {
   @ApiOperation({ summary: 'Create a 5-dimension evaluation' })
   createEvaluation(
     @CurrentUser() user: CurrentUserPayload,
-    @Body() body: {
-      orgMemberId: string; branchId: string;
-      evaluationType?: string; evaluationDate: string;
-      scoreDaoDuc?: number; scoreKyNang?: number; scoreTheChat?: number;
-      scoreLanhDao?: number; scorePhungSu?: number;
-      strengths?: string; areasToImprove?: string; recommendations?: string;
+    @Body()
+    body: {
+      orgMemberId: string;
+      branchId: string;
+      evaluationType?: string;
+      evaluationDate: string;
+      scoreDaoDuc?: number;
+      scoreKyNang?: number;
+      scoreTheChat?: number;
+      scoreLanhDao?: number;
+      scorePhungSu?: number;
+      strengths?: string;
+      areasToImprove?: string;
+      recommendations?: string;
       selfAssessment?: Prisma.InputJsonValue;
     },
   ) {
@@ -122,8 +150,12 @@ export class EnrichmentController {
   createMentoringLog(
     @CurrentUser() user: CurrentUserPayload,
     @Param('relationshipId') relationshipId: string,
-    @Body() body: {
-      sessionDate: string; topic?: string; outcome?: string; followUp?: string;
+    @Body()
+    body: {
+      sessionDate: string;
+      topic?: string;
+      outcome?: string;
+      followUp?: string;
     },
   ) {
     return this.enrichmentService.createMentoringLog(user.orgId, relationshipId, body);

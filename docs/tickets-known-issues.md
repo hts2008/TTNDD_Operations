@@ -14,9 +14,9 @@
 
 ### Deferred (by design)
 
-| Item                                | Reason                                         | Target |
-| ----------------------------------- | ---------------------------------------------- | ------ |
-| Multi-step approval workflow engine | Complexity; single-level sufficient for launch | P2     |
-| SLA background alert jobs           | Requires BullMQ worker infrastructure          | P2     |
-| Ticket PDF export                   | Low priority downstream feature                | P3     |
-| PostgreSQL RLS for tickets          | Deferred to security sprint                    | P3     |
+| Item                                | Reason                                                                                                      | Target |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------- | ------ |
+| Multi-step approval workflow engine | Complexity; single-level sufficient for launch                                                              | P2     |
+| SLA background alert jobs           | Requires worker job logic; BullMQ worker infrastructure exists but SLA alert side effect is not implemented | P2     |
+| Ticket PDF export                   | Low priority downstream feature                                                                             | P3     |
+| PostgreSQL RLS for tickets          | Deferred to security sprint                                                                                 | P3     |

@@ -16,9 +16,20 @@
       "createdAt"
     ],
     "properties": {
-      "id": { "type": "string", "format": "uuid", "description": "Auto-generated event ID" },
-      "orgId": { "type": "string", "format": "uuid", "description": "Tenant isolation key (RLS)" },
-      "eventType": { "type": "string", "description": "One of the event types listed below" },
+      "id": {
+        "type": "string",
+        "format": "uuid",
+        "description": "Auto-generated event ID"
+      },
+      "orgId": {
+        "type": "string",
+        "format": "uuid",
+        "description": "Tenant isolation key (RLS)"
+      },
+      "eventType": {
+        "type": "string",
+        "description": "One of the event types listed below"
+      },
       "aggregateId": {
         "type": "string",
         "format": "uuid",
@@ -37,8 +48,14 @@
         "format": "uuid",
         "description": "User who triggered the action"
       },
-      "createdAt": { "type": "string", "format": "date-time" },
-      "processedAt": { "type": ["string", "null"], "format": "date-time" }
+      "createdAt": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "processedAt": {
+        "type": ["string", "null"],
+        "format": "date-time"
+      }
     }
   },
   "events": {
@@ -63,6 +80,24 @@
           "aggregateType": "Organization",
           "triggers": ["UI feature flags refresh"],
           "consumers": ["notifications"]
+        },
+        "org.member_joined": {
+          "description": "TODO: document org.member_joined",
+          "aggregateType": "Unknown",
+          "triggers": [],
+          "consumers": []
+        },
+        "org.member_role_changed": {
+          "description": "TODO: document org.member_role_changed",
+          "aggregateType": "Unknown",
+          "triggers": [],
+          "consumers": []
+        },
+        "org.member_left": {
+          "description": "TODO: document org.member_left",
+          "aggregateType": "Unknown",
+          "triggers": [],
+          "consumers": []
         }
       }
     },
@@ -111,6 +146,18 @@
           "aggregateType": "Member",
           "triggers": ["Enable guardian portal access"],
           "consumers": ["notifications"]
+        },
+        "hrm.guardian_updated": {
+          "description": "TODO: document hrm.guardian_updated",
+          "aggregateType": "Unknown",
+          "triggers": [],
+          "consumers": []
+        },
+        "hrm.guardian_removed": {
+          "description": "TODO: document hrm.guardian_removed",
+          "aggregateType": "Unknown",
+          "triggers": [],
+          "consumers": []
         }
       }
     },
@@ -147,6 +194,30 @@
           "aggregateType": "Member",
           "triggers": ["Deduct EXP", "Notify leader for approval"],
           "consumers": ["notifications", "rewards"]
+        },
+        "rewards.penalty_applied": {
+          "description": "TODO: document rewards.penalty_applied",
+          "aggregateType": "Unknown",
+          "triggers": [],
+          "consumers": []
+        },
+        "rewards.penalty_corrected": {
+          "description": "TODO: document rewards.penalty_corrected",
+          "aggregateType": "Unknown",
+          "triggers": [],
+          "consumers": []
+        },
+        "rewards.redemption_requested": {
+          "description": "TODO: document rewards.redemption_requested",
+          "aggregateType": "Unknown",
+          "triggers": [],
+          "consumers": []
+        },
+        "rewards.peer_recognized": {
+          "description": "TODO: document rewards.peer_recognized",
+          "aggregateType": "Unknown",
+          "triggers": [],
+          "consumers": []
         }
       }
     },
@@ -286,17 +357,41 @@
       "module_id": 7,
       "module_name": "Learning Management System",
       "events": {
+        "lms.course_created": {
+          "description": "TODO: document lms.course_created",
+          "aggregateType": "Unknown",
+          "triggers": [],
+          "consumers": []
+        },
+        "lms.course_updated": {
+          "description": "TODO: document lms.course_updated",
+          "aggregateType": "Unknown",
+          "triggers": [],
+          "consumers": []
+        },
         "lms.course_enrolled": {
           "description": "Member enrolled in a course",
           "aggregateType": "CourseEnrollment",
           "triggers": ["Track progress", "Notify instructor"],
           "consumers": ["notifications"]
         },
+        "lms.course_completed": {
+          "description": "TODO: document lms.course_completed",
+          "aggregateType": "Unknown",
+          "triggers": [],
+          "consumers": []
+        },
         "lms.lesson_completed": {
           "description": "Member completed a lesson",
           "aggregateType": "CourseEnrollment",
           "triggers": ["Award EXP", "Check course completion"],
           "consumers": ["rewards", "notifications"]
+        },
+        "lms.competency_mapped": {
+          "description": "TODO: document lms.competency_mapped",
+          "aggregateType": "Unknown",
+          "triggers": [],
+          "consumers": []
         },
         "lms.quiz_submitted": {
           "description": "Member submitted a quiz attempt",
@@ -315,6 +410,42 @@
           "aggregateType": "CourseEnrollment",
           "triggers": ["Suggest retry"],
           "consumers": ["notifications"]
+        },
+        "lms.quiz_attempt_started": {
+          "description": "TODO: document lms.quiz_attempt_started",
+          "aggregateType": "Unknown",
+          "triggers": [],
+          "consumers": []
+        },
+        "lms.quiz_attempt_expired": {
+          "description": "TODO: document lms.quiz_attempt_expired",
+          "aggregateType": "Unknown",
+          "triggers": [],
+          "consumers": []
+        },
+        "lms.quiz_manually_graded": {
+          "description": "TODO: document lms.quiz_manually_graded",
+          "aggregateType": "Unknown",
+          "triggers": [],
+          "consumers": []
+        },
+        "lms.battle_started": {
+          "description": "TODO: document lms.battle_started",
+          "aggregateType": "Unknown",
+          "triggers": [],
+          "consumers": []
+        },
+        "lms.battle_finished": {
+          "description": "TODO: document lms.battle_finished",
+          "aggregateType": "Unknown",
+          "triggers": [],
+          "consumers": []
+        },
+        "lms.battle_answer_submitted": {
+          "description": "TODO: document lms.battle_answer_submitted",
+          "aggregateType": "Unknown",
+          "triggers": [],
+          "consumers": []
         }
       }
     },
@@ -510,61 +641,5 @@
         }
       }
     }
-  },
-  "worker_queues": {
-    "notifications": {
-      "description": "Push notifications, in-app, email, SMS dispatch",
-      "subscribed_events": [
-        "org.*",
-        "hrm.*",
-        "rewards.*",
-        "scout.*",
-        "session.*",
-        "event.*",
-        "lms.*",
-        "enrichment.*",
-        "project.*",
-        "ticket.*",
-        "finance.*",
-        "asset.*",
-        "process.*"
-      ]
-    },
-    "rewards": {
-      "description": "EXP award/deduct, badge award, level-up check",
-      "subscribed_events": [
-        "scout.skill_verified",
-        "scout.rank_awarded",
-        "session.attendance_marked",
-        "event.participant_checked_in",
-        "lms.lesson_completed",
-        "lms.quiz_passed",
-        "enrichment.spiritual_log_created",
-        "project.task_completed",
-        "project.project_completed",
-        "event.event_completed"
-      ]
-    },
-    "reports": {
-      "description": "Async report generation, data export/import",
-      "subscribed_events": [
-        "session.session_debriefed",
-        "event.event_completed",
-        "finance.transaction_completed",
-        "notification.bulk_sent",
-        "project.project_completed"
-      ]
-    },
-    "cleanup": {
-      "description": "Data retention, archiving, soft-delete sweeps",
-      "subscribed_events": ["hrm.member_left", "ticket.ticket_closed"]
-    }
-  },
-  "_metadata": {
-    "total_events": 61,
-    "total_modules": 14,
-    "source_of_truth": "packages/constants/src/events.ts",
-    "generated_at": "2026-03-07T23:30:00+07:00",
-    "generated_by": "PM Orchestrator (Antigravity)"
   }
 }

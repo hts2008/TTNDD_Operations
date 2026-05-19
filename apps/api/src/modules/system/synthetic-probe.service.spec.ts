@@ -51,9 +51,9 @@ describe('SyntheticProbeService', () => {
 
     it('should return degraded when memory usage is high', async () => {
       memUsageSpy.mockReturnValue({
-        heapUsed: 80 * 1024 * 1024,
+        heapUsed: 50 * 1024 * 1024,
         heapTotal: 100 * 1024 * 1024,
-        rss: 120 * 1024 * 1024,
+        rss: 850 * 1024 * 1024,
         external: 10 * 1024 * 1024,
         arrayBuffers: 5 * 1024 * 1024,
       });
@@ -63,9 +63,9 @@ describe('SyntheticProbeService', () => {
 
     it('should return unhealthy when memory usage is critical', async () => {
       memUsageSpy.mockReturnValue({
-        heapUsed: 95 * 1024 * 1024,
+        heapUsed: 50 * 1024 * 1024,
         heapTotal: 100 * 1024 * 1024,
-        rss: 120 * 1024 * 1024,
+        rss: 980 * 1024 * 1024,
         external: 10 * 1024 * 1024,
         arrayBuffers: 5 * 1024 * 1024,
       });

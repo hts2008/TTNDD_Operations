@@ -100,7 +100,7 @@ export class ScoutController {
     @Param('memberId') memberId: string,
     @Body('skillId') skillId: string,
   ) {
-    return this.scoutService.startSkill(user.orgId, memberId, skillId);
+    return this.scoutService.startSkill(user.orgId, memberId, skillId, user.userId);
   }
 
   @Post('progress/:memberId/verify')
@@ -168,6 +168,7 @@ export class ScoutController {
       level: number;
       evidenceType: string;
       evidenceUrl?: string;
+      fileRefId?: string;
       notes?: string;
     },
   ) {
@@ -212,7 +213,7 @@ export class ScoutController {
     @CurrentUser() user: CurrentUserPayload,
     @Param('memberId') memberId: string,
   ) {
-    return this.scoutService.checkRankEligibility(user.orgId, memberId);
+    return this.scoutService.checkRankEligibility(user.orgId, memberId, user.userId);
   }
 
   // ── Dashboard ──

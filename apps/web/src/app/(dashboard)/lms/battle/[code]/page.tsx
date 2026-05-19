@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams } from 'next/navigation';
+import { io, type Socket } from 'socket.io-client';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -20,7 +21,7 @@ import {
   Shield,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { api } from '@/lib/api';
+import { api, getRealtimeBaseUrl, getStoredAuthToken } from '@/lib/api';
 
 interface BattlePlayer {
   memberId: string;
@@ -45,7 +46,36 @@ interface BattleData {
   totalQuestions: number;
 }
 
+interface RawBattleQuestion {
+  id: string;
+  questionText?: string | null;
+  options?: unknown;
+  orderIndex?: number | null;
+  timeLimit?: number | null;
+}
+
+interface RawBattleData {
+  id: string;
+  gameCode?: string | null;
+  battleCode?: string | null;
+  status?: string | null;
+  results?: unknown;
+  currentQuestion?: number | null;
+  countdown?: number | null;
+  quiz?: {
+    title?: string | null;
+    questions?: RawBattleQuestion[] | null;
+  } | null;
+}
+
 type AnswerResult = { correct: boolean; points: number; message: string };
+type RealtimeStatus = 'connecting' | 'connected' | 'disconnected' | 'error' | 'unauthenticated';
+type SocketAck = {
+  success?: boolean;
+  error?: string;
+  pointsEarned?: number;
+  totalScore?: number;
+};
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: typeof Swords }> = {
   lobby: { label: 'Phòng chờ', color: 'bg-blue-100 text-blue-700', icon: Users },
@@ -53,6 +83,129 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: typeof
   active: { label: 'Đang thi đấu', color: 'bg-red-100 text-red-700', icon: Swords },
   finished: { label: 'Kết thúc', color: 'bg-green-100 text-green-700', icon: Trophy },
 };
+
+const BATTLE_STATUSES = ['lobby', 'countdown', 'active', 'finished'] as const;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function normalizeBattleStatus(status: unknown): BattleData['status'] {
+  return BATTLE_STATUSES.includes(status as BattleData['status'])
+    ? (status as BattleData['status'])
+    : 'lobby';
+}
+
+function toOptionLabel(value: unknown, fallback: string) {
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
+  }
+
+  if (isRecord(value)) {
+    const label = value.label ?? value.text ?? value.name ?? value.value;
+    return label === undefined ? fallback : String(label);
+  }
+
+  return fallback;
+}
+
+function normalizeOptions(options: unknown): Array<{ key: string; label: string }> {
+  if (Array.isArray(options)) {
+    return options.map((option, index) => {
+      const fallbackKey = String.fromCharCode(65 + index);
+      if (isRecord(option)) {
+        const rawKey = option.key ?? option.id ?? fallbackKey;
+        return {
+          key: String(rawKey),
+          label: toOptionLabel(
+            option.label ?? option.text ?? option.name ?? option.value,
+            fallbackKey,
+          ),
+        };
+      }
+
+      return { key: fallbackKey, label: toOptionLabel(option, fallbackKey) };
+    });
+  }
+
+  if (isRecord(options)) {
+    const choices = options.choices;
+    if (Array.isArray(choices)) return normalizeOptions(choices);
+
+    return Object.entries(options)
+      .filter(([key]) => !['correctAnswer', 'answer', 'points', 'timeLimit'].includes(key))
+      .map(([key, value], index) => ({
+        key: /^[A-Za-z]$/.test(key) ? key : String.fromCharCode(65 + index),
+        label: toOptionLabel(value, key),
+      }));
+  }
+
+  return [];
+}
+
+function normalizeAnswers(answers: unknown): BattlePlayer['answers'] {
+  if (!Array.isArray(answers)) return [];
+
+  return answers
+    .map((answer) => {
+      const record = isRecord(answer) ? answer : {};
+      const questionId = typeof record.questionId === 'string' ? record.questionId : '';
+      const points = Number(record.points ?? 0);
+      return {
+        questionId,
+        correct: record.correct === true,
+        points: Number.isFinite(points) ? points : 0,
+      };
+    })
+    .filter((answer) => answer.questionId.length > 0);
+}
+
+function normalizeBattle(raw: RawBattleData, fallbackCode: string): BattleData {
+  const status = normalizeBattleStatus(raw.status);
+  const questions = [...(raw.quiz?.questions ?? [])].sort(
+    (a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0),
+  );
+  const currentQuestionIndex =
+    typeof raw.currentQuestion === 'number' && raw.currentQuestion >= 0 ? raw.currentQuestion : 0;
+  const activeQuestion =
+    status === 'active' ? (questions[currentQuestionIndex] ?? questions[0]) : undefined;
+  const results = isRecord(raw.results) ? raw.results : {};
+  const players = Object.entries(results).map(([memberId, value]) => {
+    const result = isRecord(value) ? value : {};
+    const score = Number(result.score ?? 0);
+    const displayName =
+      typeof result.displayName === 'string'
+        ? result.displayName
+        : typeof result.name === 'string'
+          ? result.name
+          : `Player ${memberId.slice(0, 8)}`;
+
+    return {
+      memberId,
+      displayName,
+      score: Number.isFinite(score) ? score : 0,
+      answers: normalizeAnswers(result.answers),
+    };
+  });
+
+  return {
+    id: raw.id,
+    battleCode: raw.battleCode ?? raw.gameCode ?? fallbackCode,
+    status,
+    quizTitle: raw.quiz?.title ?? 'Quiz Battle',
+    players,
+    currentQuestion: activeQuestion
+      ? {
+          id: activeQuestion.id,
+          questionText: activeQuestion.questionText ?? 'Question',
+          options: normalizeOptions(activeQuestion.options),
+          timeLimit: activeQuestion.timeLimit ?? 30,
+        }
+      : undefined,
+    countdown: typeof raw.countdown === 'number' ? raw.countdown : undefined,
+    totalQuestions: questions.length,
+  };
+}
 
 export default function BattleArenaPage() {
   const params = useParams();
@@ -65,15 +218,18 @@ export default function BattleArenaPage() {
   const [answerResult, setAnswerResult] = useState<AnswerResult | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
+  const [realtimeStatus, setRealtimeStatus] = useState<RealtimeStatus>('connecting');
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const socketRef = useRef<Socket | null>(null);
 
   // Fetch battle state
   const fetchBattle = useCallback(async () => {
     if (!battleCode) return;
     try {
-      const data = await api.get<BattleData>(`/lms/battles/${battleCode}`);
-      setBattle(data);
-      if (data.countdown) setCountdown(data.countdown);
+      const data = await api.get<RawBattleData>(`/lms/battles/${battleCode}`);
+      const normalizedBattle = normalizeBattle(data, battleCode);
+      setBattle(normalizedBattle);
+      if (normalizedBattle.countdown) setCountdown(normalizedBattle.countdown);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Lỗi kết nối';
       setError(message);
@@ -81,6 +237,84 @@ export default function BattleArenaPage() {
       setLoading(false);
     }
   }, [battleCode]);
+
+  const emitSocket = useCallback(
+    <T extends SocketAck>(event: string, payload: Record<string, unknown>) => {
+      const socket = socketRef.current;
+      if (!socket?.connected) return Promise.resolve<T | null>(null);
+
+      return new Promise<T>((resolve, reject) => {
+        socket.timeout(5000).emit(event, payload, (err: Error | null, ack?: T) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          if (ack?.error) {
+            reject(new Error(ack.error));
+            return;
+          }
+          resolve(ack ?? ({ success: true } as T));
+        });
+      });
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (!battleCode) return;
+    const token = getStoredAuthToken();
+    if (!token) {
+      setRealtimeStatus('unauthenticated');
+      return;
+    }
+
+    const socket = io(`${getRealtimeBaseUrl()}/lms-battle`, {
+      auth: { token },
+      transports: ['websocket'],
+      reconnectionAttempts: 3,
+    });
+
+    socketRef.current = socket;
+    setRealtimeStatus('connecting');
+
+    socket.on('connect', () => {
+      setRealtimeStatus('connected');
+      socket.emit('joinRoom', { gameCode: battleCode }, (ack?: SocketAck) => {
+        if (ack?.error) {
+          setError(ack.error);
+          return;
+        }
+        void fetchBattle();
+      });
+    });
+
+    socket.on('connect_error', (err) => {
+      setRealtimeStatus('error');
+      setError(err.message || 'Realtime connection failed');
+    });
+
+    socket.on('disconnect', () => {
+      setRealtimeStatus('disconnected');
+    });
+
+    socket.on('playerJoined', () => void fetchBattle());
+    socket.on('playerLeft', () => void fetchBattle());
+    socket.on('countdown', (payload: { seconds?: number }) => {
+      setCountdown(payload.seconds ?? 3);
+      setBattle((current) => (current ? { ...current, status: 'countdown' } : current));
+    });
+    socket.on('battleStarted', () => {
+      setCountdown(null);
+      void fetchBattle();
+    });
+    socket.on('scoreUpdate', () => void fetchBattle());
+    socket.on('battleEnd', () => void fetchBattle());
+
+    return () => {
+      socket.disconnect();
+      socketRef.current = null;
+    };
+  }, [battleCode, fetchBattle]);
 
   // Poll every 2 seconds in active states
   useEffect(() => {
@@ -102,11 +336,13 @@ export default function BattleArenaPage() {
 
   const handleStartBattle = async () => {
     try {
-      await api.post(`/lms/battles/${battleCode}/start`);
+      const ack = await emitSocket<SocketAck>('startCountdown', { gameCode: battleCode });
+      if (!ack) await api.post(`/lms/battles/${battleCode}/start`);
       setCountdown(3);
       await fetchBattle();
-    } catch {
-      // Silently handle
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Khong the bat dau tran dau';
+      setError(message);
     }
   };
 
@@ -115,6 +351,21 @@ export default function BattleArenaPage() {
     setSelectedAnswer(answerKey);
     setSubmitting(true);
     try {
+      const socketResult = await emitSocket<SocketAck>('submitAnswer', {
+        gameCode: battleCode,
+        questionId: battle.currentQuestion.id,
+        answer: answerKey,
+      });
+      if (socketResult) {
+        const points = socketResult.pointsEarned ?? 0;
+        setAnswerResult({
+          correct: points > 0,
+          points,
+          message: socketResult.success ? 'Realtime answer submitted' : '',
+        });
+        return;
+      }
+
       const result = await api.post<AnswerResult>(`/lms/battles/${battleCode}/answer`, {
         questionId: battle.currentQuestion.id,
         answer: answerKey,
@@ -130,10 +381,12 @@ export default function BattleArenaPage() {
 
   const handleFinishBattle = async () => {
     try {
-      await api.post(`/lms/battles/${battleCode}/finish`);
+      const ack = await emitSocket<SocketAck>('endBattle', { gameCode: battleCode });
+      if (!ack) await api.post(`/lms/battles/${battleCode}/finish`);
       await fetchBattle();
-    } catch {
-      // Silently handle
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Khong the ket thuc tran dau';
+      setError(message);
     }
   };
 
@@ -159,6 +412,13 @@ export default function BattleArenaPage() {
   const statusCfg = STATUS_CONFIG[battle.status] ?? STATUS_CONFIG.lobby;
   const StatusIcon = statusCfg.icon;
   const sortedPlayers = [...battle.players].sort((a, b) => b.score - a.score);
+  const realtimeLabel: Record<RealtimeStatus, string> = {
+    connecting: 'Realtime connecting',
+    connected: 'Realtime connected',
+    disconnected: 'Realtime disconnected',
+    error: 'Realtime error',
+    unauthenticated: 'Realtime unauthenticated',
+  };
 
   return (
     <div className="space-y-6 p-6 max-w-4xl mx-auto">
@@ -192,6 +452,9 @@ export default function BattleArenaPage() {
             </span>
             <span className="flex items-center gap-1">
               <Shield className="h-4 w-4" /> Anti-cheat bật
+            </span>
+            <span className="flex items-center gap-1">
+              <Zap className="h-4 w-4" /> {realtimeLabel[realtimeStatus]}
             </span>
           </div>
         </CardContent>

@@ -1,0 +1,206 @@
+{
+  "generatedAt": "2026-05-18T15:49:52.352Z",
+  "baseUrl": "http://localhost:3101",
+  "cases": [
+    {
+      "name": "dashboard",
+      "route": "/dashboard",
+      "status": 200,
+      "url": "http://localhost:3101/dashboard",
+      "file": "w1-008-dashboard.png",
+      "failedText": 0,
+      "redirected": false,
+      "consoleErrors": 0
+    },
+    {
+      "name": "sessions",
+      "route": "/sessions",
+      "status": 200,
+      "url": "http://localhost:3101/sessions",
+      "file": "w1-008-sessions.png",
+      "failedText": 0,
+      "redirected": false,
+      "consoleErrors": 0
+    },
+    {
+      "name": "approvals",
+      "route": "/approvals",
+      "status": 200,
+      "url": "http://localhost:3101/approvals",
+      "file": "w1-008-approvals.png",
+      "failedText": 0,
+      "redirected": false,
+      "consoleErrors": 0
+    },
+    {
+      "name": "tickets",
+      "route": "/tickets",
+      "status": 200,
+      "url": "http://localhost:3101/tickets",
+      "file": "w1-008-tickets.png",
+      "failedText": 0,
+      "redirected": false,
+      "consoleErrors": 0
+    },
+    {
+      "name": "consent-templates",
+      "route": "/consent-templates",
+      "status": 200,
+      "url": "http://localhost:3101/consent-templates",
+      "file": "w1-008-consent-templates.png",
+      "failedText": 0,
+      "redirected": false,
+      "consoleErrors": 0
+    },
+    {
+      "name": "member-detail",
+      "route": "/members/24000000-0000-0000-0000-000000000032",
+      "status": 200,
+      "url": "http://localhost:3101/members/24000000-0000-0000-0000-000000000032",
+      "file": "w1-008-member-detail.png",
+      "failedText": 0,
+      "redirected": false,
+      "consoleErrors": 0
+    },
+    {
+      "name": "parent-portal",
+      "route": "/parent-portal",
+      "status": 200,
+      "url": "http://localhost:3101/parent-portal",
+      "file": "w1-008-parent-portal.png",
+      "failedText": 0,
+      "redirected": false,
+      "consoleErrors": 0
+    },
+    {
+      "name": "scout",
+      "route": "/scout",
+      "status": 200,
+      "url": "http://localhost:3101/scout",
+      "file": "w1-008-scout.png",
+      "failedText": 0,
+      "redirected": false,
+      "consoleErrors": 0
+    },
+    {
+      "name": "skills",
+      "route": "/skills",
+      "status": 200,
+      "url": "http://localhost:3101/skills",
+      "file": "w1-008-skills.png",
+      "failedText": 0,
+      "redirected": false,
+      "consoleErrors": 0
+    },
+    {
+      "name": "lms",
+      "route": "/lms",
+      "status": 200,
+      "url": "http://localhost:3101/lms",
+      "file": "w1-008-lms.png",
+      "failedText": 0,
+      "redirected": false,
+      "consoleErrors": 0
+    },
+    {
+      "name": "rewards",
+      "route": "/rewards",
+      "status": 200,
+      "url": "http://localhost:3101/rewards",
+      "file": "w1-008-rewards.png",
+      "failedText": 0,
+      "redirected": false,
+      "consoleErrors": 0
+    },
+    {
+      "name": "finance",
+      "route": "/finance",
+      "status": 200,
+      "url": "http://localhost:3101/finance",
+      "file": "w1-008-finance.png",
+      "failedText": 0,
+      "redirected": false,
+      "consoleErrors": 0
+    },
+    {
+      "name": "assets",
+      "route": "/assets",
+      "status": 200,
+      "url": "http://localhost:3101/assets",
+      "file": "w1-008-assets.png",
+      "failedText": 0,
+      "redirected": false,
+      "consoleErrors": 0
+    },
+    {
+      "name": "process",
+      "route": "/process",
+      "status": 200,
+      "url": "http://localhost:3101/process",
+      "file": "w1-008-process.png",
+      "failedText": 0,
+      "redirected": false,
+      "consoleErrors": 0
+    },
+    {
+      "name": "reports",
+      "route": "/reports",
+      "status": 200,
+      "url": "http://localhost:3101/reports",
+      "file": "w1-008-reports.png",
+      "failedText": 0,
+      "redirected": false,
+      "consoleErrors": 0
+    },
+    {
+      "name": "release",
+      "route": "/settings/release",
+      "status": 200,
+      "url": "http://localhost:3101/settings/release",
+      "file": "w1-008-release.png",
+      "failedText": 0,
+      "redirected": false,
+      "consoleErrors": 0
+    },
+    {
+      "name": "mobile-dashboard",
+      "route": "/dashboard",
+      "status": 200,
+      "url": "http://localhost:3101/dashboard",
+      "file": "w1-008-mobile-dashboard.png",
+      "failedText": 0,
+      "redirected": false,
+      "consoleErrors": 0
+    },
+    {
+      "name": "mobile-sessions",
+      "route": "/sessions",
+      "status": 200,
+      "url": "http://localhost:3101/sessions",
+      "file": "w1-008-mobile-sessions.png",
+      "failedText": 0,
+      "redirected": false,
+      "consoleErrors": 0
+    },
+    {
+      "name": "mobile-assets",
+      "route": "/assets",
+      "status": 200,
+      "url": "http://localhost:3101/assets",
+      "file": "w1-008-mobile-assets.png",
+      "failedText": 0,
+      "redirected": false,
+      "consoleErrors": 0
+    },
+    {
+      "name": "mobile-parent-portal",
+      "route": "/parent-portal",
+      "status": 200,
+      "url": "http://localhost:3101/parent-portal",
+      "file": "w1-008-mobile-parent-portal.png",
+      "failedText": 0,
+      "redirected": false,
+      "consoleErrors": 0
+    }
+  ]
+}

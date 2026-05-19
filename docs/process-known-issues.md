@@ -22,7 +22,7 @@
 **Severity**: Medium
 **Impact**: Delay nodes store `delayMinutes` but executor does not actually wait — advances immediately
 **Workaround**: Use external timer or manual step advancement after delay period
-**Plan**: Requires background job infrastructure (BullMQ / cron) — deferred P2
+**Plan**: Use existing worker/BullMQ infrastructure and implement real delay job semantics in P2
 
 ### PROC-003: Parallel branch execution not supported (P2)
 
@@ -34,9 +34,9 @@
 ### PROC-004: SOP rich text stored as TipTap JSON, no attachment upload (P2)
 
 **Severity**: Low
-**Impact**: SOP content supports JSON structure but attachments are URL-only (no file hosting)
+**Impact**: SOP content supports JSON structure but attachments are URL-only; shared signed upload exists but SOP is not integrated with FileObjectRef/finalize lifecycle
 **Workaround**: Use external file hosting and paste URLs into content
-**Plan**: Requires file upload infrastructure — deferred P2
+**Plan**: Integrate SOP attachments with File Storage finalize/scan flow in P2
 
 ### PROC-005: Trigger conditions are exact-match only (P3)
 
@@ -48,7 +48,7 @@
 ### PROC-006: No notification delivery backend (P2)
 
 **Severity**: Medium
-**Impact**: Notification nodes publish domain events but no consumer sends actual emails/SMS
+**Impact**: Notification nodes publish domain events, worker infrastructure exists, but notification processor does not yet send actual emails/SMS
 **Workaround**: Subscribe to `workflow.notification.requested` events manually or via logs
 **Plan**: Integrate with notification service when available
 
@@ -56,16 +56,16 @@
 
 ## Deferred Features
 
-| Feature                               | Priority | Reason                            |
-| ------------------------------------- | -------- | --------------------------------- |
-| Parallel branch execution             | P2       | Requires fork/join state tracking |
-| Delay node timer                      | P2       | Requires background job queue     |
-| Auto-save graph builder               | P2       | Frontend UX improvement           |
-| File attachment upload for SOPs       | P2       | Requires file upload infra        |
-| Rich trigger conditions               | P3       | Current exact-match is sufficient |
-| Workflow versioning (run old version) | P3       | Low demand for now                |
-| SOP read tracking / acknowledgment    | P3       | Track who read which SOP version  |
-| PostgreSQL RLS for process tables     | P3       | App-level auth sufficient for now |
+| Feature                               | Priority | Reason                                      |
+| ------------------------------------- | -------- | ------------------------------------------- |
+| Parallel branch execution             | P2       | Requires fork/join state tracking           |
+| Delay node timer                      | P2       | Requires worker delay job logic             |
+| Auto-save graph builder               | P2       | Frontend UX improvement                     |
+| File attachment upload for SOPs       | P2       | Requires File Storage lifecycle integration |
+| Rich trigger conditions               | P3       | Current exact-match is sufficient           |
+| Workflow versioning (run old version) | P3       | Low demand for now                          |
+| SOP read tracking / acknowledgment    | P3       | Track who read which SOP version            |
+| PostgreSQL RLS for process tables     | P3       | App-level auth sufficient for now           |
 
 ---
 

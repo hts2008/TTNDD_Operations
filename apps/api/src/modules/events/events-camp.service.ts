@@ -29,16 +29,30 @@ export class EventsCampService {
     private readonly audit: AuditService,
   ) {}
 
-  async create(orgId: string, data: {
-    title: string; eventType?: string; startDate: string; endDate: string;
-    location?: string; maxParticipants?: number; targetBranches?: string[];
-    schedule?: Prisma.InputJsonValue; raciMatrix?: Prisma.InputJsonValue;
-    riskAssessment?: Prisma.InputJsonValue; expReward?: number;
-  }, actorUserId: string) {
+  async create(
+    orgId: string,
+    data: {
+      title: string;
+      eventType?: string;
+      startDate: string;
+      endDate: string;
+      location?: string;
+      maxParticipants?: number;
+      targetBranches?: string[];
+      schedule?: Prisma.InputJsonValue;
+      raciMatrix?: Prisma.InputJsonValue;
+      riskAssessment?: Prisma.InputJsonValue;
+      expReward?: number;
+      spicesTags?: string[];
+    },
+    actorUserId: string,
+  ) {
     const event = await this.prisma.event.create({
       data: {
         orgId,
         ...data,
+        targetBranches: data.targetBranches ?? [],
+        spicesTags: data.spicesTags ?? [],
         startDate: new Date(data.startDate),
         endDate: new Date(data.endDate),
         createdBy: actorUserId,
@@ -57,7 +71,12 @@ export class EventsCampService {
     return event;
   }
 
-  async findMany(orgId: string, filters?: { status?: string; from?: string; to?: string }, page = 1, limit = 20) {
+  async findMany(
+    orgId: string,
+    filters?: { status?: string; from?: string; to?: string },
+    page = 1,
+    limit = 20,
+  ) {
     const where: Prisma.EventWhereInput = { orgId };
     if (filters?.status) where.status = filters.status;
     if (filters?.from || filters?.to) {
@@ -83,20 +102,49 @@ export class EventsCampService {
   async findById(orgId: string, eventId: string) {
     const event = await this.prisma.event.findFirst({
       where: { id: eventId, orgId },
-      include: { registrations: { include: { orgMember: { select: { scoutName: true, memberCode: true, user: { select: { displayName: true } } } } } } },
+      include: {
+        registrations: {
+          include: {
+            orgMember: {
+              select: {
+                scoutName: true,
+                memberCode: true,
+                user: { select: { displayName: true } },
+              },
+            },
+          },
+        },
+      },
     });
     if (!event) throw new NotFoundException('Event not found');
     return event;
   }
 
-  async update(orgId: string, eventId: string, data: Partial<{
-    title: string; location: string; schedule: Prisma.InputJsonValue;
-    raciMatrix: Prisma.InputJsonValue; riskAssessment: Prisma.InputJsonValue;
-    safetyChecklist: Prisma.InputJsonValue; weatherBackup: string; emergencyPlan: string;
-    postEventReport: Prisma.InputJsonValue;
-  }>, actorUserId: string) {
+  async update(
+    orgId: string,
+    eventId: string,
+    data: Partial<{
+      title: string;
+      location: string;
+      schedule: Prisma.InputJsonValue;
+      raciMatrix: Prisma.InputJsonValue;
+      riskAssessment: Prisma.InputJsonValue;
+      safetyChecklist: Prisma.InputJsonValue;
+      weatherBackup: string;
+      emergencyPlan: string;
+      postEventReport: Prisma.InputJsonValue;
+    }>,
+    actorUserId: string,
+  ) {
     const event = await this.prisma.event.update({ where: { id: eventId, orgId }, data });
-    await this.audit.log({ orgId, userId: actorUserId, action: 'event.updated', resource: 'Event', resourceId: eventId, newValue: data as Prisma.InputJsonValue });
+    await this.audit.log({
+      orgId,
+      userId: actorUserId,
+      action: 'event.updated',
+      resource: 'Event',
+      resourceId: eventId,
+      newValue: data as Prisma.InputJsonValue,
+    });
     return event;
   }
 
@@ -114,14 +162,28 @@ export class EventsCampService {
     }
 
     const newStatus = allowed[action];
-    const updated = await this.prisma.event.update({ where: { id: eventId }, data: { status: newStatus } });
+    const updated = await this.prisma.event.update({
+      where: { id: eventId },
+      data: { status: newStatus },
+    });
 
     const eventMap: Record<string, string> = {
       registration_open: DOMAIN_EVENTS.EVENT.REGISTRATION_OPENED,
       completed: DOMAIN_EVENTS.EVENT.COMPLETED,
     };
     if (eventMap[newStatus]) {
-      await this.domainEvents.publish({ orgId, eventType: eventMap[newStatus], aggregateId: eventId, aggregateType: 'Event', payload: {}, actorUserId });
+      await this.domainEvents.publish({
+        orgId,
+        eventType: eventMap[newStatus],
+        aggregateId: eventId,
+        aggregateType: 'Event',
+        payload: {
+          title: event.title,
+          eventType: event.eventType,
+          targetBranches: event.targetBranches,
+        },
+        actorUserId,
+      });
     }
 
     return updated;
@@ -143,7 +205,16 @@ export class EventsCampService {
     });
   }
 
-  async signConsent(orgId: string, eventId: string, memberId: string, consentBy: string) {
+  async signConsent(
+    orgId: string,
+    eventId: string,
+    memberId: string,
+    consentBy: string,
+    signerMemberId: string,
+    actorUserId: string,
+    actorRole?: string,
+  ) {
+    await this.assertCanSignConsent(orgId, memberId, signerMemberId, actorRole);
     const reg = await this.prisma.eventRegistration.findUnique({
       where: { eventId_orgMemberId: { eventId, orgMemberId: memberId } },
     });
@@ -160,7 +231,7 @@ export class EventsCampService {
       aggregateId: eventId,
       aggregateType: 'Event',
       payload: { memberId, consentBy },
-      actorUserId: memberId,
+      actorUserId,
     });
 
     return updated;
@@ -191,7 +262,10 @@ export class EventsCampService {
 
   // ── Safety gates (P0: 2-adult rule) ──
 
-  private validateSafetyGates(event: { raciMatrix: Prisma.JsonValue; safetyChecklist: Prisma.JsonValue }) {
+  private validateSafetyGates(event: {
+    raciMatrix: Prisma.JsonValue;
+    safetyChecklist: Prisma.JsonValue;
+  }) {
     const raci = event.raciMatrix as Record<string, unknown> | null;
     if (!raci) {
       throw new BadRequestException('RACI matrix is required before go-live');
@@ -199,7 +273,42 @@ export class EventsCampService {
 
     const checklist = event.safetyChecklist as Record<string, boolean> | null;
     if (!checklist?.['two_adult_rule']) {
-      throw new BadRequestException('2-adult rule must be confirmed in safety checklist before go-live');
+      throw new BadRequestException(
+        '2-adult rule must be confirmed in safety checklist before go-live',
+      );
     }
+  }
+
+  private async assertCanSignConsent(
+    orgId: string,
+    memberId: string,
+    signerMemberId: string,
+    actorRole?: string,
+  ) {
+    if (memberId === signerMemberId) return;
+    if (actorRole === 'admin' || actorRole === 'super_admin') return;
+
+    const child = await this.prisma.orgMember.findFirst({
+      where: { id: memberId, orgId },
+      select: { linkedMemberId: true },
+    });
+    if (child?.linkedMemberId === signerMemberId) return;
+
+    const [guardianLink, signer] = await Promise.all([
+      this.prisma.guardianLink.findFirst({
+        where: { orgMemberId: memberId, orgId, consentSigned: true },
+        select: { email: true },
+      }),
+      this.prisma.orgMember.findFirst({
+        where: { id: signerMemberId, orgId },
+        include: { user: { select: { email: true } } },
+      }),
+    ]);
+
+    if (guardianLink?.email && signer?.user?.email && guardianLink.email === signer.user.email) {
+      return;
+    }
+
+    throw new BadRequestException('Signer is not authorized to consent for this member');
   }
 }

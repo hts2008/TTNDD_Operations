@@ -7,9 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DataTable } from '@/components/ui/data-table';
 import { Ticket, Plus, Search, AlertTriangle } from 'lucide-react';
+import { api } from '@/lib/api';
 import { cn } from '@/lib/utils';
-
-const API = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
 
 type TicketPriority = 'critical' | 'high' | 'medium' | 'low';
 type TicketStatus = 'open' | 'assigned' | 'in_progress' | 'resolved' | 'closed';
@@ -139,21 +138,12 @@ export default function TicketsPage() {
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      const params = new URLSearchParams();
-      if (statusFilter) params.set('status', statusFilter);
-
-      const [ticketsRes, slaRes] = await Promise.all([
-        fetch(`${API}/tickets?${params}`, { credentials: 'include' }),
-        fetch(`${API}/tickets/sla-dashboard`, { credentials: 'include' }),
+      const [ticketsData, slaData] = await Promise.all([
+        api.get<TicketItem[]>('/tickets', statusFilter ? { status: statusFilter } : undefined),
+        api.get<SlaDashboard>('/tickets/sla-dashboard'),
       ]);
-
-      if (ticketsRes.ok) {
-        const data = await ticketsRes.json();
-        setTickets(data.data || []);
-      }
-      if (slaRes.ok) {
-        setSla(await slaRes.json());
-      }
+      setTickets(ticketsData);
+      setSla(slaData);
       setError(null);
     } catch (e: unknown) {
       setError((e as Error).message);

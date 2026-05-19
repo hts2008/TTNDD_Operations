@@ -5,55 +5,101 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  Package, MapPin, HandMetal, AlertTriangle, ClipboardList, Download,
-  Shirt, Settings2, Boxes, Tags, ChevronRight, CalendarClock,
-  CheckCircle2, XCircle, RotateCcw, ArrowDownUp, Wrench,
+  Package,
+  MapPin,
+  HandMetal,
+  AlertTriangle,
+  ClipboardList,
+  Download,
+  Shirt,
+  Settings2,
+  Boxes,
+  Tags,
+  ChevronRight,
+  CalendarClock,
+  CheckCircle2,
+  XCircle,
+  RotateCcw,
+  ArrowDownUp,
+  Wrench,
 } from 'lucide-react';
+import { api } from '@/lib/api';
 import { cn } from '@/lib/utils';
 
 // ── Types ──
 
-type _AssetStatus = 'available' | 'in_use' | 'maintenance' | 'retired' | 'disposed';
 type LoanStatus = 'pending' | 'approved' | 'checked_out' | 'returned' | 'rejected' | 'lost';
 type TabKey = 'inventory' | 'loans' | 'uniform' | 'maintenance' | 'kits' | 'categories';
 
 interface Asset {
-  id: string; name: string; assetCode: string; status: string; condition: string;
-  quantity: number; availableQty: number; location?: string; unit?: string;
+  id: string;
+  name: string;
+  assetCode: string;
+  status: string;
+  condition: string;
+  quantity: number;
+  availableQty: number;
+  location?: string;
+  unit?: string;
   category?: { name: string; icon?: string };
   _count?: { loans: number };
 }
 
 interface Loan {
-  id: string; status: LoanStatus; borrowerId: string; purpose?: string;
-  requestedAt: string; expectedReturn: string; actualReturn?: string;
+  id: string;
+  status: LoanStatus;
+  borrowerId: string;
+  purpose?: string;
+  requestedAt: string;
+  expectedReturn: string;
+  actualReturn?: string;
   guardianAcceptanceStatus?: string;
   asset?: { id: string; name: string; assetCode: string; category?: { name: string } };
 }
 
 interface UniformIssue {
-  id: string; memberId: string; uniformType: string; size: string;
-  quantity: number; status: string; issuedDate: string; returnDate?: string;
+  id: string;
+  memberId: string;
+  uniformType: string;
+  size: string;
+  quantity: number;
+  status: string;
+  issuedDate: string;
+  returnDate?: string;
 }
 
 interface MaintenanceItem {
-  id: string; maintenanceType: string; frequency: string;
-  nextDue: string; status: string; lastPerformed?: string;
+  id: string;
+  maintenanceType: string;
+  frequency: string;
+  nextDue: string;
+  status: string;
+  lastPerformed?: string;
   asset?: { id: string; name: string; assetCode: string };
 }
 
 interface StockAlert {
-  id: string; name: string; assetCode: string; availableQty: number;
-  totalQty: number; severity: 'critical' | 'high' | 'low';
+  id: string;
+  name: string;
+  assetCode: string;
+  availableQty: number;
+  totalQty: number;
+  severity: 'critical' | 'high' | 'low';
 }
 
 interface KitTemplate {
-  id: string; name: string; description?: string; itemCount?: number;
+  id: string;
+  name: string;
+  description?: string;
+  itemCount?: number;
   items?: { id: string; itemName: string; quantity: number; isOptional: boolean }[];
 }
 
 interface Category {
-  id: string; name: string; icon?: string; _count?: { assets: number };
+  id: string;
+  name: string;
+  icon?: string;
+  _count?: { assets: number };
 }
 
 // ── Config ──
@@ -66,12 +112,35 @@ const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   disposed: { label: 'Đã xử lý', className: 'bg-red-100 text-red-600 border-red-200' },
 };
 
-const LOAN_STATUS_CONFIG: Record<string, { label: string; icon: typeof CheckCircle2; className: string }> = {
-  pending: { label: 'Chờ duyệt', icon: CalendarClock, className: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
-  approved: { label: 'Đã duyệt', icon: CheckCircle2, className: 'bg-blue-100 text-blue-700 border-blue-200' },
-  checked_out: { label: 'Đã cho mượn', icon: ArrowDownUp, className: 'bg-indigo-100 text-indigo-700 border-indigo-200' },
-  returned: { label: 'Đã trả', icon: RotateCcw, className: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
-  rejected: { label: 'Từ chối', icon: XCircle, className: 'bg-red-100 text-red-700 border-red-200' },
+const LOAN_STATUS_CONFIG: Record<
+  string,
+  { label: string; icon: typeof CheckCircle2; className: string }
+> = {
+  pending: {
+    label: 'Chờ duyệt',
+    icon: CalendarClock,
+    className: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+  },
+  approved: {
+    label: 'Đã duyệt',
+    icon: CheckCircle2,
+    className: 'bg-blue-100 text-blue-700 border-blue-200',
+  },
+  checked_out: {
+    label: 'Đã cho mượn',
+    icon: ArrowDownUp,
+    className: 'bg-indigo-100 text-indigo-700 border-indigo-200',
+  },
+  returned: {
+    label: 'Đã trả',
+    icon: RotateCcw,
+    className: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+  },
+  rejected: {
+    label: 'Từ chối',
+    icon: XCircle,
+    className: 'bg-red-100 text-red-700 border-red-200',
+  },
   lost: { label: 'Mất', icon: AlertTriangle, className: 'bg-red-100 text-red-700 border-red-200' },
 };
 
@@ -89,24 +158,26 @@ const TABS: { key: TabKey; label: string; icon: typeof Package }[] = [
 function useApiData<T>(endpoint: string, deps: unknown[] = []) {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
-      const res = await fetch(`/api/${endpoint}`, { credentials: 'include' });
-      if (res.ok) {
-        const json = await res.json();
-        setData(json);
-      }
-    } catch {
-      // silently handle — data stays null
+      const json = await api.get<T>(`/${endpoint}`);
+      setData(json);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Loi tai du lieu');
+      setData(null);
     } finally {
       setLoading(false);
     }
   }, deps);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
-  return { data, loading, refetch: fetchData };
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+  return { data, loading, error, refetch: fetchData };
 }
 
 // ── Stock Alert Banner ──
@@ -133,7 +204,7 @@ function StockAlertBanner({ alerts }: { alerts: StockAlert[] }) {
                 'text-xs border',
                 a.severity === 'critical'
                   ? 'bg-red-100 text-red-700 border-red-200'
-                  : 'bg-amber-100 text-amber-700 border-amber-200'
+                  : 'bg-amber-100 text-amber-700 border-amber-200',
               )}
             >
               {a.assetCode}: {a.availableQty}/{a.totalQty}
@@ -154,7 +225,8 @@ function InventoryTab({ assets, loading }: { assets: Asset[]; loading: boolean }
   const [filter, setFilter] = useState('all');
   const filtered = filter === 'all' ? assets : assets.filter((a) => a.status === filter);
 
-  if (loading) return <div className="text-center py-12 text-[hsl(var(--muted-foreground))]">Đang tải...</div>;
+  if (loading)
+    return <div className="text-center py-12 text-[hsl(var(--muted-foreground))]">Đang tải...</div>;
 
   return (
     <div className="space-y-4">
@@ -187,8 +259,12 @@ function InventoryTab({ assets, loading }: { assets: Asset[]; loading: boolean }
                   <div className="flex items-center gap-2">
                     <span className="text-2xl">{asset.category?.icon ?? '📦'}</span>
                     <div>
-                      <CardTitle className="text-base group-hover:text-[hsl(var(--primary))] transition-colors">{asset.name}</CardTitle>
-                      <p className="text-xs font-mono text-[hsl(var(--muted-foreground))]">{asset.assetCode}</p>
+                      <CardTitle className="text-base group-hover:text-[hsl(var(--primary))] transition-colors">
+                        {asset.name}
+                      </CardTitle>
+                      <p className="text-xs font-mono text-[hsl(var(--muted-foreground))]">
+                        {asset.assetCode}
+                      </p>
                     </div>
                   </div>
                   <Badge className={cn('border shrink-0', stCfg.className)}>{stCfg.label}</Badge>
@@ -198,7 +274,9 @@ function InventoryTab({ assets, loading }: { assets: Asset[]; loading: boolean }
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-[hsl(var(--muted-foreground))]">Số lượng</span>
                   <span className="font-medium">
-                    <span className={cn(asset.availableQty === 0 ? 'text-red-500' : 'text-emerald-600')}>
+                    <span
+                      className={cn(asset.availableQty === 0 ? 'text-red-500' : 'text-emerald-600')}
+                    >
                       {asset.availableQty}
                     </span>
                     /{asset.quantity}
@@ -234,7 +312,8 @@ function LoansTab({ loans, loading }: { loans: Loan[]; loading: boolean }) {
   const [statusFilter, setStatusFilter] = useState('all');
   const filtered = statusFilter === 'all' ? loans : loans.filter((l) => l.status === statusFilter);
 
-  if (loading) return <div className="text-center py-12 text-[hsl(var(--muted-foreground))]">Đang tải...</div>;
+  if (loading)
+    return <div className="text-center py-12 text-[hsl(var(--muted-foreground))]">Đang tải...</div>;
 
   return (
     <div className="space-y-4">
@@ -259,24 +338,41 @@ function LoansTab({ loans, loading }: { loans: Loan[]; loading: boolean }) {
         {filtered.map((loan) => {
           const cfg = LOAN_STATUS_CONFIG[loan.status] ?? LOAN_STATUS_CONFIG.pending;
           const StatusIcon = cfg.icon;
-          const isOverdue = loan.status === 'checked_out' && new Date(loan.expectedReturn) < new Date();
+          const isOverdue =
+            loan.status === 'checked_out' && new Date(loan.expectedReturn) < new Date();
 
           return (
-            <Card key={loan.id} className={cn('hover:shadow-sm transition-shadow', isOverdue && 'border-red-300')}>
+            <Card
+              key={loan.id}
+              className={cn('hover:shadow-sm transition-shadow', isOverdue && 'border-red-300')}
+            >
               <CardContent className="flex items-center justify-between p-4">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <StatusIcon className={cn('h-5 w-5 shrink-0', isOverdue ? 'text-red-500' : 'text-[hsl(var(--muted-foreground))]')} />
+                  <StatusIcon
+                    className={cn(
+                      'h-5 w-5 shrink-0',
+                      isOverdue ? 'text-red-500' : 'text-[hsl(var(--muted-foreground))]',
+                    )}
+                  />
                   <div className="min-w-0">
-                    <p className="font-medium text-sm truncate">{loan.asset?.name ?? 'Loading...'}</p>
+                    <p className="font-medium text-sm truncate">
+                      {loan.asset?.name ?? 'Loading...'}
+                    </p>
                     <p className="text-xs text-[hsl(var(--muted-foreground))]">
                       {loan.asset?.assetCode} • {loan.purpose ?? 'Không ghi lý do'}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
-                  {isOverdue && <Badge className="bg-red-100 text-red-700 border-red-200 border text-xs">Quá hạn</Badge>}
+                  {isOverdue && (
+                    <Badge className="bg-red-100 text-red-700 border-red-200 border text-xs">
+                      Quá hạn
+                    </Badge>
+                  )}
                   {loan.guardianAcceptanceStatus === 'pending' && (
-                    <Badge className="bg-purple-100 text-purple-700 border-purple-200 border text-xs">Chờ PH</Badge>
+                    <Badge className="bg-purple-100 text-purple-700 border-purple-200 border text-xs">
+                      Chờ PH
+                    </Badge>
                   )}
                   <Badge className={cn('border text-xs', cfg.className)}>{cfg.label}</Badge>
                   <div className="text-right text-xs text-[hsl(var(--muted-foreground))]">
@@ -289,7 +385,9 @@ function LoansTab({ loans, loading }: { loans: Loan[]; loading: boolean }) {
           );
         })}
         {filtered.length === 0 && (
-          <div className="text-center py-12 text-[hsl(var(--muted-foreground))]">Không có phiếu mượn nào</div>
+          <div className="text-center py-12 text-[hsl(var(--muted-foreground))]">
+            Không có phiếu mượn nào
+          </div>
         )}
       </div>
     </div>
@@ -299,7 +397,8 @@ function LoansTab({ loans, loading }: { loans: Loan[]; loading: boolean }) {
 // ── Tab: Uniform ──
 
 function UniformTab({ uniforms, loading }: { uniforms: UniformIssue[]; loading: boolean }) {
-  if (loading) return <div className="text-center py-12 text-[hsl(var(--muted-foreground))]">Đang tải...</div>;
+  if (loading)
+    return <div className="text-center py-12 text-[hsl(var(--muted-foreground))]">Đang tải...</div>;
 
   return (
     <div className="space-y-3">
@@ -309,29 +408,39 @@ function UniformTab({ uniforms, loading }: { uniforms: UniformIssue[]; loading: 
             <div className="flex items-center gap-3">
               <Shirt className="h-5 w-5 text-sky-500" />
               <div>
-                <p className="font-medium text-sm">{u.uniformType} — Size {u.size}</p>
+                <p className="font-medium text-sm">
+                  {u.uniformType} — Size {u.size}
+                </p>
                 <p className="text-xs text-[hsl(var(--muted-foreground))]">
                   SL: {u.quantity} • Cấp: {new Date(u.issuedDate).toLocaleDateString('vi-VN')}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Badge className={cn(
-                'border text-xs',
-                u.status === 'issued'
-                  ? 'bg-blue-100 text-blue-700 border-blue-200'
+              <Badge
+                className={cn(
+                  'border text-xs',
+                  u.status === 'issued'
+                    ? 'bg-blue-100 text-blue-700 border-blue-200'
+                    : u.status === 'returned'
+                      ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
+                      : 'bg-gray-100 text-gray-600 border-gray-200',
+                )}
+              >
+                {u.status === 'issued'
+                  ? 'Đang cấp'
                   : u.status === 'returned'
-                    ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
-                    : 'bg-gray-100 text-gray-600 border-gray-200',
-              )}>
-                {u.status === 'issued' ? 'Đang cấp' : u.status === 'returned' ? 'Đã thu hồi' : u.status}
+                    ? 'Đã thu hồi'
+                    : u.status}
               </Badge>
             </div>
           </CardContent>
         </Card>
       ))}
       {uniforms.length === 0 && (
-        <div className="text-center py-12 text-[hsl(var(--muted-foreground))]">Chưa có dữ liệu đồng phục</div>
+        <div className="text-center py-12 text-[hsl(var(--muted-foreground))]">
+          Chưa có dữ liệu đồng phục
+        </div>
       )}
     </div>
   );
@@ -340,7 +449,8 @@ function UniformTab({ uniforms, loading }: { uniforms: UniformIssue[]; loading: 
 // ── Tab: Maintenance ──
 
 function MaintenanceTab({ items, loading }: { items: MaintenanceItem[]; loading: boolean }) {
-  if (loading) return <div className="text-center py-12 text-[hsl(var(--muted-foreground))]">Đang tải...</div>;
+  if (loading)
+    return <div className="text-center py-12 text-[hsl(var(--muted-foreground))]">Đang tải...</div>;
 
   return (
     <div className="space-y-3">
@@ -348,19 +458,33 @@ function MaintenanceTab({ items, loading }: { items: MaintenanceItem[]; loading:
         const isDue = new Date(m.nextDue) <= new Date();
 
         return (
-          <Card key={m.id} className={cn('hover:shadow-sm transition-shadow', isDue && 'border-amber-300')}>
+          <Card
+            key={m.id}
+            className={cn('hover:shadow-sm transition-shadow', isDue && 'border-amber-300')}
+          >
             <CardContent className="flex items-center justify-between p-4">
               <div className="flex items-center gap-3">
-                <Settings2 className={cn('h-5 w-5', isDue ? 'text-amber-500' : 'text-[hsl(var(--muted-foreground))]')} />
+                <Settings2
+                  className={cn(
+                    'h-5 w-5',
+                    isDue ? 'text-amber-500' : 'text-[hsl(var(--muted-foreground))]',
+                  )}
+                />
                 <div>
-                  <p className="font-medium text-sm">{m.asset?.name ?? 'N/A'} — {m.maintenanceType}</p>
+                  <p className="font-medium text-sm">
+                    {m.asset?.name ?? 'N/A'} — {m.maintenanceType}
+                  </p>
                   <p className="text-xs text-[hsl(var(--muted-foreground))]">
                     {m.asset?.assetCode} • Tần suất: {m.frequency}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                {isDue && <Badge className="bg-amber-100 text-amber-700 border-amber-200 border text-xs">Đến hạn</Badge>}
+                {isDue && (
+                  <Badge className="bg-amber-100 text-amber-700 border-amber-200 border text-xs">
+                    Đến hạn
+                  </Badge>
+                )}
                 <div className="text-right text-xs text-[hsl(var(--muted-foreground))]">
                   <p>Tiếp theo: {new Date(m.nextDue).toLocaleDateString('vi-VN')}</p>
                   {m.lastPerformed && (
@@ -376,7 +500,9 @@ function MaintenanceTab({ items, loading }: { items: MaintenanceItem[]; loading:
         );
       })}
       {items.length === 0 && (
-        <div className="text-center py-12 text-[hsl(var(--muted-foreground))]">Chưa có lịch bảo trì</div>
+        <div className="text-center py-12 text-[hsl(var(--muted-foreground))]">
+          Chưa có lịch bảo trì
+        </div>
       )}
     </div>
   );
@@ -385,7 +511,8 @@ function MaintenanceTab({ items, loading }: { items: MaintenanceItem[]; loading:
 // ── Tab: Kits ──
 
 function KitsTab({ kits, loading }: { kits: KitTemplate[]; loading: boolean }) {
-  if (loading) return <div className="text-center py-12 text-[hsl(var(--muted-foreground))]">Đang tải...</div>;
+  if (loading)
+    return <div className="text-center py-12 text-[hsl(var(--muted-foreground))]">Đang tải...</div>;
 
   if (kits.length === 0) {
     return (
@@ -423,11 +550,15 @@ function KitsTab({ kits, loading }: { kits: KitTemplate[]; loading: boolean }) {
                     <span className={cn(item.isOptional && 'text-[hsl(var(--muted-foreground))]')}>
                       {item.isOptional ? '○' : '●'} {item.itemName}
                     </span>
-                    <span className="text-xs text-[hsl(var(--muted-foreground))]">×{item.quantity}</span>
+                    <span className="text-xs text-[hsl(var(--muted-foreground))]">
+                      ×{item.quantity}
+                    </span>
                   </div>
                 ))}
                 {kit.items.length > 4 && (
-                  <p className="text-xs text-[hsl(var(--muted-foreground))]">+{kit.items.length - 4} món khác...</p>
+                  <p className="text-xs text-[hsl(var(--muted-foreground))]">
+                    +{kit.items.length - 4} món khác...
+                  </p>
                 )}
               </div>
             )}
@@ -444,7 +575,8 @@ function KitsTab({ kits, loading }: { kits: KitTemplate[]; loading: boolean }) {
 // ── Tab: Categories ──
 
 function CategoriesTab({ categories, loading }: { categories: Category[]; loading: boolean }) {
-  if (loading) return <div className="text-center py-12 text-[hsl(var(--muted-foreground))]">Đang tải...</div>;
+  if (loading)
+    return <div className="text-center py-12 text-[hsl(var(--muted-foreground))]">Đang tải...</div>;
 
   if (categories.length === 0) {
     return (
@@ -464,7 +596,9 @@ function CategoriesTab({ categories, loading }: { categories: Category[]; loadin
             <div className="flex items-center gap-3">
               <span className="text-2xl">{cat.icon ?? '📁'}</span>
               <div>
-                <p className="font-medium group-hover:text-[hsl(var(--primary))] transition-colors">{cat.name}</p>
+                <p className="font-medium group-hover:text-[hsl(var(--primary))] transition-colors">
+                  {cat.name}
+                </p>
                 <p className="text-xs text-[hsl(var(--muted-foreground))]">
                   {cat._count?.assets ?? 0} tài sản
                 </p>
@@ -483,16 +617,21 @@ function CategoriesTab({ categories, loading }: { categories: Category[]; loadin
 export default function AssetsPage() {
   const [activeTab, setActiveTab] = useState<TabKey>('inventory');
 
-  const { data: assetsResp, loading: assetsLoading } = useApiData<{ data: Asset[] }>('assets');
-  const { data: loansResp, loading: loansLoading } = useApiData<{ data: Loan[] }>('assets/loans');
-  const { data: alertsResp } = useApiData<{ alerts: StockAlert[] }>('assets/stock-alerts?threshold=5');
-  const { data: uniformsResp, loading: uniformsLoading } = useApiData<UniformIssue[]>('assets/uniform');
-  const { data: maintenanceResp, loading: maintenanceLoading } = useApiData<MaintenanceItem[]>('assets/maintenance');
+  const { data: assetsResp, loading: assetsLoading } = useApiData<Asset[]>('assets');
+  const { data: loansResp, loading: loansLoading } = useApiData<Loan[]>('assets/loans');
+  const { data: alertsResp } = useApiData<{ alerts: StockAlert[] }>(
+    'assets/stock-alerts?threshold=5',
+  );
+  const { data: uniformsResp, loading: uniformsLoading } =
+    useApiData<UniformIssue[]>('assets/uniform');
+  const { data: maintenanceResp, loading: maintenanceLoading } =
+    useApiData<MaintenanceItem[]>('assets/maintenance');
   const { data: kitsResp, loading: kitsLoading } = useApiData<KitTemplate[]>('assets/kits');
-  const { data: categoriesResp, loading: categoriesLoading } = useApiData<Category[]>('assets/categories');
+  const { data: categoriesResp, loading: categoriesLoading } =
+    useApiData<Category[]>('assets/categories');
 
-  const assets = assetsResp?.data ?? [];
-  const loans = loansResp?.data ?? [];
+  const assets = assetsResp ?? [];
+  const loans = loansResp ?? [];
   const alerts = alertsResp?.alerts ?? [];
   const uniforms = Array.isArray(uniformsResp) ? uniformsResp : [];
   const maintenance = Array.isArray(maintenanceResp) ? maintenanceResp : [];
@@ -502,15 +641,17 @@ export default function AssetsPage() {
   const handleCsvExport = async (type: 'assets' | 'loans') => {
     try {
       const endpoint = type === 'assets' ? 'assets/export/csv' : 'assets/loans/export/csv';
-      const res = await fetch(`/api/${endpoint}`, { credentials: 'include' });
-      if (!res.ok) return;
-      const { csv, filename } = await res.json();
+      const { csv, filename } = await api.get<{ csv: string; filename: string }>(`/${endpoint}`);
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url; a.download = filename; a.click();
+      a.href = url;
+      a.download = filename;
+      a.click();
       URL.revokeObjectURL(url);
-    } catch { /* silently ignore */ }
+    } catch {
+      /* silently ignore */
+    }
   };
 
   return (
@@ -562,9 +703,13 @@ export default function AssetsPage() {
       {activeTab === 'inventory' && <InventoryTab assets={assets} loading={assetsLoading} />}
       {activeTab === 'loans' && <LoansTab loans={loans} loading={loansLoading} />}
       {activeTab === 'uniform' && <UniformTab uniforms={uniforms} loading={uniformsLoading} />}
-      {activeTab === 'maintenance' && <MaintenanceTab items={maintenance} loading={maintenanceLoading} />}
+      {activeTab === 'maintenance' && (
+        <MaintenanceTab items={maintenance} loading={maintenanceLoading} />
+      )}
       {activeTab === 'kits' && <KitsTab kits={kits} loading={kitsLoading} />}
-      {activeTab === 'categories' && <CategoriesTab categories={categories} loading={categoriesLoading} />}
+      {activeTab === 'categories' && (
+        <CategoriesTab categories={categories} loading={categoriesLoading} />
+      )}
     </div>
   );
 }

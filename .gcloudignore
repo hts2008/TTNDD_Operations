@@ -6,12 +6,9 @@ node_modules/
 .env*
 .vscode/
 .idea/
-tests/
 coverage/
 docs/
 scripts/
 .shared/
 .agent/
-*.spec.ts
-*.test.ts
 dist/

@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../core/database';
 import { DomainEventService } from '../../core/events';
@@ -18,10 +23,17 @@ export class ChildSafetyService {
     private readonly audit: AuditService,
   ) {}
 
-  async reportIncident(orgId: string, data: {
-    title: string; description?: string; category?: string;
-    isAnonymous?: boolean; evidenceUrls?: string[];
-  }, actorUserId: string) {
+  async reportIncident(
+    orgId: string,
+    data: {
+      title: string;
+      description?: string;
+      category?: string;
+      isAnonymous?: boolean;
+      evidenceUrls?: string[];
+    },
+    actorUserId: string,
+  ) {
     const count = await this.prisma.ticket.count({ where: { orgId } });
     const ticketNumber = `INC-${String(count + 1).padStart(5, '0')}`;
 
@@ -47,7 +59,12 @@ export class ChildSafetyService {
     });
 
     await this.prisma.ticketStatusHistory.create({
-      data: { ticketId: ticket.id, fromStatus: null, toStatus: 'open', changedBy: data.isAnonymous ? null : actorUserId },
+      data: {
+        ticketId: ticket.id,
+        fromStatus: null,
+        toStatus: 'open',
+        changedBy: data.isAnonymous ? null : actorUserId,
+      },
     });
 
     await this.audit.log({
@@ -133,7 +150,12 @@ export class ChildSafetyService {
     return updated;
   }
 
-  async addEvidence(orgId: string, ticketId: string, evidence: { urls: string[]; notes?: string }, actorUserId: string) {
+  async addEvidence(
+    orgId: string,
+    ticketId: string,
+    evidence: { urls: string[]; notes?: string },
+    actorUserId: string,
+  ) {
     const ticket = await this.prisma.ticket.findFirst({
       where: { id: ticketId, orgId, isSensitive: true },
     });
@@ -204,7 +226,7 @@ export class ChildSafetyService {
       await this.prisma.ticket.update({
         where: { id: t.id },
         data: {
-          description: '[REDACTED — retention policy applied]',
+          description: '[REDACTED - retention policy applied]',
           customFields: { redactedAt: new Date().toISOString(), evidenceUrls: [] },
         },
       });

@@ -1,9 +1,10 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Optional } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../core/database';
 import { DomainEventService } from '../../core/events';
 import { AuditService } from '../../core/audit';
 import { DOMAIN_EVENTS } from '@ttndd/constants';
+import { FileStorageService } from '../file-storage';
 
 @Injectable()
 export class LmsService {
@@ -11,6 +12,7 @@ export class LmsService {
     private readonly prisma: PrismaService,
     private readonly domainEvents: DomainEventService,
     private readonly audit: AuditService,
+    @Optional() private readonly fileStorage?: FileStorageService,
   ) {}
 
   // ── Course CRUD ──
@@ -21,6 +23,7 @@ export class LmsService {
       title: string;
       description?: string;
       coverImageUrl?: string;
+      coverImageFileRefId?: string;
       category?: string;
       difficulty?: string;
       targetBranches?: string[];
@@ -30,6 +33,8 @@ export class LmsService {
     },
     actorUserId: string,
   ) {
+    await this.assertReadyFileRefs(orgId, [data.coverImageFileRefId]);
+
     const course = await this.prisma.course.create({
       data: {
         orgId,
@@ -66,6 +71,7 @@ export class LmsService {
       title: string;
       description: string;
       coverImageUrl: string;
+      coverImageFileRefId: string;
       category: string;
       difficulty: string;
       targetBranches: string[];
@@ -78,6 +84,7 @@ export class LmsService {
   ) {
     const course = await this.prisma.course.findFirst({ where: { id: courseId, orgId } });
     if (!course) throw new NotFoundException('Course not found');
+    await this.assertReadyFileRefs(orgId, [data.coverImageFileRefId]);
 
     const publishData: Prisma.CourseUpdateInput = { ...data };
     if (data.status === 'published' && course.status !== 'published') {
@@ -232,6 +239,7 @@ export class LmsService {
       lessonType?: string;
       content?: Prisma.InputJsonValue;
       videoUrl?: string;
+      mediaFileRefId?: string;
       duration?: number;
       expReward?: number;
       isRequired?: boolean;
@@ -239,6 +247,7 @@ export class LmsService {
     },
   ) {
     await this.findCourseById(orgId, courseId);
+    await this.assertReadyFileRefs(orgId, [data.mediaFileRefId]);
 
     return this.prisma.lesson.create({
       data: { orgId, courseId, ...data },
@@ -254,6 +263,7 @@ export class LmsService {
       lessonType: string;
       content: Prisma.InputJsonValue;
       videoUrl: string;
+      mediaFileRefId: string;
       duration: number;
       expReward: number;
       isRequired: boolean;
@@ -264,6 +274,7 @@ export class LmsService {
       where: { id: lessonId, orgId },
     });
     if (!lesson) throw new NotFoundException('Lesson not found');
+    await this.assertReadyFileRefs(orgId, [data.mediaFileRefId]);
 
     return this.prisma.lesson.update({
       where: { id: lessonId },
@@ -460,14 +471,23 @@ export class LmsService {
       points?: number;
       timeLimit?: number;
       mediaUrl?: string;
+      mediaFileRefId?: string;
       orderIndex?: number;
     },
   ) {
     await this.getQuizById(orgId, quizId);
+    await this.assertReadyFileRefs(orgId, [data.mediaFileRefId]);
 
     return this.prisma.quizQuestion.create({
       data: { orgId, quizId, ...data },
     });
+  }
+
+  private async assertReadyFileRefs(orgId: string, fileRefIds: Array<string | undefined>) {
+    const requested = fileRefIds.filter(Boolean);
+    if (requested.length === 0) return;
+    if (!this.fileStorage) throw new BadRequestException('File storage integration unavailable');
+    await this.fileStorage.assertReadyFileRefs(orgId, requested);
   }
 
   async getQuestions(orgId: string, quizId: string) {
@@ -1116,14 +1136,107 @@ export class LmsService {
     return updated;
   }
 
-  // ── Mentor Assignment (T-1125 — placeholder for future expansion) ──
+  // ── Mentor Assignment (T-1125) ──
 
-  async assignMentor(_orgId: string, _courseId: string, _mentorId: string, _menteeId: string) {
-    // TODO: Create MentorAssignment model and implement
-    // For now, leverage the existing MentoringRelationship model from the Enrichment module
-    throw new BadRequestException(
-      'Mentor assignment is not yet implemented. Use Enrichment module MentoringRelationship.',
-    );
+  async assignMentor(
+    orgId: string,
+    courseId: string,
+    mentorId: string,
+    menteeId: string,
+    actorUserId: string,
+    startDate?: string,
+  ) {
+    if (!mentorId || !menteeId) {
+      throw new BadRequestException('mentorId and menteeId are required');
+    }
+    if (mentorId === menteeId) {
+      throw new BadRequestException('Mentor and mentee must be different members');
+    }
+
+    const [course, members, existing] = await Promise.all([
+      this.prisma.course.findFirst({
+        where: { id: courseId, orgId },
+        select: { id: true, title: true, status: true },
+      }),
+      this.prisma.orgMember.findMany({
+        where: { orgId, id: { in: [mentorId, menteeId] }, status: { not: 'left' } },
+        select: {
+          id: true,
+          role: true,
+          status: true,
+          scoutName: true,
+          memberCode: true,
+          user: { select: { displayName: true, email: true } },
+        },
+      }),
+      this.prisma.mentoringRelationship.findFirst({
+        where: { orgId, mentorId, menteeId },
+      }),
+    ]);
+
+    if (!course) throw new NotFoundException('Course not found');
+
+    const mentor = members.find((member) => member.id === mentorId);
+    const mentee = members.find((member) => member.id === menteeId);
+    if (!mentor) throw new NotFoundException('Mentor member not found');
+    if (!mentee) throw new NotFoundException('Mentee member not found');
+
+    const relationship = existing
+      ? await this.prisma.mentoringRelationship.update({
+          where: { id: existing.id },
+          data: {
+            status: 'active',
+            startDate: startDate ? new Date(startDate) : (existing.startDate ?? new Date()),
+          },
+        })
+      : await this.prisma.mentoringRelationship.create({
+          data: {
+            orgId,
+            mentorId,
+            menteeId,
+            startDate: startDate ? new Date(startDate) : new Date(),
+            status: 'active',
+          },
+        });
+
+    const payload = {
+      relationshipId: relationship.id,
+      courseId,
+      courseTitle: course.title,
+      mentorId,
+      menteeId,
+      source: 'lms',
+      reusedExisting: Boolean(existing),
+    } as unknown as Prisma.InputJsonValue;
+
+    await this.audit.log({
+      orgId,
+      userId: actorUserId,
+      action: 'lms.mentor_assigned',
+      resource: 'MentoringRelationship',
+      resourceId: relationship.id,
+      newValue: payload,
+    });
+
+    await this.domainEvents.publish({
+      orgId,
+      eventType: DOMAIN_EVENTS.ENRICHMENT.MENTORING_STARTED,
+      aggregateId: relationship.id,
+      aggregateType: 'MentoringRelationship',
+      payload,
+      actorUserId,
+    });
+
+    return {
+      course,
+      relationship,
+      mentor,
+      mentee,
+      meta: {
+        reusedExisting: Boolean(existing),
+        source: 'lms',
+      },
+    };
   }
 
   // ── Offline Packs (T-1134) ──

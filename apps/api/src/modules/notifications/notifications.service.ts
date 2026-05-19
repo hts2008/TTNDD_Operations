@@ -3,6 +3,12 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../core/database';
 import { DomainEventService } from '../../core/events';
 import { DOMAIN_EVENTS } from '@ttndd/constants';
+import {
+  InAppNotificationDeliveryProvider,
+  NotificationDeliveryPayload,
+  NotificationDeliveryProvider,
+  UnconfiguredNotificationDeliveryProvider,
+} from './notification-delivery.provider';
 
 interface SendNotificationData {
   title: string;
@@ -11,11 +17,15 @@ interface SendNotificationData {
   channel?: string;
   actionUrl?: string;
   metadata?: Prisma.InputJsonValue;
+  idempotencyKey?: string;
 }
 
 @Injectable()
 export class NotificationsService {
   private readonly logger = new Logger(NotificationsService.name);
+  private readonly deliveryProviders = new Map<string, NotificationDeliveryProvider>([
+    ['in_app', new InAppNotificationDeliveryProvider()],
+  ]);
 
   constructor(
     private readonly prisma: PrismaService,
@@ -24,24 +34,43 @@ export class NotificationsService {
 
   async send(orgId: string, recipientId: string, data: SendNotificationData) {
     const channel = data.channel ?? 'in_app';
+    const metadata = this.withIdempotencyKey(data.metadata, data.idempotencyKey);
+
+    if (data.idempotencyKey) {
+      const existing = await this.prisma.notification.findFirst({
+        where: {
+          orgId,
+          recipientId,
+          type: data.type,
+          metadata: { path: ['idempotencyKey'], equals: data.idempotencyKey },
+        },
+      });
+      if (existing) {
+        this.logger.debug(`Notification idempotency hit: ${data.idempotencyKey}`);
+        return existing;
+      }
+    }
 
     const prefDisabled = await this.prisma.notificationPreference.findFirst({
       where: { userId: recipientId, channel, eventType: data.type, enabled: false },
     });
     if (prefDisabled) {
-      this.logger.debug(`Notification suppressed by preference: ${data.type} / ${channel} for ${recipientId}`);
+      this.logger.debug(
+        `Notification suppressed by preference: ${data.type} / ${channel} for ${recipientId}`,
+      );
       return null;
     }
 
     const template = await this.prisma.notificationTemplate.findUnique({
       where: { orgId_eventType_channel: { orgId, eventType: data.type, channel } },
     });
+    const templateVariables = this.asTemplateVariables(metadata);
 
     const title = template?.isActive
-      ? this.renderTemplate(template.title, data.metadata as Record<string, string> ?? {})
+      ? this.renderTemplate(template.title, templateVariables)
       : data.title;
     const body = template?.isActive
-      ? this.renderTemplate(template.body, data.metadata as Record<string, string> ?? {})
+      ? this.renderTemplate(template.body, templateVariables)
       : data.body;
 
     const notification = await this.prisma.notification.create({
@@ -53,7 +82,7 @@ export class NotificationsService {
         type: data.type,
         channel,
         actionUrl: data.actionUrl,
-        metadata: data.metadata ?? {},
+        metadata,
       },
     });
 
@@ -68,6 +97,61 @@ export class NotificationsService {
 
     this.logger.debug(`Notification sent: ${data.type} → ${recipientId} (${channel})`);
     return notification;
+  }
+
+  async processPendingDeliveries(limit = 50) {
+    const pending = await this.prisma.notificationDeliveryLog.findMany({
+      where: { status: 'pending' },
+      orderBy: { createdAt: 'asc' },
+      take: limit,
+    });
+
+    const summary = { total: pending.length, delivered: 0, failed: 0, skipped: 0 };
+
+    for (const log of pending) {
+      const lock = await this.prisma.notificationDeliveryLog.updateMany({
+        where: { id: log.id, status: 'pending' },
+        data: { status: 'sending', attempts: { increment: 1 } },
+      });
+
+      if (lock.count === 0) {
+        summary.skipped += 1;
+        continue;
+      }
+
+      const notification = await this.prisma.notification.findFirst({
+        where: { id: log.notificationId },
+      });
+
+      if (!notification) {
+        await this.prisma.notificationDeliveryLog.update({
+          where: { id: log.id },
+          data: { status: 'failed', lastError: 'notification_not_found' },
+        });
+        summary.failed += 1;
+        continue;
+      }
+
+      const provider =
+        this.deliveryProviders.get(log.channel) ??
+        new UnconfiguredNotificationDeliveryProvider(log.channel);
+      const result = await provider.deliver(this.toDeliveryPayload(notification, log.channel));
+
+      await this.prisma.notificationDeliveryLog.update({
+        where: { id: log.id },
+        data: {
+          status: result.status,
+          lastError: result.error ?? null,
+          sentAt: result.status === 'delivered' ? (result.sentAt ?? new Date()) : null,
+        },
+      });
+
+      if (result.status === 'delivered') summary.delivered += 1;
+      else if (result.status === 'failed') summary.failed += 1;
+      else summary.skipped += 1;
+    }
+
+    return summary;
   }
 
   async sendBulk(orgId: string, recipientIds: string[], data: SendNotificationData) {
@@ -195,7 +279,9 @@ export class NotificationsService {
     data: { eventType: string; channel: string; title: string; body: string; isActive?: boolean },
   ) {
     return this.prisma.notificationTemplate.upsert({
-      where: { orgId_eventType_channel: { orgId, eventType: data.eventType, channel: data.channel } },
+      where: {
+        orgId_eventType_channel: { orgId, eventType: data.eventType, channel: data.channel },
+      },
       create: { orgId, ...data },
       update: { title: data.title, body: data.body, isActive: data.isActive ?? true },
     });
@@ -219,5 +305,54 @@ export class NotificationsService {
 
   renderTemplate(template: string, variables: Record<string, string>): string {
     return template.replace(/\{\{(\w+)\}\}/g, (_, key) => variables[key] ?? '');
+  }
+
+  private withIdempotencyKey(
+    metadata: Prisma.InputJsonValue | undefined,
+    idempotencyKey: string | undefined,
+  ): Prisma.InputJsonObject {
+    const base =
+      metadata && typeof metadata === 'object' && !Array.isArray(metadata)
+        ? { ...(metadata as Prisma.InputJsonObject) }
+        : {};
+
+    if (idempotencyKey) {
+      base.idempotencyKey = idempotencyKey;
+    }
+
+    return base;
+  }
+
+  private asTemplateVariables(metadata: Prisma.InputJsonObject): Record<string, string> {
+    return Object.fromEntries(
+      Object.entries(metadata).map(([key, value]) => [key, String(value ?? '')]),
+    );
+  }
+
+  private toDeliveryPayload(
+    notification: {
+      id: string;
+      orgId: string;
+      recipientId: string;
+      title: string;
+      body: string;
+      type: string;
+      channel: string;
+      actionUrl: string | null;
+      metadata: Prisma.JsonValue;
+    },
+    channel: string,
+  ): NotificationDeliveryPayload {
+    return {
+      notificationId: notification.id,
+      orgId: notification.orgId,
+      recipientId: notification.recipientId,
+      title: notification.title,
+      body: notification.body,
+      type: notification.type,
+      channel,
+      actionUrl: notification.actionUrl,
+      metadata: notification.metadata,
+    };
   }
 }

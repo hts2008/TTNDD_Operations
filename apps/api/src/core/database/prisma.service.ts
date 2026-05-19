@@ -35,6 +35,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     userId: string,
     role: string,
     fn: (tx: PrismaClient) => Promise<T>,
+    memberId?: string,
   ): Promise<T> {
     return this.$transaction(async (tx) => {
       // Use parameterized SET LOCAL to prevent SQL injection.
@@ -43,6 +44,10 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       await tx.$executeRawUnsafe(`SELECT set_config('app.current_org_id', $1, true)`, orgId);
       await tx.$executeRawUnsafe(`SELECT set_config('app.user_role', $1, true)`, role);
       await tx.$executeRawUnsafe(`SELECT set_config('app.current_user_id', $1, true)`, userId);
+      await tx.$executeRawUnsafe(
+        `SELECT set_config('app.current_member_id', $1, true)`,
+        memberId ?? userId,
+      );
       return fn(tx as PrismaClient);
     });
   }

@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, Optional } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../core/database';
 import { DomainEventService } from '../../core/events';
 import { AuditService } from '../../core/audit';
 import { DOMAIN_EVENTS } from '@ttndd/constants';
 import { RankProgressionService } from './rank-progression.service';
+import { FileStorageService } from '../file-storage';
 
 @Injectable()
 export class ScoutService {
@@ -13,6 +14,7 @@ export class ScoutService {
     private readonly domainEvents: DomainEventService,
     private readonly audit: AuditService,
     private readonly progression: RankProgressionService,
+    @Optional() private readonly fileStorage?: FileStorageService,
   ) {}
 
   // ── Rank Definitions ──
@@ -99,7 +101,7 @@ export class ScoutService {
     });
   }
 
-  async startSkill(orgId: string, memberId: string, skillId: string) {
+  async startSkill(orgId: string, memberId: string, skillId: string, actorUserId: string) {
     const existing = await this.prisma.memberSkillProgress.findUnique({
       where: { orgMemberId_skillId: { orgMemberId: memberId, skillId } },
     });
@@ -115,7 +117,7 @@ export class ScoutService {
       aggregateId: memberId,
       aggregateType: 'OrgMember',
       payload: { skillId },
-      actorUserId: memberId,
+      actorUserId,
     });
 
     return progress;
@@ -232,10 +234,13 @@ export class ScoutService {
       level: number;
       evidenceType: string;
       evidenceUrl?: string;
+      fileRefId?: string;
       notes?: string;
     },
     actorUserId: string,
   ) {
+    await this.assertReadyFileRefs(orgId, [data.fileRefId]);
+
     const evidence = await this.prisma.skillEvidence.create({
       data: {
         orgId,
@@ -244,6 +249,7 @@ export class ScoutService {
         level: data.level,
         evidenceType: data.evidenceType,
         evidenceUrl: data.evidenceUrl,
+        fileRefId: data.fileRefId,
         notes: data.notes,
         status: 'submitted',
       },
@@ -267,6 +273,13 @@ export class ScoutService {
     });
 
     return evidence;
+  }
+
+  private async assertReadyFileRefs(orgId: string, fileRefIds: Array<string | undefined>) {
+    const requested = fileRefIds.filter(Boolean);
+    if (requested.length === 0) return;
+    if (!this.fileStorage) throw new BadRequestException('File storage integration unavailable');
+    await this.fileStorage.assertReadyFileRefs(orgId, requested);
   }
 
   async reviewEvidence(
@@ -322,12 +335,12 @@ export class ScoutService {
     });
 
     // Check rank eligibility after awarding a skill
-    await this.checkRankEligibility(orgId, memberId);
+    await this.checkRankEligibility(orgId, memberId, actorUserId);
 
     return updated;
   }
 
-  async checkRankEligibility(orgId: string, memberId: string) {
+  async checkRankEligibility(orgId: string, memberId: string, actorUserId?: string) {
     // Get member's current rank progress
     const memberRanks = await this.prisma.memberRank.findMany({
       where: { orgId, orgMemberId: memberId, status: 'in_progress' },
@@ -367,7 +380,7 @@ export class ScoutService {
             aggregateId: memberId,
             aggregateType: 'OrgMember',
             payload: { rankId: mr.rankId },
-            actorUserId: memberId,
+            actorUserId,
           });
 
           results.push({ rankId: mr.rankId, eligible: true });

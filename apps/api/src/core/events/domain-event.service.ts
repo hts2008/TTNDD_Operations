@@ -9,7 +9,7 @@ export interface DomainEventPayload {
   aggregateId: string;
   aggregateType: string;
   payload: Prisma.InputJsonValue;
-  actorUserId: string;
+  actorUserId?: string;
 }
 
 @Injectable()

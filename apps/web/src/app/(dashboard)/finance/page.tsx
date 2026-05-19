@@ -16,9 +16,8 @@ import {
   AlertTriangle,
   Plus,
 } from 'lucide-react';
+import { api } from '@/lib/api';
 import { cn } from '@/lib/utils';
-
-const API = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
 
 const formatVND = (amount: number) =>
   new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
@@ -174,20 +173,14 @@ export default function FinancePage() {
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      const [sumRes, txRes, feeRes] = await Promise.all([
-        fetch(`${API}/finance/summary`, { credentials: 'include' }),
-        fetch(`${API}/finance/export/transactions`, { credentials: 'include' }),
-        fetch(`${API}/finance/fees?limit=50`, { credentials: 'include' }),
+      const [sumData, txData, feeData] = await Promise.all([
+        api.get<FinanceSummary>('/finance/summary'),
+        api.get<Transaction[]>('/finance/export/transactions'),
+        api.get<FeeItem[]>('/finance/fees', { limit: 50 }),
       ]);
-      if (sumRes.ok) setSummary(await sumRes.json());
-      if (txRes.ok) {
-        const d = await txRes.json();
-        setTransactions(d.data ?? []);
-      }
-      if (feeRes.ok) {
-        const d = await feeRes.json();
-        setFees(d.data ?? []);
-      }
+      setSummary(sumData);
+      setTransactions(txData);
+      setFees(feeData);
       setError(null);
     } catch (e: unknown) {
       setError((e as Error).message);

@@ -25,8 +25,13 @@ async function generateSpec() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  const outputPath = path.join(__dirname, 'ttndd-ops-api.json');
+  const outputIndex = process.argv.indexOf('--output');
+  const outputPath =
+    outputIndex >= 0
+      ? path.resolve(process.argv[outputIndex + 1] as string)
+      : path.join(__dirname, 'ttndd-ops-api.json');
 
+  fs.mkdirSync(path.dirname(outputPath), { recursive: true });
   fs.writeFileSync(outputPath, JSON.stringify(document, null, 2));
   console.log(`OpenAPI spec written to: ${outputPath}`);
 

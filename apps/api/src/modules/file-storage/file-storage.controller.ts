@@ -1,9 +1,21 @@
 import {
-  Controller, Get, Post, Delete,
-  Param, Body, Query, UseGuards, HttpCode, HttpStatus,
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Param,
+  Body,
+  Query,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { FileStorageService, CreateUploadRequestDto } from './file-storage.service';
+import {
+  FileStorageService,
+  CreateUploadRequestDto,
+  FinalizeUploadDto,
+} from './file-storage.service';
 import { CurrentUser, OrgId } from '../../common/decorators';
 import { AuthGuard } from '../../core/auth';
 
@@ -24,12 +36,19 @@ export class FileStorageController {
     return this.service.createUploadRequest(orgId, userId, body);
   }
 
+  @Post('finalize')
+  @ApiOperation({ summary: 'Finalize an uploaded file reference after storage upload completes' })
+  async finalizeUpload(
+    @OrgId() orgId: string,
+    @CurrentUser('userId') userId: string,
+    @Body() body: FinalizeUploadDto,
+  ) {
+    return this.service.finalizeUpload(orgId, userId, body);
+  }
+
   @Get(':fileRefId/download-url')
   @ApiOperation({ summary: 'Get a signed URL to download a file' })
-  async getDownloadUrl(
-    @OrgId() orgId: string,
-    @Param('fileRefId') fileRefId: string,
-  ) {
+  async getDownloadUrl(@OrgId() orgId: string, @Param('fileRefId') fileRefId: string) {
     return this.service.getDownloadUrl(orgId, fileRefId);
   }
 
@@ -46,10 +65,7 @@ export class FileStorageController {
   @Delete(':fileRefId')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Soft-delete a file reference' })
-  async deleteFile(
-    @OrgId() orgId: string,
-    @Param('fileRefId') fileRefId: string,
-  ) {
+  async deleteFile(@OrgId() orgId: string, @Param('fileRefId') fileRefId: string) {
     await this.service.softDelete(orgId, fileRefId);
   }
 }

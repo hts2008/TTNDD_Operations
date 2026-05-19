@@ -14,6 +14,62 @@
         "tags": ["Health"]
       }
     },
+    "/api/v1/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "summary": "Authenticate user with email/password",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Auth"]
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "operationId": "AuthController_me",
+        "summary": "Get current user profile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Auth"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/organizations": {
+      "post": {
+        "operationId": "OrgConfigController_createOrganization",
+        "summary": "Create a new organization",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Organization Config"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/organizations/{slug}": {
       "get": {
         "operationId": "OrgConfigController_findBySlug",
@@ -225,6 +281,39 @@
             "bearer": []
           }
         ]
+      },
+      "delete": {
+        "operationId": "OrgConfigController_deleteBranch",
+        "summary": "Delete a branch (must have no active members)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "branchId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Organization Config"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
       }
     },
     "/api/v1/organizations/{id}/units": {
@@ -301,6 +390,39 @@
       "patch": {
         "operationId": "OrgConfigController_updateUnit",
         "summary": "Update a unit",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "unitId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Organization Config"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "OrgConfigController_deleteUnit",
+        "summary": "Delete a unit (must have no active members or children)",
         "parameters": [
           {
             "name": "id",
@@ -450,11 +572,241 @@
         ]
       }
     },
+    "/api/v1/organizations/{orgId}/members": {
+      "post": {
+        "operationId": "IamController_inviteMember",
+        "summary": "Invite a new member to the organization",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["IAM — Members & Roles"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/organizations/{orgId}/members/{memberId}/role": {
+      "patch": {
+        "operationId": "IamController_updateRole",
+        "summary": "Change member role (with escalation guard)",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "memberId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["IAM — Members & Roles"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/organizations/{orgId}/members/{memberId}/assignment": {
+      "patch": {
+        "operationId": "IamController_updateAssignment",
+        "summary": "Reassign member to different branch/unit",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "memberId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["IAM — Members & Roles"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/organizations/{orgId}/members/{memberId}/deactivate": {
+      "patch": {
+        "operationId": "IamController_deactivate",
+        "summary": "Deactivate a member (remain in org but inactive)",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "memberId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["IAM — Members & Roles"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/organizations/{orgId}/members/{memberId}/reactivate": {
+      "patch": {
+        "operationId": "IamController_reactivate",
+        "summary": "Reactivate an inactive member",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "memberId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["IAM — Members & Roles"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/organizations/{orgId}/members/{memberId}": {
+      "delete": {
+        "operationId": "IamController_remove",
+        "summary": "Remove member from organization (soft-delete)",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "memberId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["IAM — Members & Roles"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/organizations/{orgId}/members/roles": {
+      "get": {
+        "operationId": "IamController_getRoles",
+        "summary": "List available roles and permissions",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["IAM — Members & Roles"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/hrm/members": {
       "post": {
         "operationId": "HrmController_createMember",
         "summary": "Create a new member with profile",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMemberDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": "",
@@ -480,7 +832,7 @@
         "parameters": [
           {
             "name": "status",
-            "required": true,
+            "required": false,
             "in": "query",
             "schema": {
               "type": "string"
@@ -488,7 +840,7 @@
           },
           {
             "name": "branchId",
-            "required": true,
+            "required": false,
             "in": "query",
             "schema": {
               "type": "string"
@@ -496,7 +848,7 @@
           },
           {
             "name": "role",
-            "required": true,
+            "required": false,
             "in": "query",
             "schema": {
               "type": "string"
@@ -504,7 +856,7 @@
           },
           {
             "name": "search",
-            "required": true,
+            "required": false,
             "in": "query",
             "schema": {
               "type": "string"
@@ -512,17 +864,22 @@
           },
           {
             "name": "page",
-            "required": true,
+            "required": false,
             "in": "query",
             "schema": {
+              "minimum": 1,
+              "example": 1,
               "type": "number"
             }
           },
           {
             "name": "limit",
-            "required": true,
+            "required": false,
             "in": "query",
             "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "example": 20,
               "type": "number"
             }
           }
@@ -586,6 +943,43 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMemberProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["HRM"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/hrm/members/{id}/privacy-export": {
+      "get": {
+        "operationId": "HrmController_exportPersonalData",
+        "summary": "Export personal data for data-subject access requests",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
@@ -613,6 +1007,16 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransitionStatusDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": ""
@@ -640,6 +1044,16 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransferMemberDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": ""
@@ -653,10 +1067,72 @@
         ]
       }
     },
+    "/api/v1/hrm/members/{id}/assign-unit": {
+      "post": {
+        "operationId": "HrmController_assignUnit",
+        "summary": "T-1007: Assign member to a unit within their branch",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignUnitDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["HRM"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/hrm/org-chart": {
       "get": {
         "operationId": "HrmController_getOrgChart",
-        "summary": "Get organization chart",
+        "summary": "Get organization chart (flat list)",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["HRM"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/hrm/org-chart/tree": {
+      "get": {
+        "operationId": "HrmController_getOrgChartTree",
+        "summary": "T-1006: Get hierarchical org chart tree with member counts",
         "parameters": [],
         "responses": {
           "200": {
@@ -674,7 +1150,7 @@
     "/api/v1/hrm/members/{id}/timeline": {
       "get": {
         "operationId": "HrmController_getTimeline",
-        "summary": "Get member event timeline",
+        "summary": "T-1009: Get member event timeline (domain events + branch history)",
         "parameters": [
           {
             "name": "id",
@@ -698,6 +1174,43 @@
         ]
       }
     },
+    "/api/v1/hrm/transfers/{transferId}/sign": {
+      "post": {
+        "operationId": "HrmController_signTransfer",
+        "summary": "T-1010: Sign a transfer handover record",
+        "parameters": [
+          {
+            "name": "transferId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignTransferDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["HRM"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/hrm/stats": {
       "get": {
         "operationId": "HrmController_getStats",
@@ -709,6 +1222,234 @@
           }
         },
         "tags": ["HRM"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/hrm/members/{id}/character-sheet": {
+      "get": {
+        "operationId": "HrmController_getCharacterSheet",
+        "summary": "T-0048: Get cross-module character sheet (profile + rewards + rank + attendance)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["HRM"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/hrm/members/{id}/compliance": {
+      "get": {
+        "operationId": "HrmController_checkCompliance",
+        "summary": "T-0050/T-1005: Check member compliance (guardian, medical, background check)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["HRM"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/hrm/compliance/dashboard": {
+      "get": {
+        "operationId": "HrmController_getComplianceDashboard",
+        "summary": "T-1005: Org-wide compliance dashboard",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["HRM"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/hrm/members/{memberId}/guardians": {
+      "post": {
+        "operationId": "GuardianController_linkGuardian",
+        "summary": "Link a guardian to a member (T-0041)",
+        "parameters": [
+          {
+            "name": "memberId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["HRM — Guardians"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "get": {
+        "operationId": "GuardianController_findByMember",
+        "summary": "List guardians for a member",
+        "parameters": [
+          {
+            "name": "memberId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["HRM — Guardians"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/hrm/members/{memberId}/guardians/{guardianId}": {
+      "put": {
+        "operationId": "GuardianController_updateGuardian",
+        "summary": "Update a guardian link",
+        "parameters": [
+          {
+            "name": "guardianId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["HRM — Guardians"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "GuardianController_removeGuardian",
+        "summary": "Remove a guardian link (T-0044: blocks if under-18 last guardian)",
+        "parameters": [
+          {
+            "name": "guardianId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["HRM — Guardians"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/hrm/members/{memberId}/guardians/{memberId}/compliance": {
+      "get": {
+        "operationId": "GuardianController_checkCompliance",
+        "summary": "Check guardian compliance for a member (T-0044)",
+        "parameters": [
+          {
+            "name": "memberId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["HRM — Guardians"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/hrm/parent-portal/dashboard": {
+      "get": {
+        "operationId": "ParentPortalController_getDashboard",
+        "summary": "T-1013: Parent portal dashboard - linked children, compliance, access logs",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["HRM - Parent Portal"],
         "security": [
           {
             "bearer": []
@@ -757,7 +1498,14 @@
         "parameters": [],
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
           }
         },
         "tags": ["Rewards"],
@@ -856,13 +1604,66 @@
         ]
       }
     },
+    "/api/v1/rewards/penalties": {
+      "post": {
+        "operationId": "RewardsController_applyPenalty",
+        "summary": "Apply a penalty (deduct EXP with metadata)",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Rewards"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/rewards/penalties/{id}/correct": {
+      "post": {
+        "operationId": "RewardsController_correctPenalty",
+        "summary": "Correct (reverse) a penalty",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Rewards"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/rewards/leaderboard": {
       "get": {
         "operationId": "RewardsController_getLeaderboard",
-        "summary": "Get EXP leaderboard",
+        "summary": "Get EXP leaderboard with scope filtering",
         "parameters": [
           {
             "name": "scope",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scopeId",
             "required": true,
             "in": "query",
             "schema": {
@@ -891,6 +1692,136 @@
                 }
               }
             }
+          }
+        },
+        "tags": ["Rewards"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/rewards/leaderboard/snapshots": {
+      "get": {
+        "operationId": "RewardsController_getLeaderboardSnapshots",
+        "summary": "Get historical leaderboard snapshots",
+        "parameters": [
+          {
+            "name": "scope",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "period",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Rewards"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/rewards/leaderboard/snapshot": {
+      "post": {
+        "operationId": "RewardsController_takeLeaderboardSnapshot",
+        "summary": "Take a leaderboard snapshot",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Rewards"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/rewards/peer-recognition": {
+      "post": {
+        "operationId": "RewardsController_givePeerRecognition",
+        "summary": "Give recognition to a peer",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Rewards"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/rewards/peer-recognition/received/{memberId}": {
+      "get": {
+        "operationId": "RewardsController_getPeerRecognitionsReceived",
+        "summary": "Get recognitions received by a member",
+        "parameters": [
+          {
+            "name": "memberId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
           }
         },
         "tags": ["Rewards"],
@@ -1393,6 +2324,287 @@
         ]
       }
     },
+    "/api/v1/scout/evidence/{memberId}": {
+      "post": {
+        "operationId": "ScoutController_submitEvidence",
+        "summary": "Submit evidence for a skill",
+        "parameters": [
+          {
+            "name": "memberId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Scout"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/scout/evidence/{evidenceId}/review": {
+      "post": {
+        "operationId": "ScoutController_reviewEvidence",
+        "summary": "Review submitted evidence (approve/reject)",
+        "parameters": [
+          {
+            "name": "evidenceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Scout"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/scout/progress/{memberId}/award": {
+      "post": {
+        "operationId": "ScoutController_awardSkill",
+        "summary": "Award a skill to a member",
+        "parameters": [
+          {
+            "name": "memberId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Scout"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/scout/member-ranks/{memberId}/check-eligibility": {
+      "post": {
+        "operationId": "ScoutController_checkRankEligibility",
+        "summary": "Auto-check rank eligibility based on completed skills",
+        "parameters": [
+          {
+            "name": "memberId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Scout"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/scout/dashboard/{memberId}": {
+      "get": {
+        "operationId": "ScoutController_getScoutDashboard",
+        "summary": "Get scout dashboard with skills, ranks, evidence",
+        "parameters": [
+          {
+            "name": "memberId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Scout"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/file-storage/upload-request": {
+      "post": {
+        "operationId": "FileStorageController_requestUpload",
+        "summary": "Request a signed URL to upload a file to GCS",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["FileStorage"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/file-storage/finalize": {
+      "post": {
+        "operationId": "FileStorageController_finalizeUpload",
+        "summary": "Finalize an uploaded file reference after storage upload completes",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["FileStorage"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/file-storage/{fileRefId}/download-url": {
+      "get": {
+        "operationId": "FileStorageController_getDownloadUrl",
+        "summary": "Get a signed URL to download a file",
+        "parameters": [
+          {
+            "name": "fileRefId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["FileStorage"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/file-storage": {
+      "get": {
+        "operationId": "FileStorageController_listFiles",
+        "summary": "List files for the org, optionally filtered by entity",
+        "parameters": [
+          {
+            "name": "entityType",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entityId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["FileStorage"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/file-storage/{fileRefId}": {
+      "delete": {
+        "operationId": "FileStorageController_deleteFile",
+        "summary": "Soft-delete a file reference",
+        "parameters": [
+          {
+            "name": "fileRefId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": ["FileStorage"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/sessions": {
       "post": {
         "operationId": "SessionsController_create",
@@ -1869,23 +3081,15 @@
     "/api/v1/lms/courses": {
       "post": {
         "operationId": "LmsController_createCourse",
-        "summary": "Create a new course",
         "parameters": [],
         "responses": {
           "201": {
             "description": ""
           }
-        },
-        "tags": ["LMS"],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
+        }
       },
       "get": {
         "operationId": "LmsController_findCourses",
-        "summary": "List courses (paginated, filterable)",
         "parameters": [
           {
             "name": "category",
@@ -1916,7 +3120,7 @@
             "required": true,
             "in": "query",
             "schema": {
-              "type": "number"
+              "type": "string"
             }
           },
           {
@@ -1924,7 +3128,7 @@
             "required": true,
             "in": "query",
             "schema": {
-              "type": "number"
+              "type": "string"
             }
           }
         ],
@@ -1932,19 +3136,12 @@
           "200": {
             "description": ""
           }
-        },
-        "tags": ["LMS"],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
+        }
       }
     },
     "/api/v1/lms/courses/{id}": {
       "get": {
         "operationId": "LmsController_findCourseById",
-        "summary": "Get course detail with lessons and quizzes",
         "parameters": [
           {
             "name": "id",
@@ -1966,44 +3163,10 @@
               }
             }
           }
-        },
-        "tags": ["LMS"],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
-      }
-    },
-    "/api/v1/lms/courses/{id}/lessons": {
-      "post": {
-        "operationId": "LmsController_createLesson",
-        "summary": "Add a lesson to a course",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "tags": ["LMS"],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
+        }
       },
-      "get": {
-        "operationId": "LmsController_getLessons",
-        "summary": "List lessons for a course",
+      "patch": {
+        "operationId": "LmsController_updateCourse",
         "parameters": [
           {
             "name": "id",
@@ -2018,42 +3181,305 @@
           "200": {
             "description": ""
           }
-        },
-        "tags": ["LMS"],
-        "security": [
+        }
+      },
+      "delete": {
+        "operationId": "LmsController_deleteCourse",
+        "parameters": [
           {
-            "bearer": []
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
           }
-        ]
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        }
       }
     },
-    "/api/v1/lms/quizzes": {
+    "/api/v1/lms/courses/{courseId}/modules": {
       "post": {
-        "operationId": "LmsController_createQuiz",
-        "summary": "Create a quiz",
+        "operationId": "LmsController_createModule",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      },
+      "get": {
+        "operationId": "LmsController_getModules",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/lms/modules/{moduleId}": {
+      "patch": {
+        "operationId": "LmsController_updateModule",
+        "parameters": [
+          {
+            "name": "moduleId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "delete": {
+        "operationId": "LmsController_deleteModule",
+        "parameters": [
+          {
+            "name": "moduleId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/v1/lms/courses/{courseId}/lessons": {
+      "post": {
+        "operationId": "LmsController_createLesson",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      },
+      "get": {
+        "operationId": "LmsController_getLessons",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/v1/lms/lessons/{lessonId}": {
+      "patch": {
+        "operationId": "LmsController_updateLesson",
+        "parameters": [
+          {
+            "name": "lessonId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "delete": {
+        "operationId": "LmsController_deleteLesson",
+        "parameters": [
+          {
+            "name": "lessonId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/v1/lms/competencies": {
+      "post": {
+        "operationId": "LmsController_createCompetency",
         "parameters": [],
         "responses": {
           "201": {
             "description": ""
           }
-        },
-        "tags": ["LMS"],
-        "security": [
+        }
+      },
+      "get": {
+        "operationId": "LmsController_listCompetencies",
+        "parameters": [
           {
-            "bearer": []
+            "name": "category",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
-        ]
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/v1/lms/courses/{courseId}/competencies": {
+      "post": {
+        "operationId": "LmsController_mapCompetency",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/v1/lms/courses/{courseId}/completion-rules": {
+      "post": {
+        "operationId": "LmsController_addCompletionRule",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/v1/lms/courses/{courseId}/completion-check/{memberId}": {
+      "get": {
+        "operationId": "LmsController_checkCompletion",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "memberId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/v1/lms/quizzes": {
+      "post": {
+        "operationId": "LmsController_createQuiz",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
       },
       "get": {
         "operationId": "LmsController_getQuizzes",
-        "summary": "List quizzes (paginated)",
         "parameters": [
           {
             "name": "page",
             "required": true,
             "in": "query",
             "schema": {
-              "type": "number"
+              "type": "string"
             }
           },
           {
@@ -2061,7 +3487,7 @@
             "required": true,
             "in": "query",
             "schema": {
-              "type": "number"
+              "type": "string"
             }
           }
         ],
@@ -2069,19 +3495,12 @@
           "200": {
             "description": ""
           }
-        },
-        "tags": ["LMS"],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
+        }
       }
     },
     "/api/v1/lms/quizzes/{id}": {
       "get": {
         "operationId": "LmsController_getQuizById",
-        "summary": "Get quiz with questions",
         "parameters": [
           {
             "name": "id",
@@ -2103,22 +3522,35 @@
               }
             }
           }
-        },
-        "tags": ["LMS"],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
+        }
       }
     },
-    "/api/v1/lms/quizzes/{id}/questions": {
+    "/api/v1/lms/quizzes/{id}/public": {
+      "get": {
+        "operationId": "LmsController_getQuizPublic",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/v1/lms/quizzes/{quizId}/questions": {
       "post": {
         "operationId": "LmsController_createQuestion",
-        "summary": "Add a question to a quiz",
         "parameters": [
           {
-            "name": "id",
+            "name": "quizId",
             "required": true,
             "in": "path",
             "schema": {
@@ -2130,22 +3562,33 @@
           "201": {
             "description": ""
           }
-        },
-        "tags": ["LMS"],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
-      }
-    },
-    "/api/v1/lms/quizzes/{id}/attempt": {
-      "post": {
-        "operationId": "LmsController_submitQuizAttempt",
-        "summary": "Submit quiz attempt (auto-graded)",
+        }
+      },
+      "get": {
+        "operationId": "LmsController_getQuestions",
         "parameters": [
           {
-            "name": "id",
+            "name": "quizId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/v1/lms/quizzes/{quizId}/attempts/start": {
+      "post": {
+        "operationId": "LmsController_startAttempt",
+        "parameters": [
+          {
+            "name": "quizId",
             "required": true,
             "in": "path",
             "schema": {
@@ -2157,37 +3600,141 @@
           "201": {
             "description": ""
           }
-        },
-        "tags": ["LMS"],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
+        }
       }
     },
-    "/api/v1/lms/battles": {
+    "/api/v1/lms/attempts/{attemptId}/submit": {
       "post": {
-        "operationId": "LmsController_createBattle",
-        "summary": "Create a quiz battle room",
+        "operationId": "LmsController_submitAttempt",
+        "parameters": [
+          {
+            "name": "attemptId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/v1/lms/quizzes/{quizId}/attempts/{memberId}": {
+      "get": {
+        "operationId": "LmsController_getAttemptHistory",
+        "parameters": [
+          {
+            "name": "quizId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "memberId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/v1/lms/grading-queue": {
+      "get": {
+        "operationId": "LmsController_getGradingQueue",
         "parameters": [],
         "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/lms/attempts/{attemptId}/grade": {
+      "post": {
+        "operationId": "LmsController_gradeAttempt",
+        "parameters": [
+          {
+            "name": "attemptId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
           "201": {
             "description": ""
           }
-        },
-        "tags": ["LMS"],
-        "security": [
+        }
+      }
+    },
+    "/api/v1/lms/quizzes/{quizId}/battles": {
+      "post": {
+        "operationId": "LmsController_createBattle",
+        "parameters": [
           {
-            "bearer": []
+            "name": "quizId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
           }
-        ]
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/v1/lms/battles/{gameCode}/join": {
+      "post": {
+        "operationId": "LmsController_joinBattle",
+        "parameters": [
+          {
+            "name": "gameCode",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
       }
     },
     "/api/v1/lms/battles/{gameCode}": {
       "get": {
         "operationId": "LmsController_getBattle",
-        "summary": "Get battle by game code",
         "parameters": [
           {
             "name": "gameCode",
@@ -2209,22 +3756,15 @@
               }
             }
           }
-        },
-        "tags": ["LMS"],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
+        }
       }
     },
-    "/api/v1/lms/courses/{id}/enroll": {
+    "/api/v1/lms/battles/{gameCode}/start": {
       "post": {
-        "operationId": "LmsController_startCourse",
-        "summary": "Enroll / start a course",
+        "operationId": "LmsController_startBattle",
         "parameters": [
           {
-            "name": "id",
+            "name": "gameCode",
             "required": true,
             "in": "path",
             "schema": {
@@ -2236,19 +3776,112 @@
           "201": {
             "description": ""
           }
-        },
-        "tags": ["LMS"],
-        "security": [
+        }
+      }
+    },
+    "/api/v1/lms/battles/{gameCode}/answer": {
+      "post": {
+        "operationId": "LmsController_submitBattleAnswer",
+        "parameters": [
           {
-            "bearer": []
+            "name": "gameCode",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
           }
-        ]
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/v1/lms/battles/{gameCode}/finish": {
+      "post": {
+        "operationId": "LmsController_finishBattle",
+        "parameters": [
+          {
+            "name": "gameCode",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/v1/lms/battles/{gameCode}/scoreboard": {
+      "get": {
+        "operationId": "LmsController_getBattleScoreboard",
+        "parameters": [
+          {
+            "name": "gameCode",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/v1/lms/courses/{courseId}/enroll": {
+      "post": {
+        "operationId": "LmsController_startCourse",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/v1/lms/lessons/{lessonId}/complete": {
+      "post": {
+        "operationId": "LmsController_completeLesson",
+        "parameters": [
+          {
+            "name": "lessonId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
       }
     },
     "/api/v1/lms/progress/{memberId}": {
       "get": {
         "operationId": "LmsController_getProgress",
-        "summary": "Get course progress for a member",
         "parameters": [
           {
             "name": "memberId",
@@ -2273,13 +3906,47 @@
               }
             }
           }
-        },
-        "tags": ["LMS"],
-        "security": [
+        }
+      }
+    },
+    "/api/v1/lms/courses/{courseId}/offline-pack": {
+      "get": {
+        "operationId": "LmsController_getOfflinePack",
+        "parameters": [
           {
-            "bearer": []
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
           }
-        ]
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/v1/lms/courses/{courseId}/pack-size": {
+      "get": {
+        "operationId": "LmsController_getPackSize",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
       }
     },
     "/api/v1/enrichment/spiritual-logs": {
@@ -2525,11 +4192,67 @@
         ]
       }
     },
+    "/api/v1/projects/plans/templates": {
+      "get": {
+        "operationId": "ProjectsController_getTemplates",
+        "summary": "T-1022: List available plan templates",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Projects"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/projects/plans/from-template": {
+      "post": {
+        "operationId": "ProjectsController_createFromTemplate",
+        "summary": "T-1022: Create plan from template",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePlanFromTemplateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Projects"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/projects/plans": {
       "post": {
         "operationId": "ProjectsController_createPlan",
-        "summary": "Create a new plan",
+        "summary": "Create a new plan (T-1021)",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePlanDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": ""
@@ -2617,12 +4340,10 @@
             "bearer": []
           }
         ]
-      }
-    },
-    "/api/v1/projects/plans/{id}/transition": {
-      "post": {
-        "operationId": "ProjectsController_transitionPlan",
-        "summary": "Transition plan status (SM-2)",
+      },
+      "patch": {
+        "operationId": "ProjectsController_updatePlan",
+        "summary": "T-1023: Update plan (autosave — creates version)",
         "parameters": [
           {
             "name": "id",
@@ -2633,6 +4354,80 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePlanDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Projects"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/projects/plans/{id}/versions": {
+      "get": {
+        "operationId": "ProjectsController_getPlanVersions",
+        "summary": "T-1023: Get plan version history",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Projects"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/projects/plans/{id}/transition": {
+      "post": {
+        "operationId": "ProjectsController_transitionPlan",
+        "summary": "Transition plan status (SM-2) with guards (T-1024/T-1026)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransitionPlanDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": ""
@@ -2649,7 +4444,7 @@
     "/api/v1/projects/plans/{id}/generate": {
       "post": {
         "operationId": "ProjectsController_generateFromPlan",
-        "summary": "Generate project + tasks from approved plan",
+        "summary": "T-1028: Generate project + tasks from approved plan (RACI + budget)",
         "parameters": [
           {
             "name": "id",
@@ -2683,8 +4478,18 @@
     "/api/v1/projects": {
       "post": {
         "operationId": "ProjectsController_createProject",
-        "summary": "Create a new project",
+        "summary": "Create a new project (T-1021)",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProjectDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": ""
@@ -2755,6 +4560,33 @@
         ]
       }
     },
+    "/api/v1/projects/tasks/due-alerts": {
+      "get": {
+        "operationId": "ProjectsController_getDueAlerts",
+        "summary": "T-1036: Get tasks due within 48h",
+        "parameters": [
+          {
+            "name": "hours",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Projects"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/projects/{id}": {
       "get": {
         "operationId": "ProjectsController_findProjectById",
@@ -2803,8 +4635,45 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransitionProjectDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Projects"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/projects/{id}/calendar": {
+      "get": {
+        "operationId": "ProjectsController_getCalendar",
+        "summary": "T-1033: Get calendar data for project tasks",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
             "description": ""
           }
         },
@@ -2830,6 +4699,16 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTaskDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": ""
@@ -2954,6 +4833,16 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTaskDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": ""
@@ -2970,7 +4859,7 @@
     "/api/v1/projects/tasks/{id}/transition": {
       "post": {
         "operationId": "ProjectsController_transitionTask",
-        "summary": "Transition task status (SM-4)",
+        "summary": "Transition task status (SM-4) with EXP hooks (T-1037)",
         "parameters": [
           {
             "name": "id",
@@ -2981,6 +4870,16 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransitionTaskDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": ""
@@ -3024,8 +4923,18 @@
     "/api/v1/tickets": {
       "post": {
         "operationId": "TicketsController_createTicket",
-        "summary": "Create a new ticket (auto-generates ticketNumber)",
+        "summary": "Create ticket (auto-generates number + SLA deadlines)",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTicketDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": ""
@@ -3120,6 +5029,121 @@
         ]
       }
     },
+    "/api/v1/tickets/sla-dashboard": {
+      "get": {
+        "operationId": "TicketsController_getSlaDashboard",
+        "summary": "T-1058: SLA metrics dashboard",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Tickets"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/tickets/category-routing": {
+      "get": {
+        "operationId": "TicketsController_getCategoryRouting",
+        "summary": "T-1042: Get category → assignee routing rules",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Tickets"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/tickets/consent-templates": {
+      "get": {
+        "operationId": "TicketsController_getConsentTemplates",
+        "summary": "T-1054: List guardian consent templates",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Tickets"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/tickets/consent/{templateKey}": {
+      "post": {
+        "operationId": "TicketsController_createConsentTicket",
+        "summary": "T-1054: Create consent ticket from template",
+        "parameters": [
+          {
+            "name": "templateKey",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Tickets"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/tickets/{id}/approval-flow": {
+      "get": {
+        "operationId": "TicketsController_getApprovalFlow",
+        "summary": "P3-004: Get latest ticket approval flow with steps and decisions",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Tickets"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/tickets/{id}": {
       "get": {
         "operationId": "TicketsController_findById",
@@ -3168,9 +5192,144 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransitionTicketDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": ""
+          }
+        },
+        "tags": ["Tickets"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/tickets/{id}/escalate": {
+      "post": {
+        "operationId": "TicketsController_escalateTicket",
+        "summary": "T-1053: Escalate ticket priority",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EscalateTicketDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Tickets"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/tickets/{id}/approval": {
+      "post": {
+        "operationId": "TicketsController_requestApproval",
+        "summary": "T-1046: Request approval on ticket",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestApprovalDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Tickets"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/tickets/{id}/approve": {
+      "post": {
+        "operationId": "TicketsController_handleApproval",
+        "summary": "T-1047: Approve/reject ticket approval request",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApproveRejectDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
           }
         },
         "tags": ["Tickets"],
@@ -3195,6 +5354,16 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddCommentDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": ""
@@ -3238,6 +5407,16 @@
         "operationId": "FinanceController_createAccount",
         "summary": "Create financial account",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAccountDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": ""
@@ -3334,11 +5513,82 @@
         ]
       }
     },
+    "/api/v1/finance/cost-centers": {
+      "post": {
+        "operationId": "FinanceController_createCostCenter",
+        "summary": "Create cost center for budget tracking",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCostCenterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Finance"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "get": {
+        "operationId": "FinanceController_getCostCenters",
+        "summary": "List all cost centers",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Finance"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/finance/transactions": {
       "post": {
         "operationId": "FinanceController_createTransaction",
         "summary": "Create a financial transaction",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTransactionDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": ""
@@ -3366,6 +5616,16 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransitionTransactionDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": ""
@@ -3384,6 +5644,16 @@
         "operationId": "FinanceController_createFee",
         "summary": "Create a member fee",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFeeDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": ""
@@ -3468,6 +5738,80 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PayFeeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Finance"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/finance/fees/{id}/mark-overdue": {
+      "post": {
+        "operationId": "FinanceController_markFeeOverdue",
+        "summary": "Mark a fee overdue and emit overdue notice event (SM-7)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Finance"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/finance/fees/{id}/waive": {
+      "post": {
+        "operationId": "FinanceController_waiveFee",
+        "summary": "Waive a fee with reason (T-1068)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WaiveFeeDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": ""
@@ -3508,6 +5852,118 @@
         ]
       }
     },
+    "/api/v1/finance/fee-plans": {
+      "post": {
+        "operationId": "FinanceController_createFeePlan",
+        "summary": "Create recurring fee plan template",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFeePlanDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Finance"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "get": {
+        "operationId": "FinanceController_getFeePlans",
+        "summary": "List fee plans",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Finance"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/finance/sponsors": {
+      "post": {
+        "operationId": "FinanceController_createSponsor",
+        "summary": "Record sponsor or in-kind contribution",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSponsorDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Finance"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "get": {
+        "operationId": "FinanceController_getSponsors",
+        "summary": "List sponsors with summary",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Finance"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/finance/summary": {
       "get": {
         "operationId": "FinanceController_getFinanceSummary",
@@ -3535,11 +5991,197 @@
         ]
       }
     },
+    "/api/v1/finance/projections": {
+      "get": {
+        "operationId": "FinanceController_getProjections",
+        "summary": "Balance projections (T-1064)",
+        "parameters": [
+          {
+            "name": "days",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Finance"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/finance/budget-variance": {
+      "get": {
+        "operationId": "FinanceController_getBudgetVariance",
+        "summary": "Budget vs actual variance report (T-1072)",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Finance"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/finance/parent-view/{memberId}": {
+      "get": {
+        "operationId": "FinanceController_getParentFeeView",
+        "summary": "Parent-scoped fee view (T-1070)",
+        "parameters": [
+          {
+            "name": "memberId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Finance"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/finance/ledger": {
+      "get": {
+        "operationId": "FinanceController_getLedgerEntries",
+        "summary": "List double-entry ledger entries",
+        "parameters": [
+          {
+            "name": "transactionId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "accountId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "costCenterId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Finance"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/finance/export/transactions": {
+      "get": {
+        "operationId": "FinanceController_exportTransactions",
+        "summary": "Export transactions data (T-1065/T-1074)",
+        "parameters": [
+          {
+            "name": "accountId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fromDate",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "toDate",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Finance"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/finance/reconciliation": {
+      "get": {
+        "operationId": "FinanceController_reconcile",
+        "summary": "Reconcile account balances (T-1078)",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Finance"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/assets/categories": {
       "post": {
         "operationId": "AssetsController_createCategory",
         "summary": "Create asset category",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCategoryDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": ""
@@ -3554,7 +6196,7 @@
       },
       "get": {
         "operationId": "AssetsController_getCategories",
-        "summary": "List asset categories with counts",
+        "summary": "List categories",
         "parameters": [],
         "responses": {
           "200": {
@@ -3582,8 +6224,18 @@
     "/api/v1/assets": {
       "post": {
         "operationId": "AssetsController_createAsset",
-        "summary": "Create a new asset",
+        "summary": "Create asset",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAssetDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": ""
@@ -3598,7 +6250,7 @@
       },
       "get": {
         "operationId": "AssetsController_getAssets",
-        "summary": "List assets (paginated, filterable)",
+        "summary": "List assets with filters",
         "parameters": [
           {
             "name": "categoryId",
@@ -3662,7 +6314,7 @@
         ]
       }
     },
-    "/api/v1/assets/inventory": {
+    "/api/v1/assets/summary": {
       "get": {
         "operationId": "AssetsController_getInventorySummary",
         "summary": "Get inventory summary by category",
@@ -3680,10 +6332,120 @@
         ]
       }
     },
+    "/api/v1/assets/export": {
+      "get": {
+        "operationId": "AssetsController_exportAssets",
+        "summary": "Export all assets as JSON",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Assets"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/assets/import": {
+      "post": {
+        "operationId": "AssetsController_importAssets",
+        "summary": "Bulk import assets",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportAssetsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Assets"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/assets/by-location": {
+      "get": {
+        "operationId": "AssetsController_getAssetsByLocation",
+        "summary": "T-1085: Get assets by location",
+        "parameters": [
+          {
+            "name": "location",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Assets"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/assets/stock-alerts": {
+      "get": {
+        "operationId": "AssetsController_getStockAlerts",
+        "summary": "T-1094: Get low-stock alerts",
+        "parameters": [
+          {
+            "name": "threshold",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Assets"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/assets/{id}": {
       "get": {
         "operationId": "AssetsController_getAssetById",
-        "summary": "Get asset by ID with recent loans",
+        "summary": "Get asset by ID",
         "parameters": [
           {
             "name": "id",
@@ -3712,12 +6474,45 @@
             "bearer": []
           }
         ]
-      }
-    },
-    "/api/v1/assets/{id}/qr": {
-      "get": {
-        "operationId": "AssetsController_getQrData",
-        "summary": "Get QR code payload for asset",
+      },
+      "patch": {
+        "operationId": "AssetsController_updateAsset",
+        "summary": "T-1085: Update asset",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAssetDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Assets"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "AssetsController_retireAsset",
+        "summary": "T-1085: Retire/soft-delete asset",
         "parameters": [
           {
             "name": "id",
@@ -3741,11 +6536,30 @@
         ]
       }
     },
-    "/api/v1/assets/loans": {
+    "/api/v1/assets/{id}/dispose": {
       "post": {
-        "operationId": "AssetsController_createLoan",
-        "summary": "Request an asset loan",
-        "parameters": [],
+        "operationId": "AssetsController_disposeAsset",
+        "summary": "T-1090: Dispose asset (donated/scrapped)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DisposeAssetDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": ""
@@ -3759,10 +6573,772 @@
         ]
       }
     },
-    "/api/v1/assets/loans/{id}/transition": {
+    "/api/v1/assets/{id}/qr": {
+      "get": {
+        "operationId": "AssetsController_generateQr",
+        "summary": "Generate QR data URL for asset",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Assets"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/assets/{id}/custom-fields": {
+      "post": {
+        "operationId": "AssetsController_setCustomField",
+        "summary": "Set custom field on asset",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetCustomFieldDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Assets"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/assets/loans": {
+      "post": {
+        "operationId": "AssetsController_createLoan",
+        "summary": "Create loan request",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLoanDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Assets"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "get": {
+        "operationId": "AssetsController_getLoans",
+        "summary": "List all loans",
+        "parameters": [
+          {
+            "name": "status",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "assetId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Assets"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/assets/loans/overdue": {
+      "get": {
+        "operationId": "AssetsController_getOverdueLoans",
+        "summary": "T-1088: Get overdue loans",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Assets"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/assets/loans/{loanId}/transition": {
       "post": {
         "operationId": "AssetsController_transitionLoan",
-        "summary": "Transition loan status (SM-8)",
+        "summary": "Transition loan state (approve/checkout/return/report_lost)",
+        "parameters": [
+          {
+            "name": "loanId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransitionLoanDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Assets"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/assets/loans/{loanId}/guardian-accept": {
+      "post": {
+        "operationId": "AssetsController_guardianAcceptLoan",
+        "summary": "T-1087: Guardian accept/reject loan for minor",
+        "parameters": [
+          {
+            "name": "loanId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GuardianAcceptDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Assets"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/assets/kits": {
+      "post": {
+        "operationId": "AssetsController_createKitTemplate",
+        "summary": "Create kit template",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateKitTemplateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Assets"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "get": {
+        "operationId": "AssetsController_getKitTemplates",
+        "summary": "List kit templates",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Assets"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/assets/maintenance": {
+      "post": {
+        "operationId": "AssetsController_createMaintenance",
+        "summary": "Create maintenance schedule",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMaintenanceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Assets"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "get": {
+        "operationId": "AssetsController_getMaintenanceSchedules",
+        "summary": "List maintenance schedules",
+        "parameters": [
+          {
+            "name": "status",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Assets"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/assets/maintenance/{scheduleId}/complete": {
+      "post": {
+        "operationId": "AssetsController_completeMaintenance",
+        "summary": "T-1089: Complete maintenance task and reschedule",
+        "parameters": [
+          {
+            "name": "scheduleId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Assets"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/assets/uniform/issue": {
+      "post": {
+        "operationId": "AssetsController_issueUniform",
+        "summary": "T-1092: Issue uniform to member",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IssueUniformDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Assets"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/assets/uniform": {
+      "get": {
+        "operationId": "AssetsController_getUniformIssues",
+        "summary": "T-1092: List uniform issues",
+        "parameters": [
+          {
+            "name": "memberId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Assets"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/assets/uniform/{uniformId}/return": {
+      "post": {
+        "operationId": "AssetsController_returnUniform",
+        "summary": "T-1092: Return uniform",
+        "parameters": [
+          {
+            "name": "uniformId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReturnUniformDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Assets"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/assets/kits/{templateId}/checklist": {
+      "post": {
+        "operationId": "AssetsController_generatePackChecklist",
+        "summary": "T-1093: Generate pack checklist from kit template",
+        "parameters": [
+          {
+            "name": "templateId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Assets"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/assets/export/csv": {
+      "get": {
+        "operationId": "AssetsController_exportAssetsCsv",
+        "summary": "T-1098: Export assets as CSV",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Assets"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/assets/loans/export/csv": {
+      "get": {
+        "operationId": "AssetsController_exportLoansCsv",
+        "summary": "T-1098: Export loans as CSV",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Assets"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/process/sops": {
+      "post": {
+        "operationId": "ProcessController_createSop",
+        "summary": "Create SOP document with initial version",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Process"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "get": {
+        "operationId": "ProcessController_findSops",
+        "summary": "List/search SOP documents",
+        "parameters": [
+          {
+            "name": "status",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "category",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tag",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Process"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/process/sops/categories": {
+      "get": {
+        "operationId": "ProcessController_findSopCategories",
+        "summary": "List distinct SOP categories",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Process"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/process/sops/tags": {
+      "get": {
+        "operationId": "ProcessController_findSopTags",
+        "summary": "List all SOP tags",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Process"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/process/sops/{id}": {
+      "get": {
+        "operationId": "ProcessController_findSopById",
+        "summary": "Get SOP document with versions & approvals",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Process"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "ProcessController_updateSop",
+        "summary": "Update SOP metadata (draft only)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Process"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/process/sops/{id}/versions": {
+      "post": {
+        "operationId": "ProcessController_createSopVersion",
+        "summary": "Create a new SOP version",
         "parameters": [
           {
             "name": "id",
@@ -3778,7 +7354,224 @@
             "description": ""
           }
         },
-        "tags": ["Assets"],
+        "tags": ["Process"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/process/sops/{id}/versions/{versionNo}": {
+      "get": {
+        "operationId": "ProcessController_getSopVersion",
+        "summary": "Get specific SOP version content",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "versionNo",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Process"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/process/sops/{id}/versions/{versionNo}/submit": {
+      "post": {
+        "operationId": "ProcessController_submitSopForReview",
+        "summary": "Submit SOP version for review",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "versionNo",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Process"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/process/sops/{id}/versions/{versionNo}/approve": {
+      "post": {
+        "operationId": "ProcessController_approveSopVersion",
+        "summary": "Approve or reject SOP version",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "versionNo",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Process"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/process/sops/{id}/versions/{versionNo}/publish": {
+      "post": {
+        "operationId": "ProcessController_publishSopVersion",
+        "summary": "Publish an approved SOP version",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "versionNo",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Process"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/process/sops/{id}/diff": {
+      "get": {
+        "operationId": "ProcessController_diffSopVersions",
+        "summary": "Compare two SOP versions",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Process"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/process/sops/{id}/archive": {
+      "post": {
+        "operationId": "ProcessController_archiveSop",
+        "summary": "Archive an SOP document",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Process"],
         "security": [
           {
             "bearer": []
@@ -4021,6 +7814,371 @@
             }
           }
         ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Process"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/process/definitions/{id}/graph": {
+      "post": {
+        "operationId": "ProcessController_saveGraph",
+        "summary": "T-1106: Save workflow graph (nodes + edges)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Process"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/process/graph-runs": {
+      "post": {
+        "operationId": "ProcessController_startGraphRun",
+        "summary": "T-1108: Start a graph-based workflow run",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Process"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/process/graph-runs/{id}/execute": {
+      "post": {
+        "operationId": "ProcessController_executeNode",
+        "summary": "T-1108: Execute current node in graph run",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Process"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/process/graph-runs/trigger": {
+      "post": {
+        "operationId": "ProcessController_handleTrigger",
+        "summary": "T-1109: Trigger workflows by event type",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Process"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/process/graph-runs/{id}/history": {
+      "get": {
+        "operationId": "ProcessController_getRunHistory",
+        "summary": "T-1110: Get run history timeline",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Process"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/process/graph-runs/stuck": {
+      "get": {
+        "operationId": "ProcessController_findStuckRuns",
+        "summary": "T-1110: Find stuck workflow runs",
+        "parameters": [
+          {
+            "name": "thresholdMinutes",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Process"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/process/graph-runs/{id}/retry": {
+      "post": {
+        "operationId": "ProcessController_retryStuckRun",
+        "summary": "T-1110: Retry a stuck workflow run",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Process"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/process/templates": {
+      "get": {
+        "operationId": "ProcessController_listTemplates",
+        "summary": "T-1111: List workflow templates",
+        "parameters": [
+          {
+            "name": "category",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Process"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/process/templates/{slug}": {
+      "get": {
+        "operationId": "ProcessController_getTemplate",
+        "summary": "T-1111: Get template by slug",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Process"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/process/templates/{slug}/install": {
+      "post": {
+        "operationId": "ProcessController_installTemplate",
+        "summary": "T-1111: Install template into org as new definition",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Process"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/process/definitions/{id}/export": {
+      "post": {
+        "operationId": "ProcessController_exportDefinition",
+        "summary": "T-1112: Export workflow definition as JSON",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Process"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/process/definitions/import": {
+      "post": {
+        "operationId": "ProcessController_importDefinition",
+        "summary": "T-1112: Import workflow definition from JSON",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Process"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/process/templates/seed": {
+      "post": {
+        "operationId": "ProcessController_seedTemplates",
+        "summary": "T-1113: Seed built-in templates",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Process"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/process/health": {
+      "get": {
+        "operationId": "ProcessController_getHealth",
+        "summary": "T-1117: Process module health metrics",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Process"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/process/auto-resolve-stuck": {
+      "post": {
+        "operationId": "ProcessController_autoResolveStuck",
+        "summary": "T-1118: Auto-resolve stuck runs (>24h)",
+        "parameters": [],
         "responses": {
           "201": {
             "description": ""
@@ -4381,6 +8539,16 @@
         "operationId": "NotificationsController_updatePreference",
         "summary": "Update a notification preference",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePreferenceDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": ""
@@ -4415,6 +8583,16 @@
         "operationId": "NotificationsController_upsertTemplate",
         "summary": "Create or update a notification template",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertTemplateDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": ""
@@ -4703,131 +8881,36 @@
         ]
       }
     },
-    "/api/v1/file-storage/upload-request": {
-      "post": {
-        "operationId": "FileStorageController_requestUpload",
-        "summary": "Request a signed URL to upload a file to GCS",
-        "parameters": [],
-        "responses": {
-          "201": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
-          }
-        },
-        "tags": ["FileStorage"],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
-      }
-    },
-    "/api/v1/file-storage/{fileRefId}/download-url": {
-      "get": {
-        "operationId": "FileStorageController_getDownloadUrl",
-        "summary": "Get a signed URL to download a file",
-        "parameters": [
-          {
-            "name": "fileRefId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
-          }
-        },
-        "tags": ["FileStorage"],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
-      }
-    },
-    "/api/v1/file-storage": {
-      "get": {
-        "operationId": "FileStorageController_listFiles",
-        "summary": "List files for the org, optionally filtered by entity",
-        "parameters": [
-          {
-            "name": "entityType",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "entityId",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": ["FileStorage"],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
-      }
-    },
-    "/api/v1/file-storage/{fileRefId}": {
-      "delete": {
-        "operationId": "FileStorageController_deleteFile",
-        "summary": "Soft-delete a file reference",
-        "parameters": [
-          {
-            "name": "fileRefId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": ""
-          }
-        },
-        "tags": ["FileStorage"],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
-      }
-    },
     "/api/v1/system/health": {
       "get": {
         "operationId": "SystemController_health",
         "summary": "API health check (no auth required)",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["System"]
+      }
+    },
+    "/api/v1/system/health/canary": {
+      "get": {
+        "operationId": "SystemController_canary",
+        "summary": "Canary endpoint for post-deploy verification",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["System"]
+      }
+    },
+    "/api/v1/system/health/probes": {
+      "get": {
+        "operationId": "SystemController_probeResults",
+        "summary": "Detailed synthetic probe results",
         "parameters": [],
         "responses": {
           "200": {
@@ -4917,6 +9000,16 @@
         "operationId": "SystemController_saveReleaseGateReport",
         "summary": "Save a release gate report from CI pipeline",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveReleaseGateReportDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": ""
@@ -4977,6 +9070,31 @@
         ]
       }
     },
+    "/api/v1/data-import/members/async": {
+      "post": {
+        "operationId": "DataImportController_queueMembersImport",
+        "summary": "Queue a member CSV import and track progress by batch ID",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["DataImport"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/data-import/history": {
       "get": {
         "operationId": "DataImportController_getHistory",
@@ -5003,11 +9121,65 @@
           }
         ]
       }
+    },
+    "/api/v1/data-import/batches/{batchId}/report": {
+      "get": {
+        "operationId": "DataImportController_getBatchReport",
+        "summary": "Download the validation/import report CSV for a batch",
+        "parameters": [
+          {
+            "name": "batchId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["DataImport"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/data-import/batches/{batchId}": {
+      "get": {
+        "operationId": "DataImportController_getBatch",
+        "summary": "Get import batch status, progress, and validation summary",
+        "parameters": [
+          {
+            "name": "batchId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["DataImport"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
     }
   },
   "info": {
     "title": "TTNDD_OPS API",
-    "description": "Thanh Thiếu Niên Đại Đạo — Platform REST API.\nMulti-tenant ERP for DTNDD scouting operations.\nAll endpoints require Bearer token. RLS isolation via orgId.",
+    "description": "Thanh Thiếu Niên Đại Đạo — Platform REST API\n\nMulti-tenant ERP platform for DTNDD scouting operations.\nAll endpoints require Bearer token and X-Org-Id header for RLS isolation.",
     "version": "0.1.0",
     "contact": {}
   },
@@ -5038,7 +9210,7 @@
     },
     {
       "name": "Events",
-      "description": "Camps, events, registration (Module 12)"
+      "description": "Camps, events, registration, check-in (Module 12)"
     },
     {
       "name": "LMS",
@@ -5050,19 +9222,19 @@
     },
     {
       "name": "Projects",
-      "description": "Service learning projects (Module 2)"
+      "description": "Service learning projects, tasks (Module 2)"
     },
     {
       "name": "Tickets",
-      "description": "Support tickets (Module 3)"
+      "description": "Support tickets, status tracking (Module 3)"
     },
     {
       "name": "Finance",
-      "description": "Fees, payments (Module 4)"
+      "description": "Fees, payments, transactions (Module 4)"
     },
     {
       "name": "Assets",
-      "description": "Inventory (Module 5)"
+      "description": "Inventory, check-out/in (Module 5)"
     },
     {
       "name": "Process",
@@ -5070,15 +9242,15 @@
     },
     {
       "name": "Notifications",
-      "description": "In-app, push, email (Module 14)"
+      "description": "In-app, push, email notifications (Module 14)"
     },
     {
       "name": "ChildSafety",
-      "description": "Child protection (Module 15)"
+      "description": "Child protection, consent, incidents (Module 15)"
     },
     {
       "name": "Reports",
-      "description": "Dashboards, analytics"
+      "description": "Dashboards, analytics, exports"
     }
   ],
   "servers": [],
@@ -5090,6 +9262,1266 @@
         "type": "http"
       }
     },
-    "schemas": {}
+    "schemas": {
+      "CreateMemberProfileDto": {
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "example": "Nguyễn Văn An"
+          },
+          "birthDate": {
+            "type": "string",
+            "example": "2012-08-22"
+          },
+          "gender": {
+            "type": "string",
+            "example": "male"
+          },
+          "address": {
+            "type": "string",
+            "example": "Q.1, TP. HCM"
+          },
+          "personalPhone": {
+            "type": "string",
+            "example": "0901234567"
+          },
+          "personalEmail": {
+            "type": "string",
+            "example": "an@email.com"
+          },
+          "guardianName": {
+            "type": "string",
+            "example": "Trần Thị Mẹ"
+          },
+          "guardianPhone": {
+            "type": "string",
+            "example": "0909876543"
+          },
+          "guardianRelation": {
+            "type": "string",
+            "example": "mother"
+          },
+          "healthNotes": {
+            "type": "string"
+          },
+          "emergencyContact": {
+            "type": "string",
+            "example": "0901234999"
+          }
+        },
+        "required": ["fullName"]
+      },
+      "CreateMemberDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "example": "user-uuid-here"
+          },
+          "role": {
+            "type": "string",
+            "example": "member",
+            "enum": ["member", "leader", "admin"]
+          },
+          "branchId": {
+            "type": "string"
+          },
+          "unitId": {
+            "type": "string"
+          },
+          "memberCode": {
+            "type": "string",
+            "example": "DS-001"
+          },
+          "scoutName": {
+            "type": "string",
+            "example": "Sơn Ca"
+          },
+          "heroName": {
+            "type": "string",
+            "example": "Chiến binh Ánh Sáng"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/CreateMemberProfileDto"
+          }
+        },
+        "required": ["userId", "role", "profile"]
+      },
+      "UpdateMemberProfileDto": {
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string"
+          },
+          "birthDate": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "personalPhone": {
+            "type": "string"
+          },
+          "personalEmail": {
+            "type": "string"
+          },
+          "guardianName": {
+            "type": "string"
+          },
+          "guardianPhone": {
+            "type": "string"
+          },
+          "guardianRelation": {
+            "type": "string"
+          },
+          "healthNotes": {
+            "type": "string"
+          },
+          "emergencyContact": {
+            "type": "string"
+          }
+        }
+      },
+      "TransitionStatusDto": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "example": "approve",
+            "enum": [
+              "approve",
+              "reject",
+              "voluntary_pause",
+              "resume",
+              "discipline",
+              "reinstate",
+              "branch_transition",
+              "accept_in_new_branch",
+              "offboarding"
+            ]
+          }
+        },
+        "required": ["action"]
+      },
+      "TransferMemberDto": {
+        "type": "object",
+        "properties": {
+          "toBranchId": {
+            "type": "string"
+          },
+          "toUnitId": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string",
+            "example": "Chuyển do thay đổi nơi sinh hoạt"
+          }
+        },
+        "required": ["toBranchId"]
+      },
+      "AssignUnitDto": {
+        "type": "object",
+        "properties": {
+          "unitId": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": ["unitId"]
+      },
+      "SignTransferDto": {
+        "type": "object",
+        "properties": {
+          "signatureNote": {
+            "type": "string",
+            "example": "Xác nhận tiếp nhận đoàn sinh"
+          },
+          "accepted": {
+            "type": "boolean"
+          }
+        },
+        "required": ["signatureNote"]
+      },
+      "CreatePlanFromTemplateDto": {
+        "type": "object",
+        "properties": {
+          "templateKey": {
+            "type": "string",
+            "example": "camp",
+            "description": "Template key: camp | event | year_plan"
+          },
+          "title": {
+            "type": "string",
+            "example": "Trại hè Vũng Tàu 2026"
+          }
+        },
+        "required": ["templateKey", "title"]
+      },
+      "CreatePlanDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "Trại hè Vũng Tàu 2026"
+          },
+          "planType": {
+            "type": "string",
+            "example": "camp",
+            "description": "camp | event | year_plan"
+          },
+          "sectionIDescription": {
+            "type": "string",
+            "description": "Section I: Mô tả chung"
+          },
+          "sectionIIObjectives": {
+            "type": "object",
+            "description": "Section II: Mục tiêu"
+          },
+          "sectionIIIOutcomes": {
+            "type": "object",
+            "description": "Section III: Kết quả dự kiến"
+          },
+          "sectionIVActivities": {
+            "type": "object",
+            "description": "Section IV: Hoạt động"
+          },
+          "sectionVPersonnel": {
+            "type": "object",
+            "description": "Section V: Nhân sự & RACI"
+          },
+          "sectionVIContent": {
+            "type": "object",
+            "description": "Section VI: Nội dung chương trình"
+          },
+          "sectionVIITimeline": {
+            "type": "object",
+            "description": "Section VII: Thời gian biểu"
+          },
+          "sectionVIIIProposal": {
+            "type": "string",
+            "description": "Section VIII: Đề xuất"
+          },
+          "sectionIXBudget": {
+            "type": "object",
+            "description": "Section IX: Ngân sách"
+          }
+        },
+        "required": ["title"]
+      },
+      "UpdatePlanDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "sectionIDescription": {
+            "type": "string"
+          },
+          "sectionIIObjectives": {
+            "type": "object"
+          },
+          "sectionIIIOutcomes": {
+            "type": "object"
+          },
+          "sectionIVActivities": {
+            "type": "object"
+          },
+          "sectionVPersonnel": {
+            "type": "object"
+          },
+          "sectionVIContent": {
+            "type": "object"
+          },
+          "sectionVIITimeline": {
+            "type": "object"
+          },
+          "sectionVIIIProposal": {
+            "type": "string"
+          },
+          "sectionIXBudget": {
+            "type": "object"
+          }
+        }
+      },
+      "TransitionPlanDto": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "example": "submit",
+            "description": "submit | approve | reject | lock | resubmit"
+          },
+          "rejectionReason": {
+            "type": "string",
+            "example": "Thiếu mục ngân sách"
+          }
+        },
+        "required": ["action"]
+      },
+      "CreateProjectDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "Dự án trại hè 2026"
+          },
+          "description": {
+            "type": "string"
+          },
+          "projectType": {
+            "type": "string",
+            "example": "camp"
+          },
+          "sourcePlanId": {
+            "type": "string"
+          },
+          "objectives": {
+            "type": "object"
+          },
+          "keyResults": {
+            "type": "object"
+          },
+          "ownerId": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "example": "2026-07-01"
+          },
+          "endDate": {
+            "type": "string",
+            "example": "2026-07-05"
+          },
+          "settings": {
+            "type": "object"
+          }
+        },
+        "required": ["title"]
+      },
+      "TransitionProjectDto": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "example": "activate",
+            "description": "activate | hold | resume | complete | cancel"
+          }
+        },
+        "required": ["action"]
+      },
+      "CreateTaskDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "Chuẩn bị lều bạt"
+          },
+          "description": {
+            "type": "string"
+          },
+          "taskType": {
+            "type": "string",
+            "example": "task"
+          },
+          "assigneeIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "reporterId": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "example": "2026-07-01"
+          },
+          "dueDate": {
+            "type": "string",
+            "example": "2026-07-05"
+          },
+          "storyPoints": {
+            "type": "number",
+            "minimum": 0,
+            "example": 3
+          },
+          "priority": {
+            "type": "string",
+            "example": "high"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "parentTaskId": {
+            "type": "string"
+          },
+          "position": {
+            "type": "number",
+            "example": 0
+          }
+        },
+        "required": ["title"]
+      },
+      "UpdateTaskDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "assigneeIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "dueDate": {
+            "type": "string"
+          },
+          "storyPoints": {
+            "type": "number",
+            "minimum": 0
+          },
+          "priority": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "position": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string",
+            "description": "Kanban status override for drag-drop"
+          }
+        }
+      },
+      "TransitionTaskDto": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "example": "start",
+            "description": "start | review | approve | reject | cancel"
+          }
+        },
+        "required": ["action"]
+      },
+      "CreateTicketDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "Không thể đăng nhập hệ thống"
+          },
+          "description": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string",
+            "example": "Tài khoản"
+          },
+          "priority": {
+            "type": "string",
+            "example": "high"
+          },
+          "assigneeId": {
+            "type": "string"
+          },
+          "dueDate": {
+            "type": "string",
+            "example": "2026-07-15"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "customFields": {
+            "type": "object"
+          },
+          "isSensitive": {
+            "type": "boolean",
+            "description": "Mark as sensitive/incident ticket"
+          },
+          "isAnonymous": {
+            "type": "boolean",
+            "description": "Anonymous submission"
+          }
+        },
+        "required": ["title"]
+      },
+      "TransitionTicketDto": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "example": "assign",
+            "description": "assign | start | resolve | close | reopen | reassign"
+          },
+          "assigneeId": {
+            "type": "string"
+          },
+          "approvalNotes": {
+            "type": "string"
+          }
+        },
+        "required": ["action"]
+      },
+      "EscalateTicketDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "example": "Không phản hồi sau 24h"
+          }
+        }
+      },
+      "ApprovalStepRequestDto": {
+        "type": "object",
+        "properties": {
+          "stepName": {
+            "type": "string",
+            "example": "Finance review"
+          },
+          "approverRole": {
+            "type": "string",
+            "example": "admin"
+          },
+          "approverUserId": {
+            "type": "string",
+            "example": "8b9f9d1a-0000-4000-8000-000000000001"
+          },
+          "dueInHours": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 720,
+            "example": 24,
+            "description": "SLA due time relative to request time"
+          }
+        },
+        "required": ["stepName"]
+      },
+      "RequestApprovalDto": {
+        "type": "object",
+        "properties": {
+          "approvalType": {
+            "type": "string",
+            "example": "budget",
+            "description": "Approval type: budget | consent | advancement | general"
+          },
+          "amount": {
+            "type": "number",
+            "example": 5000000,
+            "description": "Amount for budget approvals (VND)"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "steps": {
+            "description": "Optional multi-step approval flow. Omit to create the default one-step flow.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApprovalStepRequestDto"
+            }
+          }
+        },
+        "required": ["approvalType"]
+      },
+      "ApproveRejectDto": {
+        "type": "object",
+        "properties": {
+          "decision": {
+            "type": "string",
+            "example": "approve",
+            "description": "approve | reject"
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "required": ["decision"]
+      },
+      "AddCommentDto": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "example": "Đã kiểm tra — lỗi do mật khẩu hết hạn"
+          },
+          "isInternal": {
+            "type": "boolean",
+            "description": "Internal-only comment (not visible to requester)"
+          },
+          "attachments": {
+            "type": "object"
+          }
+        },
+        "required": ["content"]
+      },
+      "CreateAccountDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "accountType": {
+            "type": "string"
+          },
+          "branchId": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": ["name"]
+      },
+      "CreateCostCenterDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Trại huấn luyện 2026"
+          },
+          "code": {
+            "type": "string"
+          },
+          "parentId": {
+            "type": "string"
+          },
+          "budgetAmount": {
+            "type": "number",
+            "minimum": 0,
+            "example": 15000000
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": ["name", "budgetAmount"]
+      },
+      "CreateTransactionDto": {
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "string"
+          },
+          "transactionType": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "costCenterId": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number",
+            "minimum": 0
+          },
+          "description": {
+            "type": "string"
+          },
+          "sourceType": {
+            "type": "string"
+          },
+          "sourceId": {
+            "type": "string"
+          },
+          "referenceNo": {
+            "type": "string"
+          },
+          "transactionDate": {
+            "type": "string"
+          },
+          "receiptUrls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["accountId", "transactionType", "amount", "description", "transactionDate"]
+      },
+      "TransitionTransactionDto": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "description": "Action: approve, reject, complete, reverse"
+          }
+        },
+        "required": ["action"]
+      },
+      "CreateFeeDto": {
+        "type": "object",
+        "properties": {
+          "orgMemberId": {
+            "type": "string"
+          },
+          "feeType": {
+            "type": "string"
+          },
+          "feePeriod": {
+            "type": "string"
+          },
+          "amountDue": {
+            "type": "number",
+            "minimum": 0
+          },
+          "dueDate": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "required": ["orgMemberId", "amountDue"]
+      },
+      "PayFeeDto": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number",
+            "minimum": 0
+          },
+          "transactionId": {
+            "type": "string"
+          }
+        },
+        "required": ["amount"]
+      },
+      "WaiveFeeDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "example": "Hoàn cảnh khó khăn — miễn phí sinh hoạt Q2"
+          },
+          "approvedBy": {
+            "type": "string"
+          }
+        },
+        "required": ["reason"]
+      },
+      "CreateFeePlanDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Phí sinh hoạt hàng quý"
+          },
+          "frequency": {
+            "type": "string",
+            "example": "quarterly",
+            "description": "monthly | quarterly | yearly | one_time"
+          },
+          "amount": {
+            "type": "number",
+            "minimum": 0,
+            "example": 300000
+          },
+          "feeType": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          }
+        },
+        "required": ["name", "frequency", "amount"]
+      },
+      "CreateSponsorDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Ban Đại Diện Phụ Huynh"
+          },
+          "contributionType": {
+            "type": "string",
+            "example": "cash",
+            "description": "cash | in_kind"
+          },
+          "amount": {
+            "type": "number",
+            "minimum": 0,
+            "example": 7500000
+          },
+          "description": {
+            "type": "string"
+          },
+          "receivedDate": {
+            "type": "string"
+          },
+          "contactInfo": {
+            "type": "string"
+          }
+        },
+        "required": ["name", "contributionType", "amount"]
+      },
+      "CreateCategoryDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "ownerType": {
+            "type": "string"
+          },
+          "branchId": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
+          }
+        },
+        "required": ["name"]
+      },
+      "CreateAssetDto": {
+        "type": "object",
+        "properties": {
+          "assetCode": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "string"
+          },
+          "ownerType": {
+            "type": "string"
+          },
+          "branchId": {
+            "type": "string"
+          },
+          "condition": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number",
+            "minimum": 1
+          },
+          "unit": {
+            "type": "string"
+          },
+          "purchaseDate": {
+            "type": "string"
+          },
+          "purchasePrice": {
+            "type": "number"
+          },
+          "serialNumber": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "photoUrls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "photoFileRefIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "type": "string"
+          },
+          "managedBy": {
+            "type": "string"
+          }
+        },
+        "required": ["assetCode", "name", "categoryId"]
+      },
+      "ImportAssetItemDto": {
+        "type": "object",
+        "properties": {
+          "assetCode": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number",
+            "minimum": 1
+          },
+          "unit": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "serialNumber": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "condition": {
+            "type": "string"
+          }
+        },
+        "required": ["assetCode", "name", "categoryId"]
+      },
+      "ImportAssetsDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImportAssetItemDto"
+            }
+          }
+        },
+        "required": ["items"]
+      },
+      "UpdateAssetDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "string"
+          },
+          "condition": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number",
+            "minimum": 0
+          },
+          "unit": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "serialNumber": {
+            "type": "string"
+          },
+          "photoUrls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "photoFileRefIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "managedBy": {
+            "type": "string"
+          }
+        }
+      },
+      "DisposeAssetDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "retired | donated | scrapped"
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "required": ["reason"]
+      },
+      "SetCustomFieldDto": {
+        "type": "object",
+        "properties": {
+          "fieldName": {
+            "type": "string"
+          },
+          "fieldValue": {
+            "type": "string"
+          },
+          "fieldType": {
+            "type": "string"
+          }
+        },
+        "required": ["fieldName", "fieldValue"]
+      },
+      "CreateLoanDto": {
+        "type": "object",
+        "properties": {
+          "assetId": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number",
+            "minimum": 1
+          },
+          "borrowerId": {
+            "type": "string"
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "expectedReturn": {
+            "type": "string"
+          },
+          "isBorrowerMinor": {
+            "type": "boolean"
+          }
+        },
+        "required": ["assetId", "borrowerId", "expectedReturn"]
+      },
+      "TransitionLoanDto": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "description": "Action: approve, checkout, return, report_lost"
+          },
+          "conditionOnReturn": {
+            "type": "string"
+          },
+          "returnNotes": {
+            "type": "string"
+          }
+        },
+        "required": ["action"]
+      },
+      "GuardianAcceptDto": {
+        "type": "object",
+        "properties": {
+          "decision": {
+            "type": "string",
+            "description": "accept or reject"
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "required": ["decision"]
+      },
+      "KitItemDto": {
+        "type": "object",
+        "properties": {
+          "itemName": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number",
+            "minimum": 1
+          },
+          "isRequired": {
+            "type": "boolean"
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "required": ["itemName"]
+      },
+      "CreateKitTemplateDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "kitType": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KitItemDto"
+            }
+          }
+        },
+        "required": ["name"]
+      },
+      "CreateMaintenanceDto": {
+        "type": "object",
+        "properties": {
+          "assetId": {
+            "type": "string"
+          },
+          "maintenanceType": {
+            "type": "string"
+          },
+          "frequency": {
+            "type": "string"
+          },
+          "nextDue": {
+            "type": "string"
+          },
+          "assignedTo": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "required": ["assetId", "maintenanceType", "nextDue"]
+      },
+      "IssueUniformDto": {
+        "type": "object",
+        "properties": {
+          "memberId": {
+            "type": "string"
+          },
+          "uniformType": {
+            "type": "string"
+          },
+          "size": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number",
+            "minimum": 1
+          },
+          "issuedDate": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "required": ["memberId", "uniformType", "size"]
+      },
+      "ReturnUniformDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdatePreferenceDto": {
+        "type": "object",
+        "properties": {
+          "channel": {
+            "type": "string",
+            "description": "Notification channel (in_app, zalo, fcm, email)"
+          },
+          "eventType": {
+            "type": "string",
+            "description": "Event type to configure"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether this channel is enabled for this event type"
+          }
+        },
+        "required": ["channel", "eventType", "enabled"]
+      },
+      "UpsertTemplateDto": {
+        "type": "object",
+        "properties": {
+          "eventType": {
+            "type": "string",
+            "description": "Domain event type that triggers this template"
+          },
+          "channel": {
+            "type": "string",
+            "description": "Delivery channel for this template"
+          },
+          "title": {
+            "type": "string",
+            "description": "Notification title (supports {{variable}} syntax)"
+          },
+          "body": {
+            "type": "string",
+            "description": "Notification body (supports {{variable}} syntax)"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether template is active",
+            "default": true
+          }
+        },
+        "required": ["eventType", "channel", "title", "body"]
+      },
+      "SaveReleaseGateReportDto": {
+        "type": "object",
+        "properties": {
+          "environment": {
+            "type": "string",
+            "description": "Deployment environment (staging, production)"
+          },
+          "buildId": {
+            "type": "string",
+            "description": "CI build identifier"
+          },
+          "commitSha": {
+            "type": "string",
+            "description": "Git commit SHA"
+          },
+          "profile": {
+            "type": "string",
+            "description": "Release profile (PROFILE_OPS, PROFILE_FULL)"
+          },
+          "status": {
+            "type": "string",
+            "description": "Gate status (pass, fail, partial)"
+          },
+          "reportJson": {
+            "type": "object",
+            "description": "Full release gate report as JSON"
+          },
+          "linksJson": {
+            "type": "object",
+            "description": "Links to CI artifacts, dashboards, etc."
+          }
+        },
+        "required": ["environment", "profile", "status", "reportJson"]
+      }
+    }
   }
 }

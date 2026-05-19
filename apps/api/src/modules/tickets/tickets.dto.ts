@@ -1,5 +1,17 @@
-import { IsString, IsOptional, IsNotEmpty, IsArray, IsBoolean, IsNumber } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsNotEmpty,
+  IsArray,
+  IsBoolean,
+  IsNumber,
+  ValidateNested,
+  IsInt,
+  Min,
+  Max,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 // ─── Ticket DTOs ───────────────────────────────────────────────────────
 
@@ -143,6 +155,30 @@ export class EscalateTicketDto {
 
 // ─── Approval DTOs ─────────────────────────────────────────────────────
 
+export class ApprovalStepRequestDto {
+  @ApiProperty({ example: 'Finance review' })
+  @IsString()
+  @IsNotEmpty()
+  stepName!: string;
+
+  @ApiPropertyOptional({ example: 'admin' })
+  @IsOptional()
+  @IsString()
+  approverRole?: string;
+
+  @ApiPropertyOptional({ example: '8b9f9d1a-0000-4000-8000-000000000001' })
+  @IsOptional()
+  @IsString()
+  approverUserId?: string;
+
+  @ApiPropertyOptional({ example: 24, description: 'SLA due time relative to request time' })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(720)
+  dueInHours?: number;
+}
+
 export class RequestApprovalDto {
   @ApiProperty({
     example: 'budget',
@@ -161,6 +197,16 @@ export class RequestApprovalDto {
   @IsOptional()
   @IsString()
   notes?: string;
+
+  @ApiPropertyOptional({
+    type: [ApprovalStepRequestDto],
+    description: 'Optional multi-step approval flow. Omit to create the default one-step flow.',
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ApprovalStepRequestDto)
+  steps?: ApprovalStepRequestDto[];
 }
 
 export class ApproveRejectDto {

@@ -1,7 +1,9 @@
 # Scout Advancement Module — Known Issues & Operator Runbook
 
 ## Module: STORY-017 Scout Advancement
+
 ## Date: 2026-04-25
+
 ## Status: IMPLEMENTED — Production Ready (with known limitations)
 
 ---
@@ -9,42 +11,49 @@
 ## Known Issues
 
 ### SCT-001: Mentor assignment not linked to Scout module (P2)
+
 **Severity**: Medium
 **Impact**: Scout module has no mentor/leader assignment per skill or rank progression
 **Workaround**: Use LMS module's mentoring relationship or manual assignment
 **Plan**: Create ScoutMentor model linking leaders to members for skill verification oversight
 
-### SCT-002: Evidence file upload not implemented (P2)
+### SCT-002: Evidence file upload not integrated with File Storage lifecycle (P2)
+
 **Severity**: Medium
 **Impact**: Evidence evidenceUrl is URL-only — requires external file hosting
 **Workaround**: Upload evidence photos/videos to GCS/S3, paste URL
-**Plan**: Integrate with platform file upload service when available
+**Plan**: Integrate evidence submission with existing File Storage signed upload plus finalize/scan flow
 
 ### SCT-003: Ceremony scheduling is state-only (P2)
+
 **Severity**: Low
 **Impact**: SM-11 `ceremony_scheduled` status exists but no actual calendar/date integration
 **Workaround**: Leaders manually coordinate ceremony dates outside the system
 **Plan**: Integrate with Calendar module for ceremony event creation
 
 ### SCT-004: No notification on evidence submission (P2)
+
 **Severity**: Medium
 **Impact**: When a scout submits evidence, no notification is sent to reviewers
 **Workaround**: Reviewers must periodically check evidence queue
 **Plan**: Add notification event consumer for EVIDENCE_SUBMITTED domain event
 
 ### SCT-005: Skill tree visualization is flat (P2)
+
 **Severity**: Low
 **Impact**: FE shows skill groups as list, not as interactive skill tree with dependencies
 **Workaround**: Functional but not visually optimized
 **Plan**: Build interactive D3/React Flow skill tree in P2
 
 ### SCT-006: No batch evidence review (P3)
+
 **Severity**: Low
 **Impact**: Evidence must be reviewed one-by-one — no bulk approve/reject
 **Workaround**: Acceptable for small scout groups (<50 members)
 **Plan**: Add batch review API endpoint in P3
 
 ### SCT-007: Rank rollback not supported (P3)
+
 **Severity**: Low
 **Impact**: Once a rank is completed, it cannot be reverted or re-opened
 **Workaround**: Manual database update if truly needed
@@ -54,18 +63,18 @@
 
 ## Deferred Features
 
-| Feature | Priority | Reason |
-|---------|----------|--------|
-| Scout mentor assignment | P2 | Needs ScoutMentor model |
-| Evidence file upload | P2 | Needs upload infra |
-| Ceremony calendar integration | P2 | Needs Calendar module |
-| Evidence submission notifications | P2 | Needs notification consumer |
-| Interactive skill tree (D3/React Flow) | P2 | Frontend feature |
-| Badge/certificate image generation | P2 | Needs image gen infra |
-| Batch evidence review | P3 | Low demand at current scale |
-| Rank rollback | P3 | Edge case |
-| Cross-branch skill recognition | P3 | Complex domain logic |
-| PostgreSQL RLS for Scout | P3 | App-level auth sufficient |
+| Feature                                | Priority | Reason                                   |
+| -------------------------------------- | -------- | ---------------------------------------- |
+| Scout mentor assignment                | P2       | Needs ScoutMentor model                  |
+| Evidence file upload                   | P2       | Needs File Storage lifecycle integration |
+| Ceremony calendar integration          | P2       | Needs Calendar module                    |
+| Evidence submission notifications      | P2       | Needs notification consumer              |
+| Interactive skill tree (D3/React Flow) | P2       | Frontend feature                         |
+| Badge/certificate image generation     | P2       | Needs image gen infra                    |
+| Batch evidence review                  | P3       | Low demand at current scale              |
+| Rank rollback                          | P3       | Edge case                                |
+| Cross-branch skill recognition         | P3       | Complex domain logic                     |
+| PostgreSQL RLS for Scout               | P3       | App-level auth sufficient                |
 
 ---
 
@@ -113,6 +122,7 @@ Create skill → POST /scout/skills { skillGroupId, skillCode, name, levels, isR
 ### 4. State Machine Reference
 
 **SM-10 Skill Progress**:
+
 ```
 not_started → [start] → in_progress → [submit_review] → pending_review
   → [verify] → verified → [award] → awarded
@@ -120,6 +130,7 @@ not_started → [start] → in_progress → [submit_review] → pending_review
 ```
 
 **SM-11 Rank Progression**:
+
 ```
 in_progress → [auto_check] → eligible → [propose] → proposed
   → [council_review] → council_review → [approve] → approved

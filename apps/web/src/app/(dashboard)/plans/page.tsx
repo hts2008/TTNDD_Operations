@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-
-const API = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
+import { api } from '@/lib/api';
 
 interface Plan {
   id: string;
@@ -29,11 +28,12 @@ export default function PlansPage() {
   const [filter, setFilter] = useState('');
 
   useEffect(() => {
-    const url = filter ? `${API}/projects/plans?status=${filter}` : `${API}/projects/plans`;
-    fetch(url, { credentials: 'include' })
-      .then((r) => r.json())
-      .then((res) => {
-        setPlans(res.data || []);
+    setLoading(true);
+    setError(null);
+    api
+      .get<Plan[]>('/projects/plans', filter ? { status: filter } : undefined)
+      .then((data) => {
+        setPlans(data);
         setLoading(false);
       })
       .catch((e) => {

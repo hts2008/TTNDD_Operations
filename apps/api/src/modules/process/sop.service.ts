@@ -3,11 +3,13 @@ import {
   NotFoundException,
   BadRequestException,
   ForbiddenException,
+  Optional,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../core/database';
 import { DomainEventService } from '../../core/events';
 import { AuditService } from '../../core/audit';
+import { FileStorageService } from '../file-storage';
 
 /**
  * SOP Document Lifecycle (T-1103):
@@ -38,6 +40,7 @@ interface CreateSopDto {
   category?: string;
   tags?: string[];
   content?: Record<string, unknown>; // TipTap JSON for initial version
+  attachmentFileRefIds?: string[];
 }
 
 interface UpdateSopDto {
@@ -50,6 +53,7 @@ interface UpdateSopDto {
 interface CreateVersionDto {
   content: Record<string, unknown>; // TipTap JSON
   changeNotes?: string;
+  attachmentFileRefIds?: string[];
 }
 
 interface SopSearchFilters {
@@ -65,6 +69,7 @@ export class SopService {
     private readonly prisma: PrismaService,
     private readonly domainEvents: DomainEventService,
     private readonly audit: AuditService,
+    @Optional() private readonly fileStorage?: FileStorageService,
   ) {}
 
   // ── T-1101: SOP Document CRUD ──
@@ -73,6 +78,7 @@ export class SopService {
     if (!data.title?.trim()) {
       throw new BadRequestException('SOP title is required');
     }
+    await this.assertReadyFileRefs(orgId, data.attachmentFileRefIds);
 
     const doc = await this.prisma.$transaction(async (tx) => {
       const sopDoc = await tx.sopDocument.create({
@@ -94,6 +100,7 @@ export class SopService {
           documentId: sopDoc.id,
           versionNo: 1,
           content: (data.content ?? {}) as Prisma.InputJsonValue,
+          attachmentFileRefIds: data.attachmentFileRefIds ?? [],
           status: 'draft',
           createdBy: actorUserId,
         },
@@ -153,6 +160,8 @@ export class SopService {
   // ── T-1104: Search & Filter ──
 
   async findMany(orgId: string, filters?: SopSearchFilters, page = 1, limit = 20) {
+    const safePage = Math.max(1, Number(page) || 1);
+    const safeLimit = Math.max(1, Math.min(100, Number(limit) || 20));
     const where: Prisma.SopDocumentWhereInput = { orgId };
 
     if (filters?.status) where.status = filters.status;
@@ -180,14 +189,14 @@ export class SopService {
           },
           _count: { select: { versions: true, approvals: true } },
         },
-        skip: (page - 1) * limit,
-        take: limit,
+        skip: (safePage - 1) * safeLimit,
+        take: safeLimit,
         orderBy: { updatedAt: 'desc' },
       }),
       this.prisma.sopDocument.count({ where }),
     ]);
 
-    return { data, meta: { total, page, limit } };
+    return { data, meta: { total, page: safePage, limit: safeLimit } };
   }
 
   async findById(orgId: string, documentId: string) {
@@ -215,6 +224,7 @@ export class SopService {
     if (doc.status === 'archived') {
       throw new BadRequestException('Cannot add versions to an archived SOP');
     }
+    await this.assertReadyFileRefs(orgId, data.attachmentFileRefIds);
 
     // Get next version number
     const latestVersion = doc.versions[0];
@@ -226,6 +236,7 @@ export class SopService {
         documentId,
         versionNo: nextVersionNo,
         content: data.content as Prisma.InputJsonValue,
+        attachmentFileRefIds: data.attachmentFileRefIds ?? [],
         changeNotes: data.changeNotes,
         status: 'draft',
         createdBy: actorUserId,
@@ -454,5 +465,11 @@ export class SopService {
         `Cannot transition SOP version from '${currentStatus}' to '${targetStatus}'`,
       );
     }
+  }
+
+  private async assertReadyFileRefs(orgId: string, fileRefIds?: string[]) {
+    if (!fileRefIds?.length) return;
+    if (!this.fileStorage) throw new BadRequestException('File storage integration unavailable');
+    await this.fileStorage.assertReadyFileRefs(orgId, fileRefIds);
   }
 }

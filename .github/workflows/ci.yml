@@ -76,6 +76,12 @@ jobs:
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/ttndd_test
           DATABASE_MIGRATION_URL: postgresql://test:test@localhost:5432/ttndd_test
+      - name: Run P0 J1-J3 API smoke
+        run: pnpm --filter api test:e2e -- p0-j1-j3-smoke.e2e-spec.ts --runInBand
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/ttndd_test
+          DATABASE_MIGRATION_URL: postgresql://test:test@localhost:5432/ttndd_test
+          APP_ENV: development
 
   migration-check:
     runs-on: ubuntu-latest
@@ -115,6 +121,9 @@ jobs:
       - name: Build workspace packages
         run: pnpm --filter @ttndd/constants build && pnpm --filter @ttndd/shared build
 
+      - name: Generate and diff event catalog
+        run: node scripts/check-contract-drift.js --event-catalog-only
+
       # Validate OpenAPI spec exists and is valid JSON
       - name: Validate OpenAPI spec
         run: |
@@ -147,16 +156,14 @@ jobs:
           fi
           echo "✅ TypeScript types present"
 
-      # Verify API compiles successfully (drift check requires full app bootstrap
-      # with Firebase/Redis/PubSub — deferred to local dev workflow)
-      - name: Verify API build compiles
+      # Generate OpenAPI from the current compiled Nest app and fail on drift
+      - name: Generate and diff OpenAPI contract
         run: |
           cd apps/api && npx prisma generate
           cd ../..
           pnpm --filter api build
-          echo "✅ API build compiled successfully"
-          echo "ℹ️  Full OpenAPI drift check skipped in CI (requires external services)."
-          echo "    Run locally: pnpm --filter api generate:openapi"
+          node scripts/check-contract-drift.js --openapi-only
+          echo "OpenAPI contract drift check completed"
         env:
           DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
           DATABASE_MIGRATION_URL: postgresql://dummy:dummy@localhost:5432/dummy

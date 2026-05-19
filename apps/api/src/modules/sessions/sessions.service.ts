@@ -16,6 +16,12 @@ const SESSION_TRANSITIONS: Record<string, Record<string, string>> = {
   completed: { archive: 'archived' },
 };
 
+function toPositiveInt(value: number | string | undefined, fallback: number, max = 100) {
+  const parsed = typeof value === 'number' ? value : Number.parseInt(String(value ?? ''), 10);
+  if (!Number.isFinite(parsed) || parsed < 1) return fallback;
+  return Math.min(Math.trunc(parsed), max);
+}
+
 @Injectable()
 export class SessionsService {
   constructor(
@@ -26,12 +32,25 @@ export class SessionsService {
 
   // ── Session CRUD ──
 
-  async create(orgId: string, data: {
-    branchId: string; title: string; sessionDate: string; startTime?: string; endTime?: string;
-    location?: string; sessionType?: string; theme?: string;
-    pillarDaoDuc?: string; pillarPhuongPhap?: string; pillarGiaoDuc?: string;
-    lessonPlan?: Prisma.InputJsonValue; materials?: Prisma.InputJsonValue;
-  }, actorUserId: string) {
+  async create(
+    orgId: string,
+    data: {
+      branchId: string;
+      title: string;
+      sessionDate: string;
+      startTime?: string;
+      endTime?: string;
+      location?: string;
+      sessionType?: string;
+      theme?: string;
+      pillarDaoDuc?: string;
+      pillarPhuongPhap?: string;
+      pillarGiaoDuc?: string;
+      lessonPlan?: Prisma.InputJsonValue;
+      materials?: Prisma.InputJsonValue;
+    },
+    actorUserId: string,
+  ) {
     const session = await this.prisma.session.create({
       data: {
         orgId,
@@ -53,7 +72,14 @@ export class SessionsService {
     return session;
   }
 
-  async findMany(orgId: string, filters?: { branchId?: string; status?: string; from?: string; to?: string }, page = 1, limit = 20) {
+  async findMany(
+    orgId: string,
+    filters?: { branchId?: string; status?: string; from?: string; to?: string },
+    page: number | string = 1,
+    limit: number | string = 20,
+  ) {
+    const currentPage = toPositiveInt(page, 1);
+    const pageSize = toPositiveInt(limit, 20);
     const where: Prisma.SessionWhereInput = { orgId };
     if (filters?.branchId) where.branchId = filters.branchId;
     if (filters?.status) where.status = filters.status;
@@ -66,36 +92,74 @@ export class SessionsService {
     const [data, total] = await Promise.all([
       this.prisma.session.findMany({
         where,
-        include: { branch: { select: { name: true, code: true } }, _count: { select: { attendance: true } } },
-        skip: (page - 1) * limit,
-        take: limit,
+        include: {
+          branch: { select: { name: true, code: true } },
+          _count: { select: { attendance: true } },
+        },
+        skip: (currentPage - 1) * pageSize,
+        take: pageSize,
         orderBy: { sessionDate: 'desc' },
       }),
       this.prisma.session.count({ where }),
     ]);
 
-    return { data, meta: { total, page, limit } };
+    return { data, meta: { total, page: currentPage, limit: pageSize } };
   }
 
   async findById(orgId: string, sessionId: string) {
     const session = await this.prisma.session.findFirst({
       where: { id: sessionId, orgId },
-      include: { branch: true, attendance: { include: { orgMember: { select: { scoutName: true, memberCode: true, user: { select: { displayName: true } } } } } } },
+      include: {
+        branch: true,
+        attendance: {
+          include: {
+            orgMember: {
+              select: {
+                scoutName: true,
+                memberCode: true,
+                user: { select: { displayName: true } },
+              },
+            },
+          },
+        },
+      },
     });
     if (!session) throw new NotFoundException('Session not found');
     return session;
   }
 
-  async update(orgId: string, sessionId: string, data: Partial<{
-    title: string; sessionDate: string; startTime: string; endTime: string;
-    location: string; theme: string; lessonPlan: Prisma.InputJsonValue;
-    debriefNotes: string; energyRating: number; engagementRating: number;
-  }>, actorUserId: string) {
+  async update(
+    orgId: string,
+    sessionId: string,
+    data: Partial<{
+      title: string;
+      sessionDate: string;
+      startTime: string;
+      endTime: string;
+      location: string;
+      theme: string;
+      lessonPlan: Prisma.InputJsonValue;
+      debriefNotes: string;
+      energyRating: number;
+      engagementRating: number;
+    }>,
+    actorUserId: string,
+  ) {
     const updateData: Prisma.SessionUpdateInput = { ...data };
     if (data.sessionDate) updateData.sessionDate = new Date(data.sessionDate);
 
-    const session = await this.prisma.session.update({ where: { id: sessionId, orgId }, data: updateData });
-    await this.audit.log({ orgId, userId: actorUserId, action: 'session.updated', resource: 'Session', resourceId: sessionId, newValue: data as Prisma.InputJsonValue });
+    const session = await this.prisma.session.update({
+      where: { id: sessionId, orgId },
+      data: updateData,
+    });
+    await this.audit.log({
+      orgId,
+      userId: actorUserId,
+      action: 'session.updated',
+      resource: 'Session',
+      resourceId: sessionId,
+      newValue: data as Prisma.InputJsonValue,
+    });
     return session;
   }
 
@@ -109,10 +173,20 @@ export class SessionsService {
     }
     const newStatus = allowed[action];
 
-    const updated = await this.prisma.session.update({ where: { id: sessionId }, data: { status: newStatus } });
+    const updated = await this.prisma.session.update({
+      where: { id: sessionId },
+      data: { status: newStatus },
+    });
 
     if (newStatus === 'published') {
-      await this.domainEvents.publish({ orgId, eventType: DOMAIN_EVENTS.SESSION.PUBLISHED, aggregateId: sessionId, aggregateType: 'Session', payload: {}, actorUserId });
+      await this.domainEvents.publish({
+        orgId,
+        eventType: DOMAIN_EVENTS.SESSION.PUBLISHED,
+        aggregateId: sessionId,
+        aggregateType: 'Session',
+        payload: {},
+        actorUserId,
+      });
     }
 
     return updated;
@@ -120,11 +194,24 @@ export class SessionsService {
 
   // ── Attendance ──
 
-  async markAttendance(orgId: string, sessionId: string, records: Array<{ memberId: string; status: string; excusedReason?: string }>, actorUserId: string) {
+  async markAttendance(
+    orgId: string,
+    sessionId: string,
+    records: Array<{ memberId: string; status: string; excusedReason?: string }>,
+    actorUserId: string,
+  ) {
     const ops = records.map((r) =>
       this.prisma.sessionAttendance.upsert({
         where: { sessionId_orgMemberId: { sessionId, orgMemberId: r.memberId } },
-        create: { orgId, sessionId, orgMemberId: r.memberId, status: r.status, excusedReason: r.excusedReason, checkInTime: r.status === 'present' ? new Date() : undefined, notedBy: actorUserId },
+        create: {
+          orgId,
+          sessionId,
+          orgMemberId: r.memberId,
+          status: r.status,
+          excusedReason: r.excusedReason,
+          checkInTime: r.status === 'present' ? new Date() : undefined,
+          notedBy: actorUserId,
+        },
         update: { status: r.status, excusedReason: r.excusedReason },
       }),
     );
@@ -148,10 +235,23 @@ export class SessionsService {
   async getAttendanceReport(orgId: string, memberId: string) {
     const [total, present, absent, excused] = await Promise.all([
       this.prisma.sessionAttendance.count({ where: { orgId, orgMemberId: memberId } }),
-      this.prisma.sessionAttendance.count({ where: { orgId, orgMemberId: memberId, status: 'present' } }),
-      this.prisma.sessionAttendance.count({ where: { orgId, orgMemberId: memberId, status: 'absent' } }),
-      this.prisma.sessionAttendance.count({ where: { orgId, orgMemberId: memberId, status: 'excused' } }),
+      this.prisma.sessionAttendance.count({
+        where: { orgId, orgMemberId: memberId, status: 'present' },
+      }),
+      this.prisma.sessionAttendance.count({
+        where: { orgId, orgMemberId: memberId, status: 'absent' },
+      }),
+      this.prisma.sessionAttendance.count({
+        where: { orgId, orgMemberId: memberId, status: 'excused' },
+      }),
     ]);
-    return { memberId, total, present, absent, excused, rate: total > 0 ? Math.round((present / total) * 100) : 0 };
+    return {
+      memberId,
+      total,
+      present,
+      absent,
+      excused,
+      rate: total > 0 ? Math.round((present / total) * 100) : 0,
+    };
   }
 }

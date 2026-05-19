@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { DataTable } from '@/components/ui/data-table';
+import { api } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import {
   Search,
@@ -76,10 +77,8 @@ export default function MembersPage() {
       if (filter !== 'all') params.set('status', filter);
       if (search) params.set('search', search);
 
-      const res = await fetch(`/api/v1/hrm/members?${params.toString()}`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-      const json: ApiResponse = await res.json();
-      setData(json);
+      const json = await api.getEnvelope<MemberData[]>('/hrm/members', Object.fromEntries(params));
+      setData({ data: json.data, meta: json.meta as ApiResponse['meta'] });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Lỗi tải dữ liệu');
     } finally {

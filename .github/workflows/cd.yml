@@ -4,9 +4,11 @@ on:
     branches: [main]
     paths:
       - 'apps/api/**'
+      - 'apps/web/**'
       - 'packages/**'
       - '.github/workflows/cd.yml'
       - 'cloudbuild.yaml'
+      - 'cloudbuild-web.yaml'
       - '.gcloudignore'
       - '.npmrc'
 
@@ -31,15 +33,24 @@ jobs:
             --substitutions=COMMIT_SHA=${{ github.sha }} \
             --project ${{ secrets.GCP_PROJECT_ID }} \
             .
+
+  deploy-web:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_SA_EMAIL }}
+      - uses: google-github-actions/setup-gcloud@v2
       - run: |
-          gcloud run deploy ttndd-api \
-            --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/ttndd-api:${{ github.sha }} \
-            --region asia-southeast1 \
-            --platform managed \
-            --allow-unauthenticated \
-            --set-env-vars "NODE_ENV=production,DATABASE_URL=${{ secrets.DATABASE_URL }}" \
-            --max-instances 3 \
-            --memory 1Gi \
-            --cpu 2 \
-            --add-cloudsql-instances ttndd-platform-2026:asia-southeast1:ttndd-db \
-            --project ${{ secrets.GCP_PROJECT_ID }}
+          gcloud builds submit \
+            --config=cloudbuild-web.yaml \
+            --substitutions=COMMIT_SHA=${{ github.sha }} \
+            --project ${{ secrets.GCP_PROJECT_ID }} \
+            .

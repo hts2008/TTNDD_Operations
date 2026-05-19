@@ -27,9 +27,7 @@ export class SyntheticProbeService {
 
     const unhealthy = this.lastResults.filter((r) => r.status === 'unhealthy');
     if (unhealthy.length > 0) {
-      this.logger.error(
-        `Unhealthy probes: ${unhealthy.map((r) => r.name).join(', ')}`,
-      );
+      this.logger.error(`Unhealthy probes: ${unhealthy.map((r) => r.name).join(', ')}`);
     }
   }
 
@@ -70,14 +68,14 @@ export class SyntheticProbeService {
     const start = Date.now();
     try {
       const mem = process.memoryUsage();
-      const heapUsedMb = mem.heapUsed / 1024 / 1024;
-      const heapTotalMb = mem.heapTotal / 1024 / 1024;
-      const usagePercent = (heapUsedMb / heapTotalMb) * 100;
+      const rssMb = mem.rss / 1024 / 1024;
+      const memoryLimitMb = Number(process.env.TTNDD_MEMORY_LIMIT_MB ?? 1024);
+      const usagePercent = (rssMb / memoryLimitMb) * 100;
       const latencyMs = Date.now() - start;
 
       let status: ProbeResult['status'] = 'healthy';
-      if (usagePercent > 90) status = 'unhealthy';
-      else if (usagePercent > 75) status = 'degraded';
+      if (usagePercent > 95) status = 'unhealthy';
+      else if (usagePercent > 80) status = 'degraded';
 
       return {
         name: 'memory',

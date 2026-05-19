@@ -40,7 +40,7 @@ export class RewardShopService {
     });
   }
 
-  async redeem(orgId: string, memberId: string, rewardId: string) {
+  async redeem(orgId: string, memberId: string, rewardId: string, actorUserId: string) {
     const item = await this.prisma.rewardItem.findFirst({
       where: { id: rewardId, orgId, isActive: true },
     });
@@ -79,7 +79,7 @@ export class RewardShopService {
       memberId,
       item.costExp,
       `Redeem: ${item.name}`,
-      memberId,
+      actorUserId,
     );
 
     await this.domainEvents.publish({
@@ -93,7 +93,7 @@ export class RewardShopService {
         expSpent: item.costExp,
         redemptionId: redemption.id,
       },
-      actorUserId: memberId,
+      actorUserId,
     });
 
     return redemption;

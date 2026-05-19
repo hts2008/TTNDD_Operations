@@ -3,6 +3,8 @@ steps:
     args:
       - 'build'
       - '-t'
+      - 'gcr.io/$PROJECT_ID/ttndd-web:$COMMIT_SHA'
+      - '-t'
       - 'gcr.io/$PROJECT_ID/ttndd-web:latest'
       - '--build-arg'
       - 'NEXT_PUBLIC_API_URL=https://ttndd-api-122940795437.asia-southeast1.run.app/api/v1'
@@ -14,8 +16,15 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
+      - 'gcr.io/$PROJECT_ID/ttndd-web:$COMMIT_SHA'
+    id: push-web-sha
+    waitFor: ['build-web']
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
       - 'gcr.io/$PROJECT_ID/ttndd-web:latest'
-    id: push-web
+    id: push-web-latest
     waitFor: ['build-web']
 
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -24,7 +33,7 @@ steps:
       - 'run'
       - 'deploy'
       - 'ttndd-platform'
-      - '--image=gcr.io/$PROJECT_ID/ttndd-web:latest'
+      - '--image=gcr.io/$PROJECT_ID/ttndd-web:$COMMIT_SHA'
       - '--region=asia-southeast1'
       - '--platform=managed'
       - '--allow-unauthenticated'
@@ -33,10 +42,12 @@ steps:
       - '--cpu=1'
       - '--min-instances=0'
       - '--max-instances=5'
+      - '--set-env-vars=NODE_ENV=production,NEXT_PUBLIC_API_URL=https://ttndd-api-122940795437.asia-southeast1.run.app'
     id: deploy-web
-    waitFor: ['push-web']
+    waitFor: ['push-web-sha', 'push-web-latest']
 
 images:
+  - 'gcr.io/$PROJECT_ID/ttndd-web:$COMMIT_SHA'
   - 'gcr.io/$PROJECT_ID/ttndd-web:latest'
 
 timeout: '600s'

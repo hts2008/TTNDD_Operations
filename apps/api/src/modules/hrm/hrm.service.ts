@@ -1,4 +1,10 @@
-import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+  Logger,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../core/database';
 import { DomainEventService } from '../../core/events';
@@ -159,11 +165,212 @@ export class HrmService {
         unit: true,
         profile: true,
         guardianLinks: { orderBy: [{ isPrimary: 'desc' }, { createdAt: 'asc' }] },
-        branchHistory: { orderBy: { transitionDate: 'desc' } },
+        branchHistory: {
+          orderBy: { transitionDate: 'desc' },
+          select: {
+            id: true,
+            orgId: true,
+            orgMemberId: true,
+            fromBranchId: true,
+            toBranchId: true,
+            fromUnitId: true,
+            toUnitId: true,
+            transitionDate: true,
+            reason: true,
+            approvedBy: true,
+            createdAt: true,
+          },
+        },
       },
     });
     if (!member) throw new NotFoundException('Member not found');
     return member;
+  }
+
+  async exportPersonalData(
+    orgId: string,
+    memberId: string,
+    actor: { userId: string; role: string; memberId?: string },
+  ) {
+    const isPrivileged = ['super_admin', 'admin'].includes(actor.role);
+    const isSelfService = actor.memberId === memberId;
+
+    if (!isPrivileged && !isSelfService) {
+      throw new ForbiddenException('You can only export your own personal data');
+    }
+
+    const member = await this.findById(orgId, memberId);
+    const profileId = member.profile?.id;
+
+    const [compliance, timeline, expSummary, badges, ranks, attendance, fees, auditTrail] =
+      await Promise.all([
+        this.validation.checkCompliance(orgId, memberId),
+        this.getTimeline(orgId, memberId),
+        this.prisma.memberExpSummary.findFirst({
+          where: { orgMemberId: memberId },
+          select: {
+            totalExp: true,
+            availableExp: true,
+            tier1Count: true,
+            tier2Count: true,
+            tier3Count: true,
+            tier4Count: true,
+            penaltyCount: true,
+            lastUpdated: true,
+          },
+        }),
+        this.prisma.memberBadge.findMany({
+          where: { orgId, orgMemberId: memberId },
+          select: {
+            id: true,
+            earnedAt: true,
+            notes: true,
+            badge: { select: { badgeCode: true, name: true, badgeType: true } },
+          },
+          orderBy: { earnedAt: 'desc' },
+          take: 100,
+        }),
+        this.prisma.memberRank.findMany({
+          where: { orgId, orgMemberId: memberId },
+          select: {
+            id: true,
+            branchId: true,
+            rankId: true,
+            status: true,
+            startedAt: true,
+            completedAt: true,
+            ceremonyDate: true,
+            notes: true,
+          },
+          orderBy: { completedAt: 'desc' },
+          take: 100,
+        }),
+        this.prisma.sessionAttendance.findMany({
+          where: { orgId, orgMemberId: memberId },
+          select: {
+            id: true,
+            status: true,
+            checkInTime: true,
+            checkOutTime: true,
+            excusedReason: true,
+            session: {
+              select: {
+                id: true,
+                title: true,
+                sessionDate: true,
+                sessionType: true,
+                location: true,
+              },
+            },
+          },
+          orderBy: { session: { sessionDate: 'desc' } },
+          take: 250,
+        }),
+        this.prisma.memberFee.findMany({
+          where: { orgId, orgMemberId: memberId },
+          select: {
+            id: true,
+            feeType: true,
+            feePeriod: true,
+            amountDue: true,
+            amountPaid: true,
+            dueDate: true,
+            paidDate: true,
+            status: true,
+            notes: true,
+            createdAt: true,
+          },
+          orderBy: { createdAt: 'desc' },
+          take: 100,
+        }),
+        this.prisma.auditLog.findMany({
+          where: {
+            orgId,
+            OR: [
+              { resource: 'OrgMember', resourceId: memberId },
+              ...(profileId ? [{ resource: 'MemberProfile', resourceId: profileId }] : []),
+            ],
+          },
+          select: {
+            action: true,
+            resource: true,
+            resourceId: true,
+            oldValue: true,
+            newValue: true,
+            createdAt: true,
+            userId: true,
+          },
+          orderBy: { createdAt: 'desc' },
+          take: 100,
+        }),
+      ]);
+
+    const categories = [
+      'identity',
+      'profile',
+      'guardian_links',
+      'membership',
+      'attendance',
+      'fees',
+      'rewards',
+      'rank_progress',
+      'compliance',
+      'audit_trail',
+    ];
+
+    await this.audit.log({
+      orgId,
+      userId: actor.userId,
+      action: 'hrm.privacy_exported',
+      resource: 'OrgMember',
+      resourceId: memberId,
+      newValue: {
+        requestedByUserId: actor.userId,
+        requestedByRole: actor.role,
+        selfService: isSelfService,
+        categories,
+      } as unknown as Prisma.InputJsonValue,
+    });
+
+    return {
+      subject: {
+        orgId,
+        memberId,
+        exportedAt: new Date().toISOString(),
+        requestedByUserId: actor.userId,
+        selfService: isSelfService,
+        categories,
+      },
+      identity: {
+        member: {
+          id: member.id,
+          memberCode: member.memberCode,
+          role: member.role,
+          status: member.status,
+          scoutName: member.scoutName,
+          heroName: member.heroName,
+          joinedDate: member.joinedDate,
+          createdAt: member.createdAt,
+        },
+        user: member.user,
+        profile: member.profile,
+        branch: member.branch,
+        unit: member.unit,
+        guardianLinks: member.guardianLinks,
+      },
+      activity: {
+        timeline,
+        attendance,
+        fees,
+      },
+      rewards: {
+        expSummary,
+        badges,
+        ranks,
+      },
+      compliance,
+      auditTrail,
+    };
   }
 
   // ─── T-1004: Update with audit oldValue ───────────────────────────
@@ -588,29 +795,145 @@ export class HrmService {
   // ─── T-0048: Character Sheet ──────────────────────────────────────
 
   async getCharacterSheet(orgId: string, memberId: string) {
-    const [member, expSummary, badges, ranks, attendance] = await Promise.all([
-      this.findById(orgId, memberId),
-      this.prisma.memberExpSummary.findFirst({ where: { orgMemberId: memberId } }),
-      this.prisma.memberBadge.findMany({
-        where: { orgMemberId: memberId },
-        include: { badge: { select: { name: true, imageUrl: true, badgeType: true } } },
-        orderBy: { earnedAt: 'desc' },
-        take: 20,
-      }),
-      this.prisma.memberRank.findMany({
-        where: { orgMemberId: memberId },
-        orderBy: { completedAt: 'desc' },
-        take: 5,
-      }),
-      this.prisma.sessionAttendance.groupBy({
-        by: ['status'],
-        where: { orgMemberId: memberId },
-        _count: true,
-      }),
-    ]);
+    const [member, expSummary, badges, ranks, skills, courses, attendance, recentAttendance] =
+      await Promise.all([
+        this.findById(orgId, memberId),
+        this.prisma.memberExpSummary.findFirst({ where: { orgMemberId: memberId } }),
+        this.prisma.memberBadge.findMany({
+          where: { orgMemberId: memberId },
+          include: { badge: { select: { name: true, imageUrl: true, badgeType: true } } },
+          orderBy: { earnedAt: 'desc' },
+          take: 20,
+        }),
+        this.prisma.memberRank.findMany({
+          where: { orgMemberId: memberId },
+          include: {
+            rank: {
+              select: {
+                rankCode: true,
+                rankName: true,
+                narrativeName: true,
+                rankOrder: true,
+                minExp: true,
+              },
+            },
+          },
+          orderBy: { completedAt: 'desc' },
+          take: 5,
+        }),
+        this.prisma.memberSkillProgress.findMany({
+          where: { orgId, orgMemberId: memberId },
+          include: {
+            skill: {
+              select: {
+                name: true,
+                skillCode: true,
+                maxLevel: true,
+                spicesTags: true,
+                skillGroup: { select: { name: true, icon: true, color: true } },
+              },
+            },
+          },
+          orderBy: [{ completedAt: 'asc' }, { currentLevel: 'desc' }],
+          take: 12,
+        }),
+        this.prisma.memberCourseProgress.findMany({
+          where: { orgId, orgMemberId: memberId },
+          include: {
+            course: {
+              select: {
+                id: true,
+                title: true,
+                category: true,
+                difficulty: true,
+                expReward: true,
+                spicesTags: true,
+              },
+            },
+          },
+          orderBy: [{ completedAt: 'desc' }, { startedAt: 'desc' }],
+          take: 8,
+        }),
+        this.prisma.sessionAttendance.groupBy({
+          by: ['status'],
+          where: { orgId, orgMemberId: memberId },
+          _count: true,
+        }),
+        this.prisma.sessionAttendance.findMany({
+          where: { orgId, orgMemberId: memberId },
+          include: {
+            session: {
+              select: {
+                title: true,
+                sessionDate: true,
+                sessionType: true,
+                location: true,
+                spicesTags: true,
+              },
+            },
+          },
+          orderBy: { session: { sessionDate: 'desc' } },
+          take: 6,
+        }),
+      ]);
 
     // T-0050: Compliance check
     const compliance = await this.validation.checkCompliance(orgId, memberId);
+    const attendanceSummary = attendance.reduce(
+      (acc, a) => {
+        acc[a.status] = a._count;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
+    const completedSkills = skills.filter((skill) => skill.completedAt !== null).length;
+    const activeCourses = courses.filter((course) => course.status !== 'completed').length;
+    const currentRank =
+      ranks.find((rank) => rank.status === 'in_progress' || rank.status === 'eligible') ??
+      ranks[0] ??
+      null;
+    const nextActions = [
+      ...(compliance.compliant
+        ? []
+        : [
+            {
+              type: 'compliance',
+              label: 'Resolve guardian, medical, or consent compliance gap',
+              href: `/members/compliance`,
+              priority: 'high',
+            },
+          ]),
+      ...(skills.some((skill) => skill.completedAt === null)
+        ? [
+            {
+              type: 'skill',
+              label: 'Review open skill evidence and next level requirements',
+              href: `/scout`,
+              priority: 'medium',
+            },
+          ]
+        : []),
+      ...(activeCourses > 0
+        ? [
+            {
+              type: 'course',
+              label: 'Continue assigned LMS course work',
+              href: `/lms`,
+              priority: 'medium',
+            },
+          ]
+        : []),
+      ...(Object.values(attendanceSummary).reduce((sum, value) => sum + value, 0) === 0
+        ? [
+            {
+              type: 'attendance',
+              label: 'Record first session attendance for this member',
+              href: `/sessions`,
+              priority: 'low',
+            },
+          ]
+        : []),
+    ];
 
     return {
       member,
@@ -625,15 +948,30 @@ export class HrmService {
           earnedAt: b.earnedAt,
         })),
       },
+      progression: {
+        currentRank,
+        completedRanks: ranks.filter((rank) => rank.status === 'completed').length,
+        skillsStarted: skills.length,
+        skillsCompleted: completedSkills,
+        skillCompletionRate:
+          skills.length > 0 ? Math.round((completedSkills / skills.length) * 100) : 0,
+        coursesStarted: courses.length,
+        coursesActive: activeCourses,
+        coursesCompleted: courses.filter((course) => course.status === 'completed').length,
+      },
       ranks,
-      attendance: attendance.reduce(
-        (acc, a) => {
-          acc[a.status] = a._count;
-          return acc;
-        },
-        {} as Record<string, number>,
-      ),
+      skills,
+      courses,
+      attendance: attendanceSummary,
+      recentAttendance: recentAttendance.map((entry) => ({
+        id: entry.id,
+        status: entry.status,
+        checkInTime: entry.checkInTime,
+        checkOutTime: entry.checkOutTime,
+        session: entry.session,
+      })),
       compliance,
+      nextActions,
       allowedActions: this.lifecycle.getAllowedActions(member.status),
     };
   }

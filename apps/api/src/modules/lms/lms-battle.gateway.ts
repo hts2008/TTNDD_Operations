@@ -4,14 +4,18 @@ import {
   SubscribeMessage,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  OnGatewayInit,
   ConnectedSocket,
   MessageBody,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { AuthService } from '../../core/auth';
+import type { CurrentUserPayload } from '../../common/decorators';
 import { LmsService } from './lms.service';
 
 interface BattleSocket extends Socket {
   data: {
+    user?: CurrentUserPayload;
     orgId?: string;
     userId?: string;
     gameCode?: string;
@@ -22,18 +26,35 @@ interface BattleSocket extends Socket {
   namespace: '/lms-battle',
   cors: { origin: '*' },
 })
-export class LmsBattleGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class LmsBattleGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server!: Server;
 
-  constructor(private readonly lmsService: LmsService) {}
+  constructor(
+    private readonly lmsService: LmsService,
+    private readonly authService: AuthService,
+  ) {}
+
+  afterInit(server: Server) {
+    server.use(async (socket, next) => {
+      const client = socket as BattleSocket;
+      const token = this.extractAuthToken(client);
+      if (!token) return next(new Error('Unauthorized: missing token'));
+
+      const user = await this.authService.verifyToken(token);
+      if (!user) return next(new Error('Unauthorized: invalid token'));
+
+      client.data.user = user;
+      client.data.orgId = user.orgId;
+      client.data.userId = user.userId;
+      next();
+    });
+  }
 
   handleConnection(client: BattleSocket) {
-    // Auth would normally be handled via middleware/guard
-    const orgId = client.handshake.query['orgId'] as string;
-    const userId = client.handshake.query['userId'] as string;
-    client.data.orgId = orgId;
-    client.data.userId = userId;
+    if (!client.data.user) {
+      client.disconnect(true);
+    }
   }
 
   handleDisconnect(client: BattleSocket) {
@@ -140,5 +161,11 @@ export class LmsBattleGateway implements OnGatewayConnection, OnGatewayDisconnec
     } catch (err: unknown) {
       return { error: (err as Error).message };
     }
+  }
+
+  private extractAuthToken(client: BattleSocket) {
+    const token = client.handshake.auth?.['token'];
+    if (typeof token !== 'string') return undefined;
+    return token.replace(/^Bearer\s+/i, '').trim() || undefined;
   }
 }

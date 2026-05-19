@@ -581,6 +581,7 @@ model SkillEvidence {
   level         Int
   evidenceType  String    @map("evidence_type") @db.VarChar(50) // photo, video, document, mentor_sign_off
   evidenceUrl   String?   @map("evidence_url")
+  fileRefId     String?   @map("file_ref_id") @db.Uuid
   notes         String?
   status        String    @default("submitted") @db.VarChar(50) // submitted, approved, rejected
   reviewedBy    String?   @map("reviewed_by") @db.Uuid
@@ -593,6 +594,7 @@ model SkillEvidence {
 
   @@unique([orgMemberId, skillId, level])
   @@index([orgId])
+  @@index([orgId, fileRefId])
   @@map("skill_evidences")
 }
 
@@ -736,6 +738,7 @@ model Course {
   title          String   @db.VarChar(500)
   description    String?
   coverImageUrl  String?  @map("cover_image_url")
+  coverImageFileRefId String? @map("cover_image_file_ref_id") @db.Uuid
   category       String?  @db.VarChar(100)
   difficulty     String?  @db.VarChar(20)
   targetBranches String[] @map("target_branches")
@@ -757,6 +760,7 @@ model Course {
   completionRules CompletionRule[]
 
   @@index([orgId])
+  @@index([orgId, coverImageFileRefId])
   @@map("courses")
 }
 
@@ -785,6 +789,7 @@ model Lesson {
   lessonType  String?  @map("lesson_type") @db.VarChar(50)
   content     Json     @default("{}")
   videoUrl    String?  @map("video_url")
+  mediaFileRefId String? @map("media_file_ref_id") @db.Uuid
   duration    Int?
   expReward   Int      @default(0) @map("exp_reward")
   isRequired  Boolean  @default(true) @map("is_required")
@@ -795,6 +800,7 @@ model Lesson {
   module         CourseModule?    @relation(fields: [moduleId], references: [id])
   lessonProgress LessonProgress[]
 
+  @@index([orgId, mediaFileRefId])
   @@map("lessons")
 }
 
@@ -889,11 +895,13 @@ model QuizQuestion {
   points       Int      @default(10)
   timeLimit    Int?     @map("time_limit")
   mediaUrl     String?  @map("media_url")
+  mediaFileRefId String? @map("media_file_ref_id") @db.Uuid
   orderIndex   Int      @default(0) @map("order_index")
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz()
 
   quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
 
+  @@index([orgId, mediaFileRefId])
   @@map("quiz_questions")
 }
 
@@ -1168,6 +1176,7 @@ model Ticket {
 
   comments      TicketComment[]
   statusHistory TicketStatusHistory[]
+  approvalFlows ApprovalFlow[]
 
   @@index([orgId, status])
   @@map("tickets")
@@ -1202,6 +1211,66 @@ model TicketStatusHistory {
   @@map("ticket_status_history")
 }
 
+model ApprovalFlow {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId            String    @map("org_id") @db.Uuid
+  ticketId         String    @map("ticket_id") @db.Uuid
+  approvalType     String    @map("approval_type") @db.VarChar(50)
+  amount           Decimal?  @db.Decimal(15, 2)
+  status           String    @default("pending") @db.VarChar(50)
+  currentStepOrder Int       @default(1) @map("current_step_order")
+  requestedBy      String    @map("requested_by") @db.Uuid
+  requestedAt      DateTime  @default(now()) @map("requested_at") @db.Timestamptz()
+  completedAt      DateTime? @map("completed_at") @db.Timestamptz()
+  slaDueAt         DateTime? @map("sla_due_at") @db.Timestamptz()
+  metadata         Json      @default("{}")
+
+  ticket    Ticket             @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  steps     ApprovalStep[]
+  decisions ApprovalDecision[]
+
+  @@index([orgId, ticketId, status])
+  @@map("approval_flows")
+}
+
+model ApprovalStep {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId          String    @map("org_id") @db.Uuid
+  flowId         String    @map("flow_id") @db.Uuid
+  stepOrder      Int       @map("step_order")
+  stepName       String    @map("step_name") @db.VarChar(255)
+  approverRole   String?   @map("approver_role") @db.VarChar(50)
+  approverUserId String?   @map("approver_user_id") @db.Uuid
+  status         String    @default("pending") @db.VarChar(50)
+  dueAt          DateTime? @map("due_at") @db.Timestamptz()
+  decidedAt      DateTime? @map("decided_at") @db.Timestamptz()
+
+  flow      ApprovalFlow       @relation(fields: [flowId], references: [id], onDelete: Cascade)
+  decisions ApprovalDecision[]
+
+  @@unique([flowId, stepOrder])
+  @@index([orgId, flowId, status])
+  @@map("approval_steps")
+}
+
+model ApprovalDecision {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId     String   @map("org_id") @db.Uuid
+  flowId    String   @map("flow_id") @db.Uuid
+  stepId    String   @map("step_id") @db.Uuid
+  decision  String   @db.VarChar(20)
+  notes     String?
+  decidedBy String   @map("decided_by") @db.Uuid
+  decidedAt DateTime @default(now()) @map("decided_at") @db.Timestamptz()
+
+  flow ApprovalFlow @relation(fields: [flowId], references: [id], onDelete: Cascade)
+  step ApprovalStep @relation(fields: [stepId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, flowId])
+  @@index([orgId, stepId])
+  @@map("approval_decisions")
+}
+
 // ============================================================
 // MODULE 4: Finance
 // ============================================================
@@ -1218,7 +1287,8 @@ model FinancialAccount {
   isActive       Boolean  @default(true) @map("is_active")
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz()
 
-  transactions FinancialTransaction[]
+  transactions  FinancialTransaction[]
+  ledgerEntries LedgerEntry[]
 
   @@index([orgId])
   @@map("financial_accounts")
@@ -1230,6 +1300,7 @@ model FinancialTransaction {
   accountId       String   @map("account_id") @db.Uuid
   transactionType String   @map("transaction_type") @db.VarChar(20)
   category        String?  @db.VarChar(100)
+  costCenterId    String?  @map("cost_center_id") @db.VarChar(50)
   amount          Decimal  @db.Decimal(15, 2)
   currency        String   @default("VND") @db.VarChar(10)
   sourceType      String?  @map("source_type") @db.VarChar(50)
@@ -1243,10 +1314,94 @@ model FinancialTransaction {
   transactionDate DateTime @map("transaction_date") @db.Date
   createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz()
 
-  account FinancialAccount @relation(fields: [accountId], references: [id])
+  account       FinancialAccount @relation(fields: [accountId], references: [id])
+  costCenter    CostCenter?      @relation(fields: [costCenterId], references: [id])
+  ledgerEntries LedgerEntry[]
 
   @@index([orgId, transactionDate])
+  @@index([orgId, costCenterId])
   @@map("financial_transactions")
+}
+
+model CostCenter {
+  id           String   @id @default(cuid()) @db.VarChar(50)
+  orgId        String   @map("org_id") @db.Uuid
+  name         String   @db.VarChar(255)
+  code         String?  @db.VarChar(50)
+  parentId     String?  @map("parent_id") @db.VarChar(50)
+  budgetAmount Decimal  @default(0) @map("budget_amount") @db.Decimal(15, 2)
+  spentAmount  Decimal  @default(0) @map("spent_amount") @db.Decimal(15, 2)
+  description  String?
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  transactions FinancialTransaction[]
+  ledgerEntries LedgerEntry[]
+
+  @@unique([orgId, code])
+  @@index([orgId])
+  @@map("cost_centers")
+}
+
+model FeePlan {
+  id          String    @id @default(cuid()) @db.VarChar(50)
+  orgId       String    @map("org_id") @db.Uuid
+  name        String    @db.VarChar(255)
+  frequency   String    @db.VarChar(50)
+  amount      Decimal   @db.Decimal(15, 2)
+  feeType     String?   @map("fee_type") @db.VarChar(50)
+  description String?
+  startDate   DateTime? @map("start_date") @db.Date
+  isActive    Boolean   @default(true) @map("is_active")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  @@index([orgId, isActive])
+  @@map("fee_plans")
+}
+
+model Sponsor {
+  id               String    @id @default(cuid()) @db.VarChar(50)
+  orgId            String    @map("org_id") @db.Uuid
+  name             String    @db.VarChar(255)
+  contributionType String    @map("contribution_type") @db.VarChar(50)
+  amount           Decimal   @default(0) @db.Decimal(15, 2)
+  description      String?
+  receivedDate     DateTime? @map("received_date") @db.Date
+  contactInfo      String?   @map("contact_info")
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  @@index([orgId, contributionType])
+  @@map("sponsors")
+}
+
+model LedgerEntry {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId          String   @map("org_id") @db.Uuid
+  transactionId  String   @map("transaction_id") @db.Uuid
+  accountId      String?  @map("account_id") @db.Uuid
+  costCenterId   String?  @map("cost_center_id") @db.VarChar(50)
+  postingKey     String   @map("posting_key") @db.VarChar(120)
+  entryType      String   @map("entry_type") @db.VarChar(20)
+  ledgerAccount  String   @map("ledger_account") @db.VarChar(100)
+  amount         Decimal  @db.Decimal(15, 2)
+  currency       String   @default("VND") @db.VarChar(10)
+  description    String?
+  sourceType     String?  @map("source_type") @db.VarChar(50)
+  sourceId       String?  @map("source_id") @db.Uuid
+  createdBy      String?  @map("created_by") @db.Uuid
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  transaction FinancialTransaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  account     FinancialAccount?    @relation(fields: [accountId], references: [id])
+  costCenter  CostCenter?          @relation(fields: [costCenterId], references: [id])
+
+  @@unique([orgId, postingKey, entryType, ledgerAccount])
+  @@index([orgId, transactionId])
+  @@index([orgId, accountId])
+  @@index([orgId, costCenterId])
+  @@map("ledger_entries")
 }
 
 model MemberFee {
@@ -1308,6 +1463,7 @@ model Asset {
   serialNumber  String?   @map("serial_number") @db.VarChar(100)
   location      String?   @db.VarChar(255)
   photoUrls     String[]  @map("photo_urls")
+  photoFileRefIds String[] @default([]) @map("photo_file_ref_ids") @db.Uuid
   notes         String?
   managedBy     String?   @map("managed_by") @db.Uuid
   createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz()
@@ -1470,9 +1626,12 @@ model WorkflowRun {
   status        String    @default("pending") @db.VarChar(50)
   currentStep   Int       @default(0) @map("current_step")
   currentNodeId String?   @map("current_node_id") @db.VarChar(100)               // T-1106: graph-based execution
+  activeNodeIds String[]  @default([]) @map("active_node_ids")                   // P2-004: parallel graph execution
   stepResults   Json      @default("[]") @map("step_results")
   nodeResults   Json      @default("{}") @map("node_results")                     // T-1106: results keyed by nodeId
+  runtimeState  Json      @default("{}") @map("runtime_state")                   // P2-004: delay/join runtime state
   initiatedBy   String    @map("initiated_by") @db.Uuid
+  waitingUntil  DateTime? @map("waiting_until") @db.Timestamptz()                // P2-004: delay node due time
   completedAt   DateTime? @map("completed_at") @db.Timestamptz()
   errorMessage  String?   @map("error_message")                                  // T-1110: stuck-run debugging
   createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz()
@@ -1482,6 +1641,7 @@ model WorkflowRun {
 
   @@index([orgId])
   @@index([orgId, status])                                                       // T-1110: filter by status
+  @@index([orgId, status, waitingUntil])
   @@map("workflow_runs")
 }
 
@@ -1546,6 +1706,7 @@ model SopVersion {
   documentId  String    @map("document_id") @db.Uuid
   versionNo   Int       @map("version_no")
   content     Json      @default("{}") // TipTap JSON content
+  attachmentFileRefIds String[] @default([]) @map("attachment_file_ref_ids") @db.Uuid
   changeNotes String?   @map("change_notes")
   status      String    @default("draft") @db.VarChar(50) // draft, review, approved, rejected
   createdBy   String    @map("created_by") @db.Uuid
@@ -1674,6 +1835,11 @@ model FileObjectRef {
   originalName  String    @map("original_name") @db.VarChar(500)
   mimeType      String    @map("mime_type") @db.VarChar(100)
   sizeBytes     BigInt    @map("size_bytes")
+  status        String    @default("PENDING") @db.VarChar(20)
+  checksum      String?   @db.VarChar(128)
+  scanStatus    String    @default("PENDING") @map("scan_status") @db.VarChar(20)
+  scanError     String?   @map("scan_error")
+  finalizedAt   DateTime? @map("finalized_at") @db.Timestamptz()
   entityType    String?   @map("entity_type") @db.VarChar(100)
   entityId      String?   @map("entity_id") @db.Uuid
   isPublic      Boolean   @default(false) @map("is_public")
@@ -1681,6 +1847,8 @@ model FileObjectRef {
   deletedAt     DateTime? @map("deleted_at") @db.Timestamptz()
 
   @@index([orgId, entityType, entityId])
+  @@index([orgId, status])
+  @@index([orgId, scanStatus])
   @@index([orgId, uploadedAt])
   @@map("file_object_refs")
 }
@@ -1714,14 +1882,24 @@ model ImportBatch {
   importType    String    @map("import_type") @db.VarChar(50)
   status        String    @default("pending") @db.VarChar(50)
   totalRows     Int       @default(0) @map("total_rows")
+  processedRows Int       @default(0) @map("processed_rows")
   successRows   Int       @default(0) @map("success_rows")
   errorRows     Int       @default(0) @map("error_rows")
+  duplicateRows Int       @default(0) @map("duplicate_rows")
+  progressPct   Int       @default(0) @map("progress_pct")
   errorDetails  Json      @default("[]") @map("error_details")
+  validationReport Json   @default("{}") @map("validation_report")
+  reportCsv     String?   @map("report_csv")
+  sourceHash    String?   @map("source_hash") @db.VarChar(128)
+  sourcePayload Json      @default("[]") @map("source_payload")
   importedBy    String?   @map("imported_by") @db.Uuid
   isDryRun      Boolean   @default(false) @map("is_dry_run")
   createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  startedAt     DateTime? @map("started_at") @db.Timestamptz()
   completedAt   DateTime? @map("completed_at") @db.Timestamptz()
 
   @@index([orgId, importType])
+  @@index([orgId, status])
+  @@index([orgId, importType, sourceHash])
   @@map("import_batches")
 }

@@ -37,6 +37,7 @@ describe('AuthController', () => {
     role: 'leader',
     email: 'test@ttndd.org',
     firebaseUid: 'firebase-uid-1',
+    memberId: 'member-1',
   };
 
   beforeEach(async () => {
@@ -90,6 +91,7 @@ describe('AuthController', () => {
           orgId: 'org-1',
           role: 'leader',
           email: 'test@ttndd.org',
+          memberId: 'member-1',
         }),
         token: 'dev:firebase-uid-1',
       });
@@ -109,9 +111,9 @@ describe('AuthController', () => {
         orgMembers: [],
       });
 
-      await expect(
-        controller.login({ email: 'test@ttndd.org', password: 'test' }),
-      ).rejects.toThrow(UnauthorizedException);
+      await expect(controller.login({ email: 'test@ttndd.org', password: 'test' })).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 
@@ -174,9 +176,9 @@ describe('AuthController', () => {
         return undefined; // No API key
       });
 
-      await expect(
-        controller.login({ email: 'test@ttndd.org', password: 'test' }),
-      ).rejects.toThrow(UnauthorizedException);
+      await expect(controller.login({ email: 'test@ttndd.org', password: 'test' })).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should throw when Firebase succeeds but user not in local DB', async () => {
@@ -198,9 +200,9 @@ describe('AuthController', () => {
     it('should throw when network error occurs', async () => {
       mockFetch.mockRejectedValue(new Error('Network error'));
 
-      await expect(
-        controller.login({ email: 'test@ttndd.org', password: 'test' }),
-      ).rejects.toThrow(UnauthorizedException);
+      await expect(controller.login({ email: 'test@ttndd.org', password: 'test' })).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 

@@ -38,6 +38,11 @@ export class CreateAssetDto {
   @ApiPropertyOptional() @IsOptional() @IsString() serialNumber?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() location?: string;
   @ApiPropertyOptional() @IsOptional() @IsArray() @IsString({ each: true }) photoUrls?: string[];
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  photoFileRefIds?: string[];
   @ApiPropertyOptional() @IsOptional() @IsString() notes?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() managedBy?: string;
 }
@@ -50,6 +55,12 @@ export class UpdateAssetDto {
   @ApiPropertyOptional() @IsOptional() @IsString() unit?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() location?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() serialNumber?: string;
+  @ApiPropertyOptional() @IsOptional() @IsArray() @IsString({ each: true }) photoUrls?: string[];
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  photoFileRefIds?: string[];
   @ApiPropertyOptional() @IsOptional() @IsString() notes?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() status?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() managedBy?: string;

@@ -1,7 +1,9 @@
 # Rewards Module — Known Issues & Operator Runbook
 
 ## Module: STORY-020 Rewards (Gamification Engine)
+
 ## Date: 2026-04-25
+
 ## Status: IMPLEMENTED — Production Ready (with known limitations)
 
 ---
@@ -9,42 +11,49 @@
 ## Known Issues
 
 ### RWD-001: No auto-award badge engine (P2)
+
 **Severity**: Medium
 **Impact**: Badges with `isAutoAward: true` and `triggerEvent` are defined but not auto-triggered
 **Workaround**: Admins manually award badges via POST /badges/award
-**Plan**: Build badge trigger engine that evaluates triggerConfig against event stream
+**Plan**: Build worker-backed badge trigger engine that evaluates triggerConfig against event stream
 
 ### RWD-002: No EXP level/rank system (P2)
+
 **Severity**: Medium
 **Impact**: EXP is accumulated but not converted to levels/ranks
 **Workaround**: Manual comparison against leaderboard
 **Plan**: Add LevelDefinition model with EXP thresholds and automatic level-up
 
 ### RWD-003: Leaderboard snapshot not auto-scheduled (P2)
+
 **Severity**: Low
 **Impact**: Snapshots must be manually triggered via API
 **Workaround**: Admin takes snapshots at regular intervals
 **Plan**: Add cron job for automatic weekly/monthly snapshots
 
 ### RWD-004: No redemption rejection/cancel workflow (P2)
+
 **Severity**: Low
 **Impact**: Redemptions can be approved but not rejected — no EXP refund path
 **Workaround**: Manual database update
 **Plan**: Add reject endpoint with EXP restoration
 
 ### RWD-005: Peer recognition has no notification (P2)
+
 **Severity**: Low
 **Impact**: Recipients don't know they were recognized until they check
 **Workaround**: Manual communication
 **Plan**: Integrate with notification system when available
 
 ### RWD-006: Cap counter uses application-time (P3)
+
 **Severity**: Low
 **Impact**: Daily/weekly caps are based on server time, not member timezone
 **Workaround**: Accept UTC-based caps
 **Plan**: Add timezone-aware cap computation
 
 ### RWD-007: No EXP expiry mechanism (P3)
+
 **Severity**: Low
 **Impact**: EXP never expires — no incentive to spend
 **Workaround**: Admins can manually deduct stale EXP
@@ -54,18 +63,18 @@
 
 ## Deferred Features
 
-| Feature | Priority | Reason |
-|---------|----------|--------|
-| Auto-award badge engine | P2 | Needs event stream processing |
-| EXP level/rank system | P2 | Needs LevelDefinition model |
-| Auto leaderboard snapshots | P2 | Needs cron infrastructure |
-| Redemption rejection | P2 | Simple but not exposed |
-| Peer recognition notifications | P2 | Needs notification infra |
-| Badge showcase / profile | P2 | FE feature |
-| EXP streak bonuses | P2 | Needs streak tracking |
-| Cap timezone awareness | P3 | Low priority edge case |
-| EXP expiry mechanism | P3 | Design decision needed |
-| Achievement chains / quests | P3 | Complex gamification feature |
+| Feature                        | Priority | Reason                                      |
+| ------------------------------ | -------- | ------------------------------------------- |
+| Auto-award badge engine        | P2       | Needs worker-backed event stream processing |
+| EXP level/rank system          | P2       | Needs LevelDefinition model                 |
+| Auto leaderboard snapshots     | P2       | Needs worker scheduler job logic            |
+| Redemption rejection           | P2       | Simple but not exposed                      |
+| Peer recognition notifications | P2       | Needs notification infra                    |
+| Badge showcase / profile       | P2       | FE feature                                  |
+| EXP streak bonuses             | P2       | Needs streak tracking                       |
+| Cap timezone awareness         | P3       | Low priority edge case                      |
+| EXP expiry mechanism           | P3       | Design decision needed                      |
+| Achievement chains / quests    | P3       | Complex gamification feature                |
 
 ---
 
@@ -76,10 +85,10 @@
 ```
 Admin configures EXP rules → POST /rewards/exp/configs
   { eventType, sourceModule, actionName, expAmount, maxPerDay, maxPerWeek, description }
-  
+
   Upsert: same orgId + eventType → updates existing config
   Cap defaults: maxPerDay=-1 (unlimited), maxPerWeek=-1 (unlimited)
-  
+
   Pre-configured event types (via seed):
   - member.activated → 10 EXP (1/day, 1/week)
   - session.attendance_marked → 5 EXP (2/day, 10/week)
@@ -114,7 +123,7 @@ View history → GET /rewards/exp/transactions/:memberId?page=1&limit=20
 ```
 Create definition → POST /rewards/badges/definitions (admin)
   { badgeCode, name, description, badgeType, imageUrl, rarity, triggerEvent, triggerConfig, expReward, isAutoAward }
-  
+
   Rarity tiers: common, uncommon, rare, epic, legendary
   Badge types: milestone, achievement, social, skill, special
 
@@ -130,7 +139,7 @@ Award badge → POST /rewards/badges/award (admin)
 Create item → POST /rewards/shop/items (admin)
   { name, description, costExp, category, imageUrl, quantityAvailable, validUntil }
   quantityAvailable: -1 = unlimited stock
-  
+
 Redeem → POST /rewards/shop/redeem (member)
   { rewardId }
   Validates: item active, in stock, not expired, member has enough EXP

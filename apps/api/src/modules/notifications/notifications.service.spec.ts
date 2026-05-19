@@ -17,6 +17,8 @@ describe('NotificationsService', () => {
     body: 'Hello',
     type: 'test',
     channel: 'in_app',
+    actionUrl: null,
+    metadata: {},
     isRead: false,
     readAt: null,
     createdAt: new Date(),
@@ -44,6 +46,9 @@ describe('NotificationsService', () => {
       },
       notificationDeliveryLog: {
         create: jest.fn().mockResolvedValue({ id: 'dl-1' }),
+        findMany: jest.fn().mockResolvedValue([]),
+        updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+        update: jest.fn().mockResolvedValue({ id: 'dl-1' }),
       },
     };
     domainEvents = { publish: jest.fn().mockResolvedValue(undefined) };
@@ -108,6 +113,90 @@ describe('NotificationsService', () => {
   });
 
   // ── markRead ───────────────────────────────────────────
+
+  describe('send idempotency', () => {
+    it('should return existing notification when idempotency key already exists', async () => {
+      prisma.notification.findFirst.mockResolvedValue(mockNotification);
+
+      const result = await service.send('org-1', 'u-1', {
+        title: 'Hi',
+        body: 'Hello',
+        type: 'test',
+        idempotencyKey: 'event-1:u-1',
+      });
+
+      expect(result).toBe(mockNotification);
+      expect(prisma.notification.create).not.toHaveBeenCalled();
+      expect(prisma.notification.findFirst).toHaveBeenCalledWith({
+        where: {
+          orgId: 'org-1',
+          recipientId: 'u-1',
+          type: 'test',
+          metadata: { path: ['idempotencyKey'], equals: 'event-1:u-1' },
+        },
+      });
+    });
+  });
+
+  describe('processPendingDeliveries', () => {
+    it('should deliver pending in-app logs exactly once using a status lock', async () => {
+      prisma.notificationDeliveryLog.findMany.mockResolvedValue([
+        { id: 'dl-1', notificationId: 'n-1', channel: 'in_app', status: 'pending', attempts: 0 },
+      ]);
+      prisma.notification.findFirst.mockResolvedValue(mockNotification);
+
+      const result = await service.processPendingDeliveries();
+
+      expect(result).toEqual({ total: 1, delivered: 1, failed: 0, skipped: 0 });
+      expect(prisma.notificationDeliveryLog.updateMany).toHaveBeenCalledWith({
+        where: { id: 'dl-1', status: 'pending' },
+        data: { status: 'sending', attempts: { increment: 1 } },
+      });
+      expect(prisma.notificationDeliveryLog.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'dl-1' },
+          data: expect.objectContaining({ status: 'delivered', lastError: null }),
+        }),
+      );
+    });
+
+    it('should skip rows already locked by another worker', async () => {
+      prisma.notificationDeliveryLog.findMany.mockResolvedValue([
+        { id: 'dl-1', notificationId: 'n-1', channel: 'in_app', status: 'pending', attempts: 0 },
+      ]);
+      prisma.notificationDeliveryLog.updateMany.mockResolvedValue({ count: 0 });
+
+      const result = await service.processPendingDeliveries();
+
+      expect(result).toEqual({ total: 1, delivered: 0, failed: 0, skipped: 1 });
+      expect(prisma.notification.findFirst).not.toHaveBeenCalled();
+      expect(prisma.notificationDeliveryLog.update).not.toHaveBeenCalled();
+    });
+
+    it('should mark unconfigured email provider as skipped with observable error', async () => {
+      prisma.notificationDeliveryLog.findMany.mockResolvedValue([
+        { id: 'dl-2', notificationId: 'n-2', channel: 'email', status: 'pending', attempts: 0 },
+      ]);
+      prisma.notification.findFirst.mockResolvedValue({
+        ...mockNotification,
+        id: 'n-2',
+        channel: 'email',
+      });
+
+      const result = await service.processPendingDeliveries();
+
+      expect(result).toEqual({ total: 1, delivered: 0, failed: 0, skipped: 1 });
+      expect(prisma.notificationDeliveryLog.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'dl-2' },
+          data: expect.objectContaining({
+            status: 'skipped',
+            lastError: 'provider_unconfigured:email',
+          }),
+        }),
+      );
+    });
+  });
 
   describe('markRead', () => {
     it('should mark notification as read', async () => {
@@ -199,7 +288,9 @@ describe('NotificationsService', () => {
       await service.updatePreference('org-1', 'u-1', 'zalo', 'test_event', false);
       expect(prisma.notificationPreference.upsert).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { userId_channel_eventType: { userId: 'u-1', channel: 'zalo', eventType: 'test_event' } },
+          where: {
+            userId_channel_eventType: { userId: 'u-1', channel: 'zalo', eventType: 'test_event' },
+          },
           create: expect.objectContaining({ enabled: false }),
           update: { enabled: false },
         }),
@@ -234,14 +325,23 @@ describe('NotificationsService', () => {
       });
       expect(prisma.notificationTemplate.upsert).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { orgId_eventType_channel: { orgId: 'org-1', eventType: 'member_joined', channel: 'in_app' } },
+          where: {
+            orgId_eventType_channel: {
+              orgId: 'org-1',
+              eventType: 'member_joined',
+              channel: 'in_app',
+            },
+          },
         }),
       );
     });
 
     it('should default isActive to true on update', async () => {
       await service.upsertTemplate('org-1', {
-        eventType: 'test', channel: 'in_app', title: 'T', body: 'B',
+        eventType: 'test',
+        channel: 'in_app',
+        title: 'T',
+        body: 'B',
       });
       const call = prisma.notificationTemplate.upsert.mock.calls[0][0];
       expect(call.update.isActive).toBe(true);
@@ -253,7 +353,9 @@ describe('NotificationsService', () => {
   describe('sendBulk', () => {
     it('should send to multiple recipients and publish event', async () => {
       const result = await service.sendBulk('org-1', ['u-1', 'u-2', 'u-3'], {
-        title: 'Announcement', body: 'Meeting at 5pm', type: 'announcement',
+        title: 'Announcement',
+        body: 'Meeting at 5pm',
+        type: 'announcement',
       });
       expect(result.total).toBe(3);
       expect(result.sent).toBe(3);
@@ -267,7 +369,9 @@ describe('NotificationsService', () => {
         .mockResolvedValueOnce(null)
         .mockResolvedValueOnce({ enabled: false });
       const result = await service.sendBulk('org-1', ['u-1', 'u-2', 'u-3'], {
-        title: 'Test', body: 'Body', type: 'test',
+        title: 'Test',
+        body: 'Body',
+        type: 'test',
       });
       expect(result.suppressed).toBe(2);
       expect(result.sent).toBe(1);

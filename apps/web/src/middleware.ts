@@ -5,7 +5,8 @@ import type { NextRequest } from 'next/server';
  * Next.js Middleware — T-0015 Route guards
  *
  * Protects dashboard routes from unauthenticated access.
- * In production, this validates JWT tokens; in dev, it allows passthrough.
+ * In production, this validates JWT tokens. Local bypass must be explicitly
+ * enabled with TTNDD_AUTH_BYPASS=true and is ignored outside development.
  *
  * Flow:
  *   1. Public routes (/login, /register, /forgot-password) → always allowed
@@ -43,10 +44,9 @@ export function middleware(request: NextRequest) {
     request.cookies.get('token')?.value ||
     request.headers.get('authorization')?.replace('Bearer ', '');
 
-  // In development, allow passthrough if no auth system is active yet
-  const isDev = process.env.NODE_ENV === 'development';
-  if (isDev && !token) {
-    // Dev mode: allow access but set a flag for the client
+  const allowDevBypass =
+    process.env.NODE_ENV === 'development' && process.env.TTNDD_AUTH_BYPASS === 'true';
+  if (allowDevBypass && !token) {
     const response = NextResponse.next();
     response.headers.set('x-auth-status', 'dev-bypass');
     return response;

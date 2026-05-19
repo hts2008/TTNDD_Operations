@@ -13,13 +13,25 @@ export class EnrichmentService {
 
   // ── Spiritual Log (privacy-by-default: only the member sees their own) ──
 
-  async createSpiritualLog(orgId: string, memberId: string, data: {
-    logDate: string; logType?: string; durationMinutes?: number;
-    notes?: string; thanhNgonRef?: string;
-    emotionBefore?: number; emotionAfter?: number;
-  }, actorUserId: string) {
-    if (memberId !== actorUserId) {
-      throw new ForbiddenException('Spiritual logs are private — only the member can create their own');
+  async createSpiritualLog(
+    orgId: string,
+    memberId: string,
+    data: {
+      logDate: string;
+      logType?: string;
+      durationMinutes?: number;
+      notes?: string;
+      thanhNgonRef?: string;
+      emotionBefore?: number;
+      emotionAfter?: number;
+    },
+    actorUserId: string,
+    requesterMemberId: string,
+  ) {
+    if (memberId !== requesterMemberId) {
+      throw new ForbiddenException(
+        'Spiritual logs are private — only the member can create their own',
+      );
     }
 
     const log = await this.prisma.spiritualLog.create({
@@ -53,9 +65,11 @@ export class EnrichmentService {
     return log;
   }
 
-  async findSpiritualLogsByMember(orgId: string, memberId: string, requesterId: string) {
-    if (memberId !== requesterId) {
-      throw new ForbiddenException('Spiritual logs are private — only the member can view their own');
+  async findSpiritualLogsByMember(orgId: string, memberId: string, requesterMemberId: string) {
+    if (memberId !== requesterMemberId) {
+      throw new ForbiddenException(
+        'Spiritual logs are private — only the member can view their own',
+      );
     }
 
     return this.prisma.spiritualLog.findMany({
@@ -66,13 +80,25 @@ export class EnrichmentService {
 
   // ── Ngu Gioi Assessment (HIDDEN from leaders — self-assessment only) ──
 
-  async createOrUpdateNguGioi(orgId: string, memberId: string, data: {
-    weekStart: string;
-    batSatSinh?: number; batDuDao?: number; batTaDam?: number;
-    batTuuNhuc?: number; batVongNgu?: number; reflection?: string;
-  }, actorUserId: string) {
-    if (memberId !== actorUserId) {
-      throw new ForbiddenException('Ngu Gioi assessments are hidden — only the member can self-assess');
+  async createOrUpdateNguGioi(
+    orgId: string,
+    memberId: string,
+    data: {
+      weekStart: string;
+      batSatSinh?: number;
+      batDuDao?: number;
+      batTaDam?: number;
+      batTuuNhuc?: number;
+      batVongNgu?: number;
+      reflection?: string;
+    },
+    actorUserId: string,
+    requesterMemberId: string,
+  ) {
+    if (memberId !== requesterMemberId) {
+      throw new ForbiddenException(
+        'Ngu Gioi assessments are hidden — only the member can self-assess',
+      );
     }
 
     const weekStartDate = new Date(data.weekStart);
@@ -114,8 +140,8 @@ export class EnrichmentService {
     return assessment;
   }
 
-  async findNguGioiByMember(orgId: string, memberId: string, requesterId: string) {
-    if (memberId !== requesterId) {
+  async findNguGioiByMember(orgId: string, memberId: string, requesterMemberId: string) {
+    if (memberId !== requesterMemberId) {
       throw new ForbiddenException('Ngu Gioi assessments are hidden from leaders');
     }
 
@@ -127,14 +153,26 @@ export class EnrichmentService {
 
   // ── Evaluation (5-dimension rubric) ──
 
-  async createEvaluation(orgId: string, data: {
-    orgMemberId: string; evaluatorId: string; branchId: string;
-    evaluationType?: string; evaluationDate: string;
-    scoreDaoDuc?: number; scoreKyNang?: number; scoreTheChat?: number;
-    scoreLanhDao?: number; scorePhungSu?: number;
-    strengths?: string; areasToImprove?: string; recommendations?: string;
-    selfAssessment?: Prisma.InputJsonValue;
-  }, actorUserId: string) {
+  async createEvaluation(
+    orgId: string,
+    data: {
+      orgMemberId: string;
+      evaluatorId: string;
+      branchId: string;
+      evaluationType?: string;
+      evaluationDate: string;
+      scoreDaoDuc?: number;
+      scoreKyNang?: number;
+      scoreTheChat?: number;
+      scoreLanhDao?: number;
+      scorePhungSu?: number;
+      strengths?: string;
+      areasToImprove?: string;
+      recommendations?: string;
+      selfAssessment?: Prisma.InputJsonValue;
+    },
+    actorUserId: string,
+  ) {
     const evaluation = await this.prisma.evaluation.create({
       data: {
         orgId,
@@ -187,9 +225,15 @@ export class EnrichmentService {
 
   // ── Mentoring Relationship ──
 
-  async createMentoringRelationship(orgId: string, data: {
-    mentorId: string; menteeId: string; startDate?: string;
-  }, actorUserId: string) {
+  async createMentoringRelationship(
+    orgId: string,
+    data: {
+      mentorId: string;
+      menteeId: string;
+      startDate?: string;
+    },
+    actorUserId: string,
+  ) {
     const relationship = await this.prisma.mentoringRelationship.create({
       data: {
         orgId,
@@ -230,9 +274,16 @@ export class EnrichmentService {
 
   // ── Mentoring Log ──
 
-  async createMentoringLog(orgId: string, relationshipId: string, data: {
-    sessionDate: string; topic?: string; outcome?: string; followUp?: string;
-  }) {
+  async createMentoringLog(
+    orgId: string,
+    relationshipId: string,
+    data: {
+      sessionDate: string;
+      topic?: string;
+      outcome?: string;
+      followUp?: string;
+    },
+  ) {
     const relationship = await this.prisma.mentoringRelationship.findFirst({
       where: { id: relationshipId, orgId },
     });

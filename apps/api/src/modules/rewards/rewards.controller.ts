@@ -293,7 +293,7 @@ export class RewardsController {
   @Post('shop/redeem')
   @ApiOperation({ summary: 'Redeem a shop item (spend EXP)' })
   redeem(@CurrentUser() user: CurrentUserPayload, @Body() body: { rewardId: string }) {
-    return this.shopService.redeem(user.orgId, user.memberId!, body.rewardId);
+    return this.shopService.redeem(user.orgId, user.memberId!, body.rewardId, user.userId);
   }
 
   @Post('shop/redemptions/:id/approve')

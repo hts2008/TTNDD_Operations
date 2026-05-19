@@ -1,4 +1,5 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
+import type { PrismaClient } from '@prisma/client';
 import { PrismaService } from '../../core/database';
 
 /**
@@ -72,8 +73,12 @@ export class MemberValidationService {
    * T-0045: Full compliance check for a member.
    * Returns list of all violations.
    */
-  async checkCompliance(orgId: string, memberId: string): Promise<ComplianceResult> {
-    const member = await this.prisma.orgMember.findFirst({
+  async checkCompliance(
+    orgId: string,
+    memberId: string,
+    db: PrismaClient = this.prisma,
+  ): Promise<ComplianceResult> {
+    const member = await db.orgMember.findFirst({
       where: { id: memberId, orgId },
       include: {
         profile: true,

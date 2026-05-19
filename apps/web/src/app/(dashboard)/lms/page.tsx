@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { BookOpen, Clock, Star, Zap, Loader2, AlertCircle } from 'lucide-react';
+import { BookOpen, Clock, Zap, Loader2, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { api } from '@/lib/api';
 
@@ -63,13 +63,13 @@ export default function LmsPage() {
   useEffect(() => {
     setLoading(true);
     api
-      .get<{ data: CourseResponse[]; meta: PageMeta }>('/lms/courses', {
+      .getEnvelope<CourseResponse[]>('/lms/courses', {
         page: String(meta.page),
         limit: String(meta.limit),
       })
       .then((res) => {
         setCourses(res.data);
-        setMeta(res.meta);
+        setMeta((current) => ({ ...current, ...(res.meta as Partial<PageMeta> | undefined) }));
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));

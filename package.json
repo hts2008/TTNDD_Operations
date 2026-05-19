@@ -13,6 +13,9 @@
     "db:migrate": "pnpm --filter api run db:migrate",
     "db:seed": "pnpm --filter api run db:seed",
     "db:studio": "pnpm --filter api run db:studio",
+    "contracts:events": "node scripts/generate-event-catalog.js",
+    "contracts:check": "node scripts/check-contract-drift.js",
+    "contracts:check:events": "node scripts/check-contract-drift.js --event-catalog-only",
     "clean": "turbo run clean && rm -rf node_modules",
     "prepare": "husky"
   },

@@ -112,6 +112,7 @@ describe('AuthService', () => {
         role: 'leader',
         email: 'test@ttndd.org',
         firebaseUid: 'firebase-uid-1',
+        memberId: 'member-1',
       });
       expect(prisma.user.findUnique).toHaveBeenCalledWith({
         where: { firebaseUid: 'firebase-uid-1' },
@@ -170,6 +171,7 @@ describe('AuthService', () => {
         role: 'leader',
         email: 'test@ttndd.org',
         firebaseUid: 'firebase-uid-1',
+        memberId: 'member-1',
       });
     });
 

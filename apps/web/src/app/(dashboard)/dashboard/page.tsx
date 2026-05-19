@@ -1,125 +1,200 @@
 'use client';
 
+import { useEffect, useMemo, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import { PageEmpty, PageError, PageLoading } from '@/components/ui/page-states';
+import { api } from '@/lib/api';
 import {
-  Users,
-  Calendar,
-  Zap,
-  Ticket,
-  Wallet,
-  CalendarDays,
-  BookOpen,
   Award,
-  TrendingUp,
-  TrendingDown,
-  Clock,
-  UserPlus,
+  BookOpen,
+  Calendar,
+  CalendarDays,
   CheckCircle2,
-  Star,
+  Clock,
+  Ticket,
+  TrendingDown,
+  TrendingUp,
+  UserPlus,
+  Users,
+  Wallet,
+  Zap,
 } from 'lucide-react';
 
-const STATS = [
-  { label: 'Tổng đoàn sinh', value: '248', icon: Users, color: 'bg-blue-500', trend: '+12', up: true },
-  { label: 'Buổi sinh hoạt', value: '32', icon: Calendar, color: 'bg-indigo-500', trend: '+3', up: true },
-  { label: 'EXP đã cấp', value: '15.4K', icon: Zap, color: 'bg-amber-500', trend: '+2.1K', up: true },
-  { label: 'Yêu cầu mở', value: '7', icon: Ticket, color: 'bg-rose-500', trend: '-2', up: false },
-  { label: 'Số dư quỹ', value: '12.5M', icon: Wallet, color: 'bg-emerald-500', trend: '+1.2M', up: true },
-  { label: 'Sự kiện sắp tới', value: '4', icon: CalendarDays, color: 'bg-violet-500', trend: '', up: true },
-  { label: 'Khóa học hoạt động', value: '6', icon: BookOpen, color: 'bg-cyan-500', trend: '+1', up: true },
-  { label: 'Huy hiệu đã cấp', value: '89', icon: Award, color: 'bg-orange-500', trend: '+14', up: true },
+interface DashboardWidget {
+  label: string;
+  value: number | string;
+  change?: number;
+  trend?: 'up' | 'down' | 'flat';
+}
+
+interface RecentActivity {
+  id: string;
+  action: string;
+  resource: string;
+  resourceId?: string;
+  createdAt: string;
+  userId?: string;
+}
+
+interface OrgDashboard {
+  widgets: DashboardWidget[];
+  recentActivity: RecentActivity[];
+}
+
+interface SpicesDashboard {
+  tamTru: {
+    daoDuc: number;
+    phuongPhap: number;
+    giaoDuc: number;
+  };
+  totalSessions: number;
+  balanceScore: number;
+}
+
+const WIDGET_ICONS = [Users, Calendar, Zap, BookOpen, Ticket, Wallet, CalendarDays, Award];
+const WIDGET_COLORS = [
+  'bg-blue-500',
+  'bg-indigo-500',
+  'bg-amber-500',
+  'bg-cyan-500',
+  'bg-rose-500',
+  'bg-emerald-500',
+  'bg-violet-500',
+  'bg-orange-500',
 ];
 
-const RECENT_ACTIVITIES = [
-  { icon: UserPlus, text: 'Nguyễn Văn An đã được thêm vào Ngành Thiếu', time: '5 phút trước', color: 'text-blue-500' },
-  { icon: CheckCircle2, text: 'Buổi sinh hoạt "Kỹ năng cắm trại" hoàn thành', time: '2 giờ trước', color: 'text-emerald-500' },
-  { icon: Star, text: 'Trần Thị Bình đạt huy hiệu "Sao Đạo Đức"', time: '3 giờ trước', color: 'text-amber-500' },
-  { icon: Zap, text: '+150 EXP cho Đội Hướng Dương (điểm danh)', time: '5 giờ trước', color: 'text-violet-500' },
-  { icon: Calendar, text: 'Sinh hoạt "Học kỳ quân đội" đã được lên lịch', time: '1 ngày trước', color: 'text-indigo-500' },
-  { icon: Wallet, text: 'Thu quỹ tháng 3: +2.500.000đ', time: '2 ngày trước', color: 'text-emerald-500' },
-];
+function formatValue(value: number | string) {
+  return typeof value === 'number' ? value.toLocaleString('vi-VN') : value;
+}
 
-const SPICES = [
-  { label: 'Social', short: 'S', value: 75, color: '#3b82f6' },
-  { label: 'Physical', short: 'P', value: 60, color: '#10b981' },
-  { label: 'Intellectual', short: 'I', value: 85, color: '#f59e0b' },
-  { label: 'Character', short: 'C', value: 70, color: '#ef4444' },
-  { label: 'Emotional', short: 'E', value: 55, color: '#8b5cf6' },
-  { label: 'Spiritual', short: 'S', value: 90, color: '#ec4899' },
-];
+function activityIcon(action: string) {
+  if (action.includes('created')) return UserPlus;
+  if (action.includes('completed') || action.includes('approved')) return CheckCircle2;
+  if (action.includes('exp') || action.includes('reward')) return Zap;
+  return Clock;
+}
 
-function RadarPlaceholder() {
-  const cx = 150, cy = 130, r = 90;
-  const points = SPICES.map((_, i) => {
-    const angle = (Math.PI * 2 * i) / SPICES.length - Math.PI / 2;
-    return { x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) };
-  });
-  const dataPoints = SPICES.map((s, i) => {
-    const angle = (Math.PI * 2 * i) / SPICES.length - Math.PI / 2;
-    const dr = (s.value / 100) * r;
-    return { x: cx + dr * Math.cos(angle), y: cy + dr * Math.sin(angle) };
-  });
-  const polygon = dataPoints.map((p) => `${p.x},${p.y}`).join(' ');
+function TamTruChart({ data }: { data: SpicesDashboard }) {
+  const rows = [
+    { label: 'Dao duc', value: data.tamTru.daoDuc, color: 'bg-emerald-500' },
+    { label: 'Phuong phap', value: data.tamTru.phuongPhap, color: 'bg-blue-500' },
+    { label: 'Giao duc', value: data.tamTru.giaoDuc, color: 'bg-amber-500' },
+  ];
 
   return (
-    <svg viewBox="0 0 300 280" className="w-full max-w-xs mx-auto">
-      {[0.25, 0.5, 0.75, 1].map((scale) => (
-        <polygon
-          key={scale}
-          points={points.map((p) => `${cx + (p.x - cx) * scale},${cy + (p.y - cy) * scale}`).join(' ')}
-          fill="none"
-          stroke="hsl(var(--border))"
-          strokeWidth="1"
-        />
-      ))}
-      {points.map((p, i) => (
-        <line key={i} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="hsl(var(--border))" strokeWidth="1" />
-      ))}
-      <polygon points={polygon} fill="hsl(var(--primary) / 0.15)" stroke="hsl(var(--primary))" strokeWidth="2" />
-      {dataPoints.map((p, i) => (
-        <circle key={i} cx={p.x} cy={p.y} r="4" fill="hsl(var(--primary))" />
-      ))}
-      {points.map((p, i) => {
-        const dx = p.x - cx;
-        const dy = p.y - cy;
-        const labelX = cx + (dx > 0 ? dx + 18 : dx < 0 ? dx - 18 : dx);
-        const labelY = cy + (dy > 0 ? dy + 16 : dy < 0 ? dy - 10 : dy);
-        return (
-          <text key={i} x={labelX} y={labelY} textAnchor="middle" className="fill-[hsl(var(--muted-foreground))] text-[11px]">
-            {SPICES[i].label}
-          </text>
-        );
-      })}
-    </svg>
+    <div className="space-y-4">
+      <div className="grid grid-cols-3 gap-3">
+        {rows.map((row) => {
+          const pct =
+            data.totalSessions > 0 ? Math.round((row.value / data.totalSessions) * 100) : 0;
+          return (
+            <div key={row.label} className="rounded-lg border border-[hsl(var(--border))] p-3">
+              <div
+                className={`mb-2 h-2 rounded-full ${row.color}`}
+                style={{ width: `${Math.max(pct, 8)}%` }}
+              />
+              <p className="text-xs text-[hsl(var(--muted-foreground))]">{row.label}</p>
+              <p className="text-lg font-semibold text-[hsl(var(--foreground))]">{pct}%</p>
+            </div>
+          );
+        })}
+      </div>
+      <div className="rounded-lg bg-[hsl(var(--muted)_/_0.45)] p-4">
+        <p className="text-xs text-[hsl(var(--muted-foreground))]">Balance score</p>
+        <p className="mt-1 text-3xl font-bold text-[hsl(var(--foreground))]">
+          {data.balanceScore}%
+        </p>
+        <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">
+          Based on {data.totalSessions.toLocaleString('vi-VN')} tagged sessions.
+        </p>
+      </div>
+    </div>
   );
 }
 
 export default function DashboardPage() {
+  const [orgDashboard, setOrgDashboard] = useState<OrgDashboard | null>(null);
+  const [spicesDashboard, setSpicesDashboard] = useState<SpicesDashboard | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  async function loadDashboard() {
+    setLoading(true);
+    setError(null);
+    try {
+      const [org, spices] = await Promise.all([
+        api.get<OrgDashboard>('/dashboards/org'),
+        api.get<SpicesDashboard>('/dashboards/spices'),
+      ]);
+      setOrgDashboard(org);
+      setSpicesDashboard(spices);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Khong the tai dashboard');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    void loadDashboard();
+  }, []);
+
+  const widgets = orgDashboard?.widgets ?? [];
+  const activities = useMemo(() => orgDashboard?.recentActivity ?? [], [orgDashboard]);
+
+  if (loading) return <PageLoading message="Dang tai dashboard tu API..." />;
+  if (error) return <PageError message={error} onRetry={loadDashboard} />;
+  if (!orgDashboard || widgets.length === 0) {
+    return (
+      <PageEmpty
+        title="Chua co du lieu dashboard"
+        description="Hay seed pilot data hoac tao workflow dau tien."
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-[hsl(var(--foreground))]">Tổng quan</h1>
-        <p className="text-sm text-[hsl(var(--muted-foreground))]">Bảng điều khiển tổ chức — DTNDD</p>
+        <h1 className="text-2xl font-bold text-[hsl(var(--foreground))]">Tong quan</h1>
+        <p className="text-sm text-[hsl(var(--muted-foreground))]">
+          Du lieu tong hop truc tiep tu backend.
+        </p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {STATS.map((stat) => {
-          const Icon = stat.icon;
+        {widgets.map((stat, index) => {
+          const Icon = WIDGET_ICONS[index % WIDGET_ICONS.length];
+          const color = WIDGET_COLORS[index % WIDGET_COLORS.length];
+          const isDown = stat.trend === 'down';
           return (
             <Card key={stat.label} className="hover:shadow-md transition-shadow">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${stat.color} text-white`}>
+                  <div
+                    className={`flex h-10 w-10 items-center justify-center rounded-lg ${color} text-white`}
+                  >
                     <Icon className="h-5 w-5" />
                   </div>
-                  {stat.trend && (
-                    <span className={`flex items-center gap-0.5 text-xs font-medium ${stat.up ? 'text-emerald-600' : 'text-rose-600'}`}>
-                      {stat.up ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                      {stat.trend}
+                  {stat.change !== undefined && (
+                    <span
+                      className={`flex items-center gap-0.5 text-xs font-medium ${
+                        isDown ? 'text-rose-600' : 'text-emerald-600'
+                      }`}
+                    >
+                      {isDown ? (
+                        <TrendingDown className="h-3 w-3" />
+                      ) : (
+                        <TrendingUp className="h-3 w-3" />
+                      )}
+                      {stat.change}
                     </span>
                   )}
                 </div>
                 <div className="mt-3">
-                  <p className="text-2xl font-bold text-[hsl(var(--foreground))]">{stat.value}</p>
+                  <p className="text-2xl font-bold text-[hsl(var(--foreground))]">
+                    {formatValue(stat.value)}
+                  </p>
                   <p className="text-xs text-[hsl(var(--muted-foreground))]">{stat.label}</p>
                 </div>
               </CardContent>
@@ -131,47 +206,59 @@ export default function DashboardPage() {
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <div className="p-6 pb-3">
-            <h2 className="text-lg font-semibold text-[hsl(var(--foreground))]">Hoạt động gần đây</h2>
+            <h2 className="text-lg font-semibold text-[hsl(var(--foreground))]">
+              Hoat dong gan day
+            </h2>
           </div>
           <CardContent className="space-y-1">
-            {RECENT_ACTIVITIES.map((activity, i) => {
-              const Icon = activity.icon;
-              return (
-                <div
-                  key={i}
-                  className="flex items-start gap-3 rounded-lg p-2.5 hover:bg-[hsl(var(--muted)_/_0.5)] transition-colors"
-                >
-                  <div className={`mt-0.5 ${activity.color}`}>
-                    <Icon className="h-4 w-4" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-[hsl(var(--foreground))]">{activity.text}</p>
-                    <div className="flex items-center gap-1 mt-0.5">
-                      <Clock className="h-3 w-3 text-[hsl(var(--muted-foreground))]" />
-                      <span className="text-xs text-[hsl(var(--muted-foreground))]">{activity.time}</span>
+            {activities.length === 0 ? (
+              <p className="py-8 text-center text-sm text-[hsl(var(--muted-foreground))]">
+                Chua co audit activity.
+              </p>
+            ) : (
+              activities.map((activity) => {
+                const Icon = activityIcon(activity.action);
+                return (
+                  <div
+                    key={activity.id}
+                    className="flex items-start gap-3 rounded-lg p-2.5 hover:bg-[hsl(var(--muted)_/_0.5)] transition-colors"
+                  >
+                    <div className="mt-0.5 text-[hsl(var(--primary))]">
+                      <Icon className="h-4 w-4" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm text-[hsl(var(--foreground))]">
+                        {activity.action} / {activity.resource}
+                      </p>
+                      <div className="mt-0.5 flex items-center gap-1">
+                        <Clock className="h-3 w-3 text-[hsl(var(--muted-foreground))]" />
+                        <span className="text-xs text-[hsl(var(--muted-foreground))]">
+                          {new Date(activity.createdAt).toLocaleString('vi-VN')}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </CardContent>
         </Card>
 
         <Card>
           <div className="p-6 pb-3">
-            <h2 className="text-lg font-semibold text-[hsl(var(--foreground))]">SPICES Coverage</h2>
-            <p className="text-sm text-[hsl(var(--muted-foreground))]">Cân bằng phát triển toàn diện</p>
+            <h2 className="text-lg font-semibold text-[hsl(var(--foreground))]">
+              Tam Tru Coverage
+            </h2>
+            <p className="text-sm text-[hsl(var(--muted-foreground))]">
+              Dao duc, phuong phap va giao duc tinh tu sessions backend.
+            </p>
           </div>
           <CardContent>
-            <RadarPlaceholder />
-            <div className="mt-4 grid grid-cols-3 gap-2">
-              {SPICES.map((s) => (
-                <div key={s.label} className="flex items-center gap-2 text-xs">
-                  <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: s.color }} />
-                  <span className="text-[hsl(var(--muted-foreground))]">{s.label}: {s.value}%</span>
-                </div>
-              ))}
-            </div>
+            {spicesDashboard ? (
+              <TamTruChart data={spicesDashboard} />
+            ) : (
+              <PageEmpty title="Chua co coverage" />
+            )}
           </CardContent>
         </Card>
       </div>

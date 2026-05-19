@@ -3,19 +3,18 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import {
   Shield,
   AlertCircle,
   CheckCircle,
   XCircle,
   Loader2,
-  Inbox,
   TrendingUp,
   Users,
   ChevronRight,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { api } from '@/lib/api';
 
 interface ComplianceDashboard {
   summary: { total: number; compliant: number; nonCompliant: number; complianceRate: number };
@@ -31,9 +30,7 @@ export default function CompliancePage() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch('/api/v1/hrm/compliance/dashboard');
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        setData(await res.json());
+        setData(await api.get<ComplianceDashboard>('/hrm/compliance/dashboard'));
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Lỗi tải dữ liệu');
       } finally {

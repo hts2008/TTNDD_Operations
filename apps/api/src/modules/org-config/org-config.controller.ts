@@ -22,6 +22,12 @@ export class OrgConfigController {
     return this.orgConfigService.createOrganization(body, user.userId);
   }
 
+  @Get('id/:id')
+  @ApiOperation({ summary: 'Get organization by id' })
+  findById(@Param('id') id: string) {
+    return this.orgConfigService.findById(id);
+  }
+
   @Get(':slug')
   @ApiOperation({ summary: 'Get organization by slug' })
   findBySlug(@Param('slug') slug: string) {

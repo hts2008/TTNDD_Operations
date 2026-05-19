@@ -54,6 +54,22 @@ export class ExpService {
   ) {
     if (amount <= 0) throw new BadRequestException('EXP amount must be positive');
 
+    if (sourceEntityId) {
+      const existing = await this.prisma.expTransaction.findFirst({
+        where: {
+          orgId,
+          orgMemberId: memberId,
+          transactionType: 'earn',
+          eventType,
+          sourceEntityId,
+        },
+      });
+      if (existing) {
+        this.logger.debug(`EXP idempotency hit: ${eventType}/${sourceEntityId}/${memberId}`);
+        return existing;
+      }
+    }
+
     // G2: Check daily/weekly cap before awarding
     const cap = await this.capCounter.canAward(orgId, memberId, eventType);
     if (!cap.allowed) {
@@ -92,7 +108,7 @@ export class ExpService {
       aggregateId: memberId,
       aggregateType: 'OrgMember',
       payload: { amount, newTotal, eventType: eventType as Prisma.InputJsonValue },
-      actorUserId: recordedBy || memberId,
+      actorUserId: recordedBy,
     });
 
     this.logger.debug(`EXP +${amount} → member ${memberId} (total: ${newTotal})`);
@@ -154,16 +170,23 @@ export class ExpService {
   }
 
   async getTransactions(orgId: string, memberId: string, page = 1, limit = 20) {
+    const safePage =
+      Number.isFinite(Number(page)) && Number(page) > 0 ? Math.floor(Number(page)) : 1;
+    const safeLimit =
+      Number.isFinite(Number(limit)) && Number(limit) > 0
+        ? Math.min(Math.floor(Number(limit)), 100)
+        : 20;
+
     const [data, total] = await Promise.all([
       this.prisma.expTransaction.findMany({
         where: { orgId, orgMemberId: memberId },
         orderBy: { createdAt: 'desc' },
-        skip: (page - 1) * limit,
-        take: limit,
+        skip: (safePage - 1) * safeLimit,
+        take: safeLimit,
       }),
       this.prisma.expTransaction.count({ where: { orgId, orgMemberId: memberId } }),
     ]);
-    return { data, meta: { total, page, limit } };
+    return { data, meta: { total, page: safePage, limit: safeLimit } };
   }
 
   // ── Leaderboard ──

@@ -1,15 +1,34 @@
 import {
-  Controller, Get, Post, Patch, Delete, Body, Param, Query,
-  HttpCode, HttpStatus, ParseIntPipe, DefaultValuePipe,
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  Query,
+  HttpCode,
+  HttpStatus,
+  ParseIntPipe,
+  DefaultValuePipe,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { CurrentUser, type CurrentUserPayload, Roles } from '../../common/decorators';
 import { AssetsService } from './assets.service';
 import {
-  CreateCategoryDto, CreateAssetDto, UpdateAssetDto,
-  CreateLoanDto, TransitionLoanDto, GuardianAcceptDto,
-  SetCustomFieldDto, CreateKitTemplateDto, CreateMaintenanceDto,
-  ImportAssetsDto, IssueUniformDto, ReturnUniformDto, DisposeAssetDto,
+  CreateCategoryDto,
+  CreateAssetDto,
+  UpdateAssetDto,
+  CreateLoanDto,
+  TransitionLoanDto,
+  GuardianAcceptDto,
+  SetCustomFieldDto,
+  CreateKitTemplateDto,
+  CreateMaintenanceDto,
+  ImportAssetsDto,
+  IssueUniformDto,
+  ReturnUniformDto,
+  DisposeAssetDto,
 } from './assets.dto';
 
 @ApiTags('Assets')
@@ -53,7 +72,12 @@ export class AssetsController {
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number,
     @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit?: number,
   ) {
-    return this.service.getAssets(user.orgId, { categoryId, status, branchId, condition }, page, limit);
+    return this.service.getAssets(
+      user.orgId,
+      { categoryId, status, branchId, condition },
+      page,
+      limit,
+    );
   }
 
   @Get('summary')
@@ -77,7 +101,10 @@ export class AssetsController {
 
   @Get('by-location')
   @ApiOperation({ summary: 'T-1085: Get assets by location' })
-  getAssetsByLocation(@CurrentUser() user: CurrentUserPayload, @Query('location') location: string) {
+  getAssetsByLocation(
+    @CurrentUser() user: CurrentUserPayload,
+    @Query('location') location: string,
+  ) {
     return this.service.getAssetsByLocation(user.orgId, location);
   }
 
@@ -90,34 +117,42 @@ export class AssetsController {
     return this.service.getStockAlerts(user.orgId, threshold);
   }
 
-  @Get(':id')
+  @Get(':id([0-9a-fA-F-]{36})')
   @ApiOperation({ summary: 'Get asset by ID' })
   getAssetById(@CurrentUser() user: CurrentUserPayload, @Param('id') id: string) {
     return this.service.getAssetById(user.orgId, id);
   }
 
-  @Patch(':id')
+  @Patch(':id([0-9a-fA-F-]{36})')
   @Roles('super_admin', 'admin')
   @ApiOperation({ summary: 'T-1085: Update asset' })
-  updateAsset(@CurrentUser() user: CurrentUserPayload, @Param('id') id: string, @Body() dto: UpdateAssetDto) {
+  updateAsset(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id') id: string,
+    @Body() dto: UpdateAssetDto,
+  ) {
     return this.service.updateAsset(user.orgId, id, dto, user.userId);
   }
 
-  @Delete(':id')
+  @Delete(':id([0-9a-fA-F-]{36})')
   @Roles('super_admin', 'admin')
   @ApiOperation({ summary: 'T-1085: Retire/soft-delete asset' })
   retireAsset(@CurrentUser() user: CurrentUserPayload, @Param('id') id: string) {
     return this.service.retireAsset(user.orgId, id, user.userId);
   }
 
-  @Post(':id/dispose')
+  @Post(':id([0-9a-fA-F-]{36})/dispose')
   @Roles('super_admin', 'admin')
   @ApiOperation({ summary: 'T-1090: Dispose asset (donated/scrapped)' })
-  disposeAsset(@CurrentUser() user: CurrentUserPayload, @Param('id') id: string, @Body() dto: DisposeAssetDto) {
+  disposeAsset(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id') id: string,
+    @Body() dto: DisposeAssetDto,
+  ) {
     return this.service.disposeAsset(user.orgId, id, dto, user.userId);
   }
 
-  @Get(':id/qr')
+  @Get(':id([0-9a-fA-F-]{36})/qr')
   @ApiOperation({ summary: 'Generate QR data URL for asset' })
   generateQr(@CurrentUser() user: CurrentUserPayload, @Param('id') id: string) {
     return this.service.generateQrDataUrl(user.orgId, id);
@@ -125,11 +160,21 @@ export class AssetsController {
 
   // ── Custom Fields ──
 
-  @Post(':id/custom-fields')
+  @Post(':id([0-9a-fA-F-]{36})/custom-fields')
   @Roles('super_admin', 'admin')
   @ApiOperation({ summary: 'Set custom field on asset' })
-  setCustomField(@CurrentUser() user: CurrentUserPayload, @Param('id') id: string, @Body() dto: SetCustomFieldDto) {
-    return this.service.setCustomField(user.orgId, id, dto.fieldName, dto.fieldValue, dto.fieldType);
+  setCustomField(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id') id: string,
+    @Body() dto: SetCustomFieldDto,
+  ) {
+    return this.service.setCustomField(
+      user.orgId,
+      id,
+      dto.fieldName,
+      dto.fieldValue,
+      dto.fieldType,
+    );
   }
 
   // ── Loans ──
@@ -176,7 +221,13 @@ export class AssetsController {
     @Param('loanId') loanId: string,
     @Body() dto: GuardianAcceptDto,
   ) {
-    return this.service.guardianAcceptLoan(user.orgId, loanId, dto.decision, user.userId, dto.notes);
+    return this.service.guardianAcceptLoan(
+      user.orgId,
+      loanId,
+      dto.decision,
+      user.userId,
+      dto.notes,
+    );
   }
 
   // ── Kit Templates ──
@@ -205,7 +256,10 @@ export class AssetsController {
 
   @Get('maintenance')
   @ApiOperation({ summary: 'List maintenance schedules' })
-  getMaintenanceSchedules(@CurrentUser() user: CurrentUserPayload, @Query('status') status?: string) {
+  getMaintenanceSchedules(
+    @CurrentUser() user: CurrentUserPayload,
+    @Query('status') status?: string,
+  ) {
     return this.service.getMaintenanceSchedules(user.orgId, { status });
   }
 

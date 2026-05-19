@@ -1,0 +1,6 @@
+ALTER TABLE "exp_transactions"
+  ADD COLUMN IF NOT EXISTS "deduction_item" VARCHAR(100),
+  ADD COLUMN IF NOT EXISTS "correction_task" TEXT,
+  ADD COLUMN IF NOT EXISTS "is_corrected" BOOLEAN NOT NULL DEFAULT false,
+  ADD COLUMN IF NOT EXISTS "corrected_at" TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS "corrected_by" UUID;

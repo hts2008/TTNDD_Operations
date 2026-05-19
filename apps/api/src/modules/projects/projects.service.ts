@@ -627,6 +627,7 @@ export class ProjectsService {
         aggregateId: taskId,
         aggregateType: 'ProjectTask',
         payload: {
+          taskId: task.id,
           title: task.title,
           projectId: task.projectId,
           expEarned: expAmount,

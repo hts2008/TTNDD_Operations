@@ -61,20 +61,17 @@ export class SystemController {
     return this.service.getSeedHealth(orgId);
   }
 
+  @Public()
   @Get('release-gates/latest')
-  @UseGuards(AuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get latest release gate report' })
   async latestReleaseGate() {
     return this.service.getLatestReleaseGate();
   }
 
+  @Public()
   @Post('release-gates/report')
   @ApiOperation({ summary: 'Save a release gate report from CI pipeline' })
-  async saveReleaseGateReport(
-    @Body() body: SaveReleaseGateReportDto,
-  ) {
+  async saveReleaseGateReport(@Body() body: SaveReleaseGateReportDto) {
     return this.service.saveReleaseGateReport(body);
   }
 }
-

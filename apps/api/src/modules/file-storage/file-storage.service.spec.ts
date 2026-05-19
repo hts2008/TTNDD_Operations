@@ -17,6 +17,11 @@ describe('FileStorageService', () => {
     originalName: 'test.pdf',
     mimeType: 'application/pdf',
     sizeBytes: BigInt(1024),
+    status: 'READY',
+    checksum: 'sha256:existing',
+    scanStatus: 'CLEAN',
+    scanError: null,
+    finalizedAt: new Date(),
     deletedAt: null,
     uploadedAt: new Date(),
   };
@@ -89,6 +94,16 @@ describe('FileStorageService', () => {
       ).rejects.toThrow(BadRequestException);
     });
 
+    it('should reject non-positive file size', async () => {
+      await expect(
+        service.createUploadRequest('org-1', 'u-1', {
+          originalName: 'empty.pdf',
+          mimeType: 'application/pdf',
+          sizeBytes: 0,
+        }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
     it('should sanitize filename', async () => {
       await service.createUploadRequest('org-1', 'u-1', {
         originalName: 'my file (1).pdf',
@@ -107,6 +122,152 @@ describe('FileStorageService', () => {
 
   // ── getDownloadUrl ─────────────────────────────────────
 
+  describe('finalizeUpload', () => {
+    const pendingFileRef = {
+      ...mockFileRef,
+      status: 'PENDING',
+      checksum: null,
+      scanStatus: 'PENDING',
+      scanError: null,
+      finalizedAt: null,
+    };
+
+    it('should mark a matching upload request READY after scan passes', async () => {
+      prisma.fileObjectRef.findFirst.mockResolvedValue(pendingFileRef);
+      prisma.fileObjectRef.update.mockResolvedValue({
+        ...pendingFileRef,
+        status: 'READY',
+        scanStatus: 'CLEAN',
+        checksum: 'sha256:abc',
+        finalizedAt: new Date('2026-05-15T00:00:00.000Z'),
+      });
+
+      const result = await service.finalizeUpload('org-1', 'u-1', {
+        fileRefId: 'f-1',
+        objectKey: pendingFileRef.objectKey,
+        checksum: 'sha256:abc',
+        sizeBytes: 1024,
+      });
+
+      expect(result).toMatchObject({
+        fileRefId: 'f-1',
+        status: 'READY',
+        scanStatus: 'CLEAN',
+        checksum: 'sha256:abc',
+      });
+      expect(prisma.fileObjectRef.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'f-1' },
+          data: expect.objectContaining({
+            status: 'READY',
+            scanStatus: 'CLEAN',
+            checksum: 'sha256:abc',
+            finalizedAt: expect.any(Date),
+          }),
+        }),
+      );
+    });
+
+    it('should mark finalize as FAILED when objectKey does not match', async () => {
+      prisma.fileObjectRef.findFirst.mockResolvedValue(pendingFileRef);
+
+      await expect(
+        service.finalizeUpload('org-1', 'u-1', {
+          fileRefId: 'f-1',
+          objectKey: 'org-1/general/wrong.pdf',
+          sizeBytes: 1024,
+        }),
+      ).rejects.toThrow(BadRequestException);
+
+      expect(prisma.fileObjectRef.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'f-1' },
+          data: expect.objectContaining({
+            status: 'FAILED',
+            scanStatus: 'FAILED',
+            scanError: 'object_key_mismatch',
+          }),
+        }),
+      );
+    });
+
+    it('should mark finalize as FAILED when sizeBytes does not match', async () => {
+      prisma.fileObjectRef.findFirst.mockResolvedValue(pendingFileRef);
+
+      await expect(
+        service.finalizeUpload('org-1', 'u-1', {
+          fileRefId: 'f-1',
+          objectKey: pendingFileRef.objectKey,
+          sizeBytes: 2048,
+        }),
+      ).rejects.toThrow(BadRequestException);
+
+      expect(prisma.fileObjectRef.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'f-1' },
+          data: expect.objectContaining({
+            status: 'FAILED',
+            scanStatus: 'FAILED',
+            scanError: 'size_mismatch',
+          }),
+        }),
+      );
+    });
+
+    it('should persist INFECTED scan outcome without returning a download-ready file', async () => {
+      prisma.fileObjectRef.findFirst.mockResolvedValue(pendingFileRef);
+      jest.spyOn(service as any, 'scanFinalizedObject').mockResolvedValue({
+        status: 'INFECTED',
+        scanStatus: 'INFECTED',
+        scanError: 'malware_signature',
+      });
+      prisma.fileObjectRef.update.mockResolvedValue({
+        ...pendingFileRef,
+        status: 'INFECTED',
+        scanStatus: 'INFECTED',
+        scanError: 'malware_signature',
+      });
+
+      const result = await service.finalizeUpload('org-1', 'u-1', {
+        fileRefId: 'f-1',
+        objectKey: pendingFileRef.objectKey,
+        sizeBytes: 1024,
+      });
+
+      expect(result).toMatchObject({
+        fileRefId: 'f-1',
+        status: 'INFECTED',
+        scanStatus: 'INFECTED',
+      });
+      expect(prisma.fileObjectRef.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            status: 'INFECTED',
+            scanStatus: 'INFECTED',
+            scanError: 'malware_signature',
+          }),
+        }),
+      );
+    });
+
+    it('should return READY idempotently for an already finalized matching file', async () => {
+      const result = await service.finalizeUpload('org-1', 'u-1', {
+        fileRefId: 'f-1',
+        objectKey: mockFileRef.objectKey,
+        checksum: mockFileRef.checksum,
+        sizeBytes: 1024,
+      });
+
+      expect(result).toMatchObject({
+        fileRefId: 'f-1',
+        status: 'READY',
+        scanStatus: 'CLEAN',
+        checksum: mockFileRef.checksum,
+      });
+      expect(prisma.fileObjectRef.update).not.toHaveBeenCalled();
+    });
+  });
+
   describe('getDownloadUrl', () => {
     it('should return signed download URL', async () => {
       const result = await service.getDownloadUrl('org-1', 'f-1');
@@ -118,9 +279,50 @@ describe('FileStorageService', () => {
       prisma.fileObjectRef.findFirst.mockResolvedValue(null);
       await expect(service.getDownloadUrl('org-1', 'invalid')).rejects.toThrow(NotFoundException);
     });
+
+    it('should reject a file that has not been finalized as READY', async () => {
+      prisma.fileObjectRef.findFirst.mockResolvedValue({ ...mockFileRef, status: 'PENDING' });
+      await expect(service.getDownloadUrl('org-1', 'f-1')).rejects.toThrow(BadRequestException);
+      expect(storageAdapter.generateDownloadUrl).not.toHaveBeenCalled();
+    });
   });
 
   // ── listFiles ──────────────────────────────────────────
+
+  describe('assertReadyFileRefs', () => {
+    it('should accept existing READY file refs for the org', async () => {
+      prisma.fileObjectRef.findMany = jest.fn().mockResolvedValue([mockFileRef]);
+
+      await expect(service.assertReadyFileRefs('org-1', ['f-1'])).resolves.toEqual([mockFileRef]);
+      expect(prisma.fileObjectRef.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            orgId: 'org-1',
+            id: { in: ['f-1'] },
+            deletedAt: null,
+          }),
+        }),
+      );
+    });
+
+    it('should reject missing file refs', async () => {
+      prisma.fileObjectRef.findMany = jest.fn().mockResolvedValue([]);
+
+      await expect(service.assertReadyFileRefs('org-1', ['missing'])).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('should reject file refs that are not READY', async () => {
+      prisma.fileObjectRef.findMany = jest
+        .fn()
+        .mockResolvedValue([{ ...mockFileRef, status: 'PENDING' }]);
+
+      await expect(service.assertReadyFileRefs('org-1', ['f-1'])).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+  });
 
   describe('listFiles', () => {
     it('should list files for org', async () => {

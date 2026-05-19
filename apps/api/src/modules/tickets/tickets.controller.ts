@@ -100,6 +100,13 @@ export class TicketsController {
     );
   }
 
+  @Get(':id/approval-flow')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'P3-004: Get latest ticket approval flow with steps and decisions' })
+  getApprovalFlow(@CurrentUser() user: CurrentUserPayload, @Param('id') id: string) {
+    return this.ticketsService.getApprovalFlow(user.orgId, id);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get ticket by ID with comments and status history' })
   findById(@CurrentUser() user: CurrentUserPayload, @Param('id') id: string) {
@@ -162,6 +169,7 @@ export class TicketsController {
       user.userId,
       body.decision,
       body.notes,
+      user.role,
     );
   }
 

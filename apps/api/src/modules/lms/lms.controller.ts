@@ -293,6 +293,22 @@ export class LmsController {
     return this.lmsService.getProgress(req.user?.orgId, memberId);
   }
 
+  @Post('courses/:courseId/mentors')
+  assignMentor(
+    @Req() req: any,
+    @Param('courseId') courseId: string,
+    @Body() body: { mentorId: string; menteeId: string; startDate?: string },
+  ) {
+    return this.lmsService.assignMentor(
+      req.user?.orgId,
+      courseId,
+      body.mentorId,
+      body.menteeId,
+      req.user?.userId,
+      body.startDate,
+    );
+  }
+
   // ── Offline Packs ──
 
   @Get('courses/:courseId/offline-pack')

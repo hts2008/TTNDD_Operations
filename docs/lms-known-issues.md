@@ -34,9 +34,9 @@
 ### LMS-004: No file/media upload for lesson content (P2)
 
 **Severity**: Medium
-**Impact**: Lesson videoUrl and content images are URL-only — no file hosting
+**Impact**: Lesson videoUrl and content images are URL-only; shared signed upload exists but LMS is not integrated with FileObjectRef/finalize lifecycle
 **Workaround**: Use external file hosting (GCS, S3) and paste URLs
-**Plan**: Requires file upload infrastructure — deferred P2
+**Plan**: Integrate LMS media fields with File Storage finalize/scan flow in P2
 
 ### LMS-005: PWA offline cache not implemented (P2)
 
@@ -63,18 +63,18 @@
 
 ## Deferred Features
 
-| Feature                    | Priority | Reason                         |
-| -------------------------- | -------- | ------------------------------ |
-| Mentor assignment model    | P2       | Needs MentorAssignment table   |
-| Background quiz expiration | P2       | Requires BullMQ                |
-| WebSocket JWT auth         | P2       | Security hardening             |
-| File/media upload          | P2       | Requires upload infra          |
-| PWA offline caching        | P2       | Frontend feature               |
-| Battle scalability         | P2       | setTimeout → distributed timer |
-| Course state machine       | P3       | Low demand                     |
-| Certificate generation     | P3       | PDF/image generation           |
-| Leaderboards (global)      | P3       | Cross-course ranking           |
-| PostgreSQL RLS for LMS     | P3       | App-level auth sufficient      |
+| Feature                    | Priority | Reason                                                  |
+| -------------------------- | -------- | ------------------------------------------------------- |
+| Mentor assignment model    | P2       | Needs MentorAssignment table                            |
+| Background quiz expiration | P2       | Requires BullMQ                                         |
+| WebSocket JWT auth         | P2       | Security hardening                                      |
+| File/media upload          | P2       | Requires module integration with File Storage lifecycle |
+| PWA offline caching        | P2       | Frontend feature                                        |
+| Battle scalability         | P2       | setTimeout → distributed timer                          |
+| Course state machine       | P3       | Low demand                                              |
+| Certificate generation     | P3       | PDF/image generation                                    |
+| Leaderboards (global)      | P3       | Cross-course ranking                                    |
+| PostgreSQL RLS for LMS     | P3       | App-level auth sufficient                               |
 
 ---
 

@@ -1,46 +1,62 @@
 @import "tailwindcss";
 
 :root {
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
+  --background: 38 45% 97%;
+  --foreground: 228 42% 12%;
+  --surface: 39 56% 95%;
   --card: 0 0% 100%;
-  --card-foreground: 222.2 84% 4.9%;
-  --primary: 221.2 83.2% 53.3%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 210 40% 96%;
-  --secondary-foreground: 222.2 47.4% 11.2%;
-  --muted: 210 40% 96%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 210 40% 96%;
-  --accent-foreground: 222.2 47.4% 11.2%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 221.2 83.2% 53.3%;
+  --card-foreground: 228 42% 12%;
+  --primary: 238 55% 28%;
+  --primary-foreground: 42 64% 96%;
+  --secondary: 43 92% 90%;
+  --secondary-foreground: 33 48% 20%;
+  --muted: 39 36% 92%;
+  --muted-foreground: 222 14% 43%;
+  --accent: 157 50% 90%;
+  --accent-foreground: 161 52% 18%;
+  --destructive: 350 73% 46%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 37 31% 84%;
+  --input: 37 31% 84%;
+  --ring: 42 95% 52%;
   --radius: 0.5rem;
-  --success: 142 76% 36%;
-  --warning: 38 92% 50%;
+  --success: 158 64% 34%;
+  --warning: 38 92% 46%;
+  --info: 201 78% 42%;
+  --sidebar: 237 42% 16%;
+  --sidebar-foreground: 42 64% 96%;
+  --sidebar-muted: 232 21% 66%;
+  --sidebar-accent: 42 95% 52%;
+  --sidebar-active: 158 64% 34%;
 }
 
 .dark {
-  --background: 222.2 84% 4.9%;
-  --foreground: 210 40% 98%;
-  --card: 222.2 84% 4.9%;
-  --card-foreground: 210 40% 98%;
-  --primary: 217.2 91.2% 59.8%;
-  --primary-foreground: 222.2 47.4% 11.2%;
-  --secondary: 217.2 32.6% 17.5%;
-  --secondary-foreground: 210 40% 98%;
-  --muted: 217.2 32.6% 17.5%;
-  --muted-foreground: 215 20.2% 65.1%;
-  --accent: 217.2 32.6% 17.5%;
-  --accent-foreground: 210 40% 98%;
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 217.2 32.6% 17.5%;
-  --input: 217.2 32.6% 17.5%;
-  --ring: 224.3 76.3% 48%;
+  --background: 232 36% 9%;
+  --foreground: 42 64% 96%;
+  --surface: 232 30% 11%;
+  --card: 232 30% 13%;
+  --card-foreground: 42 64% 96%;
+  --primary: 42 95% 58%;
+  --primary-foreground: 232 36% 9%;
+  --secondary: 236 28% 20%;
+  --secondary-foreground: 42 64% 96%;
+  --muted: 232 24% 18%;
+  --muted-foreground: 226 18% 72%;
+  --accent: 158 42% 22%;
+  --accent-foreground: 150 60% 92%;
+  --destructive: 350 67% 52%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 232 20% 24%;
+  --input: 232 20% 24%;
+  --ring: 42 95% 58%;
+  --success: 158 58% 44%;
+  --warning: 38 92% 55%;
+  --info: 201 78% 58%;
+  --sidebar: 235 44% 10%;
+  --sidebar-foreground: 42 64% 96%;
+  --sidebar-muted: 229 18% 72%;
+  --sidebar-accent: 42 95% 58%;
+  --sidebar-active: 158 58% 44%;
 }
 
 * { border-color: hsl(var(--border)); }
@@ -48,4 +64,5 @@ body {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
   font-family: system-ui, -apple-system, sans-serif;
+  letter-spacing: 0;
 }

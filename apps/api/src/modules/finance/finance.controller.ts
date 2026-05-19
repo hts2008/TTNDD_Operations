@@ -116,6 +116,13 @@ export class FinanceController {
     return this.financeService.payFee(user.orgId, id, dto.amount, dto.transactionId, user.userId);
   }
 
+  @Post('fees/:id/mark-overdue')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'Mark a fee overdue and emit overdue notice event (SM-7)' })
+  markFeeOverdue(@CurrentUser() user: CurrentUserPayload, @Param('id') id: string) {
+    return this.financeService.markFeeOverdue(user.orgId, id, user.userId);
+  }
+
   @Post('fees/:id/waive')
   @Roles('super_admin', 'admin')
   @ApiOperation({ summary: 'Waive a fee with reason (T-1068)' })
@@ -214,6 +221,22 @@ export class FinanceController {
   @ApiOperation({ summary: 'Parent-scoped fee view (T-1070)' })
   getParentFeeView(@CurrentUser() user: CurrentUserPayload, @Param('memberId') memberId: string) {
     return this.financeService.getParentFeeView(user.orgId, memberId);
+  }
+
+  @Get('ledger')
+  @Roles('super_admin', 'admin')
+  @ApiOperation({ summary: 'List double-entry ledger entries' })
+  getLedgerEntries(
+    @CurrentUser() user: CurrentUserPayload,
+    @Query('transactionId') transactionId?: string,
+    @Query('accountId') accountId?: string,
+    @Query('costCenterId') costCenterId?: string,
+  ) {
+    return this.financeService.getLedgerEntries(user.orgId, {
+      transactionId,
+      accountId,
+      costCenterId,
+    });
   }
 
   @Get('export/transactions')

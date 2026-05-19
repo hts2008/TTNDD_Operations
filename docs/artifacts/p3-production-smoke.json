@@ -1,0 +1,452 @@
+{
+  "status": "PASS",
+  "checkedAt": "2026-05-17T14:36:37.399Z",
+  "buildId": "p3-20260517-api-r2-web-r1",
+  "commitSha": "84557a7ac31e0bb41b6281cfef30937c00122cd6",
+  "targets": {
+    "apiBase": "https://ttndd-api-122940795437.asia-southeast1.run.app",
+    "webBase": "https://ttndd-platform-122940795437.asia-southeast1.run.app"
+  },
+  "gates": [
+    {
+      "name": "api-health-ok",
+      "status": "PASS",
+      "details": {
+        "statusCode": 200,
+        "body": {
+          "status": "ok",
+          "db": "connected",
+          "uptime": 53.928964588,
+          "timestamp": "2026-05-17T14:36:38.681Z",
+          "version": "1.0.0",
+          "specVersion": "17.0"
+        }
+      }
+    },
+    {
+      "name": "api-canary-not-unhealthy",
+      "status": "PASS",
+      "details": {
+        "statusCode": 200,
+        "body": {
+          "status": "healthy",
+          "api": {
+            "status": "ok",
+            "db": "connected",
+            "uptime": 54.055300366,
+            "timestamp": "2026-05-17T14:36:38.808Z",
+            "version": "1.0.0",
+            "specVersion": "17.0"
+          },
+          "buildId": "ttndd-api-00030-5h9",
+          "timestamp": "2026-05-17T14:36:38.808Z"
+        }
+      }
+    },
+    {
+      "name": "api-probes-not-unhealthy",
+      "status": "PASS",
+      "details": {
+        "statusCode": 200,
+        "body": {
+          "overall": "healthy",
+          "probes": []
+        }
+      }
+    },
+    {
+      "name": "web-home-200",
+      "status": "PASS",
+      "details": {
+        "statusCode": 200,
+        "sample": "<!DOCTYPE html><!--Ep17_lBArk7AuVgNhjdME--><html lang=\"vi\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><li"
+      }
+    },
+    {
+      "name": "release-gate-report-saved",
+      "status": "PASS",
+      "details": {
+        "statusCode": 201,
+        "body": {
+          "id": "f9988b48-91e0-42eb-92e1-8f7a45240833",
+          "environment": "production",
+          "buildId": "p3-20260517-api-r2-web-r1",
+          "commitSha": "84557a7ac31e0bb41b6281cfef30937c00122cd6",
+          "profile": "P3_PRODUCTION_OPS",
+          "status": "PASS",
+          "reportJson": {
+            "gates": [
+              {
+                "name": "api-health-ok",
+                "status": "PASS",
+                "details": {
+                  "body": {
+                    "db": "connected",
+                    "status": "ok",
+                    "uptime": 53.928964588,
+                    "version": "1.0.0",
+                    "timestamp": "2026-05-17T14:36:38.681Z",
+                    "specVersion": "17.0"
+                  },
+                  "statusCode": 200
+                }
+              },
+              {
+                "name": "api-canary-not-unhealthy",
+                "status": "PASS",
+                "details": {
+                  "body": {
+                    "api": {
+                      "db": "connected",
+                      "status": "ok",
+                      "uptime": 54.055300366,
+                      "version": "1.0.0",
+                      "timestamp": "2026-05-17T14:36:38.808Z",
+                      "specVersion": "17.0"
+                    },
+                    "status": "healthy",
+                    "buildId": "ttndd-api-00030-5h9",
+                    "timestamp": "2026-05-17T14:36:38.808Z"
+                  },
+                  "statusCode": 200
+                }
+              },
+              {
+                "name": "api-probes-not-unhealthy",
+                "status": "PASS",
+                "details": {
+                  "body": {
+                    "probes": [],
+                    "overall": "healthy"
+                  },
+                  "statusCode": 200
+                }
+              },
+              {
+                "name": "web-home-200",
+                "status": "PASS",
+                "details": {
+                  "sample": "<!DOCTYPE html><!--Ep17_lBArk7AuVgNhjdME--><html lang=\"vi\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><li",
+                  "statusCode": 200
+                }
+              }
+            ],
+            "checkedAt": "2026-05-17T14:36:37.243Z",
+            "generatedBy": "scripts/p3-production-smoke.mjs"
+          },
+          "linksJson": {
+            "apiBase": "https://ttndd-api-122940795437.asia-southeast1.run.app",
+            "webBase": "https://ttndd-platform-122940795437.asia-southeast1.run.app"
+          },
+          "createdAt": "2026-05-17T14:36:39.191Z"
+        }
+      }
+    },
+    {
+      "name": "release-gate-visible",
+      "status": "PASS",
+      "details": {
+        "statusCode": 200,
+        "body": {
+          "id": "f9988b48-91e0-42eb-92e1-8f7a45240833",
+          "environment": "production",
+          "buildId": "p3-20260517-api-r2-web-r1",
+          "commitSha": "84557a7ac31e0bb41b6281cfef30937c00122cd6",
+          "profile": "P3_PRODUCTION_OPS",
+          "status": "PASS",
+          "reportJson": {
+            "gates": [
+              {
+                "name": "api-health-ok",
+                "status": "PASS",
+                "details": {
+                  "body": {
+                    "db": "connected",
+                    "status": "ok",
+                    "uptime": 53.928964588,
+                    "version": "1.0.0",
+                    "timestamp": "2026-05-17T14:36:38.681Z",
+                    "specVersion": "17.0"
+                  },
+                  "statusCode": 200
+                }
+              },
+              {
+                "name": "api-canary-not-unhealthy",
+                "status": "PASS",
+                "details": {
+                  "body": {
+                    "api": {
+                      "db": "connected",
+                      "status": "ok",
+                      "uptime": 54.055300366,
+                      "version": "1.0.0",
+                      "timestamp": "2026-05-17T14:36:38.808Z",
+                      "specVersion": "17.0"
+                    },
+                    "status": "healthy",
+                    "buildId": "ttndd-api-00030-5h9",
+                    "timestamp": "2026-05-17T14:36:38.808Z"
+                  },
+                  "statusCode": 200
+                }
+              },
+              {
+                "name": "api-probes-not-unhealthy",
+                "status": "PASS",
+                "details": {
+                  "body": {
+                    "probes": [],
+                    "overall": "healthy"
+                  },
+                  "statusCode": 200
+                }
+              },
+              {
+                "name": "web-home-200",
+                "status": "PASS",
+                "details": {
+                  "sample": "<!DOCTYPE html><!--Ep17_lBArk7AuVgNhjdME--><html lang=\"vi\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><li",
+                  "statusCode": 200
+                }
+              }
+            ],
+            "checkedAt": "2026-05-17T14:36:37.243Z",
+            "generatedBy": "scripts/p3-production-smoke.mjs"
+          },
+          "linksJson": {
+            "apiBase": "https://ttndd-api-122940795437.asia-southeast1.run.app",
+            "webBase": "https://ttndd-platform-122940795437.asia-southeast1.run.app"
+          },
+          "createdAt": "2026-05-17T14:36:39.191Z"
+        }
+      }
+    }
+  ],
+  "raw": {
+    "apiHealth": {
+      "name": "api-health",
+      "url": "https://ttndd-api-122940795437.asia-southeast1.run.app/api/v1/system/health",
+      "ok": true,
+      "statusCode": 200,
+      "latencyMs": 223,
+      "body": {
+        "data": {
+          "status": "ok",
+          "db": "connected",
+          "uptime": 53.928964588,
+          "timestamp": "2026-05-17T14:36:38.681Z",
+          "version": "1.0.0",
+          "specVersion": "17.0"
+        }
+      }
+    },
+    "canary": {
+      "name": "api-canary",
+      "url": "https://ttndd-api-122940795437.asia-southeast1.run.app/api/v1/system/health/canary",
+      "ok": true,
+      "statusCode": 200,
+      "latencyMs": 117,
+      "body": {
+        "data": {
+          "status": "healthy",
+          "api": {
+            "status": "ok",
+            "db": "connected",
+            "uptime": 54.055300366,
+            "timestamp": "2026-05-17T14:36:38.808Z",
+            "version": "1.0.0",
+            "specVersion": "17.0"
+          },
+          "buildId": "ttndd-api-00030-5h9",
+          "timestamp": "2026-05-17T14:36:38.808Z"
+        }
+      }
+    },
+    "probes": {
+      "name": "api-probes",
+      "url": "https://ttndd-api-122940795437.asia-southeast1.run.app/api/v1/system/health/probes",
+      "ok": true,
+      "statusCode": 200,
+      "latencyMs": 46,
+      "body": {
+        "data": {
+          "overall": "healthy",
+          "probes": []
+        }
+      }
+    },
+    "webHome": {
+      "name": "web-home",
+      "url": "https://ttndd-platform-122940795437.asia-southeast1.run.app",
+      "ok": true,
+      "statusCode": 200,
+      "latencyMs": 262,
+      "sample": "<!DOCTYPE html><!--Ep17_lBArk7AuVgNhjdME--><html lang=\"vi\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><li"
+    },
+    "releaseGateWrite": {
+      "name": "release-gate-save",
+      "url": "https://ttndd-api-122940795437.asia-southeast1.run.app/api/v1/system/release-gates/report",
+      "ok": true,
+      "statusCode": 201,
+      "latencyMs": 101,
+      "body": {
+        "data": {
+          "id": "f9988b48-91e0-42eb-92e1-8f7a45240833",
+          "environment": "production",
+          "buildId": "p3-20260517-api-r2-web-r1",
+          "commitSha": "84557a7ac31e0bb41b6281cfef30937c00122cd6",
+          "profile": "P3_PRODUCTION_OPS",
+          "status": "PASS",
+          "reportJson": {
+            "gates": [
+              {
+                "name": "api-health-ok",
+                "status": "PASS",
+                "details": {
+                  "body": {
+                    "db": "connected",
+                    "status": "ok",
+                    "uptime": 53.928964588,
+                    "version": "1.0.0",
+                    "timestamp": "2026-05-17T14:36:38.681Z",
+                    "specVersion": "17.0"
+                  },
+                  "statusCode": 200
+                }
+              },
+              {
+                "name": "api-canary-not-unhealthy",
+                "status": "PASS",
+                "details": {
+                  "body": {
+                    "api": {
+                      "db": "connected",
+                      "status": "ok",
+                      "uptime": 54.055300366,
+                      "version": "1.0.0",
+                      "timestamp": "2026-05-17T14:36:38.808Z",
+                      "specVersion": "17.0"
+                    },
+                    "status": "healthy",
+                    "buildId": "ttndd-api-00030-5h9",
+                    "timestamp": "2026-05-17T14:36:38.808Z"
+                  },
+                  "statusCode": 200
+                }
+              },
+              {
+                "name": "api-probes-not-unhealthy",
+                "status": "PASS",
+                "details": {
+                  "body": {
+                    "probes": [],
+                    "overall": "healthy"
+                  },
+                  "statusCode": 200
+                }
+              },
+              {
+                "name": "web-home-200",
+                "status": "PASS",
+                "details": {
+                  "sample": "<!DOCTYPE html><!--Ep17_lBArk7AuVgNhjdME--><html lang=\"vi\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><li",
+                  "statusCode": 200
+                }
+              }
+            ],
+            "checkedAt": "2026-05-17T14:36:37.243Z",
+            "generatedBy": "scripts/p3-production-smoke.mjs"
+          },
+          "linksJson": {
+            "apiBase": "https://ttndd-api-122940795437.asia-southeast1.run.app",
+            "webBase": "https://ttndd-platform-122940795437.asia-southeast1.run.app"
+          },
+          "createdAt": "2026-05-17T14:36:39.191Z"
+        }
+      }
+    },
+    "latestReleaseGate": {
+      "name": "release-gate-latest",
+      "url": "https://ttndd-api-122940795437.asia-southeast1.run.app/api/v1/system/release-gates/latest",
+      "ok": true,
+      "statusCode": 200,
+      "latencyMs": 55,
+      "body": {
+        "data": {
+          "id": "f9988b48-91e0-42eb-92e1-8f7a45240833",
+          "environment": "production",
+          "buildId": "p3-20260517-api-r2-web-r1",
+          "commitSha": "84557a7ac31e0bb41b6281cfef30937c00122cd6",
+          "profile": "P3_PRODUCTION_OPS",
+          "status": "PASS",
+          "reportJson": {
+            "gates": [
+              {
+                "name": "api-health-ok",
+                "status": "PASS",
+                "details": {
+                  "body": {
+                    "db": "connected",
+                    "status": "ok",
+                    "uptime": 53.928964588,
+                    "version": "1.0.0",
+                    "timestamp": "2026-05-17T14:36:38.681Z",
+                    "specVersion": "17.0"
+                  },
+                  "statusCode": 200
+                }
+              },
+              {
+                "name": "api-canary-not-unhealthy",
+                "status": "PASS",
+                "details": {
+                  "body": {
+                    "api": {
+                      "db": "connected",
+                      "status": "ok",
+                      "uptime": 54.055300366,
+                      "version": "1.0.0",
+                      "timestamp": "2026-05-17T14:36:38.808Z",
+                      "specVersion": "17.0"
+                    },
+                    "status": "healthy",
+                    "buildId": "ttndd-api-00030-5h9",
+                    "timestamp": "2026-05-17T14:36:38.808Z"
+                  },
+                  "statusCode": 200
+                }
+              },
+              {
+                "name": "api-probes-not-unhealthy",
+                "status": "PASS",
+                "details": {
+                  "body": {
+                    "probes": [],
+                    "overall": "healthy"
+                  },
+                  "statusCode": 200
+                }
+              },
+              {
+                "name": "web-home-200",
+                "status": "PASS",
+                "details": {
+                  "sample": "<!DOCTYPE html><!--Ep17_lBArk7AuVgNhjdME--><html lang=\"vi\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><li",
+                  "statusCode": 200
+                }
+              }
+            ],
+            "checkedAt": "2026-05-17T14:36:37.243Z",
+            "generatedBy": "scripts/p3-production-smoke.mjs"
+          },
+          "linksJson": {
+            "apiBase": "https://ttndd-api-122940795437.asia-southeast1.run.app",
+            "webBase": "https://ttndd-platform-122940795437.asia-southeast1.run.app"
+          },
+          "createdAt": "2026-05-17T14:36:39.191Z"
+        }
+      }
+    }
+  }
+}

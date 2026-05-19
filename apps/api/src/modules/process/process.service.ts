@@ -39,9 +39,15 @@ export class ProcessService {
 
   // ── Workflow Definitions ──
 
-  async createDefinition(orgId: string, data: {
-    name: string; description?: string; steps: WorkflowStep[];
-  }, actorUserId: string) {
+  async createDefinition(
+    orgId: string,
+    data: {
+      name: string;
+      description?: string;
+      steps: WorkflowStep[];
+    },
+    actorUserId: string,
+  ) {
     if (!data.steps?.length) {
       throw new BadRequestException('Workflow must have at least one step');
     }
@@ -57,14 +63,19 @@ export class ProcessService {
     });
 
     await this.audit.log({
-      orgId, userId: actorUserId, action: 'process.definition_created',
-      resource: 'WorkflowDefinition', resourceId: definition.id,
+      orgId,
+      userId: actorUserId,
+      action: 'process.definition_created',
+      resource: 'WorkflowDefinition',
+      resourceId: definition.id,
     });
 
     return definition;
   }
 
   async findDefinitions(orgId: string, filters?: { isActive?: boolean }, page = 1, limit = 20) {
+    const safePage = Math.max(1, Number(page) || 1);
+    const safeLimit = Math.max(1, Math.min(100, Number(limit) || 20));
     const where: Prisma.WorkflowDefinitionWhereInput = { orgId };
     if (filters?.isActive !== undefined) where.isActive = filters.isActive;
 
@@ -72,14 +83,14 @@ export class ProcessService {
       this.prisma.workflowDefinition.findMany({
         where,
         include: { _count: { select: { runs: true } } },
-        skip: (page - 1) * limit,
-        take: limit,
+        skip: (safePage - 1) * safeLimit,
+        take: safeLimit,
         orderBy: { createdAt: 'desc' },
       }),
       this.prisma.workflowDefinition.count({ where }),
     ]);
 
-    return { data, meta: { total, page, limit } };
+    return { data, meta: { total, page: safePage, limit: safeLimit } };
   }
 
   async findDefinitionById(orgId: string, definitionId: string) {
@@ -117,18 +128,26 @@ export class ProcessService {
     });
 
     await this.audit.log({
-      orgId, userId: actorUserId, action: 'process.run_started',
-      resource: 'WorkflowRun', resourceId: run.id,
+      orgId,
+      userId: actorUserId,
+      action: 'process.run_started',
+      resource: 'WorkflowRun',
+      resourceId: run.id,
       newValue: { definitionId, definitionName: def.name } as unknown as Prisma.InputJsonValue,
     });
 
     return run;
   }
 
-  async advanceStep(orgId: string, runId: string, decision: {
-    status: 'approved' | 'rejected' | 'completed';
-    notes?: string;
-  }, actorUserId: string) {
+  async advanceStep(
+    orgId: string,
+    runId: string,
+    decision: {
+      status: 'approved' | 'rejected' | 'completed';
+      notes?: string;
+    },
+    actorUserId: string,
+  ) {
     const run = await this.prisma.workflowRun.findFirst({
       where: { id: runId, orgId },
       include: { definition: true },
@@ -197,14 +216,24 @@ export class ProcessService {
     });
 
     await this.audit.log({
-      orgId, userId: actorUserId, action: 'process.run_completed',
-      resource: 'WorkflowRun', resourceId: runId,
+      orgId,
+      userId: actorUserId,
+      action: 'process.run_completed',
+      resource: 'WorkflowRun',
+      resourceId: runId,
     });
 
     return updated;
   }
 
-  async findRuns(orgId: string, filters?: { definitionId?: string; status?: string }, page = 1, limit = 20) {
+  async findRuns(
+    orgId: string,
+    filters?: { definitionId?: string; status?: string },
+    page = 1,
+    limit = 20,
+  ) {
+    const safePage = Math.max(1, Number(page) || 1);
+    const safeLimit = Math.max(1, Math.min(100, Number(limit) || 20));
     const where: Prisma.WorkflowRunWhereInput = { orgId };
     if (filters?.definitionId) where.definitionId = filters.definitionId;
     if (filters?.status) where.status = filters.status;
@@ -213,14 +242,14 @@ export class ProcessService {
       this.prisma.workflowRun.findMany({
         where,
         include: { definition: { select: { name: true } } },
-        skip: (page - 1) * limit,
-        take: limit,
+        skip: (safePage - 1) * safeLimit,
+        take: safeLimit,
         orderBy: { createdAt: 'desc' },
       }),
       this.prisma.workflowRun.count({ where }),
     ]);
 
-    return { data, meta: { total, page, limit } };
+    return { data, meta: { total, page: safePage, limit: safeLimit } };
   }
 
   async findRunById(orgId: string, runId: string) {

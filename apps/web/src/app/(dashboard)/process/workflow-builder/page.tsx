@@ -1,6 +1,15 @@
 'use client';
 
-import React, { useCallback, useRef, useState, useMemo, type DragEvent } from 'react';
+import React, {
+  Suspense,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+  type DragEvent,
+} from 'react';
+import { useSearchParams } from 'next/navigation';
 import {
   ReactFlow,
   Controls,
@@ -23,19 +32,17 @@ import '@xyflow/react/dist/style.css';
 import {
   Play,
   Save,
-  Plus,
   Trash2,
-  Settings,
   CheckCircle2,
   Bell,
   GitBranch,
   Clock,
   ArrowRight,
   Zap,
-  History,
   ChevronLeft,
   RotateCcw,
 } from 'lucide-react';
+import { api } from '@/lib/api';
 
 // ══════════════════════════════════════════════
 // Types (mirrors backend T-1106 types)
@@ -61,6 +68,33 @@ interface NodeData extends Record<string, unknown> {
   delayMinutes?: number;
   notificationTemplate?: string;
   notificationChannel?: string;
+}
+
+interface WorkflowDefinitionRecord {
+  id: string;
+  name: string;
+  description?: string | null;
+  steps?: unknown;
+  nodesJson?: unknown;
+  edgesJson?: unknown;
+  version?: number;
+}
+
+interface WorkflowGraphPayload extends Record<string, unknown> {
+  nodes: Array<{
+    id: string;
+    type: WorkflowNodeType;
+    label: string;
+    position: { x: number; y: number };
+    data: Partial<NodeData>;
+  }>;
+  edges: Array<{
+    id: string;
+    source: string;
+    target: string;
+    label?: string;
+    sourceHandle?: string | null;
+  }>;
 }
 
 // ══════════════════════════════════════════════
@@ -415,16 +449,170 @@ const DEFAULT_NODES: Node<NodeData>[] = [
 
 const DEFAULT_EDGES: Edge[] = [];
 
+function buildGraphPayload(nodes: Node<NodeData>[], edges: Edge[]): WorkflowGraphPayload {
+  return {
+    nodes: nodes.map((node) => ({
+      id: node.id,
+      type: node.data.type,
+      label: node.data.label,
+      position: node.position,
+      data: {
+        assigneeRole: node.data.assigneeRole,
+        description: node.data.description,
+        conditionField: node.data.conditionField,
+        conditionOperator: node.data.conditionOperator,
+        conditionValue: node.data.conditionValue,
+        delayMinutes: node.data.delayMinutes,
+        notificationTemplate: node.data.notificationTemplate,
+        notificationChannel: node.data.notificationChannel,
+      },
+    })),
+    edges: edges.map((edge) => ({
+      id: edge.id,
+      source: edge.source,
+      target: edge.target,
+      label: typeof edge.label === 'string' ? edge.label : undefined,
+      sourceHandle: edge.sourceHandle,
+    })),
+  };
+}
+
+function buildLegacySteps(nodes: Node<NodeData>[]) {
+  const steps = nodes
+    .filter((node) => !['start', 'end'].includes(node.data.type))
+    .map((node) => ({
+      name: node.data.label || node.id,
+      type:
+        node.data.type === 'approval'
+          ? 'approval'
+          : node.data.type === 'notification'
+            ? 'notification'
+            : 'task',
+      assigneeRole: node.data.assigneeRole,
+      description: node.data.description,
+    }));
+
+  return steps.length > 0 ? steps : [{ name: 'Graph workflow', type: 'task' }];
+}
+
+function normalizeLoadedNodes(input: unknown): Node<NodeData>[] {
+  if (!Array.isArray(input) || input.length === 0) return DEFAULT_NODES;
+
+  return input.map((item) => {
+    const record = item as {
+      id?: string;
+      type?: WorkflowNodeType;
+      label?: string;
+      position?: { x?: number; y?: number };
+      data?: Partial<NodeData>;
+    };
+    const nodeType = record.type ?? record.data?.type ?? 'task';
+    return {
+      id: record.id ?? `${nodeType}-${crypto.randomUUID()}`,
+      type: 'workflowNode',
+      position: {
+        x: Number(record.position?.x ?? 250),
+        y: Number(record.position?.y ?? 120),
+      },
+      data: {
+        ...(record.data ?? {}),
+        type: nodeType,
+        label: record.label ?? record.data?.label ?? NODE_STYLES[nodeType]?.label ?? 'Task',
+      },
+    };
+  });
+}
+
+function normalizeLoadedEdges(input: unknown): Edge[] {
+  if (!Array.isArray(input)) return DEFAULT_EDGES;
+
+  return input.map((item) => {
+    const record = item as {
+      id?: string;
+      source: string;
+      target: string;
+      label?: string;
+      sourceHandle?: string | null;
+    };
+    return {
+      id: record.id ?? `edge-${record.source}-${record.target}`,
+      source: record.source,
+      target: record.target,
+      label: record.label,
+      sourceHandle: record.sourceHandle ?? null,
+      animated: true,
+      style: { stroke: 'rgba(255,255,255,0.3)', strokeWidth: 2 },
+      markerEnd: { type: MarkerType.ArrowClosed, color: 'rgba(255,255,255,0.3)' },
+    };
+  });
+}
+
+function WorkflowBuilderFallback() {
+  return (
+    <div className="min-h-screen bg-[hsl(var(--background))] p-6">
+      <div className="h-[calc(100vh-3rem)] rounded-2xl border border-white/10 bg-[hsl(var(--card))] p-6 text-white/60">
+        Dang tai workflow builder...
+      </div>
+    </div>
+  );
+}
+
 export default function WorkflowBuilderPage() {
+  return (
+    <Suspense fallback={<WorkflowBuilderFallback />}>
+      <WorkflowBuilderClient />
+    </Suspense>
+  );
+}
+
+function WorkflowBuilderClient() {
+  const searchParams = useSearchParams();
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<NodeData>>(DEFAULT_NODES);
   const [edges, setEdges, onEdgesChange] = useEdgesState(DEFAULT_EDGES);
   const [selectedNode, setSelectedNode] = useState<Node<NodeData> | null>(null);
   const [saving, setSaving] = useState(false);
+  const [loadingDefinition, setLoadingDefinition] = useState(false);
+  const [definitionId, setDefinitionId] = useState<string | null>(
+    searchParams.get('definitionId') ?? searchParams.get('id'),
+  );
   const [definitionName, setDefinitionName] = useState('Quy trình mới');
+  const [saveStatus, setSaveStatus] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const nodeCount = useMemo(() => nodes.length, [nodes]);
   const edgeCount = useMemo(() => edges.length, [edges]);
+
+  useEffect(() => {
+    if (!definitionId) return;
+
+    let cancelled = false;
+    async function loadDefinition() {
+      setLoadingDefinition(true);
+      setSaveError(null);
+      try {
+        const definition = await api.get<WorkflowDefinitionRecord>(
+          `/process/definitions/${definitionId}`,
+        );
+        if (cancelled) return;
+        setDefinitionName(definition.name);
+        setNodes(normalizeLoadedNodes(definition.nodesJson));
+        setEdges(normalizeLoadedEdges(definition.edgesJson));
+        setSaveStatus(`Loaded v${definition.version ?? 1}`);
+      } catch (err) {
+        if (!cancelled) {
+          setSaveError(err instanceof Error ? err.message : 'Khong tai duoc quy trinh');
+        }
+      } finally {
+        if (!cancelled) setLoadingDefinition(false);
+      }
+    }
+
+    void loadDefinition();
+    return () => {
+      cancelled = true;
+    };
+  }, [definitionId, setEdges, setNodes]);
 
   // ── Connection Handler ──
   const onConnect = useCallback(
@@ -506,53 +694,43 @@ export default function WorkflowBuilderPage() {
   // ── Save Handler (POST to API) ──
   const handleSave = useCallback(async () => {
     setSaving(true);
+    setSaveError(null);
+    setSaveStatus(null);
     try {
-      const payload = {
-        nodes: nodes.map((n) => ({
-          id: n.id,
-          type: n.data.type,
-          label: n.data.label,
-          position: n.position,
-          data: {
-            assigneeRole: n.data.assigneeRole,
-            description: n.data.description,
-            conditionField: n.data.conditionField,
-            conditionOperator: n.data.conditionOperator,
-            conditionValue: n.data.conditionValue,
-            delayMinutes: n.data.delayMinutes,
-            notificationTemplate: n.data.notificationTemplate,
-            notificationChannel: n.data.notificationChannel,
-          },
-        })),
-        edges: edges.map((e) => ({
-          id: e.id,
-          source: e.source,
-          target: e.target,
-          label: typeof e.label === 'string' ? e.label : undefined,
-          sourceHandle: e.sourceHandle,
-        })),
-      };
+      const name = definitionName.trim() || 'Untitled workflow';
+      let activeDefinitionId = definitionId;
 
-      // TODO: Replace with actual API call when definitionId is available
-      console.log('Saving workflow graph:', JSON.stringify(payload, null, 2));
+      if (!activeDefinitionId) {
+        const created = await api.post<WorkflowDefinitionRecord>('/process/definitions', {
+          name,
+          description: 'Created from workflow builder',
+          steps: buildLegacySteps(nodes),
+        });
+        activeDefinitionId = created.id;
+        setDefinitionId(created.id);
+      }
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      alert('✅ Đã lưu quy trình thành công!');
+      const saved = await api.post<WorkflowDefinitionRecord>(
+        `/process/definitions/${activeDefinitionId}/graph`,
+        buildGraphPayload(nodes, edges),
+      );
+      setSaveStatus(
+        `Saved v${saved.version ?? 'latest'} at ${new Date().toLocaleTimeString('vi-VN')}`,
+      );
     } catch (err) {
-      console.error('Save failed:', err);
-      alert('❌ Lưu thất bại');
+      setSaveError(err instanceof Error ? err.message : 'Khong luu duoc quy trinh');
     } finally {
       setSaving(false);
     }
-  }, [nodes, edges]);
+  }, [definitionId, definitionName, edges, nodes]);
 
   // ── Reset ──
   const handleReset = useCallback(() => {
-    if (!confirm('Bạn có chắc muốn xóa toàn bộ quy trình?')) return;
     setNodes(DEFAULT_NODES);
     setEdges(DEFAULT_EDGES);
     setSelectedNode(null);
+    setSaveError(null);
+    setSaveStatus('Reset locally');
   }, [setNodes, setEdges]);
 
   return (
@@ -576,6 +754,15 @@ export default function WorkflowBuilderPage() {
             className="w-full px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white/80 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
           />
         </div>
+
+        {(loadingDefinition || saveStatus || saveError || definitionId) && (
+          <div className="rounded-lg border border-white/10 bg-white/5 p-2 text-xs">
+            {definitionId && <div className="text-white/40">ID: {definitionId.slice(0, 8)}</div>}
+            {loadingDefinition && <div className="text-blue-300">Loading workflow...</div>}
+            {saveStatus && <div className="text-emerald-300">{saveStatus}</div>}
+            {saveError && <div className="text-red-300">{saveError}</div>}
+          </div>
+        )}
 
         <Sidebar />
 

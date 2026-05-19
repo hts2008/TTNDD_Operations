@@ -4,13 +4,13 @@
 
 ### Open Issues
 
-| ID      | Severity | Description                                                                  | Workaround                              | ETA |
-| ------- | -------- | ---------------------------------------------------------------------------- | --------------------------------------- | --- |
-| AST-001 | LOW      | Kit pack checklist state is in-memory only                                   | Regenerate from template each session   | P2  |
-| AST-002 | LOW      | QR code requires `qrcode` npm package installed                              | Falls back to error if missing          | —   |
-| AST-003 | MEDIUM   | No notification for overdue loans                                            | Manual check via GET /loans/overdue     | P2  |
-| AST-004 | LOW      | Maintenance completion resets to 'completed' but no 'pending' auto-re-create | Manual re-create or auto-reset via cron | P2  |
-| AST-005 | LOW      | Asset photos stored as URLs only (no upload endpoint)                        | Upload to external storage, paste URL   | P2  |
+| ID      | Severity | Description                                                                                 | Workaround                              | ETA |
+| ------- | -------- | ------------------------------------------------------------------------------------------- | --------------------------------------- | --- |
+| AST-001 | LOW      | Kit pack checklist state is in-memory only                                                  | Regenerate from template each session   | P2  |
+| AST-002 | LOW      | QR code requires `qrcode` npm package installed                                             | Falls back to error if missing          | —   |
+| AST-003 | MEDIUM   | No notification for overdue loans                                                           | Manual check via GET /loans/overdue     | P2  |
+| AST-004 | LOW      | Maintenance completion resets to 'completed' but no 'pending' auto-re-create                | Manual re-create or auto-reset via cron | P2  |
+| AST-005 | LOW      | Asset photos stored as URLs only; module not integrated with FileObjectRef upload lifecycle | Upload to external storage, paste URL   | P2  |
 
 ### Deferred (by design)
 

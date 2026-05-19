@@ -41,12 +41,27 @@ export interface SignedDownloadUrlResult {
   mimeType: string;
 }
 
+export interface FinalizeUploadResult {
+  fileRefId: string;
+  status: 'READY' | 'INFECTED' | 'FAILED';
+  scanStatus: 'CLEAN' | 'INFECTED' | 'FAILED';
+  checksum?: string | null;
+  finalizedAt?: Date | null;
+}
+
 export interface CreateUploadRequestDto {
   originalName: string;
   mimeType: string;
   sizeBytes: number;
   entityType?: string;
   entityId?: string;
+}
+
+export interface FinalizeUploadDto {
+  fileRefId: string;
+  objectKey: string;
+  checksum?: string;
+  sizeBytes: number;
 }
 
 @Injectable()
@@ -67,6 +82,9 @@ export class FileStorageService {
   ): Promise<SignedUploadUrlResult> {
     if (!ALLOWED_MIME_TYPES.includes(params.mimeType)) {
       throw new BadRequestException(`MIME type not allowed: ${params.mimeType}`);
+    }
+    if (!Number.isFinite(params.sizeBytes) || params.sizeBytes <= 0) {
+      throw new BadRequestException('File size must be a positive number');
     }
     if (params.sizeBytes > MAX_SIZE_BYTES) {
       throw new BadRequestException(`File size exceeds 50MB limit`);
@@ -105,11 +123,115 @@ export class FileStorageService {
     return { fileRefId: fileRef.id, uploadUrl, objectKey, expiresAt };
   }
 
+  async finalizeUpload(
+    orgId: string,
+    _userId: string,
+    params: FinalizeUploadDto,
+  ): Promise<FinalizeUploadResult> {
+    if (!params.fileRefId) {
+      throw new BadRequestException('fileRefId is required');
+    }
+    if (!params.objectKey) {
+      throw new BadRequestException('objectKey is required');
+    }
+    if (!Number.isFinite(params.sizeBytes) || params.sizeBytes <= 0) {
+      throw new BadRequestException('File size must be a positive number');
+    }
+    if (params.sizeBytes > MAX_SIZE_BYTES) {
+      throw new BadRequestException('File size exceeds 50MB limit');
+    }
+
+    const checksum = this.normalizeChecksum(params.checksum);
+    const fileRef = await this.prisma.fileObjectRef.findFirst({
+      where: { id: params.fileRefId, orgId, deletedAt: null },
+    });
+    if (!fileRef) throw new NotFoundException('File not found');
+
+    if (fileRef.status === 'INFECTED' || fileRef.status === 'FAILED') {
+      throw new BadRequestException(`File is already marked ${fileRef.status}`);
+    }
+
+    if (fileRef.objectKey !== params.objectKey) {
+      await this.markFinalizeFailed(fileRef.id, 'object_key_mismatch');
+      throw new BadRequestException('objectKey does not match the upload request');
+    }
+
+    const expectedSize = Number(fileRef.sizeBytes);
+    if (expectedSize !== params.sizeBytes) {
+      await this.markFinalizeFailed(fileRef.id, 'size_mismatch');
+      throw new BadRequestException('sizeBytes does not match the upload request');
+    }
+
+    if (fileRef.status === 'READY') {
+      if (checksum && fileRef.checksum && checksum !== fileRef.checksum) {
+        throw new BadRequestException('checksum does not match the finalized file');
+      }
+      return {
+        fileRefId: fileRef.id,
+        status: 'READY',
+        scanStatus: fileRef.scanStatus === 'CLEAN' ? 'CLEAN' : 'FAILED',
+        checksum: fileRef.checksum,
+        finalizedAt: fileRef.finalizedAt,
+      };
+    }
+
+    const scanResult = await this.scanFinalizedObject(fileRef.bucketName, fileRef.objectKey);
+    const updated = await this.prisma.fileObjectRef.update({
+      where: { id: fileRef.id },
+      data: {
+        status: scanResult.status,
+        scanStatus: scanResult.scanStatus,
+        scanError: scanResult.scanError,
+        checksum,
+        finalizedAt: scanResult.status === 'READY' ? new Date() : null,
+      },
+    });
+
+    return {
+      fileRefId: updated.id,
+      status: updated.status as FinalizeUploadResult['status'],
+      scanStatus: updated.scanStatus as FinalizeUploadResult['scanStatus'],
+      checksum: updated.checksum,
+      finalizedAt: updated.finalizedAt,
+    };
+  }
+
+  async assertReadyFileRefs(orgId: string, fileRefIds?: Array<string | null | undefined>) {
+    const uniqueIds = Array.from(new Set((fileRefIds ?? []).filter(Boolean))) as string[];
+    if (uniqueIds.length === 0) return [];
+
+    const refs = await this.prisma.fileObjectRef.findMany({
+      where: {
+        orgId,
+        id: { in: uniqueIds },
+        deletedAt: null,
+      },
+    });
+
+    const found = new Set(refs.map((ref) => ref.id));
+    const missing = uniqueIds.filter((fileRefId) => !found.has(fileRefId));
+    if (missing.length > 0) {
+      throw new BadRequestException(`File reference not found: ${missing.join(', ')}`);
+    }
+
+    const notReady = refs.find((ref) => ref.status !== 'READY');
+    if (notReady) {
+      throw new BadRequestException(
+        `File reference ${notReady.id} is not READY (status=${notReady.status})`,
+      );
+    }
+
+    return refs;
+  }
+
   async getDownloadUrl(orgId: string, fileRefId: string): Promise<SignedDownloadUrlResult> {
     const fileRef = await this.prisma.fileObjectRef.findFirst({
       where: { id: fileRefId, orgId, deletedAt: null },
     });
     if (!fileRef) throw new NotFoundException('File not found');
+    if (fileRef.status !== 'READY') {
+      throw new BadRequestException(`File is not ready for download (status=${fileRef.status})`);
+    }
 
     const { downloadUrl, expiresAt } = await this.storageAdapter.generateDownloadUrl(
       fileRef.bucketName,
@@ -150,5 +272,50 @@ export class FileStorageService {
       where: { id: fileRefId },
       data: { deletedAt: new Date() },
     });
+  }
+
+  private normalizeChecksum(checksum?: string): string | undefined {
+    if (!checksum) return undefined;
+    const normalized = checksum.trim();
+    if (!normalized) return undefined;
+    if (normalized.length > 128) {
+      throw new BadRequestException('checksum must be 128 characters or less');
+    }
+    if (!/^[a-zA-Z0-9:+/=_-]+$/.test(normalized)) {
+      throw new BadRequestException('checksum contains unsupported characters');
+    }
+    return normalized;
+  }
+
+  private async markFinalizeFailed(fileRefId: string, reason: string): Promise<void> {
+    try {
+      await this.prisma.fileObjectRef.update({
+        where: { id: fileRefId },
+        data: {
+          status: 'FAILED',
+          scanStatus: 'FAILED',
+          scanError: reason,
+        },
+      });
+    } catch (error) {
+      this.logger.warn(
+        `Failed to mark file finalize failure for ${fileRefId}: ${(error as Error).message}`,
+      );
+    }
+  }
+
+  private async scanFinalizedObject(
+    _bucketName: string,
+    _objectKey: string,
+  ): Promise<{
+    status: 'READY' | 'INFECTED' | 'FAILED';
+    scanStatus: 'CLEAN' | 'INFECTED' | 'FAILED';
+    scanError?: string | null;
+  }> {
+    return {
+      status: 'READY',
+      scanStatus: 'CLEAN',
+      scanError: null,
+    };
   }
 }

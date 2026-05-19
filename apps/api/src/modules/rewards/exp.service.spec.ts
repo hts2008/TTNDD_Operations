@@ -10,7 +10,12 @@ describe('ExpService', () => {
   let service: ExpService;
   let prisma: {
     expConfig: { findMany: jest.Mock; upsert: jest.Mock };
-    expTransaction: { create: jest.Mock; findMany: jest.Mock; count: jest.Mock };
+    expTransaction: {
+      create: jest.Mock;
+      findFirst: jest.Mock;
+      findMany: jest.Mock;
+      count: jest.Mock;
+    };
     memberExpSummary: {
       findUnique: jest.Mock;
       create: jest.Mock;
@@ -26,7 +31,12 @@ describe('ExpService', () => {
   beforeEach(async () => {
     prisma = {
       expConfig: { findMany: jest.fn(), upsert: jest.fn() },
-      expTransaction: { create: jest.fn(), findMany: jest.fn(), count: jest.fn() },
+      expTransaction: {
+        create: jest.fn(),
+        findFirst: jest.fn(),
+        findMany: jest.fn(),
+        count: jest.fn(),
+      },
       memberExpSummary: {
         findUnique: jest.fn(),
         create: jest.fn(),
@@ -78,8 +88,41 @@ describe('ExpService', () => {
       expect(domainEvents.publish).toHaveBeenCalledWith(
         expect.objectContaining({
           eventType: DOMAIN_EVENTS.REWARDS.EXP_AWARDED,
+          actorUserId: undefined,
         }),
       );
+    });
+
+    it('should return existing earn transaction for the same event source', async () => {
+      prisma.expTransaction.findFirst.mockResolvedValue({ id: 'existing-tx', expAmount: 10 });
+
+      const result = await service.awardExp(
+        'org1',
+        'member1',
+        10,
+        'session.attendance_marked',
+        'session',
+        '00000000-0000-4000-8000-000000000001',
+      );
+
+      expect(result).toEqual({ id: 'existing-tx', expAmount: 10 });
+      expect(capCounter.canAward).not.toHaveBeenCalled();
+      expect(prisma.expTransaction.create).not.toHaveBeenCalled();
+      expect(domainEvents.publish).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getTransactions', () => {
+    it('should default invalid pagination to safe values', async () => {
+      prisma.expTransaction.findMany.mockResolvedValue([]);
+      prisma.expTransaction.count.mockResolvedValue(0);
+
+      const result = await service.getTransactions('org1', 'member1', Number.NaN, Number.NaN);
+
+      expect(prisma.expTransaction.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ skip: 0, take: 20 }),
+      );
+      expect(result.meta).toEqual({ total: 0, page: 1, limit: 20 });
     });
   });
 

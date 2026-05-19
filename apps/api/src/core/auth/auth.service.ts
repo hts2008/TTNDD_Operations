@@ -83,6 +83,7 @@ export class AuthService implements OnModuleInit {
       role: member.role,
       email: user.email ?? undefined,
       firebaseUid: user.firebaseUid,
+      memberId: member.id,
     };
   }
 }

@@ -1,26 +1,41 @@
 'use client';
 
-import { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  Bell,
-  CheckCheck,
-  UserPlus,
-  Calendar,
-  Award,
   AlertTriangle,
+  Award,
+  Bell,
+  Calendar,
+  CheckCheck,
+  Loader2,
   MessageSquare,
+  RefreshCw,
+  Settings,
+  UserPlus,
 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { api } from '@/lib/api';
+import { cn } from '@/lib/utils';
 
-interface Notification {
+interface NotificationItem {
   id: string;
-  type: 'member' | 'session' | 'badge' | 'alert' | 'message';
   title: string;
   body: string;
-  time: string;
-  read: boolean;
+  type: string;
+  channel: string;
+  actionUrl?: string | null;
+  isRead: boolean;
+  readAt?: string | null;
+  createdAt: string;
+}
+
+interface NotificationPreference {
+  id: string;
+  channel: string;
+  eventType: string;
+  enabled: boolean;
 }
 
 const ICON_MAP: Record<string, { icon: typeof Bell; color: string; bg: string }> = {
@@ -29,125 +44,315 @@ const ICON_MAP: Record<string, { icon: typeof Bell; color: string; bg: string }>
   badge: { icon: Award, color: 'text-amber-600', bg: 'bg-amber-100' },
   alert: { icon: AlertTriangle, color: 'text-red-600', bg: 'bg-red-100' },
   message: { icon: MessageSquare, color: 'text-emerald-600', bg: 'bg-emerald-100' },
+  ticket: { icon: MessageSquare, color: 'text-violet-600', bg: 'bg-violet-100' },
+  system: { icon: Bell, color: 'text-gray-700', bg: 'bg-gray-100' },
 };
 
-const INITIAL_NOTIFICATIONS: Notification[] = [
-  {
-    id: '1',
-    type: 'member',
-    title: 'Đoàn sinh mới đăng ký',
-    body: 'Lê Quốc Vinh (Ngành Đồng) đã gửi đơn đăng ký. Vui lòng duyệt hồ sơ.',
-    time: '10 phút trước',
-    read: false,
-  },
-  {
-    id: '2',
-    type: 'session',
-    title: 'Buổi sinh hoạt sắp diễn ra',
-    body: '"Kỹ năng cắm trại nâng cao" sẽ diễn ra ngày 08/03/2025. Đã có 38/45 đoàn sinh xác nhận.',
-    time: '1 giờ trước',
-    read: false,
-  },
-  {
-    id: '3',
-    type: 'badge',
-    title: 'Huy hiệu mới được cấp',
-    body: 'Trần Thị Bình đã hoàn thành yêu cầu và được cấp huy hiệu "Sao Đạo Đức".',
-    time: '3 giờ trước',
-    read: false,
-  },
-  {
-    id: '4',
-    type: 'alert',
-    title: 'Cảnh báo quỹ hoạt động',
-    body: 'Quỹ hoạt động Ngành Thiếu còn dưới 500.000đ. Cần bổ sung trước kỳ sinh hoạt tới.',
-    time: '5 giờ trước',
-    read: true,
-  },
-  {
-    id: '5',
-    type: 'message',
-    title: 'Tin nhắn từ Trưởng Ngành Thanh',
-    body: 'Anh Minh nhắn: "Xin duyệt kế hoạch trại hè 2025 cho Ngành Thanh. Đã gửi file đính kèm."',
-    time: '1 ngày trước',
-    read: true,
-  },
-];
+function iconFor(type: string) {
+  const normalized = type.toLowerCase();
+  if (normalized.includes('member')) return ICON_MAP.member;
+  if (normalized.includes('session') || normalized.includes('event')) return ICON_MAP.session;
+  if (normalized.includes('badge') || normalized.includes('reward')) return ICON_MAP.badge;
+  if (
+    normalized.includes('alert') ||
+    normalized.includes('incident') ||
+    normalized.includes('safety')
+  )
+    return ICON_MAP.alert;
+  if (normalized.includes('ticket') || normalized.includes('approval')) return ICON_MAP.ticket;
+  return ICON_MAP.message;
+}
+
+function timeAgo(value: string) {
+  const diff = Date.now() - new Date(value).getTime();
+  const minutes = Math.max(0, Math.round(diff / 60000));
+  if (minutes < 1) return 'just now';
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.round(hours / 24);
+  return `${days}d ago`;
+}
 
 export default function NotificationsPage() {
-  const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [preferences, setPreferences] = useState<NotificationPreference[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadOnly, setUnreadOnly] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [markingAll, setMarkingAll] = useState(false);
+  const [markingId, setMarkingId] = useState<string | null>(null);
+  const [updatingPreferenceId, setUpdatingPreferenceId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const loadNotifications = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [notificationData, countData, preferenceData] = await Promise.all([
+        api.get<NotificationItem[]>('/notifications', { limit: 50, unreadOnly }),
+        api.get<{ count: number }>('/notifications/unread-count'),
+        api.get<NotificationPreference[]>('/notifications/preferences').catch(() => []),
+      ]);
+      setNotifications(notificationData);
+      setUnreadCount(countData.count);
+      setPreferences(preferenceData);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Khong tai duoc thong bao');
+    } finally {
+      setLoading(false);
+    }
+  }, [unreadOnly]);
 
-  function markAllRead() {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  useEffect(() => {
+    void loadNotifications();
+  }, [loadNotifications]);
+
+  const groupedPreferences = useMemo(() => {
+    const byEvent = new Map<string, NotificationPreference[]>();
+    preferences.forEach((preference) => {
+      const list = byEvent.get(preference.eventType) ?? [];
+      list.push(preference);
+      byEvent.set(preference.eventType, list);
+    });
+    return Array.from(byEvent.entries()).slice(0, 8);
+  }, [preferences]);
+
+  async function markRead(notification: NotificationItem) {
+    if (notification.isRead || markingId) return;
+    setMarkingId(notification.id);
+    setError(null);
+    try {
+      await api.patch(`/notifications/${notification.id}/read`, {});
+      setNotifications((prev) =>
+        prev.map((item) =>
+          item.id === notification.id
+            ? { ...item, isRead: true, readAt: new Date().toISOString() }
+            : item,
+        ),
+      );
+      setUnreadCount((count) => Math.max(0, count - 1));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Khong danh dau da doc duoc');
+    } finally {
+      setMarkingId(null);
+    }
   }
 
-  function toggleRead(id: string) {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: !n.read } : n)),
-    );
+  async function markAllRead() {
+    if (markingAll || unreadCount === 0) return;
+    setMarkingAll(true);
+    setError(null);
+    try {
+      const result = await api.patch<{ markedCount: number }>('/notifications/read-all', {});
+      setNotifications((prev) =>
+        prev.map((item) => ({
+          ...item,
+          isRead: true,
+          readAt: item.readAt ?? new Date().toISOString(),
+        })),
+      );
+      setUnreadCount(0);
+      if (result.markedCount > 0) await loadNotifications();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Khong danh dau tat ca duoc');
+    } finally {
+      setMarkingAll(false);
+    }
+  }
+
+  async function togglePreference(preference: NotificationPreference) {
+    if (updatingPreferenceId) return;
+    setUpdatingPreferenceId(preference.id);
+    setError(null);
+    try {
+      const updated = await api.patch<NotificationPreference>('/notifications/preferences', {
+        channel: preference.channel,
+        eventType: preference.eventType,
+        enabled: !preference.enabled,
+      });
+      setPreferences((prev) => prev.map((item) => (item.id === preference.id ? updated : item)));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Khong cap nhat preference duoc');
+    } finally {
+      setUpdatingPreferenceId(null);
+    }
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[hsl(var(--foreground))] flex items-center gap-2">
-            <Bell className="h-6 w-6 text-[hsl(var(--primary))]" />
-            Thông báo
+          <h1 className="flex items-center gap-2 text-2xl font-bold">
+            <Bell className="h-6 w-6 text-primary" />
+            Thong bao
             {unreadCount > 0 && (
               <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-bold text-white">
                 {unreadCount}
               </span>
             )}
           </h1>
-          <p className="text-sm text-[hsl(var(--muted-foreground))]">Các thông báo và cập nhật mới nhất</p>
+          <p className="text-sm text-muted-foreground">
+            Inbox doc tu Notifications API, mark-read va preferences duoc luu backend.
+          </p>
         </div>
-        {unreadCount > 0 && (
-          <Button variant="outline" className="gap-2 self-start" onClick={markAllRead}>
-            <CheckCheck className="h-4 w-4" />
-            Đánh dấu tất cả đã đọc
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            variant={unreadOnly ? 'default' : 'outline'}
+            onClick={() => setUnreadOnly((value) => !value)}
+          >
+            Unread only
           </Button>
-        )}
+          <Button variant="outline" onClick={loadNotifications} disabled={loading}>
+            <RefreshCw className={cn('mr-1 h-4 w-4', loading && 'animate-spin')} />
+            Refresh
+          </Button>
+          <Button
+            variant="outline"
+            className="gap-2"
+            onClick={markAllRead}
+            disabled={markingAll || unreadCount === 0}
+          >
+            {markingAll ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <CheckCheck className="h-4 w-4" />
+            )}
+            Mark all read
+          </Button>
+        </div>
       </div>
 
-      <div className="space-y-2">
-        {notifications.map((notification) => {
-          const iconConfig = ICON_MAP[notification.type] || ICON_MAP.message;
-          const Icon = iconConfig.icon;
+      {error && (
+        <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
+        </div>
+      )}
 
-          return (
-            <Card
-              key={notification.id}
-              className={cn(
-                'cursor-pointer transition-all hover:shadow-md',
-                !notification.read && 'border-l-4 border-l-[hsl(var(--primary))] bg-[hsl(var(--primary)_/_0.02)]',
-              )}
-              onClick={() => toggleRead(notification.id)}
-            >
-              <CardContent className="flex items-start gap-4 p-4">
-                <div className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-lg', iconConfig.bg)}>
-                  <Icon className={cn('h-5 w-5', iconConfig.color)} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2">
-                    <h3 className={cn('text-sm', !notification.read ? 'font-semibold text-[hsl(var(--foreground))]' : 'font-medium text-[hsl(var(--foreground))]')}>
-                      {notification.title}
-                    </h3>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-xs text-[hsl(var(--muted-foreground))]">{notification.time}</span>
-                      {!notification.read && <span className="h-2.5 w-2.5 rounded-full bg-[hsl(var(--primary))]" />}
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="space-y-2">
+          {loading ? (
+            [1, 2, 3, 4].map((item) => (
+              <div key={item} className="h-24 animate-pulse rounded-lg bg-muted" />
+            ))
+          ) : notifications.length === 0 ? (
+            <div className="rounded-lg border border-dashed py-16 text-center text-sm text-muted-foreground">
+              Khong co thong bao phu hop.
+            </div>
+          ) : (
+            notifications.map((notification) => {
+              const iconConfig = iconFor(notification.type);
+              const Icon = iconConfig.icon;
+
+              return (
+                <Card
+                  key={notification.id}
+                  className={cn(
+                    'transition-all hover:shadow-md',
+                    !notification.isRead && 'border-l-4 border-l-primary bg-primary/5',
+                  )}
+                >
+                  <CardContent className="flex items-start gap-4 p-4">
+                    <div
+                      className={cn(
+                        'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg',
+                        iconConfig.bg,
+                      )}
+                    >
+                      <Icon className={cn('h-5 w-5', iconConfig.color)} />
                     </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <h3
+                            className={cn(
+                              'text-sm',
+                              !notification.isRead ? 'font-semibold' : 'font-medium',
+                            )}
+                          >
+                            {notification.title}
+                          </h3>
+                          <div className="mt-1 flex flex-wrap items-center gap-2">
+                            <Badge variant="outline" className="text-[10px]">
+                              {notification.type}
+                            </Badge>
+                            <Badge variant="secondary" className="text-[10px]">
+                              {notification.channel}
+                            </Badge>
+                          </div>
+                        </div>
+                        <div className="flex shrink-0 items-center gap-2">
+                          <span className="text-xs text-muted-foreground">
+                            {timeAgo(notification.createdAt)}
+                          </span>
+                          {!notification.isRead && (
+                            <span className="h-2.5 w-2.5 rounded-full bg-primary" />
+                          )}
+                        </div>
+                      </div>
+                      <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
+                        {notification.body}
+                      </p>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {!notification.isRead && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={markingId === notification.id}
+                            onClick={() => markRead(notification)}
+                          >
+                            {markingId === notification.id ? 'Dang luu' : 'Mark read'}
+                          </Button>
+                        )}
+                        {notification.actionUrl && (
+                          <a href={notification.actionUrl}>
+                            <Button size="sm">Open</Button>
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })
+          )}
+        </div>
+
+        <Card className="h-fit">
+          <CardContent className="space-y-4 p-4">
+            <div className="flex items-center gap-2">
+              <Settings className="h-5 w-5 text-muted-foreground" />
+              <h2 className="font-semibold">Preferences</h2>
+            </div>
+            {groupedPreferences.length === 0 ? (
+              <p className="rounded-md bg-muted p-3 text-sm text-muted-foreground">
+                Chua co preference override. Backend se dung mac dinh enabled cho cac event.
+              </p>
+            ) : (
+              groupedPreferences.map(([eventType, items]) => (
+                <div key={eventType} className="rounded-lg border p-3">
+                  <p className="text-sm font-medium">{eventType}</p>
+                  <div className="mt-2 space-y-2">
+                    {items.map((preference) => (
+                      <label
+                        key={preference.id}
+                        className="flex items-center justify-between gap-3 text-sm"
+                      >
+                        <span className="text-muted-foreground">{preference.channel}</span>
+                        <input
+                          type="checkbox"
+                          checked={preference.enabled}
+                          disabled={updatingPreferenceId === preference.id}
+                          onChange={() => togglePreference(preference)}
+                        />
+                      </label>
+                    ))}
                   </div>
-                  <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))] line-clamp-2">
-                    {notification.body}
-                  </p>
                 </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+              ))
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

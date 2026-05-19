@@ -39,6 +39,7 @@ export class ProcessController {
       category?: string;
       tags?: string[];
       content?: Record<string, unknown>;
+      attachmentFileRefIds?: string[];
     },
   ) {
     return this.sopService.create(user.orgId, body, user.userId);
@@ -98,7 +99,12 @@ export class ProcessController {
   createSopVersion(
     @CurrentUser() user: CurrentUserPayload,
     @Param('id') id: string,
-    @Body() body: { content: Record<string, unknown>; changeNotes?: string },
+    @Body()
+    body: {
+      content: Record<string, unknown>;
+      changeNotes?: string;
+      attachmentFileRefIds?: string[];
+    },
   ) {
     return this.sopService.createVersion(user.orgId, id, body, user.userId);
   }

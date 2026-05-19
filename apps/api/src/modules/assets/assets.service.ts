@@ -1,9 +1,10 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Optional } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../core/database';
 import { DomainEventService } from '../../core/events';
 import { AuditService } from '../../core/audit';
 import { DOMAIN_EVENTS } from '@ttndd/constants';
+import { FileStorageService } from '../file-storage';
 
 /**
  * SM-8: Asset Loan Lifecycle
@@ -22,6 +23,7 @@ export class AssetsService {
     private readonly prisma: PrismaService,
     private readonly domainEvents: DomainEventService,
     private readonly audit: AuditService,
+    @Optional() private readonly fileStorage?: FileStorageService,
   ) {}
 
   // ── Categories ──
@@ -78,11 +80,14 @@ export class AssetsService {
       serialNumber?: string;
       location?: string;
       photoUrls?: string[];
+      photoFileRefIds?: string[];
       notes?: string;
       managedBy?: string;
     },
     actorUserId: string,
   ) {
+    await this.assertReadyFileRefs(orgId, data.photoFileRefIds);
+
     const asset = await this.prisma.asset.create({
       data: {
         orgId,
@@ -100,6 +105,7 @@ export class AssetsService {
         serialNumber: data.serialNumber,
         location: data.location,
         photoUrls: data.photoUrls ?? [],
+        photoFileRefIds: data.photoFileRefIds ?? [],
         notes: data.notes,
         managedBy: data.managedBy,
       },
@@ -128,6 +134,8 @@ export class AssetsService {
       unit?: string;
       location?: string;
       serialNumber?: string;
+      photoUrls?: string[];
+      photoFileRefIds?: string[];
       notes?: string;
       status?: string;
       managedBy?: string;
@@ -136,6 +144,7 @@ export class AssetsService {
   ) {
     const asset = await this.prisma.asset.findFirst({ where: { id: assetId, orgId } });
     if (!asset) throw new NotFoundException('Asset not found');
+    await this.assertReadyFileRefs(orgId, data.photoFileRefIds);
 
     const updated = await this.prisma.asset.update({
       where: { id: assetId },
@@ -150,6 +159,8 @@ export class AssetsService {
         ...(data.unit !== undefined && { unit: data.unit }),
         ...(data.location !== undefined && { location: data.location }),
         ...(data.serialNumber !== undefined && { serialNumber: data.serialNumber }),
+        ...(data.photoUrls !== undefined && { photoUrls: data.photoUrls }),
+        ...(data.photoFileRefIds !== undefined && { photoFileRefIds: data.photoFileRefIds }),
         ...(data.notes !== undefined && { notes: data.notes }),
         ...(data.status !== undefined && { status: data.status }),
         ...(data.managedBy !== undefined && { managedBy: data.managedBy }),
@@ -166,6 +177,12 @@ export class AssetsService {
     });
 
     return updated;
+  }
+
+  private async assertReadyFileRefs(orgId: string, fileRefIds?: string[]) {
+    if (!fileRefIds?.length) return;
+    if (!this.fileStorage) throw new BadRequestException('File storage integration unavailable');
+    await this.fileStorage.assertReadyFileRefs(orgId, fileRefIds);
   }
 
   // T-1085: Retire/soft-delete asset
@@ -429,6 +446,13 @@ export class AssetsService {
     }
 
     if (action === 'checkout') {
+      if (loan.guardianAcceptanceStatus === 'pending') {
+        throw new BadRequestException('Guardian acceptance is required before checkout');
+      }
+      if (loan.guardianAcceptanceStatus === 'rejected') {
+        throw new BadRequestException('Guardian rejected this loan');
+      }
+
       updateData.checkedOutAt = new Date();
 
       await this.prisma.asset.update({
@@ -940,7 +964,8 @@ export class AssetsService {
       orderBy: { assetCode: 'asc' },
     });
 
-    const header = 'asset_code,name,category,status,condition,quantity,available_qty,location,serial_number,unit,notes';
+    const header =
+      'asset_code,name,category,status,condition,quantity,available_qty,location,serial_number,unit,notes';
     const rows = assets.map((a) =>
       [
         a.assetCode,
@@ -967,7 +992,8 @@ export class AssetsService {
       orderBy: { requestedAt: 'desc' },
     });
 
-    const header = 'loan_id,asset_code,asset_name,borrower_id,status,quantity,requested_at,expected_return,actual_return,condition_on_return,guardian_status';
+    const header =
+      'loan_id,asset_code,asset_name,borrower_id,status,quantity,requested_at,expected_return,actual_return,condition_on_return,guardian_status';
     const rows = loans.map((l) =>
       [
         l.id,

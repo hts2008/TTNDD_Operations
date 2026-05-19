@@ -51,6 +51,16 @@ export class HrmController {
     return this.hrmService.findById(user.orgId, id);
   }
 
+  @Get('members/:id/privacy-export')
+  @ApiOperation({ summary: 'Export personal data for data-subject access requests' })
+  exportPersonalData(@CurrentUser() user: CurrentUserPayload, @Param('id') id: string) {
+    return this.hrmService.exportPersonalData(user.orgId, id, {
+      userId: user.userId,
+      role: user.role,
+      memberId: user.memberId,
+    });
+  }
+
   @Put('members/:id')
   @Roles('super_admin', 'admin')
   @ApiOperation({ summary: 'Update member profile' })

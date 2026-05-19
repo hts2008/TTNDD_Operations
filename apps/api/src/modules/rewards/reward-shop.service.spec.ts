@@ -44,7 +44,7 @@ describe('RewardShopService', () => {
   describe('redeem', () => {
     it('should throw when item not found', async () => {
       prisma.rewardItem.findFirst.mockResolvedValue(null);
-      await expect(service.redeem('org1', 'member1', 'item-missing')).rejects.toThrow(
+      await expect(service.redeem('org1', 'member1', 'item-missing', 'user1')).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -57,7 +57,9 @@ describe('RewardShopService', () => {
         quantityAvailable: 0,
         isActive: true,
       });
-      await expect(service.redeem('org1', 'member1', 'item1')).rejects.toThrow(BadRequestException);
+      await expect(service.redeem('org1', 'member1', 'item1', 'user1')).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should emit REDEMPTION_REQUESTED event on successful redeem', async () => {
@@ -78,12 +80,20 @@ describe('RewardShopService', () => {
       expService.getSummary.mockResolvedValue({ availableExp: 100, totalExp: 200 });
       expService.deductExp.mockResolvedValue({});
 
-      await service.redeem('org1', 'member1', 'item1');
+      await service.redeem('org1', 'member1', 'item1', 'user1');
 
+      expect(expService.deductExp).toHaveBeenCalledWith(
+        'org1',
+        'member1',
+        10,
+        'Redeem: Badge',
+        'user1',
+      );
       expect(domainEvents.publish).toHaveBeenCalledWith(
         expect.objectContaining({
           eventType: DOMAIN_EVENTS.REWARDS.REDEMPTION_REQUESTED,
           aggregateId: 'member1',
+          actorUserId: 'user1',
         }),
       );
     });

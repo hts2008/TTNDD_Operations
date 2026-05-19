@@ -15,11 +15,19 @@ export class EventsCampController {
   @ApiOperation({ summary: 'Create an event/camp' })
   create(
     @CurrentUser() user: CurrentUserPayload,
-    @Body() body: {
-      title: string; eventType?: string; startDate: string; endDate: string;
-      location?: string; maxParticipants?: number; targetBranches?: string[];
-      schedule?: Prisma.InputJsonValue; raciMatrix?: Prisma.InputJsonValue;
-      riskAssessment?: Prisma.InputJsonValue; expReward?: number;
+    @Body()
+    body: {
+      title: string;
+      eventType?: string;
+      startDate: string;
+      endDate: string;
+      location?: string;
+      maxParticipants?: number;
+      targetBranches?: string[];
+      schedule?: Prisma.InputJsonValue;
+      raciMatrix?: Prisma.InputJsonValue;
+      riskAssessment?: Prisma.InputJsonValue;
+      expReward?: number;
     },
   ) {
     return this.eventsService.create(user.orgId, body, user.userId);
@@ -50,10 +58,15 @@ export class EventsCampController {
   update(
     @CurrentUser() user: CurrentUserPayload,
     @Param('id') id: string,
-    @Body() body: {
-      title?: string; location?: string; schedule?: Prisma.InputJsonValue;
-      raciMatrix?: Prisma.InputJsonValue; riskAssessment?: Prisma.InputJsonValue;
-      safetyChecklist?: Prisma.InputJsonValue; postEventReport?: Prisma.InputJsonValue;
+    @Body()
+    body: {
+      title?: string;
+      location?: string;
+      schedule?: Prisma.InputJsonValue;
+      raciMatrix?: Prisma.InputJsonValue;
+      riskAssessment?: Prisma.InputJsonValue;
+      safetyChecklist?: Prisma.InputJsonValue;
+      postEventReport?: Prisma.InputJsonValue;
     },
   ) {
     return this.eventsService.update(user.orgId, id, body, user.userId);
@@ -72,10 +85,7 @@ export class EventsCampController {
 
   @Post(':id/register')
   @ApiOperation({ summary: 'Register for an event' })
-  register(
-    @CurrentUser() user: CurrentUserPayload,
-    @Param('id') id: string,
-  ) {
+  register(@CurrentUser() user: CurrentUserPayload, @Param('id') id: string) {
     return this.eventsService.register(user.orgId, id, user.memberId!);
   }
 
@@ -84,9 +94,17 @@ export class EventsCampController {
   signConsent(
     @CurrentUser() user: CurrentUserPayload,
     @Param('id') id: string,
-    @Body('consentBy') consentBy: string,
+    @Body() body: { consentBy: string; memberId?: string },
   ) {
-    return this.eventsService.signConsent(user.orgId, id, user.memberId!, consentBy);
+    return this.eventsService.signConsent(
+      user.orgId,
+      id,
+      body.memberId ?? user.memberId!,
+      body.consentBy,
+      user.memberId!,
+      user.userId,
+      user.role,
+    );
   }
 
   @Post(':id/check-in/:memberId')

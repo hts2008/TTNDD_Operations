@@ -1,7 +1,7 @@
 FROM node:20-slim AS builder
 WORKDIR /app
 RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
-RUN corepack enable && corepack prepare pnpm@8 --activate
+RUN corepack enable && corepack prepare pnpm@10.27.0 --activate
 COPY pnpm-lock.yaml pnpm-workspace.yaml turbo.json package.json .npmrc ./
 COPY apps/api/package.json apps/api/
 COPY packages/constants/package.json packages/constants/

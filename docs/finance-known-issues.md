@@ -15,13 +15,13 @@
 
 ### Deferred (by design)
 
-| Item                            | Reason                                                 | Target |
-| ------------------------------- | ------------------------------------------------------ | ------ |
-| Double-entry ledger             | Complexity exceeds scouting org needs at current scale | P2     |
-| Fee plan auto-generation (cron) | Requires BullMQ worker infrastructure                  | P2     |
-| PDF/Excel file export           | Requires server-side file generation library           | P2     |
-| PostgreSQL RLS for finance      | Deferred to security sprint                            | P3     |
-| Multi-currency support          | VND-only at current scale                              | P3     |
+| Item                            | Reason                                                                                                      | Target |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------- | ------ |
+| Double-entry ledger             | Complexity exceeds scouting org needs at current scale                                                      | P2     |
+| Fee plan auto-generation (cron) | Requires worker job logic; BullMQ worker infrastructure exists but processor side effect is not implemented | P2     |
+| PDF/Excel file export           | Requires server-side file generation library                                                                | P2     |
+| PostgreSQL RLS for finance      | Deferred to security sprint                                                                                 | P3     |
+| Multi-currency support          | VND-only at current scale                                                                                   | P3     |
 
 ### Operator Runbook (T-1080)
 
