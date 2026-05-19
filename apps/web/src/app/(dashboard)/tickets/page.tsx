@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DataTable } from '@/components/ui/data-table';
+import { ApprovalFlowView, getApprovalSummary } from '@/components/ui/approval-flow-stepper';
 import { Ticket, Plus, Search, AlertTriangle } from 'lucide-react';
 import { api } from '@/lib/api';
 import { cn } from '@/lib/utils';
@@ -24,6 +26,9 @@ interface TicketItem {
   dueDate: string | null;
   createdAt: string;
   _count?: { comments: number };
+  customFields?: {
+    approvalRequest?: ApprovalFlowView;
+  };
 }
 
 interface SlaDashboard {
@@ -92,6 +97,33 @@ const columns = [
     },
   },
   {
+    key: 'approval',
+    label: 'Approval',
+    render: (item: TicketItem) => {
+      const approval = item.customFields?.approvalRequest;
+      const summary = getApprovalSummary(approval ?? null);
+      if (!summary) {
+        return <span className="text-sm text-[hsl(var(--muted-foreground))]">-</span>;
+      }
+
+      const statusClass =
+        summary.status === 'approved'
+          ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
+          : summary.status === 'rejected' || summary.isOverdue
+            ? 'bg-red-100 text-red-700 border-red-200'
+            : 'bg-amber-100 text-amber-700 border-amber-200';
+
+      return (
+        <div className="flex flex-col gap-1">
+          <Badge className={cn('w-fit border', statusClass)}>{summary.statusLabel}</Badge>
+          <span className="text-xs text-[hsl(var(--muted-foreground))]">
+            Step {summary.currentStepOrder}/{summary.totalSteps}
+          </span>
+        </div>
+      );
+    },
+  },
+  {
     key: 'dueDate',
     label: 'Hạn xử lý',
     render: (item: TicketItem) => {
@@ -128,6 +160,7 @@ const columns = [
 ];
 
 export default function TicketsPage() {
+  const router = useRouter();
   const [tickets, setTickets] = useState<TicketItem[]>([]);
   const [sla, setSla] = useState<SlaDashboard | null>(null);
   const [search, setSearch] = useState('');
@@ -274,7 +307,11 @@ export default function TicketsPage() {
               <p>Chưa có yêu cầu nào.</p>
             </div>
           ) : (
-            <DataTable columns={columns} data={filtered} />
+            <DataTable
+              columns={columns}
+              data={filtered}
+              onRowClick={(item) => router.push(`/tickets/${item.id}`)}
+            />
           )}
         </CardContent>
       </Card>

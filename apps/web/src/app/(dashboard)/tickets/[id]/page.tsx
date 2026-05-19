@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { ApprovalFlowResponse, ApprovalFlowStepper } from '@/components/ui/approval-flow-stepper';
 import { api } from '@/lib/api';
 import {
   ArrowLeft,
@@ -107,18 +108,38 @@ export default function TicketDetailPage() {
   const [newComment, setNewComment] = useState('');
   const [submittingComment, setSubmittingComment] = useState(false);
   const [transitioning, setTransitioning] = useState<string | null>(null);
+  const [approvalFlow, setApprovalFlow] = useState<ApprovalFlowResponse | null>(null);
+  const [approvalLoading, setApprovalLoading] = useState(true);
+  const [approvalError, setApprovalError] = useState<string | null>(null);
 
   const loadTicket = useCallback(async () => {
     setLoading(true);
+    setApprovalLoading(true);
     setError(null);
+    setApprovalError(null);
     try {
-      const data = await api.get<TicketDetail>(`/tickets/${id}`);
+      const [data, flowResult] = await Promise.all([
+        api.get<TicketDetail>(`/tickets/${id}`),
+        api
+          .get<ApprovalFlowResponse>(`/tickets/${id}/approval-flow`)
+          .then((data) => ({ data }))
+          .catch((err) => ({
+            error: err instanceof Error ? err.message : 'Khong tai duoc approval flow',
+          })),
+      ]);
       setTicket(data);
+      if ('data' in flowResult) {
+        setApprovalFlow(flowResult.data);
+      } else {
+        setApprovalFlow(null);
+        setApprovalError(flowResult.error);
+      }
     } catch (err) {
       setTicket(null);
       setError(err instanceof Error ? err.message : 'Khong tai duoc ticket');
     } finally {
       setLoading(false);
+      setApprovalLoading(false);
     }
   }, [id]);
 
@@ -319,6 +340,13 @@ export default function TicketDetailPage() {
               </div>
             </CardContent>
           </Card>
+
+          <ApprovalFlowStepper
+            response={approvalFlow}
+            loading={approvalLoading}
+            error={approvalError}
+            title="Approval journey"
+          />
 
           {actions.length > 0 && (
             <Card>

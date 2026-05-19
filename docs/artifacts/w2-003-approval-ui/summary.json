@@ -1,0 +1,44 @@
+{
+  "taskId": "W2-003",
+  "generatedAt": "2026-05-19T09:59:49+07:00",
+  "scope": "Approval v2 UI for approvals queue, tickets list, and ticket detail on localhost",
+  "localhost": {
+    "api": "http://127.0.0.1:3001",
+    "web": "http://localhost:3101",
+    "apiHealth": 200,
+    "webLogin": 200
+  },
+  "stitch": {
+    "projectId": "10347881824526707610",
+    "screenId": "be0e3df246754af8aa49c6ab694b63f4",
+    "title": "TTNDD Approval Command Center",
+    "modelId": "GEMINI_3_1_PRO"
+  },
+  "checks": [
+    {
+      "command": "node node_modules\\typescript\\bin\\tsc -p apps\\web\\tsconfig.json --noEmit --incremental false",
+      "status": "PASS"
+    },
+    {
+      "command": "pnpm --filter web lint",
+      "status": "PASS"
+    },
+    {
+      "command": "node node_modules\\@playwright\\test\\cli.js test \"tests/e2e/w2-003-approval-ui.spec.ts\" --project=chromium --reporter=line --timeout=60000 --retries=0",
+      "status": "PASS",
+      "tests": "1/1"
+    },
+    {
+      "command": "pnpm build",
+      "status": "PASS",
+      "tasks": "7/7",
+      "warning": "Non-fatal long path warning while setting .next/standalone link name"
+    }
+  ],
+  "screenshots": [
+    "w2-003-approvals-desktop.png",
+    "w2-003-tickets-list-desktop.png",
+    "w2-003-ticket-detail-desktop.png",
+    "w2-003-approvals-mobile.png"
+  ]
+}
