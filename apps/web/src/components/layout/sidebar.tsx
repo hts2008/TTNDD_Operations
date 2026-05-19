@@ -191,7 +191,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                       href={item.href}
                       onClick={onClose}
                       className={cn(
-                        'flex min-h-10 items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors',
+                        'motion-nav-item flex min-h-10 items-center gap-3 rounded-md px-3 py-2 text-sm',
                         active
                           ? 'border-l-2 border-[hsl(var(--sidebar-accent))] bg-white/10 text-white shadow-sm'
                           : 'text-white/70 hover:bg-white/10 hover:text-white',

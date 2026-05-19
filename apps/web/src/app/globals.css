@@ -28,6 +28,11 @@
   --sidebar-muted: 232 21% 66%;
   --sidebar-accent: 42 95% 52%;
   --sidebar-active: 158 64% 34%;
+  --motion-fast: 160ms;
+  --motion-base: 240ms;
+  --motion-slow: 420ms;
+  --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-snap: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .dark {
@@ -59,10 +64,122 @@
   --sidebar-active: 158 58% 44%;
 }
 
-* { border-color: hsl(var(--border)); }
+* {
+  border-color: hsl(var(--border));
+}
+
 body {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
   font-family: system-ui, -apple-system, sans-serif;
   letter-spacing: 0;
+}
+
+@keyframes ttndd-page-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ttndd-panel-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.992);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes ttndd-progress-shine {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+.ttndd-command-surface {
+  background-color: hsl(var(--surface));
+  background-image:
+    linear-gradient(135deg, hsl(var(--primary) / 0.06), transparent 34%),
+    linear-gradient(180deg, hsl(var(--surface)), hsl(var(--background)));
+}
+
+.ttndd-command-surface::before {
+  pointer-events: none;
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(hsl(var(--foreground) / 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--foreground) / 0.03) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: linear-gradient(to bottom, black, transparent 72%);
+}
+
+.motion-page {
+  animation: ttndd-page-reveal var(--motion-base) var(--motion-ease) both;
+}
+
+.motion-panel {
+  animation: ttndd-panel-rise var(--motion-base) var(--motion-ease) both;
+}
+
+.motion-pressable {
+  transition:
+    transform var(--motion-fast) var(--motion-snap),
+    background-color var(--motion-fast) ease,
+    border-color var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease,
+    color var(--motion-fast) ease;
+}
+
+.motion-pressable:hover {
+  transform: translateY(-1px);
+}
+
+.motion-pressable:active {
+  transform: translateY(0) scale(0.985);
+}
+
+.motion-nav-item {
+  transition:
+    transform var(--motion-fast) var(--motion-snap),
+    background-color var(--motion-fast) ease,
+    border-color var(--motion-fast) ease,
+    color var(--motion-fast) ease;
+}
+
+.motion-nav-item:hover {
+  transform: translateX(2px);
+}
+
+.motion-progress {
+  background-size: 200% 100%;
+  animation: ttndd-progress-shine var(--motion-slow) linear 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .motion-pressable:hover,
+  .motion-pressable:active,
+  .motion-nav-item:hover {
+    transform: none;
+  }
 }

@@ -127,6 +127,7 @@ Screenshot caveat: the first shell capture was taken before the local API was re
 | Finance/process pagination 500s during screenshot sweep                    | `finance.service.ts`, `process.service.ts`, and `sop.service.ts` normalize `page`/`limit` before Prisma `skip`/`take`                                                                                           | Direct API probes PASS, API typecheck PASS, W1-008 rerun PASS                                                           |
 | Asset collection routes shadowed by `GET /assets/:id`                      | `assets.controller.ts` constrains asset detail routes to UUID-shaped params                                                                                                                                     | Direct API probes PASS for `/assets/uniform`, `/assets/loans`, `/assets/maintenance`, `/assets/kits`; W1-008 rerun PASS |
 | Workflow builder production build bailout                                  | `process/workflow-builder/page.tsx` wraps the `useSearchParams()` client subtree in `Suspense`                                                                                                                  | Web typecheck PASS; `pnpm build` PASS 7/7 after fix                                                                     |
+| Motion-safe operational shell baseline                                     | `globals.css`, dashboard layout, sidebar, header, and HUD top bar now expose motion tokens/classes, command-surface texture, pressable/nav transitions, progress animation, and reduced-motion fallback         | Web typecheck PASS; web lint PASS; `pnpm build` PASS 7/7; `docs/artifacts/w1-009-motion/summary.json` PASS 3/3          |
 
 ## 5. Next Execution Order
 
@@ -134,7 +135,7 @@ Screenshot caveat: the first shell capture was taken before the local API was re
 2. `W1-006`: CLOSED for member/parent progression surfaces with API-backed desktop/mobile screenshots.
 3. `W1-008`: CLOSED for API-backed core route visual baseline: 20 screenshots plus summary JSON.
 4. `LOCALHOST-001`: CLOSED with `docs/runbooks/localhost-readiness.md`; use it before every build/push handoff.
-5. `W1-009`: READY for MotionSites-inspired operational motion system with reduced-motion and performance guardrails.
+5. `W1-009`: CLOSED for MotionSites-inspired operational motion system with reduced-motion and performance guardrails.
 6. `W2-003`: add Approval v2 stepper/timeline into tickets and approvals UI.
 7. `W2-004` + `W3-009`: build reusable file upload/finalize component and wire it into assets, scout, LMS, SOP attachments.
 8. `W2-006`: complete plan/project browser journey proof.

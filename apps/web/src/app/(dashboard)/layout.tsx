@@ -138,13 +138,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, [myDashboard]);
 
   return (
-    <div className="flex h-screen bg-[hsl(var(--surface))]">
+    <div className="motion-page flex h-screen bg-[hsl(var(--surface))]">
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div className="flex flex-1 flex-col overflow-hidden">
         <Header onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
 
-        <div className="border-b border-[hsl(var(--border)_/_0.65)] bg-[hsl(var(--card)_/_0.92)] px-4 py-2 shadow-sm lg:px-6">
+        <div className="motion-panel border-b border-[hsl(var(--border)_/_0.65)] bg-[hsl(var(--card)_/_0.92)] px-4 py-2 shadow-sm lg:px-6">
           <HudTopBar
             memberName={user?.email ?? 'Unknown user'}
             rankName={rank?.rankName ?? 'No active rank'}
@@ -158,16 +158,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
 
         <div className="flex flex-1 overflow-hidden">
-          <main className="min-w-0 flex-1 overflow-auto bg-[hsl(var(--surface))] p-4 lg:p-6">
+          <main className="ttndd-command-surface motion-page min-w-0 flex-1 overflow-auto p-4 lg:p-6">
             {children}
           </main>
 
           {questPanelOpen && (
-            <aside className="hidden w-72 overflow-y-auto border-l border-[hsl(var(--border)_/_0.65)] bg-[hsl(var(--card))] p-3 xl:block">
+            <aside className="motion-panel hidden w-72 overflow-y-auto border-l border-[hsl(var(--border)_/_0.65)] bg-[hsl(var(--card))] p-3 xl:block">
               <QuestPanel quests={quests} />
               <button
                 onClick={() => setQuestPanelOpen(false)}
-                className="mt-3 w-full rounded-md border border-[hsl(var(--border)_/_0.8)] py-1.5 text-xs text-[hsl(var(--muted-foreground))] transition-colors hover:bg-[hsl(var(--muted))]"
+                className="motion-pressable mt-3 w-full rounded-md border border-[hsl(var(--border)_/_0.8)] py-1.5 text-xs text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--muted))]"
               >
                 An nhiem vu
               </button>
@@ -179,7 +179,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {!questPanelOpen && (
         <button
           onClick={() => setQuestPanelOpen(true)}
-          className="fixed bottom-4 right-4 z-50 hidden h-10 w-10 items-center justify-center rounded-full bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] shadow-lg transition-transform hover:scale-105 xl:flex"
+          className="motion-pressable fixed bottom-4 right-4 z-50 hidden h-10 w-10 items-center justify-center rounded-full bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] shadow-lg xl:flex"
           title="Hien nhiem vu"
         >
           Q

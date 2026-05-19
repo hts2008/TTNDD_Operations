@@ -67,7 +67,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
       <div className="flex min-w-0 items-center gap-3">
         <button
           onClick={onMenuToggle}
-          className="rounded-md p-2 text-[hsl(var(--muted-foreground))] transition-colors hover:bg-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))] lg:hidden"
+          className="motion-pressable rounded-md p-2 text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))] lg:hidden"
           aria-label="Open navigation"
         >
           <Menu className="h-5 w-5" />
@@ -101,7 +101,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
       <div className="flex shrink-0 items-center gap-2">
         <button
           onClick={() => router.push('/notifications')}
-          className="relative rounded-md p-2 text-[hsl(var(--muted-foreground))] transition-colors hover:bg-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))]"
+          className="motion-pressable relative rounded-md p-2 text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))]"
           aria-label="Open notifications"
         >
           <Bell className="h-5 w-5" />
@@ -111,7 +111,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="flex items-center gap-2 rounded-md p-1.5 transition-colors hover:bg-[hsl(var(--muted))]"
+            className="motion-pressable flex items-center gap-2 rounded-md p-1.5 hover:bg-[hsl(var(--muted))]"
           >
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--primary))] text-xs font-bold text-[hsl(var(--primary-foreground))]">
               {user?.email?.charAt(0).toUpperCase() || 'U'}
@@ -122,7 +122,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
           </button>
 
           {dropdownOpen && (
-            <div className="absolute right-0 top-full mt-1 w-56 rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--card))] py-1 shadow-lg">
+            <div className="motion-panel absolute right-0 top-full mt-1 w-56 rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--card))] py-1 shadow-lg">
               <div className="border-b border-[hsl(var(--border))] px-3 py-2">
                 <p className="truncate text-sm font-medium text-[hsl(var(--foreground))]">
                   {user?.email || 'user@ttndd.org'}
@@ -136,14 +136,14 @@ export function Header({ onMenuToggle }: HeaderProps) {
                   setDropdownOpen(false);
                   router.push('/settings');
                 }}
-                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-[hsl(var(--foreground))] transition-colors hover:bg-[hsl(var(--muted))]"
+                className="motion-pressable flex w-full items-center gap-2 px-3 py-2 text-sm text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))]"
               >
                 <User className="h-4 w-4" />
                 Ho so ca nhan
               </button>
               <button
                 onClick={handleLogout}
-                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-[hsl(var(--destructive))] transition-colors hover:bg-red-50"
+                className="motion-pressable flex w-full items-center gap-2 px-3 py-2 text-sm text-[hsl(var(--destructive))] hover:bg-red-50"
               >
                 <LogOut className="h-4 w-4" />
                 Dang xuat

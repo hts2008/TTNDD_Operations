@@ -36,7 +36,7 @@ export function HudTopBar({
   const rankGradient = rankColors[rankTier] || rankColors[1];
 
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-lg border border-[hsl(var(--border)_/_0.75)] bg-[hsl(var(--card))] p-2 px-3 shadow-sm sm:flex-nowrap sm:px-4">
+    <div className="motion-panel flex flex-wrap items-center gap-3 rounded-lg border border-[hsl(var(--border)_/_0.75)] bg-[hsl(var(--card))] p-2 px-3 shadow-sm sm:flex-nowrap sm:px-4">
       <div
         className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-gradient-to-br ${rankGradient} shadow-sm`}
       >
@@ -64,7 +64,7 @@ export function HudTopBar({
         </div>
         <div className="h-2 w-full overflow-hidden rounded-full bg-[hsl(var(--muted))]">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 transition-all duration-700 ease-out"
+            className="motion-progress h-full rounded-full bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 transition-all duration-700 ease-out"
             style={{ width: `${expPercent}%` }}
           />
         </div>

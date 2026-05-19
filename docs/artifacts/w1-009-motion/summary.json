@@ -1,0 +1,29 @@
+{
+  "generatedAt": "2026-05-19T00:46:48.929Z",
+  "cases": [
+    {
+      "name": "desktop-dashboard",
+      "status": 200,
+      "url": "http://localhost:3101/dashboard",
+      "failedText": 0,
+      "consoleErrors": 0,
+      "reducedMotion": "no-preference"
+    },
+    {
+      "name": "mobile-dashboard",
+      "status": 200,
+      "url": "http://localhost:3101/dashboard",
+      "failedText": 0,
+      "consoleErrors": 0,
+      "reducedMotion": "no-preference"
+    },
+    {
+      "name": "reduced-motion-dashboard",
+      "status": 200,
+      "url": "http://localhost:3101/dashboard",
+      "failedText": 0,
+      "consoleErrors": 0,
+      "reducedMotion": "reduce"
+    }
+  ]
+}
