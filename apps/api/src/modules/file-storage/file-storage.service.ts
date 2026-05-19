@@ -64,6 +64,13 @@ export interface FinalizeUploadDto {
   sizeBytes: number;
 }
 
+type LocalStorageAdapterMethods = StorageAdapter & {
+  putLocalObject?: (objectKey: string, buffer: Buffer, mimeType: string) => Promise<void>;
+  getLocalObject?: (
+    objectKey: string,
+  ) => Promise<{ buffer: Buffer; mimeType: string; uploadedAt: Date } | null>;
+};
+
 @Injectable()
 export class FileStorageService {
   private readonly logger = new Logger(FileStorageService.name);
@@ -259,6 +266,35 @@ export class FileStorageService {
     });
   }
 
+  async acceptLocalUpload(encodedKey: string, stream: NodeJS.ReadableStream, mimeType?: string) {
+    const adapter = this.storageAdapter as LocalStorageAdapterMethods;
+    if (!adapter.putLocalObject) {
+      throw new BadRequestException(
+        'Local upload endpoint is only available in local storage mode',
+      );
+    }
+
+    const objectKey = this.decodeLocalObjectKey(encodedKey);
+    const buffer = await this.readStream(stream);
+    await adapter.putLocalObject(objectKey, buffer, mimeType || 'application/octet-stream');
+
+    return { objectKey, sizeBytes: buffer.length };
+  }
+
+  async getLocalObject(encodedKey: string) {
+    const adapter = this.storageAdapter as LocalStorageAdapterMethods;
+    if (!adapter.getLocalObject) {
+      throw new BadRequestException(
+        'Local download endpoint is only available in local storage mode',
+      );
+    }
+
+    const objectKey = this.decodeLocalObjectKey(encodedKey);
+    const object = await adapter.getLocalObject(objectKey);
+    if (!object) throw new NotFoundException('Local object not found');
+    return { objectKey, ...object };
+  }
+
   async softDelete(orgId: string, fileRefId: string): Promise<void> {
     const fileRef = await this.prisma.fileObjectRef.findFirst({
       where: { id: fileRefId, orgId, deletedAt: null },
@@ -285,6 +321,29 @@ export class FileStorageService {
       throw new BadRequestException('checksum contains unsupported characters');
     }
     return normalized;
+  }
+
+  private decodeLocalObjectKey(encodedKey: string) {
+    try {
+      const objectKey = Buffer.from(encodedKey, 'base64url').toString('utf8');
+      if (!objectKey || objectKey.includes('\0')) {
+        throw new Error('invalid object key');
+      }
+      return objectKey;
+    } catch {
+      throw new BadRequestException('Invalid local object key');
+    }
+  }
+
+  private readStream(stream: NodeJS.ReadableStream): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+      const chunks: Buffer[] = [];
+      stream.on('data', (chunk) => {
+        chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+      });
+      stream.on('end', () => resolve(Buffer.concat(chunks)));
+      stream.on('error', reject);
+    });
   }
 
   private async markFinalizeFailed(fileRefId: string, reason: string): Promise<void> {

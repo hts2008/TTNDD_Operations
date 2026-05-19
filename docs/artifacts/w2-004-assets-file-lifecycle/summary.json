@@ -1,0 +1,75 @@
+{
+  "taskId": "W2-004",
+  "title": "Assets file lifecycle UI",
+  "status": "PASS",
+  "completedAt": "2026-05-19T05:56:00.000Z",
+  "localhost": {
+    "api": "http://127.0.0.1:3001",
+    "web": "http://localhost:3101",
+    "apiHealth": 200,
+    "webLogin": 200
+  },
+  "stitch": {
+    "projectId": "10347881824526707610",
+    "screenId": "c34de4cfa15e4f5da704d0ce2aee7f11",
+    "modelId": "GEMINI_3_1_PRO",
+    "direction": "TTNDD Asset File Lifecycle Dashboard with dense command-center panels, file evidence upload stepper, scanner status, audit trail, and Sacred Utility & Discipline visual system."
+  },
+  "sourceChanges": [
+    "apps/api/src/modules/file-storage/local-storage.adapter.ts",
+    "apps/api/src/modules/file-storage/file-storage.service.ts",
+    "apps/api/src/modules/file-storage/file-storage.controller.ts",
+    "apps/web/src/components/ui/file-upload-finalizer.tsx",
+    "apps/web/src/app/(dashboard)/assets/page.tsx",
+    "tests/e2e/w2-004-assets-file-lifecycle.spec.ts"
+  ],
+  "workflowEvidence": [
+    "POST /api/v1/file-storage/upload-request returned local signed upload URL",
+    "PUT /api/v1/file-storage/local-upload/:encodedKey stored object bytes in local adapter",
+    "POST /api/v1/file-storage/finalize returned READY/CLEAN",
+    "GET /api/v1/file-storage/:fileRefId/download-url returned local download URL",
+    "GET /api/v1/file-storage/local-download/:encodedKey returned uploaded object bytes",
+    "PATCH /api/v1/assets/:id persisted READY photoFileRefIds",
+    "/assets browser UI refreshed from API and showed 1 READY refs"
+  ],
+  "checks": [
+    {
+      "command": "node node_modules\\typescript\\bin\\tsc -p apps\\api\\tsconfig.json --noEmit --incremental false",
+      "result": "PASS"
+    },
+    {
+      "command": "node node_modules\\typescript\\bin\\tsc -p apps\\web\\tsconfig.json --noEmit --incremental false",
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm --filter web lint",
+      "result": "PASS"
+    },
+    {
+      "command": "git diff --check",
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm --filter api test:e2e -- file-storage-lifecycle.e2e-spec.ts --runInBand",
+      "result": "PASS 1/1"
+    },
+    {
+      "command": "CI=1 BASE_URL=http://localhost:3101 NEXT_PUBLIC_API_URL=http://127.0.0.1:3001 node node_modules\\@playwright\\test\\cli.js test tests/e2e/w2-004-assets-file-lifecycle.spec.ts --project=chromium --reporter=line --retries=0",
+      "result": "PASS 1/1"
+    },
+    {
+      "command": "pnpm build",
+      "result": "PASS 7/7; non-fatal Windows long-path warning in apps/web/.next/standalone"
+    }
+  ],
+  "screenshots": [
+    "docs/artifacts/w2-004-assets-file-lifecycle/w2-004-assets-before-upload.png",
+    "docs/artifacts/w2-004-assets-file-lifecycle/w2-004-assets-after-upload.png"
+  ],
+  "notes": [
+    "Local signed URL encoding now uses base64url so object keys containing slashes do not break route params.",
+    "The reusable FileUploadFinalizer handles upload-request, object PUT, SHA-256 checksum, finalize, READY-only success, and error states.",
+    "Assets page now normalizes paginated /assets API responses before rendering inventory cards.",
+    "W3-009 remains partial until the reusable upload/finalize component is wired into Scout, LMS, and SOP attachment flows."
+  ]
+}

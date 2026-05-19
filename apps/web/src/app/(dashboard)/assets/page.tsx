@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { FileUploadFinalizer } from '@/components/ui/file-upload-finalizer';
 import {
   Package,
   MapPin,
@@ -41,6 +42,8 @@ interface Asset {
   availableQty: number;
   location?: string;
   unit?: string;
+  photoUrls?: string[];
+  photoFileRefIds?: string[];
   category?: { name: string; icon?: string };
   _count?: { loans: number };
 }
@@ -100,6 +103,11 @@ interface Category {
   name: string;
   icon?: string;
   _count?: { assets: number };
+}
+
+interface PaginatedResponse<T> {
+  data: T[];
+  meta?: Record<string, unknown>;
 }
 
 // ── Config ──
@@ -221,7 +229,15 @@ function StockAlertBanner({ alerts }: { alerts: StockAlert[] }) {
 
 // ── Tab: Inventory ──
 
-function InventoryTab({ assets, loading }: { assets: Asset[]; loading: boolean }) {
+function InventoryTab({
+  assets,
+  loading,
+  onPhotoReady,
+}: {
+  assets: Asset[];
+  loading: boolean;
+  onPhotoReady: (asset: Asset, fileRefId: string) => Promise<void>;
+}) {
   const [filter, setFilter] = useState('all');
   const filtered = filter === 'all' ? assets : assets.filter((a) => a.status === filter);
 
@@ -253,7 +269,11 @@ function InventoryTab({ assets, loading }: { assets: Asset[]; loading: boolean }
           const canBorrow = asset.status === 'available' && asset.availableQty > 0;
 
           return (
-            <Card key={asset.id} className="hover:shadow-md transition-shadow group">
+            <Card
+              key={asset.id}
+              className="hover:shadow-md transition-shadow group"
+              data-testid={`asset-card-${asset.id}`}
+            >
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-2">
@@ -287,6 +307,25 @@ function InventoryTab({ assets, loading }: { assets: Asset[]; loading: boolean }
                     <MapPin className="h-3.5 w-3.5" /> {asset.location}
                   </div>
                 )}
+                <div className="rounded-md border bg-muted/30 p-3">
+                  <div className="mb-2 flex items-center justify-between gap-2">
+                    <span className="text-xs font-medium text-[hsl(var(--muted-foreground))]">
+                      Asset photos
+                    </span>
+                    <Badge className="border bg-sky-50 text-sky-700 border-sky-200 text-xs">
+                      {asset.photoFileRefIds?.length ?? 0} READY refs
+                    </Badge>
+                  </div>
+                  <FileUploadFinalizer
+                    entityType="asset"
+                    entityId={asset.id}
+                    accept="image/jpeg,image/png,image/webp"
+                    buttonLabel="Upload photo"
+                    compact
+                    testId={`asset-photo-upload-${asset.id}`}
+                    onReady={(result) => onPhotoReady(asset, result.fileRefId)}
+                  />
+                </div>
                 {canBorrow && (
                   <Button size="sm" className="w-full">
                     <HandMetal className="h-4 w-4 mr-1" /> Mượn tài sản
@@ -617,7 +656,11 @@ function CategoriesTab({ categories, loading }: { categories: Category[]; loadin
 export default function AssetsPage() {
   const [activeTab, setActiveTab] = useState<TabKey>('inventory');
 
-  const { data: assetsResp, loading: assetsLoading } = useApiData<Asset[]>('assets');
+  const {
+    data: assetsResp,
+    loading: assetsLoading,
+    refetch: refetchAssets,
+  } = useApiData<Asset[] | PaginatedResponse<Asset>>('assets');
   const { data: loansResp, loading: loansLoading } = useApiData<Loan[]>('assets/loans');
   const { data: alertsResp } = useApiData<{ alerts: StockAlert[] }>(
     'assets/stock-alerts?threshold=5',
@@ -630,7 +673,7 @@ export default function AssetsPage() {
   const { data: categoriesResp, loading: categoriesLoading } =
     useApiData<Category[]>('assets/categories');
 
-  const assets = assetsResp ?? [];
+  const assets = Array.isArray(assetsResp) ? assetsResp : (assetsResp?.data ?? []);
   const loans = loansResp ?? [];
   const alerts = alertsResp?.alerts ?? [];
   const uniforms = Array.isArray(uniformsResp) ? uniformsResp : [];
@@ -652,6 +695,12 @@ export default function AssetsPage() {
     } catch {
       /* silently ignore */
     }
+  };
+
+  const handleAssetPhotoReady = async (asset: Asset, fileRefId: string) => {
+    const nextFileRefs = Array.from(new Set([...(asset.photoFileRefIds ?? []), fileRefId]));
+    await api.patch(`/assets/${asset.id}`, { photoFileRefIds: nextFileRefs });
+    await refetchAssets();
   };
 
   return (
@@ -700,7 +749,13 @@ export default function AssetsPage() {
       </div>
 
       {/* Tab Content */}
-      {activeTab === 'inventory' && <InventoryTab assets={assets} loading={assetsLoading} />}
+      {activeTab === 'inventory' && (
+        <InventoryTab
+          assets={assets}
+          loading={assetsLoading}
+          onPhotoReady={handleAssetPhotoReady}
+        />
+      )}
       {activeTab === 'loans' && <LoansTab loans={loans} loading={loansLoading} />}
       {activeTab === 'uniform' && <UniformTab uniforms={uniforms} loading={uniformsLoading} />}
       {activeTab === 'maintenance' && (
